@@ -9,10 +9,14 @@ interface Todo {
 
 export default ({
   todos,
+  likes = 0,
+  foo,
   errors,
   serverTimestamp,
 }: {
   todos: Todo[]
+  likes?: number
+  foo?: string
   errors?: Record<string, string>
   serverTimestamp?: number
 }) => {
@@ -65,6 +69,72 @@ export default ({
 
   const clearTodos = () => {
     router.post('/optimistic/clear')
+  }
+
+  const like = () => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post('/optimistic/like', {}, { preserveScroll: true })
+  }
+
+  const likeSlow = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const likeControlled = (delay: number, serverLikes: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-controlled?delay=${delay}&likes=${serverLikes}`, {}, { preserveScroll: true })
+  }
+
+  const likeTriple = () => {
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=300&likes=1', {}, { preserveScroll: true })
+
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=600&likes=2&foo=bar_updated', {}, { preserveScroll: true })
+
+    router
+      .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+      .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
+  }
+
+  const likeSameUrl = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const likeAndRedirect = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-and-redirect?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const likeError = (delay: number) => {
+    router
+      .optimistic<{ likes: number }>((props) => ({
+        likes: (props.likes as number) + 1,
+      }))
+      .post(`/optimistic/like-error?delay=${delay}`, {}, { preserveScroll: true })
+  }
+
+  const resetLikes = () => {
+    router.post('/optimistic/reset-likes')
   }
 
   const triggerServerError = () => {
@@ -123,6 +193,42 @@ export default ({
           Trigger Server Error
         </button>
       </div>
+
+      <div className="likes" style={{ margin: '16px 0' }}>
+        <span id="likes-count">Likes: {likes}</span>
+        <button id="like-btn" onClick={() => like()}>
+          Like
+        </button>
+        <button id="like-slow-btn" onClick={() => likeSlow(800)}>
+          Like (slow)
+        </button>
+        <button id="like-fast-btn" onClick={() => likeSlow(100)}>
+          Like (fast)
+        </button>
+        <button id="like-controlled-slow-btn" onClick={() => likeControlled(800, 5)}>
+          Like Controlled (slow, 5)
+        </button>
+        <button id="like-controlled-fast-btn" onClick={() => likeControlled(100, 3)}>
+          Like Controlled (fast, 3)
+        </button>
+        <button id="like-same-url-btn" onClick={() => likeSameUrl(500)}>
+          Like Same URL
+        </button>
+        <button id="like-and-redirect-btn" onClick={() => likeAndRedirect(500)}>
+          Like &amp; Redirect
+        </button>
+        <button id="like-error-btn" onClick={() => likeError(100)}>
+          Like Error (fast)
+        </button>
+        <button id="like-triple-btn" onClick={likeTriple}>
+          Like Triple
+        </button>
+        <button id="reset-likes-btn" onClick={resetLikes}>
+          Reset Likes
+        </button>
+      </div>
+
+      {foo && <div id="foo-value">Foo: {foo}</div>}
 
       <div className="counters">
         <div id="success-count">Success: {successCount}</div>

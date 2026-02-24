@@ -1,4 +1,5 @@
 import { ReloadOptions, router } from '@inertiajs/core'
+import { get } from 'lodash-es'
 import { defineComponent, h, PropType, SlotsType } from 'vue'
 import { usePage } from './app'
 
@@ -47,9 +48,9 @@ export default defineComponent({
     const page = usePage()
 
     this.$watch(
-      () => this.keys.map((key) => page.props[key]),
+      () => this.keys.map((key) => get(page.props, key)),
       () => {
-        const exists = this.keys.length > 0 && this.keys.every((key) => page.props[key] !== undefined)
+        const exists = this.keys.length > 0 && this.keys.every((key) => get(page.props, key) !== undefined)
         this.loaded = exists
 
         if (exists && !this.always) {

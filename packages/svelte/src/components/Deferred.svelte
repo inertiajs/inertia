@@ -1,5 +1,6 @@
 <script lang="ts">
   import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
+  import { get } from 'lodash-es'
   import { page } from '../index'
 
   interface Props {
@@ -11,7 +12,7 @@
   let { data, fallback, children }: Props = $props()
 
   const keys = $derived(Array.isArray(data) ? data : [data])
-  const loaded = $derived(keys.every((key) => typeof page.props[key] !== 'undefined'))
+  const loaded = $derived(keys.every((key) => typeof get(page.props, key) !== 'undefined'))
 
   let reloading = $state(false)
   const activeReloads = new Set<object>()

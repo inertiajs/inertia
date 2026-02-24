@@ -12,8 +12,8 @@ const wayfinderObjectMethodOverride = () => {
 
 <template>
   <div>
-    <a href="#" @click="wayfinderObjectVisit" class="wayfinder-visit">Wayfinder object visit</a>
-    <a href="#" @click="wayfinderObjectMethodOverride" class="wayfinder-method-override">
+    <a href="#" @click.prevent="wayfinderObjectVisit" class="wayfinder-visit">Wayfinder object visit</a>
+    <a href="#" @click.prevent="wayfinderObjectMethodOverride" class="wayfinder-method-override">
       Wayfinder object method override
     </a>
   </div>

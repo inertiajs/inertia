@@ -11,9 +11,7 @@ import { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType } from '@inert
 
 export { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType }
 
-/**
- * Framework-specific lifecycle hook names for the hint messages.
- */
+/** Used in hint messages to suggest the right lifecycle hook per framework. */
 const LIFECYCLE_HOOKS: Record<string, string> = {
   vue: 'onMounted',
   react: 'useEffect',
@@ -21,12 +19,7 @@ const LIFECYCLE_HOOKS: Record<string, string> = {
 }
 
 /**
- * Detect which browser API is being accessed from an error message.
- *
- * Looks for patterns like:
- * - "window is not defined"
- * - "Cannot read property 'x' of undefined" (when accessing window.x)
- * - "ReferenceError: document is not defined"
+ * Detect which browser API is referenced in the error message.
  */
 export function detectBrowserApi(error: Error): string | null {
   const message = error.message.toLowerCase()
@@ -48,9 +41,6 @@ export function detectBrowserApi(error: Error): string | null {
   return null
 }
 
-/**
- * Check if the error is a component resolution error.
- */
 export function isComponentResolutionError(error: Error): boolean {
   const message = error.message.toLowerCase()
 
@@ -62,9 +52,6 @@ export function isComponentResolutionError(error: Error): boolean {
   )
 }
 
-/**
- * Generate a helpful hint for a browser API error.
- */
 export function getBrowserApiHint(api: string): string {
   const apiDescription = BROWSER_APIS[api] || `The "${api}" object`
   const hooks = Object.values(LIFECYCLE_HOOKS).join('/')
@@ -107,9 +94,6 @@ export function getBrowserApiHint(api: string): string {
   )
 }
 
-/**
- * Generate a hint for a component resolution error.
- */
 export function getComponentResolutionHint(component?: string): string {
   const componentPart = component ? ` "${component}"` : ''
 
@@ -120,9 +104,6 @@ export function getComponentResolutionHint(component?: string): string {
   )
 }
 
-/**
- * Generate a hint for a general render error.
- */
 export function getRenderErrorHint(): string {
   return (
     'An error occurred while rendering the component. ' +
@@ -132,7 +113,7 @@ export function getRenderErrorHint(): string {
 }
 
 /**
- * Classify an SSR error and generate helpful debugging information.
+ * Classify the error and attach a hint for the console output.
  */
 export function classifySSRError(error: Error, component?: string, url?: string): ClassifiedSSRError {
   const timestamp = new Date().toISOString()
@@ -171,9 +152,6 @@ export function classifySSRError(error: Error, component?: string, url?: string)
   }
 }
 
-/**
- * ANSI color codes for terminal output.
- */
 const colors = {
   reset: '\x1b[0m',
   red: '\x1b[31m',
@@ -186,8 +164,8 @@ const colors = {
 }
 
 /**
- * Extract the first relevant source location from a stack trace.
- * Skips node_modules and internal Node.js files.
+ * Pull the first user-authored source location from a stack trace,
+ * skipping node_modules and Node.js internals.
  */
 function extractSourceLocation(stack?: string): string | null {
   if (!stack) {
@@ -197,22 +175,14 @@ function extractSourceLocation(stack?: string): string | null {
   const lines = stack.split('\n')
 
   for (const line of lines) {
-    // Skip lines that don't look like stack frames
     if (!line.includes('at ')) {
       continue
     }
 
-    // Skip node_modules and internal files
     if (line.includes('node_modules') || line.includes('node:')) {
       continue
     }
 
-    // Try multiple patterns for different stack trace formats
-    // Format 1: "at functionName (/path/to/file.vue:10:5)" - with parentheses
-    // Format 2: "at /path/to/file.vue:10:5" - without function name
-    // Format 3: "at file:///path/to/file.vue:10:5" - with file:// protocol
-
-    // Pattern for path with line:column inside parentheses
     let match = line.match(/\(([^)]+):(\d+):(\d+)\)/)
 
     if (match) {
@@ -221,7 +191,6 @@ function extractSourceLocation(stack?: string): string | null {
       return `${path}:${match[2]}:${match[3]}`
     }
 
-    // Pattern for path with line:column without parentheses
     match = line.match(/at\s+(?:file:\/\/)?(.+):(\d+):(\d+)\s*$/)
 
     if (match) {
@@ -232,21 +201,12 @@ function extractSourceLocation(stack?: string): string | null {
   return null
 }
 
-/**
- * Format a classified error for console output.
- *
- * @param classified - The classified error
- * @param root - Project root path for making source locations relative
- * @param handleErrors - Whether to show detailed formatted output or a simple one-liner
- * @param suppressedWarnings - Framework warnings that were suppressed
- */
 export function formatConsoleError(
   classified: ClassifiedSSRError,
   root?: string,
   handleErrors: boolean = true,
   suppressedWarnings: string[] = [],
 ): string {
-  // Simple one-liner when handleErrors is disabled
   if (!handleErrors) {
     const component = classified.component ? `[${classified.component}]` : ''
     return `SSR Error ${component}: ${classified.error}`
@@ -263,7 +223,6 @@ export function formatConsoleError(
   ]
 
   if (classified.sourceLocation) {
-    // Make path relative to project root for cleaner output
     let location = classified.sourceLocation
 
     if (root && location.startsWith(root)) {

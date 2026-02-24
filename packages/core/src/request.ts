@@ -1,3 +1,4 @@
+import { get } from 'lodash-es'
 import {
   fireFinishEvent,
   fireNetworkErrorEvent,
@@ -19,21 +20,32 @@ export class Request {
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
   protected requestHasFinished = false
+  protected optimistic: boolean
 
   constructor(
     params: ActiveVisit,
     protected page: Page,
+    { optimistic = false }: { optimistic?: boolean } = {},
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
+    this.optimistic = optimistic
   }
 
-  public static create(params: ActiveVisit, page: Page): Request {
-    return new Request(params, page)
+  public static create(params: ActiveVisit, page: Page, options?: { optimistic?: boolean }): Request {
+    return new Request(params, page, options)
   }
 
   public isPrefetch(): boolean {
     return this.requestParams.isPrefetch()
+  }
+
+  public isOptimistic(): boolean {
+    return this.optimistic
+  }
+
+  public isPendingOptimistic(): boolean {
+    return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }
 
   public async send() {
@@ -162,7 +174,7 @@ export class Request {
 
     const onceProps = Object.entries(page.onceProps || {})
       .filter(([, onceProp]) => {
-        if (page.props[onceProp.prop] === undefined) {
+        if (get(page.props, onceProp.prop) === undefined) {
           // The prop could deferred and not be loaded yet
           return false
         }

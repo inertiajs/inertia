@@ -21,6 +21,16 @@ export default (props: { example: string }) => {
     router.post('/redirect-external')
   }
 
+  const redirectHash = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.get('/redirect-hash')
+  }
+
+  const redirectHashPost = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.post('/redirect-hash')
+  }
+
   // window._inertia_page_key = getCurrentInstance().uid
   window._inertia_props = props
   // window._plugin_global_props = getCurrentInstance().appContext.config.globalProperties
@@ -69,6 +79,14 @@ export default (props: { example: string }) => {
 
         <a href="#" onClick={redirectExternal} className="visits-redirect-external">
           Manual External Redirect visit
+        </a>
+
+        <a href="#" onClick={redirectHash} className="visits-redirect-hash">
+          Manual Hash Redirect visit
+        </a>
+
+        <a href="#" onClick={redirectHashPost} className="visits-redirect-hash-post">
+          Manual Hash Redirect POST visit
         </a>
 
         <Link id="navigate-back" href="/head/mixed">

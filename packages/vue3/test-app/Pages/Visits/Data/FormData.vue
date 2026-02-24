@@ -46,10 +46,10 @@ const deleteMethod = () => {
   <div>
     <span class="text">This is the page that demonstrates manual visit data passing through FormData objects</span>
 
-    <a href="#" @click="visitMethod" class="visit">Visit Link</a>
-    <a href="#" @click="postMethod" class="post">POST Link</a>
-    <a href="#" @click="putMethod" class="put">PUT Link</a>
-    <a href="#" @click="patchMethod" class="patch">PATCH Link</a>
-    <a href="#" @click="deleteMethod" class="delete">DELETE Link</a>
+    <a href="#" @click.prevent="visitMethod" class="visit">Visit Link</a>
+    <a href="#" @click.prevent="postMethod" class="post">POST Link</a>
+    <a href="#" @click.prevent="putMethod" class="put">PUT Link</a>
+    <a href="#" @click.prevent="patchMethod" class="patch">PATCH Link</a>
+    <a href="#" @click.prevent="deleteMethod" class="delete">DELETE Link</a>
   </div>
 </template>

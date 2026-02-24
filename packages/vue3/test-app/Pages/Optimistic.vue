@@ -10,6 +10,8 @@ interface Todo {
 
 defineProps<{
   todos: Todo[]
+  likes?: number
+  foo?: string
   errors?: Record<string, string>
   serverTimestamp?: number
 }>()
@@ -65,6 +67,72 @@ const clearTodos = () => {
   router.post('/optimistic/clear')
 }
 
+const like = () => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post('/optimistic/like', {}, { preserveScroll: true })
+}
+
+const likeSlow = (delay: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic/like?delay=${delay}`, {}, { preserveScroll: true })
+}
+
+const likeControlled = (delay: number, serverLikes: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic/like-controlled?delay=${delay}&likes=${serverLikes}`, {}, { preserveScroll: true })
+}
+
+const likeTriple = () => {
+  router
+    .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+    .post('/optimistic/like-controlled?delay=300&likes=1', {}, { preserveScroll: true })
+
+  router
+    .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+    .post('/optimistic/like-controlled?delay=600&likes=2&foo=bar_updated', {}, { preserveScroll: true })
+
+  router
+    .optimistic<{ likes: number }>((props) => ({ likes: (props.likes as number) + 1 }))
+    .post('/optimistic/like-controlled?delay=900&likes=3&foo=bar_updated_twice', {}, { preserveScroll: true })
+}
+
+const likeSameUrl = (delay: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic?delay=${delay}`, {}, { preserveScroll: true })
+}
+
+const likeAndRedirect = (delay: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic/like-and-redirect?delay=${delay}`, {}, { preserveScroll: true })
+}
+
+const likeError = (delay: number) => {
+  router
+    .optimistic<{ likes: number }>((props) => ({
+      likes: (props.likes as number) + 1,
+    }))
+    .post(`/optimistic/like-error?delay=${delay}`, {}, { preserveScroll: true })
+}
+
+const resetLikes = () => {
+  router.post('/optimistic/reset-likes')
+}
+
 const triggerServerError = () => {
   router.post(
     '/optimistic/server-error',
@@ -111,6 +179,22 @@ const triggerServerError = () => {
       <button id="clear-btn" @click="clearTodos">Reset</button>
       <button id="server-error-btn" @click="triggerServerError">Trigger Server Error</button>
     </div>
+
+    <div class="likes" style="margin: 16px 0">
+      <span id="likes-count">Likes: {{ likes }}</span>
+      <button id="like-btn" @click="like()">Like</button>
+      <button id="like-slow-btn" @click="likeSlow(800)">Like (slow)</button>
+      <button id="like-fast-btn" @click="likeSlow(100)">Like (fast)</button>
+      <button id="like-controlled-slow-btn" @click="likeControlled(800, 5)">Like Controlled (slow, 5)</button>
+      <button id="like-controlled-fast-btn" @click="likeControlled(100, 3)">Like Controlled (fast, 3)</button>
+      <button id="like-same-url-btn" @click="likeSameUrl(500)">Like Same URL</button>
+      <button id="like-and-redirect-btn" @click="likeAndRedirect(500)">Like &amp; Redirect</button>
+      <button id="like-error-btn" @click="likeError(100)">Like Error (fast)</button>
+      <button id="like-triple-btn" @click="likeTriple">Like Triple</button>
+      <button id="reset-likes-btn" @click="resetLikes">Reset Likes</button>
+    </div>
+
+    <div v-if="foo" id="foo-value">Foo: {{ foo }}</div>
 
     <div class="counters">
       <div id="success-count">Success: {{ successCount }}</div>

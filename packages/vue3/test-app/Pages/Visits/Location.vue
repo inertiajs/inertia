@@ -11,6 +11,6 @@ const locationVisit = (e: Event) => {
   <div>
     <span class="text">This is the page that demonstrates location visits</span>
 
-    <a href="#" @click="locationVisit" class="example">Location visit</a>
+    <a href="#" @click.prevent="locationVisit" class="example">Location visit</a>
   </div>
 </template>

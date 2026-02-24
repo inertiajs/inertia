@@ -14,13 +14,14 @@ import { page as currentPage } from './page'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
-import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page } from './types'
+import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
   protected wasPrefetched = false
+  protected processed = false
 
   constructor(
     protected requestParams: RequestParams,
@@ -30,6 +31,10 @@ export class Response {
 
   public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
     return new Response(params, response, originatingPage)
+  }
+
+  public isProcessed(): boolean {
+    return this.processed
   }
 
   public async handlePrefetch() {
@@ -54,6 +59,7 @@ export class Response {
     }
 
     this.requestParams.runCallbacks()
+    this.processed = true
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -81,7 +87,7 @@ export class Response {
 
     if (!this.wasPrefetched) {
       // We end up here other than from the prefetch cache, so we assume this response is
-      // never than the cached one and therefore flush the cache.
+      // newer than the cached one and therefore flush the cache.
       router.flush(currentPage.get().url)
     }
 
@@ -115,6 +121,16 @@ export class Response {
   }
 
   protected async handleNonInertiaResponse() {
+    if (this.isInertiaRedirect()) {
+      router.visit(this.getHeader('x-inertia-redirect'), {
+        ...this.requestParams.all(),
+        method: 'get',
+        data: {},
+      })
+
+      return
+    }
+
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
@@ -153,6 +169,10 @@ export class Response {
     return this.getHeader(header) !== undefined
   }
 
+  protected isInertiaRedirect(): boolean {
+    return this.hasStatus(409) && this.hasHeader('x-inertia-redirect')
+  }
+
   protected isLocationVisit(): boolean {
     return this.hasStatus(409) && this.hasHeader('x-inertia-location')
   }
@@ -189,6 +209,7 @@ export class Response {
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)
+    this.preserveOptimisticProps(pageResponse)
     this.preserveEqualProps(pageResponse)
 
     await this.setRememberedState(pageResponse)
@@ -249,9 +270,29 @@ export class Response {
   protected pageUrl(pageResponse: Page) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
-    setHashIfSameUrl(this.requestParams.all().url, responseUrl)
+    if (pageResponse.preserveFragment) {
+      responseUrl.hash = this.requestParams.all().url.hash
+    } else {
+      setHashIfSameUrl(this.requestParams.all().url, responseUrl)
+    }
 
     return responseUrl.pathname + responseUrl.search + responseUrl.hash
+  }
+
+  protected preserveOptimisticProps(pageResponse: Page): void {
+    const optimisticUpdatedAt = currentPage.get().optimisticUpdatedAt
+
+    if (!optimisticUpdatedAt || !router.hasPendingOptimistic()) {
+      return
+    }
+
+    for (const key of Object.keys(pageResponse.props)) {
+      if (key in optimisticUpdatedAt) {
+        pageResponse.props[key] = currentPage.get().props[key]
+      }
+    }
+
+    pageResponse.optimisticUpdatedAt = { ...optimisticUpdatedAt }
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
@@ -306,8 +347,8 @@ export class Response {
     propsToPrepend.forEach((prop) => mergeProp(prop, false))
 
     propsToDeepMerge.forEach((prop) => {
-      const currentProp = currentPage.get().props[prop]
-      const incomingProp = pageResponse.props[prop]
+      const currentProp = get(currentPage.get().props, prop)
+      const incomingProp = get(pageResponse.props, prop)
 
       // Function to recursively merge objects and arrays
       const deepMerge = (target: any, source: any, matchProp: string) => {
@@ -331,8 +372,22 @@ export class Response {
       }
 
       // Apply the deep merge and update the page response
-      pageResponse.props[prop] = deepMerge(currentProp, incomingProp, prop)
+      set(pageResponse.props, prop, deepMerge(currentProp, incomingProp, prop))
     })
+
+    const nestedTopKeys = new Set(
+      [...this.requestParams.all().only, ...this.requestParams.all().except]
+        .filter((prop) => prop.includes('.'))
+        .map((prop) => prop.split('.')[0]),
+    )
+
+    for (const key of nestedTopKeys) {
+      const currentValue = currentPage.get().props[key]
+
+      if (this.isObject(currentValue) && this.isObject(pageResponse.props[key])) {
+        pageResponse.props[key] = this.deepMergeObjects(currentValue as PageProps, pageResponse.props[key] as PageProps)
+      }
+    }
 
     pageResponse.props = { ...currentPage.get().props, ...pageResponse.props }
 
@@ -392,6 +447,27 @@ export class Response {
     }
 
     return true
+  }
+
+  protected isObject(item: any): boolean {
+    return item && typeof item === 'object' && !Array.isArray(item)
+  }
+
+  protected deepMergeObjects(target: PageProps, source: PageProps): PageProps {
+    const result = { ...target }
+
+    for (const key of Object.keys(source)) {
+      const targetValue = target[key]
+      const sourceValue = source[key]
+
+      if (this.isObject(targetValue) && this.isObject(sourceValue)) {
+        result[key] = this.deepMergeObjects(targetValue as PageProps, sourceValue as PageProps)
+      } else {
+        result[key] = sourceValue
+      }
+    }
+
+    return result
   }
 
   protected mergeOrMatchItems(

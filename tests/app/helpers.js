@@ -27,9 +27,22 @@ const processPartialProps = (req, data) => {
 
   const isPartial = partialComponentHeader && partialComponentHeader === data.component
 
+  const partialDataKeys = partialDataHeader.split(',')
+  const partialExceptKeys = partialExceptHeader.split(',')
+
   data.props = Object.keys(data.props)
-    .filter((key) => !isPartial || !partialDataHeader || partialDataHeader.split(',').indexOf(key) > -1)
-    .filter((key) => !isPartial || !partialExceptHeader || partialExceptHeader.split(',').indexOf(key) == -1)
+    .filter(
+      (key) =>
+        !isPartial ||
+        !partialDataHeader ||
+        partialDataKeys.some((partial) => partial === key || partial.startsWith(key + '.')),
+    )
+    .filter(
+      (key) =>
+        !isPartial ||
+        !partialExceptHeader ||
+        !partialExceptKeys.some((partial) => partial === key || partial.startsWith(key + '.')),
+    )
     .reduce((carry, key) => {
       carry[key] = typeof data.props[key] === 'function' ? data.props[key](data.props) : data.props[key]
 
@@ -160,4 +173,5 @@ module.exports = {
     )
   },
   location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
+  redirect: (res, href) => res.status(409).header('X-Inertia-Redirect', href).send(''),
 }

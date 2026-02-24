@@ -836,6 +836,7 @@ test.describe('Partial Reloads', () => {
     test(`does not have headers specific to partial reloads when the feature is not being used ${label}`, async ({
       page,
     }) => {
+      test.setTimeout(10_000)
       requests.listen(page)
 
       await page.getByRole('link', { name: `Update All (${label})` }).click()
@@ -1074,6 +1075,26 @@ test.describe('Redirects', () => {
     await page.getByRole('link', { name: 'Manual External Redirect visit' }).click()
     await expect(page).toHaveURL('/non-inertia')
     await expect(pageLoads.count).toBe(2)
+  })
+
+  test('it follows hash redirects via GET without a full page load', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/')
+
+    await page.getByRole('link', { name: 'Manual Hash Redirect visit' }).click()
+    await expect(page).toHaveURL('/links/url-fragments#target')
+    await expect(page.getByText("This is the element with id 'target'")).toBeVisible()
+    await expect(pageLoads.count).toBe(1)
+  })
+
+  test('it follows hash redirects via POST without a full page load', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/')
+
+    await page.getByRole('link', { name: 'Manual Hash Redirect POST visit' }).click()
+    await expect(page).toHaveURL('/links/url-fragments#target')
+    await expect(page.getByText("This is the element with id 'target'")).toBeVisible()
+    await expect(pageLoads.count).toBe(1)
   })
 })
 
