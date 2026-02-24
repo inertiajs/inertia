@@ -2938,6 +2938,21 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
+app.get('/preserve-fragment', (req, res) =>
+  inertia.render(req, res, {
+    component: 'PreserveFragment',
+  }),
+)
+
+app.get('/preserve-fragment/redirect', (req, res) => res.redirect(303, '/preserve-fragment/target'))
+
+app.get('/preserve-fragment/target', (req, res) =>
+  inertia.render(req, res, {
+    component: 'PreserveFragment/Target',
+    preserveFragment: true,
+  }),
+)
+
 app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'HttpHandlers', props: {} }))
 
 app.get('/http-handlers/error', (req, res) => {

@@ -213,6 +213,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   url: string
   version: string | null
   clearHistory: boolean
+  preserveFragment?: boolean
   encryptHistory: boolean
   deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   initialDeferredProps?: Record<string, NonNullable<VisitOptions['only']>>
