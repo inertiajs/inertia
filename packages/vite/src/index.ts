@@ -84,8 +84,8 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   return {
     name: '@inertiajs/vite',
 
-    config(config, { isSsrBuild }) {
-      if (!isSsrBuild) {
+    config(config, env) {
+      if (!env.isSsrBuild) {
         return
       }
 
