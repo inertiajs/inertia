@@ -17,7 +17,7 @@ Activate this skill when:
 - Creating or modifying Svelte page components for Inertia
 - Working with forms in Svelte (using `<Form>` or `useForm`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v2 features: deferred props, prefetching, or polling
+- Using v2 features: deferred props, prefetching, WhenVisible, InfiniteScroll, once props, flash data, or polling
 - Building Svelte-specific features with the Inertia protocol
 
 ## Documentation
@@ -135,6 +135,50 @@ import { Form } from '@inertiajs/svelte'
 
     {#if wasSuccessful}
         <div>User created!</div>
+    {/if}
+</Form>
+@endboostsnippet
+
+### Form Component With All Props
+
+@boostsnippet("Form Component Full Example", "svelte")
+<script>
+import { Form } from '@inertiajs/svelte'
+</script>
+
+<Form
+    action="/users"
+    method="post"
+    let:errors
+    let:hasErrors
+    let:processing
+    let:progress
+    let:wasSuccessful
+    let:recentlySuccessful
+    let:clearErrors
+    let:resetAndClearErrors
+    let:defaults
+    let:isDirty
+    let:reset
+    let:submit
+>
+    <input type="text" name="name" value={defaults.name} />
+    {#if errors.name}
+        <div>{errors.name}</div>
+    {/if}
+
+    <button type="submit" disabled={processing}>
+        {processing ? 'Saving...' : 'Save'}
+    </button>
+
+    {#if progress}
+        <progress value={progress.percentage} max="100">
+            {progress.percentage}%
+        </progress>
+    {/if}
+
+    {#if wasSuccessful}
+        <div>Saved!</div>
     {/if}
 </Form>
 @endboostsnippet
@@ -284,6 +328,34 @@ onDestroy(() => {
 <div>
     <h1>Dashboard</h1>
     <div>Active Users: {stats.activeUsers}</div>
+</div>
+@endboostsnippet
+
+### WhenVisible
+
+Lazy-load a prop when an element scrolls into view. Useful for deferring expensive data that sits below the fold:
+
+@boostsnippet("WhenVisible Example", "svelte")
+<script>
+import { WhenVisible } from '@inertiajs/svelte'
+
+export let stats
+</script>
+
+<div>
+    <h1>Dashboard</h1>
+
+    <!-- stats prop is loaded only when this section scrolls into view -->
+    <WhenVisible data="stats" buffer={200}>
+        <div>
+            <p>Total Users: {stats.total_users}</p>
+            <p>Revenue: {stats.revenue}</p>
+        </div>
+
+        <svelte:fragment slot="fallback">
+            <div class="animate-pulse">Loading stats...</div>
+        </svelte:fragment>
+    </WhenVisible>
 </div>
 @endboostsnippet
 
