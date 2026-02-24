@@ -315,7 +315,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   component: string | null
   pageProps:
     | Record<string, unknown>
-    | ((currentProps: PageProps, sharedProps: Record<string, unknown>) => Record<string, unknown>)
+    | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
 }
 
@@ -641,7 +641,7 @@ export interface LinkComponentBaseProps extends Partial<
       clientSide: boolean
       pageProps:
         | Record<string, unknown>
-        | ((currentProps: PageProps, sharedProps: Record<string, unknown>) => Record<string, unknown>)
+        | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
         | null
       prefetch: boolean | LinkPrefetchOption | LinkPrefetchOption[]
       cacheFor: CacheForOption | CacheForOption[]
