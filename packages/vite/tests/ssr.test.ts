@@ -746,7 +746,11 @@ createInertiaApp({ resolve: (name) => name })`
 
       plugin.configResolved!(createMockConfig(logger, false))
 
-      const result = plugin.config!({ root: '/project' }, { command: 'build', mode: 'production', isSsrBuild: true } as any)
+      const result = plugin.config!({ root: '/project' }, {
+        command: 'build',
+        mode: 'production',
+        isSsrBuild: true,
+      } as any)
 
       expect(result).toBeUndefined()
     })

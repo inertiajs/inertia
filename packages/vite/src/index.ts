@@ -78,7 +78,7 @@ function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<
 
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   const ssrDisabled = options.ssr === false
-  const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr || {})
+  const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : options.ssr || {}
   const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
   let entry: string | null = null
