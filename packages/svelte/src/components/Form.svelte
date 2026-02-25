@@ -51,7 +51,7 @@
     optimistic?: FormComponentProps['optimistic']
     withAllErrors?: FormComponentProps['withAllErrors']
     component?: FormComponentProps['component']
-    clientSide?: FormComponentProps['clientSide']
+    instant?: FormComponentProps['instant']
     children?: import('svelte').Snippet<[FormComponentSlotProps]>
     [key: string]: any
   }
@@ -84,7 +84,7 @@
     optimistic,
     withAllErrors = false,
     component = undefined,
-    clientSide = false,
+    instant = false,
     children,
     ...rest
   }: Props = $props()
@@ -111,7 +111,7 @@
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
   const resolvedComponent = $derived(
-    component ? component : clientSide && isUrlMethodPair(action) ? resolveUrlMethodPairComponent(action) : null,
+    component ? component : instant && isUrlMethodPair(action) ? resolveUrlMethodPairComponent(action) : null,
   )
 
   export function getFormData(submitter?: FormSubmitter): FormData {

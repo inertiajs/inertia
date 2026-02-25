@@ -22,7 +22,7 @@
     cacheTags?: LinkComponentBaseProps['cacheTags']
     viewTransition?: LinkComponentBaseProps['viewTransition']
     component?: LinkComponentBaseProps['component']
-    clientSide?: LinkComponentBaseProps['clientSide']
+    instant?: LinkComponentBaseProps['instant']
     pageProps?: LinkComponentBaseProps['pageProps']
     children?: import('svelte').Snippet
     [key: string]: any
@@ -70,7 +70,7 @@
     cacheTags = [],
     viewTransition = false,
     component = undefined,
-    clientSide = false,
+    instant = false,
     pageProps = null,
     children,
     ...rest
@@ -79,7 +79,7 @@
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
   let resolvedComponent = $derived(
-    component ? component : clientSide && isUrlMethodPair(href) ? resolveUrlMethodPairComponent(href) : null,
+    component ? component : instant && isUrlMethodPair(href) ? resolveUrlMethodPairComponent(href) : null,
   )
 
   let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())

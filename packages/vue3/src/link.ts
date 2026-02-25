@@ -138,8 +138,8 @@ const Link: InertiaLink = defineComponent({
       type: String as PropType<InertiaLinkProps['component']>,
       default: null,
     },
-    clientSide: {
-      type: Boolean as PropType<InertiaLinkProps['clientSide']>,
+    instant: {
+      type: Boolean as PropType<InertiaLinkProps['instant']>,
       default: false,
     },
     pageProps: {
@@ -220,7 +220,7 @@ const Link: InertiaLink = defineComponent({
         return props.component
       }
 
-      if (props.clientSide && isUrlMethodPair(props.href)) {
+      if (props.instant && isUrlMethodPair(props.href)) {
         return resolveUrlMethodPairComponent(props.href)
       }
 

@@ -59,7 +59,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       cacheTags = [],
       viewTransition = false,
       component = null,
-      clientSide = false,
+      instant = false,
       pageProps = null,
       ...props
     },
@@ -77,12 +77,12 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         return component
       }
 
-      if (clientSide && isUrlMethodPair(href)) {
+      if (instant && isUrlMethodPair(href)) {
         return resolveUrlMethodPairComponent(href)
       }
 
       return null
-    }, [component, clientSide, href])
+    }, [component, instant, href])
 
     const _as = useMemo(() => {
       if (typeof as !== 'string' || as.toLowerCase() !== 'a') {

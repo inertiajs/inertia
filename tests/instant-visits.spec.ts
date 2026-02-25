@@ -84,12 +84,12 @@ test('it works with the Link component prop', async ({ page }) => {
   await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
 })
 
-test('it works with the Link clientSide prop and UrlMethodPair', async ({ page }) => {
+test('it works with the Link instant prop and UrlMethodPair', async ({ page }) => {
   pageLoads.watch(page)
 
   await page.goto('/instant-visit')
 
-  await page.getByRole('link', { exact: true, name: 'Link with clientSide' }).click()
+  await page.getByRole('link', { exact: true, name: 'Link with instant' }).click()
 
   await expect(page.locator('#target')).toBeVisible()
   await expect(page.locator('#greeting')).toContainText('Greeting: none')

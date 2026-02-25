@@ -66,8 +66,8 @@
   <button onclick={visitDeferred}>Visit deferred</button>
 
   <Link href="/instant-visit/target?delay=500" component="InstantVisit/Target">Link with component</Link>
-  <Link href={{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }} clientSide>
-    Link with clientSide
+  <Link href={{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }} instant>
+    Link with instant
   </Link>
   <Link
     href={{
@@ -75,7 +75,7 @@
       method: 'get',
       component: ['InstantVisit/Target', 'InstantVisit/Other'],
     }}
-    clientSide
+    instant
     component="InstantVisit/Target"
   >
     Link with array component and explicit override
@@ -86,7 +86,7 @@
       method: 'get',
       component: ['InstantVisit/Target', 'InstantVisit/Other'],
     }}
-    clientSide
+    instant
   >
     Link with array component
   </Link>

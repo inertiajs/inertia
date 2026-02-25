@@ -154,8 +154,8 @@ const Form = defineComponent({
       type: String as PropType<FormComponentProps['component']>,
       default: null,
     },
-    clientSide: {
-      type: Boolean as PropType<FormComponentProps['clientSide']>,
+    instant: {
+      type: Boolean as PropType<FormComponentProps['instant']>,
       default: false,
     },
   },
@@ -191,7 +191,7 @@ const Form = defineComponent({
         return props.component
       }
 
-      if (props.clientSide && isUrlMethodPair(props.action)) {
+      if (props.instant && isUrlMethodPair(props.action)) {
         return resolveUrlMethodPairComponent(props.action)
       }
 

@@ -79,7 +79,7 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       validationTimeout = 1500,
       withAllErrors = null,
       component = null,
-      clientSide = false,
+      instant = false,
       children,
       ...props
     },
@@ -118,12 +118,12 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         return component
       }
 
-      if (clientSide && isUrlMethodPair(action)) {
+      if (instant && isUrlMethodPair(action)) {
         return resolveUrlMethodPairComponent(action)
       }
 
       return null
-    }, [component, clientSide, action])
+    }, [component, instant, action])
 
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())

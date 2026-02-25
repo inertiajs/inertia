@@ -117,7 +117,7 @@ function link(
     cacheTags: cacheTagValues = [],
     viewTransition = false,
     component: componentProp,
-    clientSide = false,
+    instant = false,
     pageProps: pagePropsProp = null,
     ...params
   }: ActionParameters) {
@@ -159,7 +159,7 @@ function link(
         return componentProp
       }
 
-      if (clientSide && isUrlMethodPair(params.href)) {
+      if (instant && isUrlMethodPair(params.href)) {
         return resolveUrlMethodPairComponent(params.href)
       }
 

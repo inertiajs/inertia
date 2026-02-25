@@ -71,11 +71,8 @@ const submitForm = () => {
     <button @click="visitDeferred">Visit deferred</button>
 
     <Link href="/instant-visit/target?delay=500" component="InstantVisit/Target">Link with component</Link>
-    <Link
-      :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }"
-      client-side
-    >
-      Link with clientSide
+    <Link :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }" instant>
+      Link with instant
     </Link>
     <Link
       :href="{
@@ -83,7 +80,7 @@ const submitForm = () => {
         method: 'get',
         component: ['InstantVisit/Target', 'InstantVisit/Other'],
       }"
-      client-side
+      instant
       component="InstantVisit/Target"
     >
       Link with array component and explicit override
@@ -94,7 +91,7 @@ const submitForm = () => {
         method: 'get',
         component: ['InstantVisit/Target', 'InstantVisit/Other'],
       }"
-      client-side
+      instant
     >
       Link with array component
     </Link>

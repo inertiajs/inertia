@@ -638,7 +638,7 @@ export interface LinkComponentBaseProps extends Partial<
   > &
     VisitCallbacks & {
       href: string | UrlMethodPair
-      clientSide: boolean
+      instant: boolean
       pageProps:
         | Record<string, unknown>
         | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
@@ -738,7 +738,7 @@ export type FormComponentProps = Partial<
   method?: Method | Uppercase<Method>
   action?: string | UrlMethodPair
   component?: string
-  clientSide?: boolean
+  instant?: boolean
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   optimistic?: FormComponentOptimisticCallback
   options?: FormComponentOptions

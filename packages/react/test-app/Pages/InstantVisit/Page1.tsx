@@ -66,11 +66,8 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
       <Link href="/instant-visit/target?delay=500" component="InstantVisit/Target">
         Link with component
       </Link>
-      <Link
-        href={{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }}
-        clientSide
-      >
-        Link with clientSide
+      <Link href={{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }} instant>
+        Link with instant
       </Link>
       <Link
         href={{
@@ -79,7 +76,7 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
         }}
-        clientSide
+        instant
         component="InstantVisit/Target"
       >
         Link with array component and explicit override
@@ -91,7 +88,7 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
         }}
-        clientSide
+        instant
       >
         Link with array component
       </Link>
