@@ -428,6 +428,182 @@ describe('SSR', () => {
     })
   })
 
+  describe('CSS collection', () => {
+    it('prepends CSS link tags from module graph to head', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const jsModule = {
+        url: '/resources/js/utils.js',
+        id: '/project/resources/js/utils.js',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule, jsModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: ['<title>Test</title>'],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+        '<title>Test</title>',
+      ])
+    })
+
+    it('traverses nested module imports to find CSS', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const deepCssModule = {
+        url: '/resources/css/components.css',
+        id: '/project/resources/css/components.css',
+        importedModules: new Set(),
+      }
+      const middleModule = {
+        url: '/resources/js/component.js',
+        id: '/project/resources/js/component.js',
+        importedModules: new Set([deepCssModule]),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([middleModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/components.css" data-vite-dev-id="/project/resources/css/components.css">',
+      ])
+    })
+
+    it('detects preprocessor stylesheets like SCSS and Less', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const scssModule = {
+        url: '/resources/css/app.scss',
+        id: '/project/resources/css/app.scss',
+        importedModules: new Set(),
+      }
+      const lessModule = {
+        url: '/resources/css/vendor.less',
+        id: '/project/resources/css/vendor.less',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([scssModule, lessModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.scss" data-vite-dev-id="/project/resources/css/app.scss">',
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/vendor.less" data-vite-dev-id="/project/resources/css/vendor.less">',
+      ])
+    })
+
+    it('returns no CSS links when entry module is not in graph', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      server.environments.ssr.moduleGraph.getModuleById.mockReturnValue(undefined)
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: ['<title>Test</title>'],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual(['<title>Test</title>'])
+    })
+  })
+
   describe('SSR transform', () => {
     it('wraps createInertiaApp with server bootstrap for Vue', () => {
       mockExistsSync.mockReturnValue(false)
@@ -546,7 +722,9 @@ function createMockServer(logger: ReturnType<typeof createMockLogger>): ViteDevS
     middlewares: { use: vi.fn() },
     ssrLoadModule: vi.fn(),
     ssrFixStacktrace: vi.fn(),
-    config: { logger },
+    environments: { ssr: { moduleGraph: { getModuleById: vi.fn() } } },
+    resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
+    config: { logger, base: '/', root: '/project' },
   } as unknown as ViteDevServer
 }
 
