@@ -336,8 +336,16 @@ app.get('/client-side-visit/sequential', (req, res) =>
 app.get('/instant-visit', (req, res) =>
   inertia.render(req, res, {
     component: 'InstantVisit/Page1',
-    props: { foo: 'foo from server', auth: { user: 'John' } },
-    sharedProps: ['auth'],
+    props: { foo: 'foo from server', auth: { user: 'John' }, errors: {} },
+    sharedProps: ['auth', 'errors'],
+  }),
+)
+
+app.post('/instant-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'InstantVisit/Page1',
+    props: { foo: 'foo from server', auth: { user: 'John' }, errors: { name: 'The name field is required.' } },
+    sharedProps: ['auth', 'errors'],
   }),
 )
 

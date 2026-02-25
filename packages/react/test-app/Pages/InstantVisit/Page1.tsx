@@ -1,6 +1,6 @@
 import { Link, router } from '@inertiajs/react'
 
-export default ({ foo, auth }: { foo: string; auth?: { user: string } }) => {
+export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; errors?: Record<string, string> }) => {
   const visitWithComponent = () => {
     router.visit('/instant-visit/target?delay=500', {
       component: 'InstantVisit/Target',
@@ -44,12 +44,18 @@ export default ({ foo, auth }: { foo: string; auth?: { user: string } }) => {
     })
   }
 
+  const submitForm = () => {
+    router.post('/instant-visit')
+  }
+
   return (
     <div>
       <div id="page1">This is Page1</div>
       <div>Foo: {foo}</div>
       <div id="auth">Auth: {auth?.user ?? 'none'}</div>
+      <div id="errors">Errors: {Object.keys(errors ?? {}).length > 0 ? JSON.stringify(errors) : 'none'}</div>
 
+      <button onClick={submitForm}>Submit form</button>
       <button onClick={visitWithComponent}>Visit with component</button>
       <button onClick={visitWithComponentAndPageProps}>Visit with component and pageProps</button>
       <button onClick={visitWithPagePropsCallback}>Visit with pageProps callback</button>
@@ -67,14 +73,22 @@ export default ({ foo, auth }: { foo: string; auth?: { user: string } }) => {
         Link with clientSide
       </Link>
       <Link
-        href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] as any }}
+        href={{
+          url: '/instant-visit/target?delay=500',
+          method: 'get',
+          component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
+        }}
         clientSide
         component="InstantVisit/Target"
       >
         Link with array component and explicit override
       </Link>
       <Link
-        href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] as any }}
+        href={{
+          url: '/instant-visit/target?delay=500',
+          method: 'get',
+          component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
+        }}
         clientSide
       >
         Link with array component

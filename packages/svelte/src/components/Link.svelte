@@ -79,11 +79,7 @@
   let _method = $derived(isUrlMethodPair(href) ? href.method : method)
   let _href = $derived(isUrlMethodPair(href) ? href.url : href)
   let resolvedComponent = $derived(
-    component
-      ? component
-      : clientSide && isUrlMethodPair(href)
-        ? resolveUrlMethodPairComponent(href)
-        : null,
+    component ? component : clientSide && isUrlMethodPair(href) ? resolveUrlMethodPairComponent(href) : null,
   )
 
   let asProp = $derived(_method !== 'get' ? 'button' : as.toLowerCase())

@@ -222,6 +222,30 @@ test('it uses the explicit component prop when the UrlMethodPair has an array of
   await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
 })
 
+test('it does not carry over shared errors to the intermediate page', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/instant-visit')
+  await expect(page.locator('#errors')).toContainText('Errors: none')
+
+  const formResponse = page.waitForResponse(
+    (resp) => resp.url().endsWith('/instant-visit') && resp.request().method() === 'POST',
+  )
+  await page.getByRole('button', { exact: true, name: 'Submit form' }).click()
+  await formResponse
+
+  await expect(page.locator('#errors')).toContainText('The name field is required.')
+
+  await page.getByRole('button', { exact: true, name: 'Visit with component' }).click()
+
+  await expect(page.locator('#target')).toBeVisible()
+  await expect(page.locator('#errors')).toContainText('Errors: none')
+
+  await page.waitForResponse('**/instant-visit/target**')
+
+  await expect(page.locator('#errors')).toContainText('Errors: none')
+})
+
 test('it logs a console error and falls back to a regular visit when the UrlMethodPair has an array of components', async ({
   page,
 }) => {
@@ -237,7 +261,5 @@ test('it logs a console error and falls back to a regular visit when the UrlMeth
 
   await expect(page.locator('#target')).toBeVisible()
   await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
-  expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(
-    true,
-  )
+  expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(true)
 })

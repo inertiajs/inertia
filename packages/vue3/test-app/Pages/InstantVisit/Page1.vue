@@ -4,6 +4,7 @@ import { Link, router } from '@inertiajs/vue3'
 defineProps<{
   foo: string
   auth?: { user: string }
+  errors?: Record<string, string>
 }>()
 
 const visitWithComponent = () => {
@@ -48,6 +49,10 @@ const visitDeferred = () => {
     pageProps: { title: 'Placeholder Title' },
   })
 }
+
+const submitForm = () => {
+  router.post('/instant-visit')
+}
 </script>
 
 <template>
@@ -55,7 +60,9 @@ const visitDeferred = () => {
     <div id="page1">This is Page1</div>
     <div>Foo: {{ foo }}</div>
     <div id="auth">Auth: {{ auth?.user ?? 'none' }}</div>
+    <div id="errors">Errors: {{ Object.keys(errors ?? {}).length > 0 ? JSON.stringify(errors) : 'none' }}</div>
 
+    <button @click="submitForm">Submit form</button>
     <button @click="visitWithComponent">Visit with component</button>
     <button @click="visitWithComponentAndPageProps">Visit with component and pageProps</button>
     <button @click="visitWithPagePropsCallback">Visit with pageProps callback</button>
@@ -71,14 +78,22 @@ const visitDeferred = () => {
       Link with clientSide
     </Link>
     <Link
-      :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }"
+      :href="{
+        url: '/instant-visit/target?delay=500',
+        method: 'get',
+        component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      }"
       client-side
       component="InstantVisit/Target"
     >
       Link with array component and explicit override
     </Link>
     <Link
-      :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }"
+      :href="{
+        url: '/instant-visit/target?delay=500',
+        method: 'get',
+        component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      }"
       client-side
     >
       Link with array component

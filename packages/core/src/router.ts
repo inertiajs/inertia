@@ -593,8 +593,8 @@ export class Router {
       url: visit.url.pathname + visit.url.search + visit.url.hash,
       version: current.version,
       props: {
-        errors: {},
         ...intermediateProps,
+        errors: {},
       },
       flash: {},
       clearHistory: false,
