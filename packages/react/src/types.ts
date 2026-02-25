@@ -9,4 +9,6 @@ export type ReactComponent = ComponentType<any> & {
 }
 
 export type ReactPageHandlerArgs = Parameters<PageHandler<ComponentType>>[0]
-export type ReactInertiaAppConfig = {}
+export type ReactInertiaAppConfig = {
+  strictMode?: boolean
+}

@@ -1,4 +1,26 @@
-import { expect, test } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
+
+declare const process: { env: { PACKAGE?: string } }
+
+function hasStrictMode(page: Page): Promise<boolean> {
+  return page.evaluate(() => {
+    const el = document.getElementById('app')!
+    const fiberKey = Object.keys(el).find((key) => key.startsWith('__reactContainer'))!
+    const rootFiber = (el as any)[fiberKey]?.stateNode?.current
+
+    let fiber = rootFiber?.child
+
+    while (fiber) {
+      if (fiber.type?.toString?.() === 'Symbol(react.strict_mode)') {
+        return true
+      }
+
+      fiber = fiber.child
+    }
+
+    return false
+  })
+}
 
 test.describe('createInertiaApp', () => {
   test('it renders a page with props', async ({ page }) => {
@@ -30,5 +52,23 @@ test.describe('createInertiaApp', () => {
     // The props should be available
     const props = await page.evaluate(() => (window as any)._inertia_props)
     expect(props.example).toBe('FooBar')
+  })
+
+  test('it wraps the app in StrictMode when enabled', async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React-only tests')
+
+    await page.goto('/unified/strict-mode?strictMode')
+
+    await expect(page.locator('#strict-mode-status')).toContainText('Rendered')
+    expect(await hasStrictMode(page)).toBe(true)
+  })
+
+  test('it does not wrap the app in StrictMode by default', async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React-only tests')
+
+    await page.goto('/unified/strict-mode')
+
+    await expect(page.locator('#strict-mode-status')).toContainText('Rendered')
+    expect(await hasStrictMode(page)).toBe(false)
   })
 })

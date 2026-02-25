@@ -30,14 +30,15 @@ export { InertiaSSROptions }
 
 export interface InertiaPluginOptions {
   /**
-   * SSR configuration. Pass a string for the entry path, or an object
-   * for additional options. Auto-detected when not specified from:
+   * SSR configuration. Pass a string for the entry path, an object for
+   * additional options, or `false` to disable SSR entirely. Auto-detected
+   * when not specified from:
    * - resources/js/ssr.{ts,tsx,js,jsx}
    * - src/ssr.{ts,tsx,js,jsx}
    * - resources/js/app.{ts,tsx,js,jsx}
    * - src/app.{ts,tsx,js,jsx}
    */
-  ssr?: string | InertiaSSROptions
+  ssr?: string | false | InertiaSSROptions
 
   /**
    * Custom framework configurations. Use this to add support for frameworks
@@ -76,7 +77,8 @@ function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<
 }
 
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {
-  const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr ?? {})
+  const ssrDisabled = options.ssr === false
+  const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : (options.ssr || {})
   const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
   let entry: string | null = null
@@ -84,8 +86,8 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   return {
     name: '@inertiajs/vite',
 
-    config(config, { isSsrBuild }) {
-      if (!isSsrBuild) {
+    config(config, env) {
+      if (ssrDisabled || !env.isSsrBuild) {
         return
       }
 
@@ -105,6 +107,10 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
     },
 
     configResolved(config) {
+      if (ssrDisabled) {
+        return
+      }
+
       entry = resolveSSREntry(ssr, config)
 
       if (entry && config.build?.ssr) {
@@ -119,7 +125,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
 
       let result = code
 
-      if (options?.ssr && findInertiaAppExport(result)) {
+      if (!ssrDisabled && options?.ssr && findInertiaAppExport(result)) {
         result =
           wrapWithServerBootstrap(
             result,
