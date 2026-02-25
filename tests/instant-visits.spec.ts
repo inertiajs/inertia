@@ -237,7 +237,5 @@ test('it logs a console error and falls back to a regular visit when the UrlMeth
 
   await expect(page.locator('#target')).toBeVisible()
   await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
-  expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(
-    true,
-  )
+  expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(true)
 })

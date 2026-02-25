@@ -71,14 +71,22 @@ const visitDeferred = () => {
       Link with clientSide
     </Link>
     <Link
-      :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }"
+      :href="{
+        url: '/instant-visit/target?delay=500',
+        method: 'get',
+        component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      }"
       client-side
       component="InstantVisit/Target"
     >
       Link with array component and explicit override
     </Link>
     <Link
-      :href="{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }"
+      :href="{
+        url: '/instant-visit/target?delay=500',
+        method: 'get',
+        component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      }"
       client-side
     >
       Link with array component
