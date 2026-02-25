@@ -270,15 +270,37 @@ export class Router {
       ...events,
     }
 
-    const prefetched = prefetchedRequests.get(requestParams)
+    const sendRequest = () => {
+      const prefetched = prefetchedRequests.get(requestParams)
 
-    if (prefetched) {
-      progress.reveal(prefetched.inFlight)
-      prefetchedRequests.use(prefetched, requestParams)
+      if (prefetched) {
+        progress.reveal(prefetched.inFlight)
+        prefetchedRequests.use(prefetched, requestParams)
+      } else {
+        progress.reveal(true)
+        const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
+        requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
+      }
+    }
+
+    if (Array.isArray(visit.component)) {
+      console.error(
+        `The "component" prop received an array of components (${visit.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
+      )
+      visit.component = null
+    }
+
+    if (visit.component) {
+      history.processQueue().then(() => {
+        this.performInstantSwap(visit).then(() => {
+          requestParams.preserveState = true
+          requestParams.replace = true
+          requestParams.viewTransition = false
+          sendRequest()
+        })
+      })
     } else {
-      progress.reveal(true)
-      const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-      requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
+      sendRequest()
     }
   }
 
@@ -552,6 +574,43 @@ export class Router {
       .finally(() => onFinish?.(params))
   }
 
+  protected performInstantSwap(visit: PendingVisit): Promise<void> {
+    const current = currentPage.get()
+
+    const sharedProps = Object.fromEntries(
+      (current.sharedProps ?? []).filter((key) => key in current.props).map((key) => [key, current.props[key]]),
+    )
+
+    const resolvedPageProps =
+      typeof visit.pageProps === 'function'
+        ? visit.pageProps(cloneDeep(current.props), cloneDeep(sharedProps))
+        : visit.pageProps
+
+    const intermediateProps = resolvedPageProps !== null ? { ...resolvedPageProps } : { ...sharedProps }
+
+    const intermediatePage: Page = {
+      component: visit.component!,
+      url: visit.url.pathname + visit.url.search + visit.url.hash,
+      version: current.version,
+      props: {
+        ...intermediateProps,
+        errors: {},
+      },
+      flash: {},
+      clearHistory: false,
+      encryptHistory: current.encryptHistory,
+      sharedProps: current.sharedProps,
+      rememberedState: {},
+    }
+
+    return currentPage.set(intermediatePage, {
+      replace: visit.replace,
+      preserveScroll: RequestParams.resolvePreserveOption(visit.preserveScroll, intermediatePage),
+      preserveState: false,
+      viewTransition: visit.viewTransition,
+    })
+  }
+
   protected getPrefetchParams(href: string | URL | UrlMethodPair, options: VisitOptions): ActiveVisit {
     return {
       ...this.getPendingVisit(href, {
@@ -599,6 +658,8 @@ export class Router {
       prefetch: false,
       invalidateCacheTags: [],
       viewTransition: false,
+      component: null,
+      pageProps: null,
       ...options,
       ...configuredOptions,
     }

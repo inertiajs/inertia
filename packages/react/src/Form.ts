@@ -10,6 +10,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  resolveUrlMethodPairComponent,
   UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
@@ -77,6 +78,8 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       validateFiles = false,
       validationTimeout = 1500,
       withAllErrors = null,
+      component = null,
+      clientSide = false,
       children,
       ...props
     },
@@ -109,6 +112,18 @@ const Form = forwardRef<FormComponentRef, FormProps>(
     const resolvedMethod = useMemo(() => {
       return isUrlMethodPair(action) ? action.method : (method.toLowerCase() as Method)
     }, [action, method])
+
+    const resolvedComponent = useMemo(() => {
+      if (component) {
+        return component
+      }
+
+      if (clientSide && isUrlMethodPair(action)) {
+        return resolveUrlMethodPairComponent(action)
+      }
+
+      return null
+    }, [component, clientSide, action])
 
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
@@ -213,6 +228,7 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         errorBag,
         showProgress,
         invalidateCacheTags,
+        component: resolvedComponent,
         optimistic: optimistic ? (pageProps) => optimistic(pageProps, data) : undefined,
         onCancelToken,
         onBefore,

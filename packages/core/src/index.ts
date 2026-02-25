@@ -30,6 +30,7 @@ export {
   isSameUrlWithoutQueryOrHash,
   isUrlMethodPair,
   mergeDataIntoQueryString,
+  resolveUrlMethodPairComponent,
   urlHasProtocol,
   urlToString,
   urlWithoutHash,

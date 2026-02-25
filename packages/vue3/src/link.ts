@@ -6,6 +6,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -133,6 +134,18 @@ const Link: InertiaLink = defineComponent({
       type: [Boolean, Object] as PropType<InertiaLinkProps['viewTransition']>,
       default: false,
     },
+    component: {
+      type: String as PropType<InertiaLinkProps['component']>,
+      default: null,
+    },
+    clientSide: {
+      type: Boolean as PropType<InertiaLinkProps['clientSide']>,
+      default: false,
+    },
+    pageProps: {
+      type: [Object, Function] as PropType<InertiaLinkProps['pageProps']>,
+      default: null,
+    },
   },
   setup(props, { slots, attrs }) {
     const inFlightCount = ref(0)
@@ -202,6 +215,18 @@ const Link: InertiaLink = defineComponent({
     const href = computed(() => mergeDataArray.value[0])
     const data = computed(() => mergeDataArray.value[1])
 
+    const resolvedComponent = computed(() => {
+      if (props.component) {
+        return props.component
+      }
+
+      if (props.clientSide && isUrlMethodPair(props.href)) {
+        return resolveUrlMethodPairComponent(props.href)
+      }
+
+      return null
+    })
+
     const elProps = computed(() => {
       if (as.value === 'button') {
         return { type: 'button' }
@@ -225,6 +250,8 @@ const Link: InertiaLink = defineComponent({
       except: props.except,
       headers: props.headers,
       async: props.async,
+      component: resolvedComponent.value,
+      pageProps: props.pageProps,
     }))
 
     const visitParams = computed(() => ({

@@ -11,6 +11,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  resolveUrlMethodPairComponent,
   UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
@@ -149,6 +150,14 @@ const Form = defineComponent({
       type: Boolean as PropType<FormComponentProps['withAllErrors']>,
       default: null,
     },
+    component: {
+      type: String as PropType<FormComponentProps['component']>,
+      default: null,
+    },
+    clientSide: {
+      type: Boolean as PropType<FormComponentProps['clientSide']>,
+      default: false,
+    },
   },
   setup(props, { slots, attrs, expose }) {
     const getTransformedData = (): Record<string, FormDataConvertible> => {
@@ -177,6 +186,17 @@ const Form = defineComponent({
     const method = computed(() =>
       isUrlMethodPair(props.action) ? props.action.method : (props.method.toLowerCase() as Method),
     )
+    const resolvedComponent = computed(() => {
+      if (props.component) {
+        return props.component
+      }
+
+      if (props.clientSide && isUrlMethodPair(props.action)) {
+        return resolveUrlMethodPairComponent(props.action)
+      }
+
+      return null
+    })
 
     // Can't use computed because FormData is not reactive
     const isDirty = ref(false)
@@ -258,6 +278,7 @@ const Form = defineComponent({
         errorBag: props.errorBag,
         showProgress: props.showProgress,
         invalidateCacheTags: props.invalidateCacheTags,
+        component: resolvedComponent.value,
         optimistic: props.optimistic ? (pageProps) => props.optimistic!(pageProps, data) : undefined,
         onCancelToken: props.onCancelToken,
         onBefore: props.onBefore,

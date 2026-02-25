@@ -6,6 +6,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -57,6 +58,9 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       cacheFor = 0,
       cacheTags = [],
       viewTransition = false,
+      component = null,
+      clientSide = false,
+      pageProps = null,
       ...props
     },
     ref,
@@ -67,6 +71,18 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     const _method = useMemo(() => {
       return isUrlMethodPair(href) ? href.method : (method.toLowerCase() as Method)
     }, [href, method])
+
+    const resolvedComponent = useMemo(() => {
+      if (component) {
+        return component
+      }
+
+      if (clientSide && isUrlMethodPair(href)) {
+        return resolveUrlMethodPairComponent(href)
+      }
+
+      return null
+    }, [component, clientSide, href])
 
     const _as = useMemo(() => {
       if (typeof as !== 'string' || as.toLowerCase() !== 'a') {
@@ -97,8 +113,23 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         except,
         headers,
         async,
+        component: resolvedComponent,
+        pageProps,
       }),
-      [_data, _method, preserveScroll, preserveState, preserveUrl, replace, only, except, headers, async],
+      [
+        _data,
+        _method,
+        preserveScroll,
+        preserveState,
+        preserveUrl,
+        replace,
+        only,
+        except,
+        headers,
+        async,
+        resolvedComponent,
+        pageProps,
+      ],
     )
 
     const visitParams = useMemo<VisitOptions>(

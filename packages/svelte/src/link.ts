@@ -1,6 +1,7 @@
 import {
   isUrlMethodPair,
   mergeDataIntoQueryString,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -115,6 +116,9 @@ function link(
     prefetch = false,
     cacheTags: cacheTagValues = [],
     viewTransition = false,
+    component: componentProp,
+    clientSide = false,
+    pageProps: pagePropsProp = null,
     ...params
   }: ActionParameters) {
     prefetchModes = (() => {
@@ -150,6 +154,18 @@ function link(
     method = isUrlMethodPair(params.href) ? params.href.method : (params.method?.toLowerCase() as Method) || 'get'
     ;[href, data] = hrefAndData(method, params)
 
+    const resolvedComponent = (() => {
+      if (componentProp) {
+        return componentProp
+      }
+
+      if (clientSide && isUrlMethodPair(params.href)) {
+        return resolveUrlMethodPairComponent(params.href)
+      }
+
+      return null
+    })()
+
     if (node.tagName === 'A') {
       node.href = href
     }
@@ -165,6 +181,8 @@ function link(
       except: params.except || [],
       headers: params.headers || {},
       async: params.async || false,
+      component: resolvedComponent,
+      pageProps: pagePropsProp,
     }
 
     visitParams = {
