@@ -436,10 +436,9 @@ describe('SSR', () => {
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
-      const cssModule = { type: 'css', url: '/resources/css/app.css', id: '/project/resources/css/app.css', importedModules: new Set() }
-      const jsModule = { type: 'js', url: '/resources/js/utils.js', id: '/project/resources/js/utils.js', importedModules: new Set() }
+      const cssModule = { url: '/resources/css/app.css', id: '/project/resources/css/app.css', importedModules: new Set() }
+      const jsModule = { url: '/resources/js/utils.js', id: '/project/resources/js/utils.js', importedModules: new Set() }
       const entryModule = {
-        type: 'js',
         url: '/resources/js/ssr.ts',
         id: '/project/resources/js/ssr.ts',
         importedModules: new Set([cssModule, jsModule]),
@@ -478,10 +477,9 @@ describe('SSR', () => {
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
-      const deepCssModule = { type: 'css', url: '/resources/css/components.css', id: '/project/resources/css/components.css', importedModules: new Set() }
-      const middleModule = { type: 'js', url: '/resources/js/component.js', id: '/project/resources/js/component.js', importedModules: new Set([deepCssModule]) }
+      const deepCssModule = { url: '/resources/css/components.css', id: '/project/resources/css/components.css', importedModules: new Set() }
+      const middleModule = { url: '/resources/js/component.js', id: '/project/resources/js/component.js', importedModules: new Set([deepCssModule]) }
       const entryModule = {
-        type: 'js',
         url: '/resources/js/ssr.ts',
         id: '/project/resources/js/ssr.ts',
         importedModules: new Set([middleModule]),
@@ -509,6 +507,47 @@ describe('SSR', () => {
       const response = JSON.parse(res.end.mock.calls[0][0])
       expect(response.head).toEqual([
         '<link rel="stylesheet" href="http://localhost:5173/resources/css/components.css" data-vite-dev-id="/project/resources/css/components.css">',
+      ])
+    })
+
+    it('detects preprocessor stylesheets like SCSS and Less', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const scssModule = { url: '/resources/css/app.scss', id: '/project/resources/css/app.scss', importedModules: new Set() }
+      const lessModule = { url: '/resources/css/vendor.less', id: '/project/resources/css/vendor.less', importedModules: new Set() }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([scssModule, lessModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.scss" data-vite-dev-id="/project/resources/css/app.scss">',
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/vendor.less" data-vite-dev-id="/project/resources/css/vendor.less">',
       ])
     })
 
