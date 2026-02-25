@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { pageLoads, requests } from './support'
+import { consoleMessages, pageLoads, requests } from './support'
 
 test('it instantly swaps to the target component before the server responds', async ({ page }) => {
   pageLoads.watch(page)
@@ -205,4 +205,39 @@ test('it does not carry over shared props when pageProps callback is provided wi
   await page.waitForResponse('**/instant-visit/target**')
 
   await expect(page.locator('#auth')).toContainText('Auth: John')
+})
+
+test('it uses the explicit component prop when the UrlMethodPair has an array of components', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/instant-visit')
+
+  await page.getByRole('link', { exact: true, name: 'Link with array component and explicit override' }).click()
+
+  await expect(page.locator('#target')).toBeVisible()
+  await expect(page.locator('#greeting')).toContainText('Greeting: none')
+
+  await page.waitForResponse('**/instant-visit/target**')
+
+  await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+})
+
+test('it logs a console error and falls back to a regular visit when the UrlMethodPair has an array of components', async ({
+  page,
+}) => {
+  pageLoads.watch(page)
+  consoleMessages.listen(page)
+
+  await page.goto('/instant-visit')
+  await expect(page.locator('#page1')).toBeVisible()
+
+  await page.getByRole('link', { exact: true, name: 'Link with array component' }).click()
+
+  await page.waitForResponse('**/instant-visit/target**')
+
+  await expect(page.locator('#target')).toBeVisible()
+  await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+  expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(
+    true,
+  )
 })

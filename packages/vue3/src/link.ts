@@ -6,6 +6,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -219,8 +220,8 @@ const Link: InertiaLink = defineComponent({
         return props.component
       }
 
-      if (props.clientSide && isUrlMethodPair(props.href) && props.href.component) {
-        return props.href.component
+      if (props.clientSide && isUrlMethodPair(props.href)) {
+        return resolveUrlMethodPairComponent(props.href)
       }
 
       return null

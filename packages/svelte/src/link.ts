@@ -1,6 +1,7 @@
 import {
   isUrlMethodPair,
   mergeDataIntoQueryString,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -158,8 +159,8 @@ function link(
         return componentProp
       }
 
-      if (clientSide && isUrlMethodPair(params.href) && params.href.component) {
-        return params.href.component
+      if (clientSide && isUrlMethodPair(params.href)) {
+        return resolveUrlMethodPairComponent(params.href)
       }
 
       return null

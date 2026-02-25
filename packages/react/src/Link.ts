@@ -6,6 +6,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   PendingVisit,
+  resolveUrlMethodPairComponent,
   router,
   shouldIntercept,
   shouldNavigate,
@@ -76,8 +77,8 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         return component
       }
 
-      if (clientSide && isUrlMethodPair(href) && href.component) {
-        return href.component
+      if (clientSide && isUrlMethodPair(href)) {
+        return resolveUrlMethodPairComponent(href)
       }
 
       return null

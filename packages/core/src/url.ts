@@ -103,6 +103,22 @@ export function isUrlMethodPair(href: unknown): href is UrlMethodPair {
   return href !== null && typeof href === 'object' && href !== undefined && 'url' in href && 'method' in href
 }
 
+export function resolveUrlMethodPairComponent(pair: UrlMethodPair): string | null {
+  if (!pair.component) {
+    return null
+  }
+
+  if (Array.isArray(pair.component)) {
+    console.error(
+      `The "component" property on the URL method pair received an array of components (${pair.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
+    )
+
+    return null
+  }
+
+  return pair.component
+}
+
 export function urlHasProtocol(url: string): boolean {
   return /^([a-z][a-z0-9+.-]*:)?\/\/[^/]/i.test(url)
 }

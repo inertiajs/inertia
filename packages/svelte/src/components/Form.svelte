@@ -12,6 +12,7 @@
     type FormDataConvertible,
     type VisitOptions,
     isUrlMethodPair,
+    resolveUrlMethodPairComponent,
     UseFormUtils,
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
@@ -110,7 +111,11 @@
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
   const resolvedComponent = $derived(
-    component ? component : clientSide && isUrlMethodPair(action) && action.component ? action.component : null,
+    component
+      ? component
+      : clientSide && isUrlMethodPair(action)
+        ? resolveUrlMethodPairComponent(action)
+        : null,
   )
 
   export function getFormData(submitter?: FormSubmitter): FormData {

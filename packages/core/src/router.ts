@@ -283,6 +283,13 @@ export class Router {
       }
     }
 
+    if (Array.isArray(visit.component)) {
+      console.error(
+        `The "component" prop received an array of components (${visit.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
+      )
+      visit.component = null
+    }
+
     if (visit.component) {
       history.processQueue().then(() => {
         this.performInstantSwap(visit).then(() => {

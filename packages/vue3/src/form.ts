@@ -11,6 +11,7 @@ import {
   mergeDataIntoQueryString,
   Method,
   resetFormFields,
+  resolveUrlMethodPairComponent,
   UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
@@ -190,8 +191,8 @@ const Form = defineComponent({
         return props.component
       }
 
-      if (props.clientSide && isUrlMethodPair(props.action) && props.action.component) {
-        return props.action.component
+      if (props.clientSide && isUrlMethodPair(props.action)) {
+        return resolveUrlMethodPairComponent(props.action)
       }
 
       return null

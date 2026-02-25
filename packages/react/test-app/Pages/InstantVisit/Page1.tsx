@@ -66,6 +66,19 @@ export default ({ foo, auth }: { foo: string; auth?: { user: string } }) => {
       >
         Link with clientSide
       </Link>
+      <Link
+        href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] as any }}
+        clientSide
+        component="InstantVisit/Target"
+      >
+        Link with array component and explicit override
+      </Link>
+      <Link
+        href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] as any }}
+        clientSide
+      >
+        Link with array component
+      </Link>
     </div>
   )
 }

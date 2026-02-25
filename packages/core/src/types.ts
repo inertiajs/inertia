@@ -694,7 +694,7 @@ export type ProgressSettings = {
   color: string
 }
 
-export type UrlMethodPair = { url: string; method: Method; component?: string }
+export type UrlMethodPair = { url: string; method: Method; component?: string | string[] }
 
 export type UseFormTransformCallback<TForm> = (data: TForm) => object
 export type UseFormWithPrecognitionArguments =

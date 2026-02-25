@@ -63,4 +63,17 @@
   <Link href={{ url: '/instant-visit/target?delay=500', method: 'get', component: 'InstantVisit/Target' }} clientSide>
     Link with clientSide
   </Link>
+  <Link
+    href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }}
+    clientSide
+    component="InstantVisit/Target"
+  >
+    Link with array component and explicit override
+  </Link>
+  <Link
+    href={{ url: '/instant-visit/target?delay=500', method: 'get', component: ['InstantVisit/Target', 'InstantVisit/Other'] }}
+    clientSide
+  >
+    Link with array component
+  </Link>
 </div>
