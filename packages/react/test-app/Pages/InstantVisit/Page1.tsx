@@ -76,8 +76,8 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
         href={{
           url: '/instant-visit/target?delay=500',
           method: 'get',
-          component: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ['InstantVisit/Target', 'InstantVisit/Other'] as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
         }}
         clientSide
         component="InstantVisit/Target"
@@ -88,8 +88,8 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
         href={{
           url: '/instant-visit/target?delay=500',
           method: 'get',
-          component: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ['InstantVisit/Target', 'InstantVisit/Other'] as any,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          component: ['InstantVisit/Target', 'InstantVisit/Other'] as any,
         }}
         clientSide
       >
