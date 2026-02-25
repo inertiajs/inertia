@@ -268,6 +268,8 @@ class PrefetchedRequests {
         'async',
         'viewTransition',
         'optimistic',
+        'component',
+        'pageProps',
       ],
     )
   }
