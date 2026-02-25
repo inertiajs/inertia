@@ -707,6 +707,50 @@ createInertiaApp({ resolve: (name) => name })`
       expect(result).toBeNull()
     })
   })
+
+  describe('ssr: false', () => {
+    it('does not add middleware when ssr is disabled', () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia({ ssr: false })
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      expect(server.middlewares.use).not.toHaveBeenCalled()
+      expect(logger.info).not.toHaveBeenCalled()
+    })
+
+    it('does not apply SSR transform when ssr is disabled', () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia({ ssr: false })
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({ resolve: (name) => name })`
+      const result = plugin.transform!(code, 'app.ts', { ssr: true })
+
+      expect(result).toBeNull()
+    })
+
+    it('does not configure SSR build options when ssr is disabled', () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia({ ssr: false })
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const result = plugin.config!({ root: '/project' }, { command: 'build', mode: 'production', isSsrBuild: true } as any)
+
+      expect(result).toBeUndefined()
+    })
+  })
 })
 
 function createMockLogger() {
