@@ -436,8 +436,16 @@ describe('SSR', () => {
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
-      const cssModule = { url: '/resources/css/app.css', id: '/project/resources/css/app.css', importedModules: new Set() }
-      const jsModule = { url: '/resources/js/utils.js', id: '/project/resources/js/utils.js', importedModules: new Set() }
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const jsModule = {
+        url: '/resources/js/utils.js',
+        id: '/project/resources/js/utils.js',
+        importedModules: new Set(),
+      }
       const entryModule = {
         url: '/resources/js/ssr.ts',
         id: '/project/resources/js/ssr.ts',
@@ -477,8 +485,16 @@ describe('SSR', () => {
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
-      const deepCssModule = { url: '/resources/css/components.css', id: '/project/resources/css/components.css', importedModules: new Set() }
-      const middleModule = { url: '/resources/js/component.js', id: '/project/resources/js/component.js', importedModules: new Set([deepCssModule]) }
+      const deepCssModule = {
+        url: '/resources/css/components.css',
+        id: '/project/resources/css/components.css',
+        importedModules: new Set(),
+      }
+      const middleModule = {
+        url: '/resources/js/component.js',
+        id: '/project/resources/js/component.js',
+        importedModules: new Set([deepCssModule]),
+      }
       const entryModule = {
         url: '/resources/js/ssr.ts',
         id: '/project/resources/js/ssr.ts',
@@ -517,8 +533,16 @@ describe('SSR', () => {
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
-      const scssModule = { url: '/resources/css/app.scss', id: '/project/resources/css/app.scss', importedModules: new Set() }
-      const lessModule = { url: '/resources/css/vendor.less', id: '/project/resources/css/vendor.less', importedModules: new Set() }
+      const scssModule = {
+        url: '/resources/css/app.scss',
+        id: '/project/resources/css/app.scss',
+        importedModules: new Set(),
+      }
+      const lessModule = {
+        url: '/resources/css/vendor.less',
+        id: '/project/resources/css/vendor.less',
+        importedModules: new Set(),
+      }
       const entryModule = {
         url: '/resources/js/ssr.ts',
         id: '/project/resources/js/ssr.ts',
