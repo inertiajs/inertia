@@ -9,19 +9,19 @@
     "type-check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^9.39.3",
     "@sveltejs/eslint-config": "^8.3.5",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
-    "@tsconfig/svelte": "^5.0.7",
+    "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^24.10.13",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.3",
     "eslint-plugin-svelte": "^3.15.0",
     "globals": "^17.3.0",
-    "nodemon": "^3.1.11",
-    "svelte": "^5.50.3",
-    "svelte-check": "^4.3.6",
+    "nodemon": "^3.1.14",
+    "svelte": "^5.53.5",
+    "svelte-check": "^4.4.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0",
+    "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
   },
   "dependencies": {

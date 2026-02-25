@@ -54,7 +54,7 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "@types/lodash-es": "^4.17.12",
-    "laravel-precognition": "2.0.0-beta.0",
+    "laravel-precognition": "2.0.0-beta.2",
     "lodash-es": "^4.17.23"
   },
   "peerDependencies": {
@@ -68,7 +68,7 @@
   "devDependencies": {
     "@types/node": "^24.10.13",
     "axios": "^1.13.5",
-    "es-check": "^9.5.4",
+    "es-check": "^9.6.1",
     "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",
     "typescript": "^5.9.3",

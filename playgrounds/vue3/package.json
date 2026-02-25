@@ -9,21 +9,21 @@
     "@inertiajs/core": "workspace:*",
     "@inertiajs/vite": "workspace:*",
     "@inertiajs/vue3": "workspace:*",
-    "@laravel/stream-vue": "^0.3.10",
+    "@laravel/stream-vue": "^0.3.13",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.1",
     "@vitejs/plugin-vue": "^6.0.4",
-    "@vue/server-renderer": "^3.5.28",
+    "@vue/server-renderer": "^3.5.29",
     "autosize": "^6.0.1",
     "axios": "^1.13.5",
     "laravel-vite-plugin": "^2.1.0",
     "lodash": "^4.17.23",
-    "marked": "^17.0.2",
-    "tailwindcss": "^4.1.18",
+    "marked": "^17.0.3",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vue": "^3.5.28",
-    "vue-tsc": "^3.2.4"
+    "vue": "^3.5.29",
+    "vue-tsc": "^3.2.5"
   },
   "type": "module"
 }
