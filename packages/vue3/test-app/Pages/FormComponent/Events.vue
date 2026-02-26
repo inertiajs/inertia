@@ -74,7 +74,8 @@ function cancelVisit() {
     </div>
 
     <div>
-      Progress: <span id="progress" :class="progress?.percentage ? 'uploading' : undefined">{{ progress?.percentage || 0 }}</span>
+      Progress:
+      <span id="progress" :class="progress?.percentage ? 'uploading' : undefined">{{ progress?.percentage || 0 }}</span>
     </div>
 
     <div>
