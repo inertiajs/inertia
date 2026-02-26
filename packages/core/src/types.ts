@@ -742,7 +742,7 @@ export type FormComponentProps = Partial<
   transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
   optimistic?: FormComponentOptimisticCallback
   options?: FormComponentOptions
-  onSubmitComplete?: (props: FormComponentonSubmitCompleteArguments) => void
+  onSubmitComplete?: (props: FormComponentOnSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
   resetOnSuccess?: boolean | string[]
   resetOnError?: boolean | string[]
@@ -775,7 +775,7 @@ export type FormComponentMethods<TForm extends object = Record<string, any>> = {
   validator: () => Validator
 }
 
-export type FormComponentonSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
+export type FormComponentOnSubmitCompleteArguments<TForm extends object = Record<string, any>> = Pick<
   FormComponentMethods<TForm>,
   'reset' | 'defaults'
 >

@@ -367,7 +367,7 @@ export class Response {
           )
         }
 
-        // If the source is neither an array nor an object, simply return the it
+        // If the source is neither an array nor an object, simply return it
         return source
       }
 

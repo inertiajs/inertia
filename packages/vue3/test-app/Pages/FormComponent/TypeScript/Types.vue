@@ -1,6 +1,6 @@
 <!-- This component is used for checking the TypeScript implementation; there is no Playwright test depending on it. -->
 <script setup lang="ts">
-import { FormComponentSlotProps, FormComponentonSubmitCompleteArguments } from '@inertiajs/core'
+import { FormComponentSlotProps, FormComponentOnSubmitCompleteArguments } from '@inertiajs/core'
 
 interface UserForm {
   name: string
@@ -23,7 +23,7 @@ function renderFormContent(props: FormComponentSlotProps<UserForm>) {
   return 'Form content'
 }
 
-function handleSubmitComplete(props: FormComponentonSubmitCompleteArguments<UserForm>) {
+function handleSubmitComplete(props: FormComponentOnSubmitCompleteArguments<UserForm>) {
   const { reset, defaults } = props
 
   reset('name')

@@ -45,7 +45,6 @@ export class RequestParams {
         onPrefetchError: params.onPrefetchError || (() => {}),
       }
     }
-    //
   }
 
   public static create(params: ActiveVisit): RequestParams {
