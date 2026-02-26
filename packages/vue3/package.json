@@ -17,7 +17,8 @@
   },
   "files": [
     "dist",
-    "types"
+    "types",
+    "resources"
   ],
   "type": "module",
   "main": "dist/index.js",

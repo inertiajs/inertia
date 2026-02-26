@@ -19,7 +19,8 @@
   "files": [
     "dist",
     "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
+    "!dist/**/*.spec.*",
+    "resources"
   ],
   "type": "module",
   "types": "./dist/index.d.ts",
