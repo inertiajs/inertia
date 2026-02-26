@@ -1,5 +1,5 @@
 // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
-import { FormComponentSlotProps, FormComponentOnSubmitCompleteArguments } from '@inertiajs/core'
+import { FormComponentOnSubmitCompleteArguments, FormComponentSlotProps } from '@inertiajs/core'
 
 interface UserForm {
   name: string
