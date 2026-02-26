@@ -226,7 +226,7 @@ export class Router {
 
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
-      showProgress: options.showProgress ?? !options.async,
+      showProgress: options.showProgress ?? (!options.async || !!options.optimistic),
     } as VisitOptions)
 
     const events = this.getVisitEvents(options as VisitOptions)

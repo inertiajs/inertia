@@ -187,6 +187,20 @@ test.describe('Optimistic', () => {
     await page.waitForURL('**/dump/get')
   })
 
+  test('it shows the progress bar during optimistic form helper submissions', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#new-todo').fill('New optimistic todo')
+    await page.locator('#add-btn').click()
+
+    await expect(page.locator('#todo-list li')).toHaveCount(3)
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#nprogress .bar')).toBeVisible()
+
+    await expect(page.locator('#success-count')).toContainText('Success: 1')
+  })
+
   test('it updates non-optimistic props while preserving optimistic ones', async ({ page }) => {
     pageLoads.watch(page)
 
