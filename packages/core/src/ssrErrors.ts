@@ -1,8 +1,10 @@
 /**
- * SSR Error Classification for Production Server
+ * SSR Error Classification
  *
  * This module detects common SSR errors and provides helpful hints
- * to developers on how to fix them.
+ * to developers on how to fix them. The most common issue is using
+ * browser-specific APIs (like window, document) that don't exist
+ * in the Node.js server environment.
  */
 
 export type SSRErrorType = 'browser-api' | 'component-resolution' | 'render' | 'unknown'
@@ -31,7 +33,7 @@ export interface ClassifiedSSRError {
   timestamp: string
 }
 
-export const BROWSER_APIS: Record<string, string> = {
+const BROWSER_APIS: Record<string, string> = {
   // Global objects
   window: 'The global window object',
   document: 'The DOM document object',
@@ -81,6 +83,7 @@ function detectBrowserApi(error: Error): string | null {
       `'${api.toLowerCase()}' is not defined`,
       `"${api.toLowerCase()}" is not defined`,
       `cannot read properties of undefined (reading '${api.toLowerCase()}')`,
+      `cannot read property '${api.toLowerCase()}'`,
     ]
 
     if (patterns.some((pattern) => message.includes(pattern))) {
@@ -102,13 +105,64 @@ function isComponentResolutionError(error: Error): boolean {
   )
 }
 
+const LIFECYCLE_HOOKS = 'onMounted/useEffect/onMount'
+
 function getBrowserApiHint(api: string): string {
   const apiDescription = BROWSER_APIS[api] || `The "${api}" object`
 
+  if (['localStorage', 'sessionStorage'].includes(api)) {
+    return (
+      `${apiDescription} doesn't exist in Node.js. ` +
+      `Check "typeof ${api} !== 'undefined'" before using it, ` +
+      `or move the code to a ${LIFECYCLE_HOOKS} lifecycle hook.`
+    )
+  }
+
+  if (['window', 'document'].includes(api)) {
+    return (
+      `${apiDescription} doesn't exist in Node.js. ` +
+      `Wrap browser-specific code in a ${LIFECYCLE_HOOKS} lifecycle hook, ` +
+      `or check "typeof ${api} !== 'undefined'" before using it.`
+    )
+  }
+
+  if (['IntersectionObserver', 'ResizeObserver', 'MutationObserver'].includes(api)) {
+    return (
+      `${apiDescription} doesn't exist in Node.js. ` +
+      `Create observers inside a ${LIFECYCLE_HOOKS} lifecycle hook, not at the module level.`
+    )
+  }
+
+  if (['fetch', 'XMLHttpRequest'].includes(api)) {
+    return (
+      `${apiDescription} may not be available in all Node.js versions. ` +
+      `For SSR, ensure data fetching happens on the server (in your controller) ` +
+      `and is passed as props, or use a ${LIFECYCLE_HOOKS} hook for client-side fetching.`
+    )
+  }
+
   return (
     `${apiDescription} doesn't exist in Node.js. ` +
-    `Wrap browser-specific code in a onMounted/useEffect/onMount lifecycle hook, ` +
-    `or check "typeof ${api} !== 'undefined'" before using it.`
+    `Move this code to a ${LIFECYCLE_HOOKS} lifecycle hook, or guard it with ` +
+    `"typeof ${api} !== 'undefined'".`
+  )
+}
+
+function getComponentResolutionHint(component?: string): string {
+  const componentPart = component ? ` "${component}"` : ''
+
+  return (
+    `Could not resolve component${componentPart}. ` +
+    `Check that the file exists and the path is correct. ` +
+    `Ensure the component name matches the file name exactly (case-sensitive).`
+  )
+}
+
+function getRenderErrorHint(): string {
+  return (
+    'An error occurred while rendering the component. ' +
+    'Check the component for browser-specific code that runs during initialization. ' +
+    'Move any code that accesses browser APIs to a lifecycle hook.'
   )
 }
 
@@ -137,7 +191,6 @@ function extractSourceLocation(stack?: string): string | undefined {
       const lineNum = parseInt(match[2], 10)
       const colNum = parseInt(match[3], 10)
 
-      // Try to resolve through sourcemap
       if (sourceMapResolver) {
         const resolved = sourceMapResolver(file, lineNum, colNum)
 
@@ -179,14 +232,14 @@ export function classifySSRError(error: Error, component?: string, url?: string)
     return {
       ...base,
       type: 'component-resolution',
-      hint: `Could not resolve component${component ? ` "${component}"` : ''}. Check that the file exists and the path is correct.`,
+      hint: getComponentResolutionHint(component),
     }
   }
 
   return {
     ...base,
     type: 'render',
-    hint: 'An error occurred while rendering. Check for browser-specific code that runs during initialization.',
+    hint: getRenderErrorHint(),
   }
 }
 
@@ -201,17 +254,27 @@ const colors = {
   white: '\x1b[37m',
 }
 
-function makeRelative(path: string): string {
-  const cwd = process.cwd()
+function makeRelative(path: string, root?: string): string {
+  const base = root ?? process.cwd()
 
-  if (path.startsWith(cwd + '/')) {
-    return path.slice(cwd.length + 1)
+  if (path.startsWith(base + '/')) {
+    return path.slice(base.length + 1)
   }
 
   return path
 }
 
-export function formatConsoleError(classified: ClassifiedSSRError): string {
+export function formatConsoleError(
+  classified: ClassifiedSSRError,
+  root?: string,
+  handleErrors: boolean = true,
+  suppressedWarnings: string[] = [],
+): string {
+  if (!handleErrors) {
+    const component = classified.component ? `[${classified.component}]` : ''
+    return `SSR Error ${component}: ${classified.error}`
+  }
+
   const componentPart = classified.component ? `  ${colors.cyan}${classified.component}${colors.reset}` : ''
 
   const lines = [
@@ -222,7 +285,7 @@ export function formatConsoleError(classified: ClassifiedSSRError): string {
   ]
 
   if (classified.sourceLocation) {
-    const relativePath = makeRelative(classified.sourceLocation)
+    const relativePath = makeRelative(classified.sourceLocation, root)
     lines.push(`  ${colors.dim}Source: ${relativePath}${colors.reset}`)
   }
 
@@ -231,6 +294,14 @@ export function formatConsoleError(classified: ClassifiedSSRError): string {
   }
 
   lines.push('', `  ${colors.yellow}Hint${colors.reset}  ${classified.hint}`, '')
+
+  if (classified.stack) {
+    lines.push(`  ${colors.dim}${classified.stack.split('\n').join('\n  ')}${colors.reset}`, '')
+  }
+
+  if (suppressedWarnings.length > 0) {
+    lines.push(`  ${colors.dim}Suppressed ${suppressedWarnings.length} framework warning(s).${colors.reset}`, '')
+  }
 
   return lines.join('\n')
 }

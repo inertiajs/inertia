@@ -32,12 +32,19 @@
     "./server": {
       "types": "./types/server.d.ts",
       "import": "./dist/server.js"
+    },
+    "./ssrErrors": {
+      "types": "./types/ssrErrors.d.ts",
+      "import": "./dist/ssrErrors.js"
     }
   },
   "typesVersions": {
     "*": {
       "server": [
         "types/server.d.ts"
+      ],
+      "ssrErrors": [
+        "types/ssrErrors.d.ts"
       ]
     }
   },
