@@ -8,9 +8,6 @@ import * as process from 'process'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
-// Re-export SSR error utilities for use by @inertiajs/vite
-export { BROWSER_APIS, type ClassifiedSSRError, type SSRErrorType } from './ssrErrors'
-
 // Cache parsed sourcemaps for performance
 const sourceMaps = new Map<string, TraceMap>()
 
