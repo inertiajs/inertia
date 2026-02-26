@@ -53,11 +53,11 @@
   },
   "devDependencies": {
     "axios": "^1.13.5",
-    "es-check": "^9.5.4",
+    "es-check": "^9.6.1",
     "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",
     "typescript": "^5.9.3",
-    "vue": "^3.5.28"
+    "vue": "^3.5.29"
   },
   "peerDependencies": {
     "vue": "^3.0.0"
