@@ -145,6 +145,23 @@ test.describe('Progress Component', () => {
     await expect(page.locator('#nprogress .bar')).toBeVisible()
   })
 
+  test('works without popover API', async ({ page }) => {
+    await page.goto('/progress-component?popover=false')
+
+    await page.getByRole('button', { name: 'Start', exact: true }).click()
+    const bar = page.locator('#nprogress .bar')
+    await expect(bar).toBeVisible()
+
+    const nprogress = page.locator('#nprogress')
+    await expect(nprogress).not.toHaveAttribute('popover')
+
+    await page.getByRole('button', { name: 'Hide' }).click()
+    await expect(bar).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Reveal' }).click()
+    await expect(bar).toBeVisible()
+  })
+
   test('isStarted() reflects actual DOM state', async ({ page }) => {
     await page.getByRole('button', { name: 'Is Started' }).click()
     let tests = await page.evaluate(() => (window as any).progressTests)

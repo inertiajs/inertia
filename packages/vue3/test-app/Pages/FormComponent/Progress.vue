@@ -14,7 +14,11 @@ function disableProgress() {
 onMounted(() => {
   const observer = new MutationObserver(() => {
     const nprogressElement = document.querySelector('#nprogress') as HTMLElement | null
-    const nprogressIsVisible = nprogressElement && nprogressElement.style.display !== 'none'
+    const nprogressIsVisible =
+      nprogressElement &&
+      ('popover' in HTMLElement.prototype
+        ? nprogressElement.matches(':popover-open')
+        : nprogressElement.style.display !== 'none')
 
     if (nprogressIsVisible) {
       if (!nprogressVisible.value) {

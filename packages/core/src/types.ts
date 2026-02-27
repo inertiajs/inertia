@@ -525,11 +525,12 @@ type PagesOption =
       transform?: (name: string) => string
     }
 
-type ProgressOptions = {
+export type ProgressOptions = {
   delay?: number
   color?: string
   includeCSS?: boolean
   showSpinner?: boolean
+  popover?: boolean | null
 }
 
 interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
@@ -681,7 +682,6 @@ export type PrefetchRemovalTimer = {
 export type ProgressSettings = {
   minimum: number
   easing: string
-  positionUsing: 'translate3d' | 'translate' | 'margin'
   speed: number
   trickle: boolean
   trickleSpeed: number
@@ -692,6 +692,7 @@ export type ProgressSettings = {
   template: string
   includeCSS: boolean
   color: string
+  popover: boolean | null
 }
 
 export type UrlMethodPair = { url: string; method: Method; component?: string | string[] }
