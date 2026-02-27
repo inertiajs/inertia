@@ -17,7 +17,7 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
   const allowsVerticalScroll = (el: HTMLElement): boolean => {
     const computedStyle = window.getComputedStyle(el)
 
-    if (['scroll', 'overlay'].includes(computedStyle.overflowY)) {
+    if (computedStyle.overflowY === 'scroll') {
       return true
     }
 
@@ -35,7 +35,7 @@ export const getScrollableParent = (element: HTMLElement | null): HTMLElement | 
   const allowsHorizontalScroll = (el: HTMLElement): boolean => {
     const computedStyle = window.getComputedStyle(el)
 
-    if (['scroll', 'overlay'].includes(computedStyle.overflowX)) {
+    if (computedStyle.overflowX === 'scroll') {
       return true
     }
 
