@@ -68,4 +68,7 @@ createInertiaApp({
       return DefaultLayout
     },
   }),
+  ...(params.get('popover') === 'false' && {
+    progress: { popover: false },
+  }),
 })

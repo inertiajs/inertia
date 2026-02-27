@@ -14,7 +14,11 @@
   onMount(() => {
     observer = new MutationObserver(() => {
       const nprogressElement = document.querySelector('#nprogress') as HTMLElement | null
-      const nprogressIsCurrentlyVisible = nprogressElement && nprogressElement.style.display !== 'none'
+      const nprogressIsCurrentlyVisible =
+        nprogressElement &&
+        ('popover' in HTMLElement.prototype
+          ? nprogressElement.matches(':popover-open')
+          : nprogressElement.style.display !== 'none')
 
       if (nprogressIsCurrentlyVisible) {
         if (!nprogressVisible) {
