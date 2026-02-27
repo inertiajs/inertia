@@ -37,7 +37,7 @@ let hidden = false
 const configure = (options: Partial<ProgressSettings>) => {
   Object.assign(settings, options)
 
-  usePopover = settings.popover ?? ('popover' in HTMLElement.prototype)
+  usePopover = settings.popover ?? 'popover' in HTMLElement.prototype
 
   if (settings.includeCSS) {
     injectCSS(settings.color)
