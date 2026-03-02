@@ -187,10 +187,10 @@ importers:
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^3.3.1
-        version: 3.3.1(@sveltejs/kit@2.53.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))
+        version: 3.3.1(@sveltejs/kit@2.53.3(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))
       '@sveltejs/kit':
-        specifier: ^2.53.2
-        version: 2.53.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))
+        specifier: ^2.53.3
+        version: 2.53.3(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))
       '@sveltejs/package':
         specifier: ^2.5.7
         version: 2.5.7(svelte@4.2.20)(typescript@5.9.3)
@@ -1054,8 +1054,8 @@ packages:
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
 
-  '@sveltejs/kit@2.53.2':
-    resolution: {integrity: sha512-M+MqAvFve12T1HWws/2npP/s3hFtyjw3GB/OXW/8a1jZBk48qnvPJrtgE+VOMc3RnjUMxc4mv/vQ73nvj2uNMg==}
+  '@sveltejs/kit@2.53.3':
+    resolution: {integrity: sha512-tshOeBUid2v5LAblUpatIdFm5Cyykbw2EiKWOunAAX0A/oJaR7DOdC9wLR5Qqh9zUf3QUISA2m9A3suBdQSYQg==}
     engines: {node: '>=18.13'}
     hasBin: true
     peerDependencies:
@@ -3702,12 +3702,12 @@ snapshots:
     dependencies:
       acorn: 8.16.0
 
-  '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.53.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))':
+  '@sveltejs/adapter-auto@3.3.1(@sveltejs/kit@2.53.3(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))':
     dependencies:
-      '@sveltejs/kit': 2.53.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))
+      '@sveltejs/kit': 2.53.3(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))
       import-meta-resolve: 4.2.0
 
-  '@sveltejs/kit@2.53.2(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))':
+  '@sveltejs/kit@2.53.3(@sveltejs/vite-plugin-svelte@3.1.2(svelte@4.2.20)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0)))(svelte@4.2.20)(typescript@5.9.3)(vite@5.4.21(@types/node@25.0.9)(lightningcss@1.31.1)(terser@5.46.0))':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@sveltejs/acorn-typescript': 1.0.9(acorn@8.16.0)
