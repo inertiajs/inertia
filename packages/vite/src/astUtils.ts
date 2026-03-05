@@ -10,6 +10,7 @@ import type {
   CallExpression,
   ExpressionStatement,
   Identifier,
+  Node,
   ObjectExpression,
   Program,
   Property,
@@ -73,27 +74,46 @@ export class ParsedCode {
   /**
    * Find a top-level `createInertiaApp()` expression statement.
    * Only matches bare calls, not `export default createInertiaApp()`.
+   *
+   * Handles: bare call, await, void, and .then()/.catch() chains.
    */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
-      if (node.type !== 'ExpressionStatement') {
-        continue
-      }
+      if (node.type === 'ExpressionStatement') {
+        const statement = node as NodeWithPos<ExpressionStatement>
+        const call = this.unwrapInertiaCall(statement.expression)
 
-      const statement = node as NodeWithPos<ExpressionStatement>
-      let expr = statement.expression as { type: string; argument?: unknown; start: number; end: number }
-
-      // Handle `await createInertiaApp()` - unwrap the await to get the call
-      if (expr.type === 'AwaitExpression') {
-        expr = expr.argument as typeof expr
-      }
-
-      if (expr.type === 'CallExpression') {
-        const call = expr as NodeWithPos<SimpleCallExpression>
-
-        if (this.isInertiaCall(call)) {
+        if (call) {
           return { statement, call }
         }
+      }
+    }
+
+    return null
+  }
+
+  /**
+   * Unwrap an expression to find a `createInertiaApp()` call inside it.
+   * Strips away `await`, `void`, and `.then()`/`.catch()` chains.
+   */
+  private unwrapInertiaCall(expr: Node): NodeWithPos<SimpleCallExpression> | null {
+    const node = expr as NodeWithPos<Node>
+
+    // Unwrap UnaryExpression (void) and AwaitExpression
+    if ((node.type === 'UnaryExpression' || node.type === 'AwaitExpression') && node.argument) {
+      return this.unwrapInertiaCall(node.argument as Node)
+    }
+
+    if (node.type === 'CallExpression') {
+      const call = node as NodeWithPos<SimpleCallExpression>
+
+      if (this.isInertiaCall(call)) {
+        return call
+      }
+
+      // Unwrap method chains: createInertiaApp({}).catch(...)
+      if (call.callee.type === 'MemberExpression') {
+        return this.unwrapInertiaCall(call.callee.object as Node)
       }
     }
 
