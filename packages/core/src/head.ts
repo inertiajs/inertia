@@ -42,13 +42,13 @@ const Renderer = {
     targetElements.forEach((targetElement) => {
       const index = this.findMatchingElementIndex(targetElement as Element, sourceElements)
       if (index === -1) {
-        targetElement?.parentNode?.removeChild(targetElement)
+        targetElement.remove()
         return
       }
 
       const sourceElement = sourceElements.splice(index, 1)[0]
       if (sourceElement && !targetElement.isEqualNode(sourceElement)) {
-        targetElement?.parentNode?.replaceChild(sourceElement, targetElement)
+        targetElement.replaceWith(sourceElement)
       }
     })
 

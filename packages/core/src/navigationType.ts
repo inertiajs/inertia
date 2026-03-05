@@ -10,15 +10,9 @@ class NavigationType {
       return 'navigate'
     }
 
-    if (
-      window.performance &&
-      window.performance.getEntriesByType &&
-      window.performance.getEntriesByType('navigation').length > 0
-    ) {
-      return (window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type
-    }
+    const entry = window.performance?.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
 
-    return 'navigate'
+    return entry?.type ?? 'navigate'
   }
 
   public get(): NavigationTimingType {
