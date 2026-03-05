@@ -1,6 +1,6 @@
 ---
 name: inertia-vue-development
-description: "Develops Inertia.js v2 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using <Link>, <Form>, useForm, or router; working with deferred props, prefetching, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation."
+description: "Develops Inertia.js v3 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using <Link>, <Form>, useForm, useHttp, useLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation."
 license: MIT
 metadata:
   author: laravel
@@ -15,14 +15,14 @@ metadata:
 Activate this skill when:
 
 - Creating or modifying Vue page components for Inertia
-- Working with forms in Vue (using `<Form>` or `useForm`)
+- Working with forms in Vue (using `<Form>`, `useForm`, or `useHttp`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v2 features: deferred props, prefetching, WhenVisible, InfiniteScroll, once props, flash data, or polling
+- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, once props, flash data, or polling
 - Building Vue-specific features with the Inertia protocol
 
 ## Documentation
 
-Use `search-docs` for detailed Inertia v2 Vue patterns and documentation.
+Use `search-docs` for detailed Inertia v3 Vue patterns and documentation.
 
 ## Basic Usage
 
@@ -293,7 +293,134 @@ function submit() {
 @endboostsnippet
 @endverbatim
 
-## Inertia v2 Features
+## Inertia v3 Features
+
+### HTTP Requests
+
+Use the `useHttp` hook for standalone HTTP requests that do not trigger Inertia page visits. It provides the same developer experience as `useForm`, but for plain JSON endpoints.
+
+@boostsnippet("useHttp Example", "vue")
+<script setup>
+import { useHttp } from '@inertiajs/vue3'
+
+const http = useHttp({
+    query: '',
+})
+
+function search() {
+    http.get('/api/search', {
+        onSuccess: (response) => {
+            console.log(response)
+        },
+    })
+}
+</script>
+
+<template>
+    <input v-model="http.query" @input="search" />
+    <div v-if="http.processing">Searching...</div>
+</template>
+@endboostsnippet
+
+### Optimistic Updates
+
+Apply data changes instantly before the server responds, with automatic rollback on failure:
+
+@boostsnippet("Optimistic Update with Router", "vue")
+<script setup>
+import { router } from '@inertiajs/vue3'
+
+function like(post) {
+    router.optimistic((props) => ({
+        post: {
+            ...props.post,
+            likes: props.post.likes + 1,
+        },
+    })).post(`/posts/${post.id}/like`)
+}
+</script>
+@endboostsnippet
+
+Optimistic updates also work with `useForm` and the `<Form>` component:
+
+@verbatim
+@boostsnippet("Optimistic Update with Form Component", "vue")
+<template>
+    <Form
+        action="/todos"
+        method="post"
+        :optimistic="(props, data) => ({
+            todos: [...props.todos, { id: Date.now(), name: data.name, done: false }],
+        })"
+    >
+        <input type="text" name="name" />
+        <button type="submit">Add Todo</button>
+    </Form>
+</template>
+@endboostsnippet
+@endverbatim
+
+### Instant Visits
+
+Navigate to a new page immediately without waiting for the server response. The target component renders right away with shared props, while page-specific props load in the background.
+
+@boostsnippet("Instant Visit with Link", "vue")
+<script setup>
+import { Link } from '@inertiajs/vue3'
+</script>
+
+<template>
+    <Link href="/dashboard" component="Dashboard">Dashboard</Link>
+
+    <Link
+        href="/posts/1"
+        component="Posts/Show"
+        :page-props="{ post: { id: 1, title: 'My Post' } }"
+    >
+        View Post
+    </Link>
+</template>
+@endboostsnippet
+
+### Layout Props
+
+Share dynamic data between pages and persistent layouts:
+
+@verbatim
+@boostsnippet("Layout Props in Layout", "vue")
+<script setup>
+import { useLayoutProps } from '@inertiajs/vue3'
+
+const layout = useLayoutProps({
+    title: 'My App',
+    showSidebar: true,
+})
+</script>
+
+<template>
+    <header>{{ layout.title }}</header>
+    <aside v-if="layout.showSidebar">Sidebar</aside>
+    <main>
+        <slot />
+    </main>
+</template>
+@endboostsnippet
+@endverbatim
+
+@boostsnippet("Setting Layout Props from Page", "vue")
+<script setup>
+import { setLayoutProps } from '@inertiajs/vue3'
+
+setLayoutProps({
+    title: 'Dashboard',
+    showSidebar: false,
+})
+</script>
+
+<template>
+    <h1>Dashboard</h1>
+</template>
+@endboostsnippet
 
 ### Deferred Props
 
@@ -343,7 +470,7 @@ let interval
 onMounted(() => {
     interval = setInterval(() => {
         router.reload({ only: ['stats'] })
-    }, 5000) // Poll every 5 seconds
+    }, 5000)
 })
 
 onUnmounted(() => {
@@ -378,7 +505,6 @@ defineProps({
     <div>
         <h1>Dashboard</h1>
 
-        <!-- stats prop is loaded only when this section scrolls into view -->
         <WhenVisible data="stats" :buffer="200">
             <template #fallback>
                 <div class="animate-pulse">Loading stats...</div>
@@ -409,3 +535,5 @@ Server-side patterns (Inertia::render, props, middleware) are covered in inertia
 - Not handling the `undefined` state of deferred props before data loads
 - Using `<form>` without preventing default submission (use `<Form>` component or `@submit.prevent`)
 - Forgetting to check if `<Form>` component is available in your Inertia version
+- Using `router.cancel()` instead of `router.cancelAll()` (v3 breaking change)
+- Using `router.on('invalid', ...)` or `router.on('exception', ...)` instead of the renamed `httpException` and `networkError` events
