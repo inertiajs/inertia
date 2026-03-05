@@ -1,5 +1,5 @@
 import ProgressComponent from './progress-component'
-import { GlobalEvent } from './types'
+import { GlobalEvent, ProgressOptions } from './types'
 
 class Progress {
   public hideCount = 0
@@ -91,7 +91,8 @@ export default function setupProgress({
   color = '#29d',
   includeCSS = true,
   showSpinner = false,
-} = {}): void {
+  popover = null,
+}: ProgressOptions = {}): void {
   addEventListeners(delay)
-  ProgressComponent.configure({ showSpinner, includeCSS, color })
+  ProgressComponent.configure({ showSpinner, includeCSS, color, popover })
 }

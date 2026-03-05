@@ -5,12 +5,12 @@ import { ProgressSettings } from './types'
 
 const baseComponentSelector = 'nprogress'
 
+let usePopover: boolean
 let progress: HTMLDivElement
 
 const settings: ProgressSettings = {
   minimum: 0.08,
   easing: 'linear',
-  positionUsing: 'translate3d',
   speed: 200,
   trickle: true,
   trickleSpeed: 200,
@@ -20,6 +20,7 @@ const settings: ProgressSettings = {
   parent: 'body',
   color: '#29d',
   includeCSS: true,
+  popover: null,
   template: [
     '<div class="bar" role="bar">',
     '<div class="peg"></div>',
@@ -31,9 +32,12 @@ const settings: ProgressSettings = {
 }
 
 let status: number | null = null
+let hidden = false
 
 const configure = (options: Partial<ProgressSettings>) => {
   Object.assign(settings, options)
+
+  usePopover = settings.popover ?? 'popover' in HTMLElement.prototype
 
   if (settings.includeCSS) {
     injectCSS(settings.color)
@@ -42,6 +46,10 @@ const configure = (options: Partial<ProgressSettings>) => {
   progress = document.createElement('div')
   progress.id = baseComponentSelector
   progress.innerHTML = settings.template
+
+  if (usePopover) {
+    progress.popover = 'manual'
+  }
 }
 
 /**
@@ -61,23 +69,10 @@ const set = (n: number) => {
   progress.offsetWidth /* Repaint */
 
   queue((next) => {
-    const barStyles = ((): Partial<CSSStyleDeclaration> => {
-      if (settings.positionUsing === 'translate3d') {
-        return {
-          transition: `all ${speed}ms ${ease}`,
-          transform: `translate3d(${toBarPercentage(n)}%,0,0)`,
-        }
-      }
-
-      if (settings.positionUsing === 'translate') {
-        return {
-          transition: `all ${speed}ms ${ease}`,
-          transform: `translate(${toBarPercentage(n)}%,0)`,
-        }
-      }
-
-      return { marginLeft: `${toBarPercentage(n)}%` }
-    })()
+    const barStyles: Partial<CSSStyleDeclaration> = {
+      transition: `all ${speed}ms ${ease}`,
+      transform: `translate3d(${toBarPercentage(n)}%,0,0)`,
+    }
 
     for (const key in barStyles) {
       bar.style[key] = barStyles[key]!
@@ -195,7 +190,6 @@ const render = (fromStart: boolean) => {
 
   const bar = progress.querySelector(settings.barSelector)! as HTMLElement
   const perc = fromStart ? '-100' : toBarPercentage(status || 0)
-  const parent = getParent()
 
   bar.style.transition = 'all 0 linear'
   bar.style.transform = `translate3d(${perc}%,0,0)`
@@ -204,35 +198,53 @@ const render = (fromStart: boolean) => {
     progress.querySelector(settings.spinnerSelector)?.remove()
   }
 
-  if (parent !== document.body) {
-    parent.classList.add(`${baseComponentSelector}-custom-parent`)
-  }
+  if (usePopover) {
+    document.body.appendChild(progress)
 
-  parent.appendChild(progress)
+    if (!hidden) {
+      progress.showPopover()
+    }
+  } else {
+    const parent = getParent()
+
+    if (parent !== document.body) {
+      parent.classList.add(`${baseComponentSelector}-custom-parent`)
+    }
+
+    parent.appendChild(progress)
+
+    if (hidden) {
+      progress.style.display = 'none'
+    }
+  }
 
   return progress
 }
 
 const getParent = (): HTMLElement => {
-  return (isDOM(settings.parent) ? settings.parent : document.querySelector(settings.parent)) as HTMLElement
+  return document.querySelector(settings.parent) as HTMLElement
 }
 
 const remove = () => {
   document.documentElement.classList.remove(`${baseComponentSelector}-busy`)
-  getParent().classList.remove(`${baseComponentSelector}-custom-parent`)
+
+  if (usePopover && progress?.isConnected) {
+    try {
+      progress.hidePopover()
+    } catch {
+      // Already hidden
+    }
+  }
+
+  if (!usePopover) {
+    getParent().classList.remove(`${baseComponentSelector}-custom-parent`)
+  }
+
   progress?.remove()
 }
 
 const isRendered = () => {
   return document.getElementById(baseComponentSelector) !== null
-}
-
-const isDOM = (obj: any) => {
-  if (typeof HTMLElement === 'object') {
-    return obj instanceof HTMLElement
-  }
-
-  return obj && typeof obj === 'object' && obj.nodeType === 1 && typeof obj.nodeName === 'string'
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -277,6 +289,21 @@ const injectCSS = (color: string): void => {
   element.textContent = `
     #${baseComponentSelector} {
       pointer-events: none;
+      background: none;
+      border: none;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      inset: unset;
+      width: 100%;
+      height: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+
+    #${baseComponentSelector}::backdrop {
+      display: none;
     }
 
     #${baseComponentSelector} .bar {
@@ -343,13 +370,37 @@ const injectCSS = (color: string): void => {
 }
 
 const show = () => {
-  if (progress) {
+  hidden = false
+
+  if (!progress?.isConnected) {
+    return
+  }
+
+  if (usePopover) {
+    try {
+      progress.showPopover()
+    } catch {
+      // Already showing
+    }
+  } else {
     progress.style.display = ''
   }
 }
 
 const hide = () => {
-  if (progress) {
+  hidden = true
+
+  if (!progress?.isConnected) {
+    return
+  }
+
+  if (usePopover) {
+    try {
+      progress.hidePopover()
+    } catch {
+      // Already hidden
+    }
+  } else {
     progress.style.display = 'none'
   }
 }
