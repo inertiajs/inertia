@@ -6,6 +6,7 @@ import {
   InertiaAppSSRResponse,
   Page,
   PageProps,
+  SharedPageProps,
   router,
   setupProgress,
 } from '@inertiajs/core'
@@ -20,7 +21,7 @@ type ComponentResolver = (name: string) => DefineComponent | Promise<DefineCompo
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
   App: InertiaApp
-  props: InertiaAppProps<SharedProps>
+  props: InertiaAppProps<SharedProps & SharedPageProps>
   plugin: Plugin
 }
 
