@@ -10,13 +10,22 @@ body:
         Please read [our full contribution guide](https://laravel.com/docs/contributions#bug-reports) before submitting bug reports.
 
         Before submitting, please confirm:
-        - The issue is reproducible with the **latest version** of Inertia.js
-        - You are using **supported versions** of Node.js, PHP, and other server-side dependencies
+        - You have **upgraded to the latest version** of both `@inertiajs/svelte` and `inertiajs/inertia-laravel` and confirmed the issue still exists
+        - Only Inertia **2.x** and **3.x (beta)** are supported. Issues for 0.x or 1.x will be closed.
+  - type: dropdown
+    attributes:
+      label: Inertia version
+      description: Which major version of Inertia are you using?
+      options:
+        - 2.x (stable)
+        - 3.x (beta)
+    validations:
+      required: true
   - type: input
     attributes:
       label: '@inertiajs/svelte Version'
-      description: Provide the version of `@inertiajs/svelte` you are using.
-      placeholder: 2.0.0
+      description: Provide the exact version of `@inertiajs/svelte` you are using (e.g. 2.0.3 or 3.0.0-beta.2).
+      placeholder: 2.0.3
     validations:
       required: true
   - type: textarea
