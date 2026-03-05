@@ -1,5 +1,5 @@
-import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
-import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import type { HttpClient, HttpClientOptions, Page, VisitOptions } from '@inertiajs/core'
+import { axiosAdapter } from '@inertiajs/core/axios'
 import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 import DefaultLayout from './Layouts/DefaultLayout'

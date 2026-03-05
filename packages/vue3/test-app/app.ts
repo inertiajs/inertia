@@ -1,5 +1,5 @@
-import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
-import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import type { HttpClient, HttpClientOptions, Page, VisitOptions } from '@inertiajs/core'
+import { axiosAdapter } from '@inertiajs/core/axios'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'

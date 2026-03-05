@@ -28,6 +28,7 @@ const config = {
 
 const builds = [
   { entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.js', platform: 'browser' },
+  { entryPoints: ['src/axiosHttpClient.ts'], format: 'esm', outfile: 'dist/axiosHttpClient.js', platform: 'browser' },
   { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.js', platform: 'node' },
   { entryPoints: ['src/ssrErrors.ts'], format: 'esm', outfile: 'dist/ssrErrors.js', platform: 'node' },
 ]

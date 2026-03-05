@@ -1,5 +1,5 @@
-import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
-import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import type { HttpClient, HttpClientOptions, Page, VisitOptions } from '@inertiajs/core'
+import { axiosAdapter } from '@inertiajs/core/axios'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
 import { hydrate, mount } from 'svelte'
 import DefaultLayout from './Layouts/DefaultLayout.svelte'
