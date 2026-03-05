@@ -485,6 +485,39 @@ test.describe('Events', () => {
     })
   })
 
+  test.describe('httpException with Inertia error page response', () => {
+    test('it fires when the server returns a valid Inertia response with an error status code', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event (Inertia Response)', 'inertia-error-page')
+
+      const messages = await waitForMessages(page, 5)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException', 1)
+
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:httpException', true)
+
+      await expect(messages[0]).toBe('onHttpException')
+      await expect(messages[1]).toBe('Inertia.on(httpException)')
+      await expect(messages[3]).toBe('addEventListener(inertia:httpException)')
+
+      await expect(page.locator('#status')).toContainText('500')
+    })
+
+    test('it suppresses the error page navigation when the visit callback returns false', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event (Inertia Response Prevent)', 'inertia-error-page')
+
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException')
+
+      await expect(messages[0]).toBe('onHttpException')
+      await assertResponseObject(messages[1])
+
+      await expect(globalMessages).toHaveLength(0)
+
+      await expect(page.locator('#status')).not.toBeVisible()
+    })
+  })
+
   test.describe('networkError', () => {
     test('gets fired when an unexpected situation occurs (e.g. network disconnect)', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:networkError', true)

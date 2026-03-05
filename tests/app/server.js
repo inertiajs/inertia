@@ -1820,6 +1820,28 @@ app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.status(200).json({ foo: 'bar' }))
+app.get('/inertia-error-page', (req, res) => {
+  const data = {
+    component: 'ErrorPage',
+    props: { status: 500 },
+    url: req.originalUrl,
+    version: null,
+  }
+
+  if (req.get('X-Inertia')) {
+    res.header('Vary', 'Accept')
+    res.header('X-Inertia', true)
+    return res.status(500).json(data)
+  }
+
+  return res.status(200).send(
+    require('fs')
+      .readFileSync(require('path').resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist/index.html'))
+      .toString()
+      .replace('{{ headAttribute }}', 'data-inertia')
+      .replace("'{{ placeholder }}'", JSON.stringify(data)),
+  )
+})
 
 app.get('/form-component/child-component', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),

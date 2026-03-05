@@ -65,6 +65,21 @@ export class Response {
       return this.handleNonInertiaResponse()
     }
 
+    if (this.isHttpException()) {
+      const response = {
+        ...this.response,
+        data: this.getDataFromResponse(this.response.data),
+      }
+
+      if (this.requestParams.all().onHttpException(response) === false) {
+        return
+      }
+
+      if (!fireHttpExceptionEvent(response)) {
+        return
+      }
+    }
+
     await history.processQueue()
 
     history.preserveUrl = this.requestParams.all().preserveUrl
@@ -155,6 +170,10 @@ export class Response {
 
   protected isInertiaResponse(): boolean {
     return this.hasHeader('x-inertia')
+  }
+
+  protected isHttpException(): boolean {
+    return this.response.status >= 400
   }
 
   protected hasStatus(status: number): boolean {
