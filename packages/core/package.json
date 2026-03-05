@@ -36,10 +36,6 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
-    },
-    "./axios": {
-      "types": "./types/axiosHttpClient.d.ts",
-      "import": "./dist/axiosHttpClient.js"
     }
   },
   "typesVersions": {
@@ -49,9 +45,6 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
-      ],
-      "axios": [
-        "types/axiosHttpClient.d.ts"
       ]
     }
   },

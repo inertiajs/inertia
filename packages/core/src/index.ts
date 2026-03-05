@@ -3,6 +3,7 @@ import { Router } from './router'
 
 export { UseFormUtils } from './useFormUtils'
 
+export { axiosAdapter } from './axiosHttpClient'
 export { config } from './config'
 export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
 export { hasFiles } from './files'

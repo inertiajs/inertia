@@ -1,5 +1,4 @@
 import type { AxiosInstance, AxiosProgressEvent } from 'axios'
-import axios from 'axios'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
@@ -44,19 +43,30 @@ function toHttpProgressEvent(axiosEvent: AxiosProgressEvent): HttpProgressEvent 
 /**
  * HTTP client implementation using Axios
  */
+// Cached at module level so multiple AxiosHttpClient instances share
+// the same import and it's only fetched once. Cleared on rejection so
+// transient failures are retryable.
+let axiosModulePromise: Promise<typeof import('axios')> | undefined
+
+function loadAxiosModule(): Promise<typeof import('axios')> {
+  if (!axiosModulePromise) {
+    axiosModulePromise = import('axios').catch((error) => {
+      axiosModulePromise = undefined
+      throw error
+    })
+  }
+  return axiosModulePromise
+}
+
 export class AxiosHttpClient implements HttpClient {
-  private axios?: AxiosInstance
+  private axiosInstance: Promise<AxiosInstance>
 
   constructor(instance?: AxiosInstance) {
-    this.axios = instance
+    this.axiosInstance = instance ? Promise.resolve(instance) : loadAxiosModule().then((module) => module.default)
   }
 
   private async getAxios(): Promise<AxiosInstance> {
-    if (!this.axios) {
-      return (this.axios = axios)
-    }
-
-    return this.axios
+    return this.axiosInstance
   }
 
   async request(config: HttpRequestConfig): Promise<HttpResponse> {
@@ -102,7 +112,7 @@ export class AxiosHttpClient implements HttpClient {
         headers: normalizeHeaders(response.headers),
       }
     } catch (error) {
-      const axiosModule = await import('axios')
+      const axiosModule = await loadAxiosModule()
 
       if (axiosModule.default.isCancel(error)) {
         throw new HttpCancelledError('Request was cancelled', config.url)
