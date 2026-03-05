@@ -2,7 +2,7 @@ name: Publish Packages
 
 on:
   release:
-    types: [released]
+    types: [released, prereleased]
 
 permissions:
   id-token: write # Required for OIDC
