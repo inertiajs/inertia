@@ -697,7 +697,10 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <a href="#" @click.prevent="httpExceptionInertiaResponseVisit" class="http-exception-inertia-response"
       >HTTP Exception Event (Inertia Response)</a
     >
-    <a href="#" @click.prevent="httpExceptionInertiaResponsePreventVisit" class="http-exception-inertia-response-prevent"
+    <a
+      href="#"
+      @click.prevent="httpExceptionInertiaResponsePreventVisit"
+      class="http-exception-inertia-response-prevent"
       >HTTP Exception Event (Inertia Response Prevent)</a
     >
 

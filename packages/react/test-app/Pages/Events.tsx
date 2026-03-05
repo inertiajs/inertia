@@ -761,7 +761,11 @@ export default () => {
       <a href="#" onClick={httpExceptionInertiaResponseVisit} className="http-exception-inertia-response">
         HTTP Exception Event (Inertia Response)
       </a>
-      <a href="#" onClick={httpExceptionInertiaResponsePreventVisit} className="http-exception-inertia-response-prevent">
+      <a
+        href="#"
+        onClick={httpExceptionInertiaResponsePreventVisit}
+        className="http-exception-inertia-response-prevent"
+      >
         HTTP Exception Event (Inertia Response Prevent)
       </a>
 
