@@ -55,6 +55,7 @@ function loadAxiosModule(): Promise<typeof import('axios')> {
       throw error
     })
   }
+
   return axiosModulePromise
 }
 
