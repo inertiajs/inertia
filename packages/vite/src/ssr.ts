@@ -18,12 +18,12 @@
  * - Automatic TypeScript/JSX transformation via Vite
  */
 
+import { classifySSRError, formatConsoleError } from '@inertiajs/core/ssrErrors'
 import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { collectCSSFromModuleGraph } from './css'
-import { classifySSRError, formatConsoleError } from './ssrErrors'
 
 /** Options for the SSR dev server and production builds. */
 export interface InertiaSSROptions {
