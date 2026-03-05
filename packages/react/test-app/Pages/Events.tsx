@@ -378,6 +378,52 @@ export default () => {
     )
   }
 
+  const httpExceptionInertiaResponseVisit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.on('httpException', (event) => {
+      internalAlert('Inertia.on(httpException)')
+      internalAlert(event)
+    })
+
+    document.addEventListener('inertia:httpException', (event) => {
+      internalAlert('addEventListener(inertia:httpException)')
+      internalAlert(event)
+    })
+
+    router.get(
+      '/inertia-error-page',
+      {},
+      {
+        onHttpException: () => internalAlert('onHttpException'),
+      },
+    )
+  }
+
+  const httpExceptionInertiaResponsePreventVisit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.on('httpException', (event) => {
+      internalAlert('Inertia.on(httpException)')
+      internalAlert(event)
+    })
+
+    document.addEventListener('inertia:httpException', (event) => {
+      internalAlert('addEventListener(inertia:httpException)')
+      internalAlert(event)
+    })
+
+    router.get(
+      '/inertia-error-page',
+      {},
+      {
+        onHttpException: (response) => {
+          internalAlert('onHttpException')
+          internalAlert(response)
+          return false
+        },
+      },
+    )
+  }
+
   const networkErrorVisit = (e: React.MouseEvent) => {
     e.preventDefault()
     router.on('networkError', (event) => {
@@ -711,6 +757,16 @@ export default () => {
       </a>
       <a href="#" onClick={httpExceptionPreventVisit} className="http-exception-prevent">
         HTTP Exception Event (Prevent)
+      </a>
+      <a href="#" onClick={httpExceptionInertiaResponseVisit} className="http-exception-inertia-response">
+        HTTP Exception Event (Inertia Response)
+      </a>
+      <a
+        href="#"
+        onClick={httpExceptionInertiaResponsePreventVisit}
+        className="http-exception-inertia-response-prevent"
+      >
+        HTTP Exception Event (Inertia Response Prevent)
       </a>
 
       {/* Events: Network Error */}
