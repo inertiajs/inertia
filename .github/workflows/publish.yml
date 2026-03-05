@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        adapter: ['core', 'vue3', 'react', 'svelte']
+        adapter: ['core', 'vue3', 'react', 'svelte', 'vite']
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -39,5 +39,14 @@ jobs:
       - name: 'Publish ${{ matrix.adapter }}'
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }} build
 
+      - name: Determine npm tag
+        id: tag
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            echo "flag=--tag beta" >> $GITHUB_OUTPUT
+          else
+            echo "flag=" >> $GITHUB_OUTPUT
+          fi
+
       - name: 'Publish ${{ matrix.adapter }} to npm'
-        run: cd ./packages/${{ matrix.adapter }} && pnpm publish --no-git-checks
+        run: cd ./packages/${{ matrix.adapter }} && pnpm publish --no-git-checks ${{ steps.tag.outputs.flag }}
