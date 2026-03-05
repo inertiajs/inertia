@@ -37,8 +37,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(axios@1.13.5)
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3(axios@1.13.5)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -74,8 +74,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(axios@1.13.5)
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3(axios@1.13.5)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -178,8 +178,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(axios@1.13.5)
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3(axios@1.13.5)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -313,8 +313,8 @@ importers:
         specifier: ^4.17.12
         version: 4.17.12
       laravel-precognition:
-        specifier: 2.0.0-beta.2
-        version: 2.0.0-beta.2(axios@1.13.5)
+        specifier: 2.0.0-beta.3
+        version: 2.0.0-beta.3(axios@1.13.5)
       lodash-es:
         specifier: ^4.17.23
         version: 4.17.23
@@ -2356,8 +2356,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@2.0.0-beta.2:
-    resolution: {integrity: sha512-Sg5hOSO4tYXt/ICYJPDcY+HZjP3kuPEhcRx6sNs11q8ndV/kSe2i9uTo3Q9hULBi7ftVMwoS04DbI4ihYhPimg==}
+  laravel-precognition@2.0.0-beta.3:
+    resolution: {integrity: sha512-2askALMGfTAuB5WEKyEcQsNUn6limHaqd7s37CJPy3jL9uFEb/sVnlIKkcjin4UIsGFdshi8JGIBuoWJWNyMHA==}
     peerDependencies:
       axios: ^1.4.0
     peerDependenciesMeta:
@@ -5406,7 +5406,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@2.0.0-beta.2(axios@1.13.5):
+  laravel-precognition@2.0.0-beta.3(axios@1.13.5):
     dependencies:
       lodash-es: 4.17.23
     optionalDependencies:
