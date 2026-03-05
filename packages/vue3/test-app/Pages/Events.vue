@@ -360,6 +360,50 @@ const httpExceptionPreventVisit = () => {
   )
 }
 
+const httpExceptionInertiaResponseVisit = () => {
+  router.on('httpException', (event) => {
+    internalAlert('Inertia.on(httpException)')
+    internalAlert(event)
+  })
+
+  document.addEventListener('inertia:httpException', (event) => {
+    internalAlert('addEventListener(inertia:httpException)')
+    internalAlert(event)
+  })
+
+  router.get(
+    '/inertia-error-page',
+    {},
+    {
+      onHttpException: () => internalAlert('onHttpException'),
+    },
+  )
+}
+
+const httpExceptionInertiaResponsePreventVisit = () => {
+  router.on('httpException', (event) => {
+    internalAlert('Inertia.on(httpException)')
+    internalAlert(event)
+  })
+
+  document.addEventListener('inertia:httpException', (event) => {
+    internalAlert('addEventListener(inertia:httpException)')
+    internalAlert(event)
+  })
+
+  router.get(
+    '/inertia-error-page',
+    {},
+    {
+      onHttpException: (response) => {
+        internalAlert('onHttpException')
+        internalAlert(response)
+        return false
+      },
+    },
+  )
+}
+
 const networkErrorVisit = () => {
   router.on('networkError', (event) => {
     internalAlert('Inertia.on(networkError)')
@@ -649,6 +693,12 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <a href="#" @click.prevent="httpExceptionVisit" class="http-exception">HTTP Exception Event</a>
     <a href="#" @click.prevent="httpExceptionPreventVisit" class="http-exception-prevent"
       >HTTP Exception Event (Prevent)</a
+    >
+    <a href="#" @click.prevent="httpExceptionInertiaResponseVisit" class="http-exception-inertia-response"
+      >HTTP Exception Event (Inertia Response)</a
+    >
+    <a href="#" @click.prevent="httpExceptionInertiaResponsePreventVisit" class="http-exception-inertia-response-prevent"
+      >HTTP Exception Event (Inertia Response Prevent)</a
     >
 
     <!-- Events: Network Error -->
