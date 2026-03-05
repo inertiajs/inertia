@@ -218,6 +218,69 @@ createServer((page) => renderApp(page), { port: 13715 })`
       `)
     })
 
+    it('wraps void createInertiaApp expression', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+void createInertiaApp({ resolve: (name) => name })`
+
+      expect(wrap(code)).toMatchInlineSnapshot(`
+        "import { createInertiaApp } from '@inertiajs/react'
+        import createServer from '@inertiajs/react/server'
+        import { renderToString } from 'react-dom/server'
+
+        const render = await createInertiaApp({ resolve: (name) => name })
+
+        const renderPage = (page) => render(page, renderToString)
+
+        if (import.meta.env.PROD) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
+      `)
+    })
+
+    it('wraps void createInertiaApp with .catch() chain', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+void createInertiaApp({ resolve: (name) => name }).catch(console.error)`
+
+      expect(wrap(code)).toMatchInlineSnapshot(`
+        "import { createInertiaApp } from '@inertiajs/react'
+        import createServer from '@inertiajs/react/server'
+        import { renderToString } from 'react-dom/server'
+
+        const render = await createInertiaApp({ resolve: (name) => name })
+
+        const renderPage = (page) => render(page, renderToString)
+
+        if (import.meta.env.PROD) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
+      `)
+    })
+
+    it('wraps createInertiaApp().catch() without void', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+createInertiaApp({ resolve: (name) => name }).catch(console.error)`
+
+      expect(wrap(code)).toMatchInlineSnapshot(`
+        "import { createInertiaApp } from '@inertiajs/react'
+        import createServer from '@inertiajs/react/server'
+        import { renderToString } from 'react-dom/server'
+
+        const render = await createInertiaApp({ resolve: (name) => name })
+
+        const renderPage = (page) => render(page, renderToString)
+
+        if (import.meta.env.PROD) {
+          createServer(renderPage)
+        }
+
+        export default renderPage"
+      `)
+    })
+
     it('does not transform createServer if already exported', () => {
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
 import createServer from '@inertiajs/vue3/server'
