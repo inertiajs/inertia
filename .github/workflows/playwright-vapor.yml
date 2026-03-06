@@ -22,7 +22,7 @@ jobs:
           cache: pnpm
 
       - name: Upgrade Vue to latest 3.6 beta
-        run: pnpm --filter './packages/vue3/test-app' add -D vue@next
+        run: pnpm --filter './packages/vue3/test-app' add -D vue@beta
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
