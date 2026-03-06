@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Page } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
-import { getCurrentInstance, onMounted } from 'vue'
+import { onMounted } from 'vue'
 
 defineProps({
   foo: {
@@ -10,8 +10,10 @@ defineProps({
   },
 })
 
+const id = String(Date.now() + Math.random())
+
 onMounted(() => {
-  window._inertia_page_key = getCurrentInstance()?.uid
+  window._inertia_page_key = id
 })
 
 const preserve = () => {

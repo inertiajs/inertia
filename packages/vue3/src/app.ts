@@ -18,10 +18,12 @@ import {
   markRaw,
   Plugin,
   PropType,
+  provide,
   reactive,
   ref,
   shallowRef,
 } from 'vue'
+import headContext from './HeadContext'
 import { LayoutProvider, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -123,6 +125,8 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
     headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
+
+    provide(headContext, headManager)
 
     if (!isServer) {
       router.init<DefineComponent>({

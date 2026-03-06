@@ -30,8 +30,11 @@ const redirectHashPost = () => {
   router.post('/redirect-hash')
 }
 
-window._inertia_page_key = getCurrentInstance()?.uid
+const id = String(Date.now() + Math.random())
+
+window._inertia_page_key = id
 window._inertia_props = props
+// getCurrentInstance is used here to test Options API plugin registration ($page, $inertia global properties)
 window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProperties || {}
 </script>
 

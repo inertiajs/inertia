@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3'
-import { getCurrentInstance, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
+const id = String(Date.now() + Math.random())
 const createdAt = ref<number | null>(null)
 
 onMounted(() => {
-  window._inertia_nested_layout_id = getCurrentInstance()?.uid
+  window._inertia_nested_layout_id = id
   window._inertia_nested_layout_props = usePage().props
   createdAt.value = Date.now()
 })

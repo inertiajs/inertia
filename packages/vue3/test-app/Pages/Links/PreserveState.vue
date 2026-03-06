@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Page } from '@inertiajs/core'
 import { Link } from '@inertiajs/vue3'
-import { getCurrentInstance, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import WithoutScrollRegion from '../../Layouts/WithoutScrollRegion.vue'
 
 defineOptions({
@@ -27,8 +27,10 @@ const preserveCallbackFalse = (page: Page) => {
   return false
 }
 
+const id = String(Date.now() + Math.random())
+
 onMounted(() => {
-  window._inertia_page_key = getCurrentInstance()?.uid
+  window._inertia_page_key = id
 })
 </script>
 
