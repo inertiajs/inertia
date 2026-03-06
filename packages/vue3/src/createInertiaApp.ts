@@ -35,7 +35,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<HTMLElement, SharedProps>,
   void,
   VueInertiaAppConfig
->
+> & {
+  vaporMode?: undefined
+}
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
@@ -45,6 +47,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueInertiaAppConfig
 > & {
   render: typeof renderToString
+  vaporMode?: undefined
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
@@ -55,6 +58,7 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
 > & {
   page?: Page<SharedProps>
   render?: undefined
+  vaporMode?: Plugin
 }
 
 type RenderToString = (app: VueApp) => Promise<string>
@@ -85,6 +89,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     defaults = {},
     http,
     layout,
+    vaporMode,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -97,6 +102,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   const isServer = typeof window === 'undefined'
+
+  const installVaporInterop = (app: VueApp) => {
+    if (vaporMode) {
+      app.use(vaporMode)
+    }
+  }
 
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => module.default || module)
@@ -129,6 +140,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         })
       } else {
         vueApp = createSSRApp({ render: () => h(App, props) })
+        installVaporInterop(vueApp)
         vueApp.use(plugin)
       }
 
@@ -179,10 +191,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     // Default mounting when setup is not provided
     if (el.hasAttribute('data-server-rendered')) {
       const app = createSSRApp({ render: () => h(App, props) })
+      installVaporInterop(app)
       app.use(plugin)
       app.mount(el)
     } else {
       const app = createApp({ render: () => h(App, props) })
+      installVaporInterop(app)
       app.use(plugin)
       app.mount(el)
     }

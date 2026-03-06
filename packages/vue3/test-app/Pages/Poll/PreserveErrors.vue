@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { useForm, usePoll } from '@inertiajs/vue3'
+import { useForm, usePage, usePoll } from '@inertiajs/vue3'
 
 defineProps<{
   time: number
 }>()
+
+const page = usePage()
 
 const form = useForm({
   name: '',
@@ -19,7 +21,7 @@ usePoll(300, {
 </script>
 
 <template>
-  <p v-if="$page.props.errors?.name" id="page-error">{{ $page.props.errors.name }}</p>
+  <p v-if="page.props.errors?.name" id="page-error">{{ page.props.errors.name }}</p>
   <p v-if="form.errors.name" id="form-error">{{ form.errors.name }}</p>
 
   <button type="button" @click="submit">Submit</button>

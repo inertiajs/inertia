@@ -1,6 +1,8 @@
 import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const vaporInteropPlugin = import.meta.env.VITE_VAPOR_MODE ? (await import('vue') as any).vaporInteropPlugin : undefined
 
 window.testing = { Inertia: router }
 
@@ -19,6 +21,7 @@ createInertiaApp({
   progress: {
     delay: 0,
   },
+  vaporMode: vaporInteropPlugin,
   ...(withAppDefaults && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {

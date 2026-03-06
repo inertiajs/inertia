@@ -1,9 +1,11 @@
 import { createHeadManager, Page, PageHandler, PageProps, router, SharedPageProps } from '@inertiajs/core'
-import { DefineComponent } from 'vue'
+import { DefineComponent, Plugin } from 'vue'
 import useForm from './useForm'
 
 export type VuePageHandlerArgs = Parameters<PageHandler<DefineComponent>>[0]
-export type VueInertiaAppConfig = {}
+export type VueInertiaAppConfig = {
+  vaporMode?: Plugin
+}
 
 declare module '@inertiajs/core' {
   export interface Router {

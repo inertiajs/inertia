@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { WhenVisible, useForm } from '@inertiajs/vue3'
+import { WhenVisible, useForm, usePage } from '@inertiajs/vue3'
 
 defineProps<{
   foo?: string
 }>()
+
+const page = usePage()
 
 const form = useForm({
   name: '',
@@ -15,7 +17,7 @@ const submit = () => {
 </script>
 
 <template>
-  <p v-if="$page.props.errors?.name" id="page-error">{{ $page.props.errors.name }}</p>
+  <p v-if="page.props.errors?.name" id="page-error">{{ page.props.errors.name }}</p>
   <p v-if="form.errors.name" id="form-error">{{ form.errors.name }}</p>
 
   <button type="button" @click="submit">Submit</button>

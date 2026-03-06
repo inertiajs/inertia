@@ -569,7 +569,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <a href="#" @click.prevent="beforeVisit" class="before">Before Event</a>
     <a href="#" @click.prevent="beforeVisitPreventLocal" class="before-prevent-local">Before Event (Prevent)</a>
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @before="(visit) => internalAlert('linkOnBefore', visit)"
       @start="() => internalAlert('linkOnStart')"
@@ -577,7 +577,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >Before Event Link</Link
     >
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @before="
         () => {
@@ -599,7 +599,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <!-- Events: CancelToken -->
     <a href="#" @click.prevent="cancelTokenVisit" class="canceltoken">Cancel Token Event</a>
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @cancelToken="(event) => internalAlert('linkOnCancelToken', event)"
       class="link-canceltoken"
@@ -611,7 +611,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
 
     <!-- @vue-expect-error - We're testing that the onCancel callback has no arguments, so event will be undefined -->
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @cancelToken="(token) => token.cancel()"
       @cancel="(event) => internalAlert('linkOnCancel', event)"
@@ -621,7 +621,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
 
     <!-- Events: Start -->
     <a href="#" @click.prevent="startVisit" class="start">Start Event</a>
-    <Link :href="$page.url" method="post" @start="(event) => internalAlert('linkOnStart', event)" class="link-start"
+    <Link :href="page.url" method="post" @start="(event) => internalAlert('linkOnStart', event)" class="link-start"
       >Start Event Link</Link
     >
 
@@ -629,7 +629,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <a href="#" @click.prevent="progressVisit" class="progress">Progress Event</a>
     <a href="#" @click.prevent="progressNoFilesVisit" class="progress-no-files">Missing Progress Event (no files)</a>
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       :data="payloadWithFile"
       @progress="(event) => internalAlert('linkOnProgress', event)"
@@ -637,7 +637,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >Progress Event Link</Link
     >
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @before="() => internalAlert('linkProgressNoFilesOnBefore')"
       @progress="(event) => internalAlert('linkOnProgress', event)"
@@ -672,7 +672,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >Success Event (delaying onFinish w/ Promise)</a
     >
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @error="() => internalAlert('This listener should not have been called')"
       @success="(event) => internalAlert('linkOnSuccess', event)"
@@ -680,7 +680,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >Success Event Link</Link
     >
     <Link
-      :href="$page.url"
+      :href="page.url"
       method="post"
       @error="() => internalAlert('This listener should not have been called')"
       @success="() => callbackSuccessErrorPromise('linkOnSuccess')"
@@ -712,7 +712,7 @@ const callbackSuccessErrorPromise = (eventName: string) => {
 
     <!-- Events: Finish -->
     <a href="#" @click.prevent="finishVisit" class="finish">Finish Event</a>
-    <Link :href="$page.url" method="post" @finish="(event) => internalAlert('linkOnFinish', event)" class="link-finish"
+    <Link :href="page.url" method="post" @finish="(event) => internalAlert('linkOnFinish', event)" class="link-finish"
       >Finish Event Link</Link
     >
 

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3'
+import { Form, usePage } from '@inertiajs/vue3'
+
+const page = usePage()
 </script>
 
 <template>
@@ -10,13 +12,13 @@ import { Form } from '@inertiajs/vue3'
       <div>
         <label for="name">Name</label>
         <input type="text" name="name" id="name" value="John Doe" />
-        <p id="error_name">{{ $page.props.errors?.name }}</p>
+        <p id="error_name">{{ page.props.errors?.name }}</p>
       </div>
 
       <div>
         <label for="email">Email</label>
         <input type="email" name="email" id="email" value="john@doe.biz" />
-        <p id="error_email">{{ $page.props.errors?.email }}</p>
+        <p id="error_email">{{ page.props.errors?.email }}</p>
       </div>
 
       <button type="submit">Submit</button>

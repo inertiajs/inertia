@@ -33,8 +33,8 @@ console.log({
 </script>
 
 <template>
-  {{ $page.props.auth.user?.name }}
+  {{ page.props.auth.user?.name }}
 
   <!-- @vue-expect-error - 'email' does not exist on user -->
-  {{ $page.props.auth.user?.email }}
+  {{ page.props.auth.user?.email }}
 </template>

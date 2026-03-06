@@ -3,9 +3,13 @@ on: [push, pull_request]
 jobs:
   test-vapor:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Vue Vapor Mode (Chromium)
+    name: Vue Vapor Mode (${{ matrix.shard }}/3)
     timeout-minutes: 15
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ['1', '2', '3']
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -34,7 +38,7 @@ jobs:
         run: pnpm playwright install chromium
 
       - name: Run Playwright Tests
-        run: pnpm test:vue
+        run: pnpm test:vue --shard=${{ matrix.shard }}/3
         env:
           VITE_VAPOR_MODE: 'true'
 
@@ -42,5 +46,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: playwright-failure-screenshots-vue-vapor
+          name: playwright-failure-screenshots-vue-vapor-${{ matrix.shard }}
           path: test-results

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
+
+const page = usePage()
 
 const visitWithFragment = () => {
   router.visit('/preserve-fragment/redirect#my-fragment')
@@ -8,7 +10,7 @@ const visitWithFragment = () => {
 
 <template>
   <div>
-    <span id="current-url">{{ $page.url }}</span>
+    <span id="current-url">{{ page.url }}</span>
 
     <Link href="/preserve-fragment/redirect#my-fragment" id="link-with-fragment">Link with fragment</Link>
 
