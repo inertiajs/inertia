@@ -45,7 +45,8 @@ createInertiaApp({
     const inst = createApp({ render: () => h(App, props) })
 
     if (import.meta.env.VITE_VAPOR_MODE) {
-      inst.use((await import('vue')).vaporInteropPlugin)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      inst.use((await import('vue') as any).vaporInteropPlugin)
     }
 
     if (!window.location.pathname.startsWith('/plugin/without')) {

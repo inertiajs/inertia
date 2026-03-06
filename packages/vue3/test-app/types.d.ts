@@ -15,11 +15,11 @@ declare global {
       url: string
       $page: Page
     }
-    _inertia_page_key: number | undefined
+    _inertia_page_key: string | undefined
     _inertia_props: PageProps
-    _inertia_layout_id: number | undefined
+    _inertia_layout_id: string | undefined
     _inertia_site_layout_props: PageProps
-    _inertia_nested_layout_id: number | undefined
+    _inertia_nested_layout_id: string | undefined
     _inertia_nested_layout_props: PageProps
     _inertia_page_props: PageProps
     _inertia_app_layout_id: string | undefined
