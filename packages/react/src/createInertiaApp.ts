@@ -6,9 +6,9 @@ import {
   InertiaAppSSRResponse,
   Page,
   PageProps,
-  SharedPageProps,
   router,
   setupProgress,
+  SharedPageProps,
 } from '@inertiajs/core'
 import { createElement, Fragment, ReactElement } from 'react'
 import { renderToString } from 'react-dom/server'

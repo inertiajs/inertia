@@ -6,9 +6,9 @@ import {
   InertiaAppSSRResponse,
   Page,
   PageProps,
-  SharedPageProps,
   router,
   setupProgress,
+  SharedPageProps,
 } from '@inertiajs/core'
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import { renderToString } from 'vue/server-renderer'
