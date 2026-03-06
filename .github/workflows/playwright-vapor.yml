@@ -1,0 +1,46 @@
+name: Playwright Tests (Vue Vapor Mode)
+on: [push, pull_request]
+jobs:
+  test-vapor:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+    name: Vue Vapor Mode (Chromium)
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Upgrade Vue to latest 3.6 beta
+        run: pnpm --filter './packages/vue3/test-app' add -D vue@next
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Build Inertia
+        run: pnpm -r --filter './packages/{core,vite}' --filter './packages/vue3*' build
+
+      - name: Install Playwright Browsers
+        run: pnpm playwright install chromium
+
+      - name: Run Playwright Tests
+        run: pnpm test:vue
+        env:
+          VITE_VAPOR_MODE: 'true'
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-failure-screenshots-vue-vapor
+          path: test-results

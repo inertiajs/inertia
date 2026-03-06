@@ -1,9 +1,28 @@
 import inertia from '@inertiajs/vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 
 const isSSR = process.argv.includes('--ssr')
+const vaporMode = !!process.env.VITE_VAPOR_MODE
+
+function vaporTransformPlugin(): Plugin {
+  return {
+    name: 'vapor-transform',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!id.endsWith('.vue')) {
+        return
+      }
+
+      if (!code.includes('<template')) {
+        return
+      }
+
+      return code.replace(/<script setup/g, '<script setup vapor')
+    },
+  }
+}
 
 export default defineConfig({
   build: {
@@ -24,8 +43,9 @@ export default defineConfig({
   },
   plugins: [
     inertia(),
+    ...(vaporMode ? [vaporTransformPlugin()] : []),
     vue({
-      features: { prodDevtools: true },
+      features: { prodDevtools: !vaporMode },
     }),
   ],
 })

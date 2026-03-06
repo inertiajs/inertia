@@ -151,7 +151,9 @@ const App: InertiaApp = defineComponent({
 
     return () => {
       if (component.value) {
-        component.value.inheritAttrs = !!component.value.inheritAttrs
+        if (!component.value.__vapor) {
+          component.value.inheritAttrs = !!component.value.inheritAttrs
+        }
 
         const child = h(component.value, {
           ...page.value!.props,
@@ -179,7 +181,9 @@ const App: InertiaApp = defineComponent({
           if (layouts.length > 0) {
             return layouts.reduceRight((childNode, layout) => {
               const layoutComponent = layout.component as DefineComponent
-              layoutComponent.inheritAttrs = !!layoutComponent.inheritAttrs
+              if (!(layoutComponent as any).__vapor) {
+                layoutComponent.inheritAttrs = !!layoutComponent.inheritAttrs
+              }
 
               return h(LayoutProvider, { layoutName: layout.name }, () =>
                 h(layoutComponent, { ...page.value!.props, ...layout.props }, () => childNode),

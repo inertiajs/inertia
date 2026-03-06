@@ -8,6 +8,7 @@ declare const process: {
     CI?: boolean
     PACKAGE?: 'vue3' | 'react' | 'svelte'
     SSR?: 'true'
+    VITE_VAPOR_MODE?: 'true'
   }
   platform: string
 }

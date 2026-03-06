@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test.describe('plugin', () => {
   test.skip(process.env.PACKAGE !== 'vue3')
+  test.skip(process.env.VITE_VAPOR_MODE === 'true', 'Plugin global properties are not supported in Vapor mode')
 
   test.describe('$page helper', () => {
     test('has the helper injected into the Vue component', async ({ page }) => {

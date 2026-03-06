@@ -2,7 +2,7 @@ import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
-import { createApp, h } from 'vue'
+import { createApp, h, vaporInteropPlugin } from 'vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
 
 window.testing = { Inertia: router }
@@ -43,6 +43,10 @@ createInertiaApp({
   },
   setup({ el, App, props, plugin }) {
     const inst = createApp({ render: () => h(App, props) })
+
+    if (import.meta.env.VITE_VAPOR_MODE) {
+      inst.use(vaporInteropPlugin)
+    }
 
     if (!window.location.pathname.startsWith('/plugin/without')) {
       inst.use(plugin)
