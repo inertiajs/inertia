@@ -33,7 +33,7 @@ export function collectCSSFromModuleGraph(server: ViteDevServer, entry: string):
 
   const origin = resolveDevServerOrigin(server)
   const base = server.config.base || '/'
-  const basePrefix = base === '/' ? '' : base
+  const basePrefix = base === '/' ? '' : base.replace(/\/$/, '')
 
   return cssModules.map(({ url, id }) => {
     const href = `${origin}${basePrefix}${url}`
@@ -82,9 +82,7 @@ function isCSSRequest(url: string): boolean {
 
 function resolveDevServerOrigin(server: ViteDevServer): string {
   if (server.resolvedUrls?.local[0]) {
-    const url = new URL(server.resolvedUrls.local[0])
-
-    return `${url.protocol}//${url.host}`
+    return new URL(server.resolvedUrls.local[0]).origin
   }
 
   const protocol = server.config.server.https ? 'https' : 'http'

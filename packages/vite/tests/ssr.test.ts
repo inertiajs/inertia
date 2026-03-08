@@ -575,6 +575,49 @@ describe('SSR', () => {
       ])
     })
 
+    it('does not duplicate base path in CSS link URLs', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger, { base: '/build/' })
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false, { base: '/build/' }))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/build/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
     it('returns no CSS links when entry module is not in graph', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
@@ -761,18 +804,25 @@ function createMockLogger() {
   return { info: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }
 
-function createMockConfig(logger: ReturnType<typeof createMockLogger>, ssr: boolean): ResolvedConfig {
-  return { root: '/project', logger, plugins: [], build: { ssr }, command: 'build' } as unknown as ResolvedConfig
+function createMockConfig(
+  logger: ReturnType<typeof createMockLogger>,
+  ssr: boolean,
+  { base = '/' }: { base?: string } = {},
+): ResolvedConfig {
+  return { root: '/project', logger, plugins: [], build: { ssr }, command: 'build', base } as unknown as ResolvedConfig
 }
 
-function createMockServer(logger: ReturnType<typeof createMockLogger>): ViteDevServer {
+function createMockServer(
+  logger: ReturnType<typeof createMockLogger>,
+  { base = '/' }: { base?: string } = {},
+): ViteDevServer {
   return {
     middlewares: { use: vi.fn() },
     ssrLoadModule: vi.fn(),
     ssrFixStacktrace: vi.fn(),
     environments: { ssr: { moduleGraph: { getModuleById: vi.fn() } } },
-    resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
-    config: { logger, base: '/', root: '/project' },
+    resolvedUrls: { local: [`http://localhost:5173${base}`], network: [] },
+    config: { logger, base, root: '/project' },
   } as unknown as ViteDevServer
 }
 
