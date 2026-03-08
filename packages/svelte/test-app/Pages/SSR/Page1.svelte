@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia, usePage } from '@inertiajs/svelte'
 
   interface Props {
     user: { name: string; email: string }
@@ -8,10 +8,14 @@
   }
 
   let { user, items, count }: Props = $props()
+
+  const page = usePage()
 </script>
 
 <div>
   <h1 data-testid="ssr-title">SSR Page 1</h1>
+
+  <p data-testid="page-url">URL: {page.url}</p>
 
   <div data-testid="user-info">
     <p data-testid="user-name">Name: {user.name}</p>
