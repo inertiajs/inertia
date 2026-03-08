@@ -575,6 +575,54 @@ describe('SSR', () => {
       ])
     })
 
+    it('does not collect CSS sub-dependencies imported via @import', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      const tailwindModule = {
+        url: '/node_modules/tailwindcss/index.css',
+        id: '/project/node_modules/tailwindcss/index.css',
+        importedModules: new Set(),
+      }
+      const appCssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set([tailwindModule]),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([appCssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
     it('returns no CSS links when entry module is not in graph', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
