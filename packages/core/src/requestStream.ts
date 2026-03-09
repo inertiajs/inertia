@@ -15,9 +15,11 @@ export class RequestStream {
   public send(request: Request) {
     this.requests.push(request)
 
-    request.send().then(() => {
+    const remove = () => {
       this.requests = this.requests.filter((r) => r !== request)
-    })
+    }
+
+    request.send().then(remove, remove)
   }
 
   public interruptInFlight(): void {
