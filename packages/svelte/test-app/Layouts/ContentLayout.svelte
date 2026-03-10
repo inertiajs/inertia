@@ -18,7 +18,7 @@
   })
 </script>
 
-<div class="content-layout" data-padding={$layoutProps.padding} data-max-width={$layoutProps.maxWidth}>
+<div class="content-layout" data-padding={layoutProps.padding} data-max-width={layoutProps.maxWidth}>
   <div class="content-wrapper">
     {@render children?.()}
   </div>

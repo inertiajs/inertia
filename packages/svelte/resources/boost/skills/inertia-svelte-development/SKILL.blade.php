@@ -389,8 +389,8 @@ const layout = useLayoutProps({
 let { children } = $props()
 </script>
 
-<header>{$layout.title}</header>
-{#if $layout.showSidebar}
+<header>{layout.title}</header>
+{#if layout.showSidebar}
     <aside>Sidebar</aside>
 {/if}
 <main>
