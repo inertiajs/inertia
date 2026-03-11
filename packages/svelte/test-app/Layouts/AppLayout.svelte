@@ -19,12 +19,12 @@
   })
 </script>
 
-<div data-theme={$layoutProps.theme} class="app-layout">
+<div data-theme={layoutProps.theme} class="app-layout">
   <header>
-    <h1 class="app-title">{$layoutProps.title}</h1>
+    <h1 class="app-title">{layoutProps.title}</h1>
   </header>
   <div class="app-content">
-    {#if $layoutProps.showSidebar}
+    {#if layoutProps.showSidebar}
       <aside class="sidebar">
         <span>Sidebar</span>
       </aside>
