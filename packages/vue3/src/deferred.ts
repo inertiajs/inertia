@@ -1,6 +1,7 @@
 import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
 import { get } from 'lodash-es'
 import { defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
+import { usePage } from './app'
 
 const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
   if (only.length === 0 && except.length === 0) {
@@ -29,6 +30,7 @@ export default defineComponent({
   setup(props, { slots }) {
     const reloading = ref(false)
     const activeReloads = new Set<object>()
+    const page = usePage()
 
     let removeStartListener: (() => void) | null = null
     let removeFinishListener: (() => void) | null = null
@@ -65,17 +67,16 @@ export default defineComponent({
       activeReloads.clear()
     })
 
-    return { reloading, slots }
-  },
-  render() {
-    const keys = (Array.isArray(this.$props.data) ? this.$props.data : [this.$props.data]) as string[]
+    return () => {
+      const keys = (Array.isArray(props.data) ? props.data : [props.data]) as string[]
 
-    if (!this.$slots.fallback) {
-      throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
+      if (!slots.fallback) {
+        throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
+      }
+
+      return keys.every((key) => get(page.props, key) !== undefined)
+        ? slots.default?.({ reloading: reloading.value })
+        : slots.fallback({})
     }
-
-    return keys.every((key) => get(this.$page.props, key) !== undefined)
-      ? this.$slots.default?.({ reloading: this.reloading })
-      : this.$slots.fallback({})
   },
 })

@@ -77,7 +77,7 @@ const page = ref<Page>()
 let pageAccessor: Page | null = null
 const layout = shallowRef(null)
 const key = ref<number | undefined>(undefined)
-let headManager: HeadManager
+export let headManager: HeadManager
 
 const App: InertiaApp = defineComponent({
   name: 'Inertia',
