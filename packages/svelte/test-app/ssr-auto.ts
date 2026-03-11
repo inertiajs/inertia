@@ -11,4 +11,7 @@ createInertiaApp({
     const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.svelte', { eager: true })
     return pages[`./Pages/${name}.svelte`]
   },
+  withApp(context) {
+    context.set('withAppValue', 'injected-via-withApp')
+  },
 })

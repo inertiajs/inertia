@@ -29,7 +29,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<SharedProps>,
   SvelteRenderResult | void,
   SvelteInertiaAppConfig
->
+> & {
+  withApp?: (context: Map<any, any>, options: { ssr: boolean }) => void
+}
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
   ComponentResolver,
@@ -38,9 +40,13 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
   SvelteInertiaAppConfig
 > & {
   page?: Page<SharedProps>
+  withApp?: (context: Map<any, any>, options: { ssr: boolean }) => void
 }
 
-type SvelteServerRender = (component: typeof App, options: { props: InertiaAppProps<PageProps> }) => SvelteRenderResult
+type SvelteServerRender = (
+  component: typeof App,
+  options: { props: InertiaAppProps<PageProps>; context?: Map<any, any> },
+) => SvelteRenderResult
 
 type RenderFunction<SharedProps extends PageProps> = (
   page: Page<SharedProps>,
@@ -63,6 +69,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     defaults = {},
     http,
     layout,
+    withApp,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
@@ -99,7 +106,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         }
         svelteApp = result
       } else {
-        svelteApp = render(App, { props })
+        const context = new Map()
+
+        if (withApp) {
+          withApp(context, { ssr: true })
+        }
+
+        svelteApp = render(App, { props, context })
       }
 
       const body = buildSSRBody(id, page, svelteApp.body)
@@ -145,10 +158,18 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (setup) {
     await setup({ el: target, App, props })
-  } else if (target.hasAttribute('data-server-rendered')) {
-    hydrate(App, { target, props })
   } else {
-    mount(App, { target, props })
+    const context = new Map()
+
+    if (withApp) {
+      withApp(context, { ssr: false })
+    }
+
+    if (target.hasAttribute('data-server-rendered')) {
+      hydrate(App, { target, props, context })
+    } else {
+      mount(App, { target, props, context })
+    }
   }
 
   if (progress) {
