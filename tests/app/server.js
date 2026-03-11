@@ -3076,6 +3076,8 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
+app.get('/network-error', (req, res) => inertia.render(req, res, { component: 'NetworkError' }))
+
 // Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
 const optimisticSessions = {}
 
