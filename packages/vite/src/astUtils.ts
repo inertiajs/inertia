@@ -79,13 +79,16 @@ export class ParsedCode {
    */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
-      if (node.type === 'ExpressionStatement') {
-        const statement = node as NodeWithPos<ExpressionStatement>
-        const call = this.unwrapInertiaCall(statement.expression)
+      if (node.type !== 'ExpressionStatement') {
+        continue
+      }
 
-        if (call) {
-          return { statement, call }
-        }
+      const call = this.unwrapInertiaCall(node.expression)
+
+      if (call) {
+        const statement = node as NodeWithPos<ExpressionStatement>
+
+        return { statement, call }
       }
     }
 
@@ -96,24 +99,20 @@ export class ParsedCode {
    * Unwrap an expression to find a `createInertiaApp()` call inside it.
    * Strips away `await`, `void`, and `.then()`/`.catch()` chains.
    */
-  private unwrapInertiaCall(expr: Node): NodeWithPos<SimpleCallExpression> | null {
-    const node = expr as NodeWithPos<Node>
-
+  private unwrapInertiaCall(node: Node): NodeWithPos<SimpleCallExpression> | null {
     // Unwrap UnaryExpression (void) and AwaitExpression
     if ((node.type === 'UnaryExpression' || node.type === 'AwaitExpression') && node.argument) {
-      return this.unwrapInertiaCall(node.argument as Node)
+      return this.unwrapInertiaCall(node.argument)
     }
 
     if (node.type === 'CallExpression') {
-      const call = node as NodeWithPos<SimpleCallExpression>
-
-      if (this.isInertiaCall(call)) {
-        return call
+      if (this.isInertiaCall(node)) {
+        return node as NodeWithPos<SimpleCallExpression>
       }
 
       // Unwrap method chains: createInertiaApp({}).catch(...)
-      if (call.callee.type === 'MemberExpression') {
-        return this.unwrapInertiaCall(call.callee.object as Node)
+      if (node.callee.type === 'MemberExpression') {
+        return this.unwrapInertiaCall(node.callee.object)
       }
     }
 
