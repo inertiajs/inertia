@@ -137,6 +137,8 @@ test.describe('SSR Auto Transform', () => {
     })
 
     test('it applies withApp callback during SSR rendering', async ({ page }) => {
+      test.skip(process.env.PACKAGE === 'svelte', 'Svelte does not support withApp')
+
       const response = await page.request.get('/ssr-auto/with-app')
       const html = await response.text()
 
