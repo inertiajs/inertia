@@ -72,10 +72,10 @@ export class ParsedCode {
   }
 
   /**
-   * Find a top-level `createInertiaApp()` expression statement.
-   * Only matches bare calls, not `export default createInertiaApp()`.
+   * Find a top-level `createInertiaApp()` expression statement, ignoring any
+   * `await`, `void`, or `.then()`/`.catch()` wrappers around it.
    *
-   * Handles: bare call, await, void, and .then()/.catch() chains.
+   * Does not match `export default createInertiaApp()`.
    */
   get inertiaStatement(): InertiaStatement | null {
     for (const node of this.ast.body) {
@@ -100,7 +100,7 @@ export class ParsedCode {
    * Strips away `await`, `void`, and `.then()`/`.catch()` chains.
    */
   private unwrapInertiaCall(node: Node): NodeWithPos<SimpleCallExpression> | null {
-    // Unwrap UnaryExpression (void) and AwaitExpression
+    // void createInertiaApp(...) / await createInertiaApp(...)
     if ((node.type === 'UnaryExpression' || node.type === 'AwaitExpression') && node.argument) {
       return this.unwrapInertiaCall(node.argument)
     }
@@ -110,7 +110,7 @@ export class ParsedCode {
         return node as NodeWithPos<SimpleCallExpression>
       }
 
-      // Unwrap method chains: createInertiaApp({}).catch(...)
+      // createInertiaApp({}).then(...).catch(...)
       if (node.callee.type === 'MemberExpression') {
         return this.unwrapInertiaCall(node.callee.object)
       }
