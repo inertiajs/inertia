@@ -18,6 +18,7 @@ test.describe('SSR', () => {
       expect(html).toContain('Item 2')
       expect(html).toContain('Item 3')
       expect(html).toMatch(/Count:.*42/)
+      expect(html).toMatch(/URL:.*\/ssr\/page1/)
     })
 
     test('hydrates correctly after initial SSR load', async ({ page }) => {
@@ -28,6 +29,7 @@ test.describe('SSR', () => {
       await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 1')
       await expect(page.getByTestId('user-name')).toHaveText('Name: John Doe')
       await expect(page.getByTestId('count')).toHaveText('Count: 42')
+      await expect(page.getByTestId('page-url')).toHaveText('URL: /ssr/page1')
 
       expect(consoleMessages.errors).toHaveLength(0)
     })
@@ -101,6 +103,7 @@ test.describe('SSR Auto Transform', () => {
       expect(html).toContain('Auto 2')
       expect(html).toContain('Auto 3')
       expect(html).toMatch(/Count:.*100/)
+      expect(html).toMatch(/URL:.*\/ssr-auto\/page1/)
     })
 
     test('it hydrates correctly after SSR with auto-transformed entry', async ({ page }) => {
