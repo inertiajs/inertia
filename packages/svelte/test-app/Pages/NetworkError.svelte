@@ -4,8 +4,6 @@
   let { status }: { status?: string } = $props()
   let error = $state(false)
 
-  ;(window as any)._inertia_router = router
-
   function makeRequest() {
     error = false
     router.get('/network-error', {}, { onNetworkError: () => (error = true) })

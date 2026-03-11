@@ -15,7 +15,7 @@ test.describe('network error', () => {
     await page.locator('#make-request').click()
     await expect(page.locator('#network-error')).toBeVisible()
 
-    await page.waitForFunction(() => (window as any)._inertia_router.syncRequestStream.requests.length === 0)
+    await page.waitForFunction(() => (window.testing.Inertia as any).syncRequestStream.requests.length === 0)
 
     await page.unroute('**/network-error')
 

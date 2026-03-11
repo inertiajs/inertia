@@ -3,7 +3,6 @@ import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 defineProps<{ status?: string }>()
-;(window as any)._inertia_router = router
 
 const error = ref(false)
 

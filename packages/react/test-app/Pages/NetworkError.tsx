@@ -1,6 +1,5 @@
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
-;(window as any)._inertia_router = router
 
 export default ({ status }: { status?: string }) => {
   const [error, setError] = useState(false)
