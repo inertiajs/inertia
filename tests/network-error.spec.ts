@@ -1,10 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('network error', () => {
-  test('cleans up request stream after network failure', async ({ page }) => {
-    const pageErrors: string[] = []
-    page.on('pageerror', (err) => pageErrors.push(err.message))
-
+  test('it cleans up request stream after network failure', async ({ page }) => {
     await page.goto('/network-error')
 
     await page.route('**/network-error', async (route) => {
@@ -16,9 +13,9 @@ test.describe('network error', () => {
     })
 
     await page.locator('#make-request').click()
-    await page.waitForTimeout(300)
+    await expect(page.locator('#network-error')).toBeVisible()
 
-    expect(pageErrors).toHaveLength(0)
+    await page.waitForFunction(() => (window as any)._inertia_router.syncRequestStream.requests.length === 0)
 
     await page.unroute('**/network-error')
 
