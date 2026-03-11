@@ -2534,6 +2534,8 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
+app.get('/network-error', (req, res) => inertia.render(req, res, { component: 'NetworkError' }))
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
