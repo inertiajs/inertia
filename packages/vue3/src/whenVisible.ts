@@ -33,7 +33,7 @@ export default defineComponent({
     const loaded = ref(false)
     const fetching = ref(false)
     const observer = ref<IntersectionObserver | null>(null)
-    const sentinelRef = ref<HTMLElement | null>(null)
+    const elementRef = ref<HTMLElement | null>(null)
     const page = usePage()
 
     const keys = computed(() => {
@@ -93,8 +93,8 @@ export default defineComponent({
         },
       )
 
-      if (sentinelRef.value) {
-        observer.value.observe(sentinelRef.value)
+      if (elementRef.value) {
+        observer.value.observe(elementRef.value)
       }
     }
 
@@ -123,7 +123,7 @@ export default defineComponent({
       const els = []
 
       if (props.always || !loaded.value) {
-        els.push(h(props.as, { ref: sentinelRef }))
+        els.push(h(props.as, { ref: elementRef }))
       }
 
       if (!loaded.value) {
