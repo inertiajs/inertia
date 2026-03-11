@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react'
 import { useState } from 'react'
 
-export default ({ status }: { status?: string }) => {
+export default () => {
   const [error, setError] = useState(false)
 
   function makeRequest() {
@@ -12,7 +12,6 @@ export default ({ status }: { status?: string }) => {
   return (
     <div>
       <h1>Network Error</h1>
-      <div id="status">{status ?? 'idle'}</div>
       {error && <div id="network-error">Network error occurred</div>}
       <button id="make-request" onClick={makeRequest}>
         Make Request

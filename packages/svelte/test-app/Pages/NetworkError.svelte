@@ -1,7 +1,6 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  let { status }: { status?: string } = $props()
   let error = $state(false)
 
   function makeRequest() {
@@ -12,7 +11,6 @@
 
 <div>
   <h1>Network Error</h1>
-  <div id="status">{status ?? 'idle'}</div>
   {#if error}
     <div id="network-error">Network error occurred</div>
   {/if}

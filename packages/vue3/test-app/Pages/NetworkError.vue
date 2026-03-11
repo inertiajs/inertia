@@ -2,8 +2,6 @@
 import { router } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
-defineProps<{ status?: string }>()
-
 const error = ref(false)
 
 function makeRequest() {
@@ -15,7 +13,6 @@ function makeRequest() {
 <template>
   <div>
     <h1>Network Error</h1>
-    <div id="status">{{ status ?? 'idle' }}</div>
     <div v-if="error" id="network-error">Network error occurred</div>
     <button id="make-request" @click="makeRequest">Make Request</button>
   </div>
