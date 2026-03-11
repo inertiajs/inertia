@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 
 defineProps<{
   user: {
@@ -9,11 +9,15 @@ defineProps<{
   items: string[]
   count: number
 }>()
+
+const page = usePage()
 </script>
 
 <template>
   <div>
     <h1 data-testid="ssr-title">SSR Page 1</h1>
+
+    <p data-testid="page-url">URL: {{ page.url }}</p>
 
     <div data-testid="user-info">
       <p data-testid="user-name">Name: {{ user.name }}</p>
