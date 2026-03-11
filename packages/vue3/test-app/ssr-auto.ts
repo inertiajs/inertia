@@ -12,4 +12,7 @@ createInertiaApp({
     const pages = import.meta.glob<DefineComponent>('./Pages/SSR/**/*.vue', { eager: true })
     return pages[`./Pages/${name}.vue`]
   },
+  withApp(app) {
+    app.provide('withAppValue', 'injected-via-withApp')
+  },
 })
