@@ -62,6 +62,7 @@ function collectCSSModules(entryModule: EnvironmentModuleNode): { url: string; i
 
     if (isCSSRequest(mod.url)) {
       cssModules.push({ url: mod.url, id: mod.id })
+      return
     }
 
     for (const imported of mod.importedModules) {
