@@ -24,6 +24,9 @@ export type DefaultInertiaConfig = {
  * @see {@link DefaultInertiaConfig} for keys to override
  * @example
  * ```ts
+ * // global.d.ts
+ * import '@inertiajs/core'
+ *
  * declare module '@inertiajs/core' {
  *   export interface InertiaConfig {
  *     errorValueType: string[]
