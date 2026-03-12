@@ -357,23 +357,23 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   beforeUpdate: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
   navigate: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
   success: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
