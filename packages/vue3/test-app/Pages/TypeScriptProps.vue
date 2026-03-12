@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
-import { usePage } from '@inertiajs/vue3'
+import { router, usePage } from '@inertiajs/vue3'
 
 declare module '@inertiajs/core' {
   export interface InertiaConfig {
@@ -23,6 +23,27 @@ const postTitles = page.props.posts.map((post) => post.title)
 const userEmail = page.props.auth.user?.email
 // @ts-expect-error - 'users' does not exist on page props
 const userNames = page.props.users.map((user) => user.name)
+
+router.on('success', (event) => {
+  const name = event.detail.page.props.auth.user?.name
+  // @ts-expect-error - 'email' does not exist on user
+  const email = event.detail.page.props.auth.user?.email
+  console.log({ name, email })
+})
+
+router.on('navigate', (event) => {
+  const name = event.detail.page.props.auth.user?.name
+  // @ts-expect-error - 'email' does not exist on user
+  const email = event.detail.page.props.auth.user?.email
+  console.log({ name, email })
+})
+
+router.on('beforeUpdate', (event) => {
+  const name = event.detail.page.props.auth.user?.name
+  // @ts-expect-error - 'email' does not exist on user
+  const email = event.detail.page.props.auth.user?.email
+  console.log({ name, email })
+})
 
 console.log({
   userName,
