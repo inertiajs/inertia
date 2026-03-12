@@ -7,9 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.17...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.18...master)
 
 - Nothing yet
+
+## [v2.3.18](https://github.com/inertiajs/inertia/compare/v2.3.17...v2.3.18) - 2026-03-12
+
+### What's Changed
+
+* Bump [@sveltejs](https://github.com/sveltejs)/kit from 2.53.2 to 2.53.3 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2919
+* Bump multer from 2.0.2 to 2.1.1 by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/2923
+* [2.x] Remove request from stream on network failure by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2948
+* Use SharedPageProps in GlobalEventsMap event types by [@hamedelasma](https://github.com/hamedelasma) in https://github.com/inertiajs/inertia/pull/2946
+* [2.x] fix: include SharedPageProps in createInertiaApp and onSuccess types by [@isaackaara](https://github.com/isaackaara) in https://github.com/inertiajs/inertia/pull/2931
+* [2.x] Remove `server-renderer` dependency from Vue adapter type by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2955
+* [2.x] fix(types): module augmentation example by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2954
+* [2.x] fix: always fire flash event regardless of partial reload equality by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2953
+* fix: skip view transition when document visibility is hidden by [@mortenhauberg](https://github.com/mortenhauberg) in https://github.com/inertiajs/inertia/pull/2957
+
+### New Contributors
+
+* [@hamedelasma](https://github.com/hamedelasma) made their first contribution in https://github.com/inertiajs/inertia/pull/2946
+* [@mortenhauberg](https://github.com/mortenhauberg) made their first contribution in https://github.com/inertiajs/inertia/pull/2957
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.17...v2.3.18
 
 ## [v2.3.17](https://github.com/inertiajs/inertia/compare/v2.3.16...v2.3.17) - 2026-02-26
 
