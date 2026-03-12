@@ -1,4 +1,4 @@
-import { get, set } from 'lodash-es'
+import { cloneDeep, get, set } from 'lodash-es'
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
@@ -21,6 +21,9 @@ class CurrentPage {
   protected cleared = false
   protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
   protected historyQuotaExceeded = false
+  protected optimisticBaseline: Partial<Page['props']> = {}
+  protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
+  protected optimisticCounter = 0
 
   public init<ComponentType = Component>({
     initialPage,
@@ -90,7 +93,6 @@ class CurrentPage {
 
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
-      delete pageForHistory.optimisticUpdatedAt
 
       return new Promise<void>((resolve) =>
         replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
@@ -252,22 +254,71 @@ class CurrentPage {
     return Promise.resolve(this.resolveComponent(component, page))
   }
 
-  public recordOptimisticUpdate(keys: string[], updatedAt: number): void {
-    if (!this.page.optimisticUpdatedAt) {
-      this.page.optimisticUpdatedAt = {}
-    }
+  public nextOptimisticId(): number {
+    return ++this.optimisticCounter
+  }
 
-    for (const key of keys) {
-      if (updatedAt > (this.page.optimisticUpdatedAt[key] || 0)) {
-        this.page.optimisticUpdatedAt[key] = updatedAt
-      }
+  public setBaseline(key: string, value: unknown): void {
+    if (!(key in this.optimisticBaseline)) {
+      this.optimisticBaseline[key] = value
     }
   }
 
-  public shouldPreserveOptimistic(key: string, updatedAt: number): boolean {
-    const lastUpdatedAt = this.page.optimisticUpdatedAt?.[key]
+  public updateBaseline(key: string, value: unknown): void {
+    if (key in this.optimisticBaseline) {
+      this.optimisticBaseline[key] = value
+    }
+  }
 
-    return lastUpdatedAt !== undefined && updatedAt < lastUpdatedAt
+  public hasBaseline(key: string): boolean {
+    return key in this.optimisticBaseline
+  }
+
+  public registerOptimistic(id: number, callback: (props: Page['props']) => Partial<Page['props']> | void): void {
+    this.pendingOptimistics.push({ id, callback })
+  }
+
+  public unregisterOptimistic(id: number): void {
+    this.pendingOptimistics = this.pendingOptimistics.filter((entry) => entry.id !== id)
+  }
+
+  public replayOptimistics(): Partial<Page['props']> {
+    const baselineKeys = Object.keys(this.optimisticBaseline)
+
+    if (baselineKeys.length === 0) {
+      return {}
+    }
+
+    const props = cloneDeep(this.page.props)
+
+    for (const key of baselineKeys) {
+      props[key] = cloneDeep(this.optimisticBaseline[key])
+    }
+
+    for (const { callback } of this.pendingOptimistics) {
+      const result = callback(cloneDeep(props))
+
+      if (result) {
+        Object.assign(props, result)
+      }
+    }
+
+    const replayedProps: Partial<Page['props']> = {}
+
+    for (const key of baselineKeys) {
+      replayedProps[key] = props[key]
+    }
+
+    return replayedProps
+  }
+
+  public pendingOptimisticCount(): number {
+    return this.pendingOptimistics.length
+  }
+
+  public clearOptimisticState(): void {
+    this.optimisticBaseline = {}
+    this.pendingOptimistics = []
   }
 
   public isTheSame(page: Page): boolean {

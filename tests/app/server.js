@@ -3251,6 +3251,63 @@ app.post('/optimistic/reset-likes', (req, res) => {
   res.redirect(303, '/optimistic')
 })
 
+app.get('/optimistic/rollback', (req, res) => {
+  const session = getOptimisticSession(req)
+
+  if (!session.contacts) {
+    session.contacts = [
+      { id: 1, name: 'John', is_favorite: false },
+      { id: 2, name: 'Jane', is_favorite: false },
+      { id: 3, name: 'Bob', is_favorite: false },
+    ]
+  }
+
+  inertia.render(req, res, {
+    component: 'Optimistic/Rollback',
+    props: {
+      contacts: [...session.contacts.map((c) => ({ ...c }))],
+    },
+  })
+})
+
+app.post('/optimistic/rollback/toggle/:id', (req, res) => {
+  const delay = parseInt(req.query.delay || '500')
+  const simulateError = req.query.error === '1'
+
+  setTimeout(() => {
+    if (simulateError) {
+      const session = getOptimisticSession(req)
+      return inertia.render(req, res, {
+        component: 'Optimistic/Rollback',
+        url: '/optimistic/rollback',
+        props: {
+          contacts: [...session.contacts.map((c) => ({ ...c }))],
+          errors: { toggle: 'Something went wrong' },
+        },
+      })
+    }
+
+    const session = getOptimisticSession(req)
+    const contact = session.contacts.find((c) => c.id === parseInt(req.params.id))
+
+    if (contact) {
+      contact.is_favorite = !contact.is_favorite
+    }
+
+    res.redirect(303, '/optimistic/rollback')
+  }, delay)
+})
+
+app.post('/optimistic/rollback/reset', (req, res) => {
+  const session = getOptimisticSession(req)
+  session.contacts = [
+    { id: 1, name: 'John', is_favorite: false },
+    { id: 2, name: 'Jane', is_favorite: false },
+    { id: 3, name: 'Bob', is_favorite: false },
+  ]
+  res.redirect(303, '/optimistic/rollback')
+})
+
 app.get('/use-page/page1', (req, res) =>
   inertia.render(req, res, {
     component: 'UsePage/Page1',

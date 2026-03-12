@@ -715,20 +715,26 @@ export class Router {
       return
     }
 
-    const propsSnapshot: Partial<Page['props']> = {}
+    const changedKeys: string[] = []
 
     for (const key of Object.keys(optimisticProps)) {
       if (!isEqual(currentProps[key], optimisticProps[key])) {
-        propsSnapshot[key] = cloneDeep(currentProps[key])
+        changedKeys.push(key)
       }
     }
 
-    if (Object.keys(propsSnapshot).length === 0) {
+    if (changedKeys.length === 0) {
       return
     }
 
-    const updatedAt = Date.now()
-    currentPage.recordOptimisticUpdate(Object.keys(propsSnapshot), updatedAt)
+    const id = currentPage.nextOptimisticId()
+    const component = currentPage.get().component
+
+    for (const key of changedKeys) {
+      currentPage.setBaseline(key, cloneDeep(currentProps[key]))
+    }
+
+    currentPage.registerOptimistic(id, optimistic)
     currentPage.setPropsQuietly({ ...currentProps, ...optimisticProps })
 
     let shouldRestore = true
@@ -741,18 +747,18 @@ export class Router {
 
     const originalOnFinish = events.onFinish
     events.onFinish = (visit) => {
-      if (shouldRestore) {
-        const propsToRestore: Partial<Page['props']> = {}
+      currentPage.unregisterOptimistic(id)
 
-        for (const [key, value] of Object.entries(propsSnapshot)) {
-          if (!currentPage.shouldPreserveOptimistic(key, updatedAt)) {
-            propsToRestore[key] = value
-          }
-        }
+      if (shouldRestore && currentPage.get().component === component) {
+        const replayedProps = currentPage.replayOptimistics()
 
-        if (Object.keys(propsToRestore).length > 0) {
-          currentPage.setPropsQuietly({ ...currentPage.get().props, ...propsToRestore })
+        if (Object.keys(replayedProps).length > 0) {
+          currentPage.setPropsQuietly({ ...currentPage.get().props, ...replayedProps })
         }
+      }
+
+      if (currentPage.pendingOptimisticCount() === 0) {
+        currentPage.clearOptimisticState()
       }
 
       return originalOnFinish(visit)
