@@ -15,7 +15,7 @@ export class RequestStream {
   public send(request: Request) {
     this.requests.push(request)
 
-    request.send().then(() => {
+    request.send().finally(() => {
       this.requests = this.requests.filter((r) => r !== request)
     })
   }
