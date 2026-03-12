@@ -698,7 +698,7 @@ export type ProgressSettings = {
   popover: boolean | null
 }
 
-export type UrlMethodPair = { url: string; method: Method; component?: string | string[] }
+export type UrlMethodPair = { url: string; method: Method; component?: string | string[] | Record<string, string> }
 
 export type UseFormTransformCallback<TForm> = (data: TForm) => object
 export type UseFormWithPrecognitionArguments =

@@ -116,6 +116,14 @@ export function resolveUrlMethodPairComponent(pair: UrlMethodPair): string | nul
     return null
   }
 
+  if (typeof pair.component !== 'string') {
+    console.error(
+      `The "component" property on the URL method pair must be a string, but received ${typeof pair.component}`,
+    )
+
+    return null
+  }
+
   return pair.component
 }
 
