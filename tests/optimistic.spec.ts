@@ -141,7 +141,7 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
   })
 
-  test('it does not roll back when a newer optimistic update exists for the same prop', async ({ page }) => {
+  test('it replays remaining pending optimistic updates when an earlier one errors', async ({ page }) => {
     pageLoads.watch(page)
 
     await page.locator('#reset-likes-btn').click()
@@ -152,8 +152,10 @@ test.describe('Optimistic', () => {
 
     await expect(page.locator('#likes-count')).toContainText('Likes: 2')
 
+    // After the fast error resolves, the failed +1 is removed and the remaining
+    // pending +1 is replayed on the baseline (0), giving 1
     await page.waitForTimeout(300)
-    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+    await expect(page.locator('#likes-count')).toContainText('Likes: 1')
 
     await page.waitForTimeout(800)
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
