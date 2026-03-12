@@ -22,6 +22,8 @@ createInertiaApp({
     // @ts-expect-error - 'email' does not exist on user
     console.log(props.initialPage.props.auth.user?.email)
 
-    createApp({ render: () => h(App, props) }).use(plugin).mount(el)
+    createApp({ render: () => h(App, props) })
+      .use(plugin)
+      .mount(el)
   },
 })
