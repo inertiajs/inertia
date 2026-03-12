@@ -1,5 +1,6 @@
 // This file is used for checking the TypeScript implementation; there is no Playwright test depending on it.
 import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
+import { mount } from 'svelte'
 
 declare module '@inertiajs/core' {
   export interface InertiaConfig {
@@ -20,6 +21,6 @@ createInertiaApp({
     // @ts-expect-error - 'email' does not exist on user
     console.log(props.initialPage.props.auth.user?.email)
 
-    new App({ target: el!, props })
+    mount(App, { target: el!, props })
   },
 })
