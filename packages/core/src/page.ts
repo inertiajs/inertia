@@ -235,7 +235,7 @@ class CurrentPage {
   }): Promise<unknown> {
     const doSwap = () => this.swapComponent({ component, page, preserveState })
 
-    if (!viewTransition || !document?.startViewTransition) {
+    if (!viewTransition || !document?.startViewTransition || document.visibilityState === 'hidden') {
       return doSwap()
     }
 

@@ -71,4 +71,23 @@ test.describe('View Transitions', () => {
 
     await expect(consoleMessages.messages).toEqual([])
   })
+
+  test('does not throw InvalidStateError when document visibility is hidden during view transition', async ({
+    page,
+  }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true })
+    })
+
+    await page.getByRole('button', { name: 'Transition with boolean' }).click()
+
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await expect(consoleMessages.errors).toEqual([])
+  })
 })
