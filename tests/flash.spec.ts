@@ -48,7 +48,7 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash-event-count')).toHaveText('1')
   })
 
-  test('does not fire flash event on partial request when flash is unchanged', async ({ page }) => {
+  test('fires flash event on partial request even when flash is unchanged', async ({ page }) => {
     await page.goto('/flash/partial')
 
     await expect(page.locator('#flash')).toContainText('Initial flash')
@@ -61,7 +61,7 @@ test.describe('Flash Data', () => {
 
     await expect(page.locator('#count')).not.toHaveText(initialCount!)
     await expect(page.locator('#flash')).toContainText('Initial flash')
-    await expect(page.locator('#flash-event-count')).toHaveText('1')
+    await expect(page.locator('#flash-event-count')).toHaveText('2')
   })
 
   test('fires flash event on partial request when flash changes', async ({ page }) => {
