@@ -14,7 +14,10 @@
 
   let { contacts, errors }: Props = $props()
 
-  const toggleFavorite = (contact: Contact, { delay = 500, error = false }: { delay?: number; error?: boolean } = {}) => {
+  const toggleFavorite = (
+    contact: Contact,
+    { delay = 500, error = false }: { delay?: number; error?: boolean } = {},
+  ) => {
     router
       .optimistic<{ contacts: Contact[] }>((props) => ({
         contacts: props.contacts.map((c) => (c.id === contact.id ? { ...c, is_favorite: !c.is_favorite } : c)),
@@ -40,9 +43,12 @@
         <span class="contact-name">{contact.name}</span>
         <span class="contact-status">{contact.is_favorite ? 'Favorite' : 'Not Favorite'}</span>
         <button class="toggle-btn" onclick={() => toggleFavorite(contact)}>Toggle</button>
-        <button class="toggle-error-btn" onclick={() => toggleFavorite(contact, { error: true })}>Toggle (Error)</button>
+        <button class="toggle-error-btn" onclick={() => toggleFavorite(contact, { error: true })}>Toggle (Error)</button
+        >
         <button class="toggle-slow-btn" onclick={() => toggleFavorite(contact, { delay: 1000 })}>Toggle (Slow)</button>
-        <button class="toggle-slow-error-btn" onclick={() => toggleFavorite(contact, { delay: 1000, error: true })}>Toggle (Slow Error)</button>
+        <button class="toggle-slow-error-btn" onclick={() => toggleFavorite(contact, { delay: 1000, error: true })}
+          >Toggle (Slow Error)</button
+        >
       </div>
     {/each}
   </div>

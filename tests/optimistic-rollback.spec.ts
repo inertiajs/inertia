@@ -16,9 +16,7 @@ test.describe('Optimistic Rollback', () => {
     await expect(page.locator('.contact-status').first()).toContainText('Not Favorite')
   })
 
-  test('it fully rolls back multiple optimistic updates on the same prop when all requests error', async ({
-    page,
-  }) => {
+  test('it fully rolls back multiple optimistic updates on the same prop when all requests error', async ({ page }) => {
     pageLoads.watch(page)
 
     await expect(page.locator('.contact-status').nth(0)).toContainText('Not Favorite')

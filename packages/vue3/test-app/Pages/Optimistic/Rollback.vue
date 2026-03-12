@@ -40,7 +40,9 @@ const reset = () => {
         <button class="toggle-btn" @click="toggleFavorite(contact)">Toggle</button>
         <button class="toggle-error-btn" @click="toggleFavorite(contact, { error: true })">Toggle (Error)</button>
         <button class="toggle-slow-btn" @click="toggleFavorite(contact, { delay: 1000 })">Toggle (Slow)</button>
-        <button class="toggle-slow-error-btn" @click="toggleFavorite(contact, { delay: 1000, error: true })">Toggle (Slow Error)</button>
+        <button class="toggle-slow-error-btn" @click="toggleFavorite(contact, { delay: 1000, error: true })">
+          Toggle (Slow Error)
+        </button>
       </div>
     </div>
 
