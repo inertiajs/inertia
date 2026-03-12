@@ -6,6 +6,7 @@ import {
   type InertiaAppResponse,
   type Page,
   type PageProps,
+  type SharedPageProps,
 } from '@inertiajs/core'
 import { escape } from 'lodash-es'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -30,7 +31,7 @@ type InertiaAppOptions<SharedProps extends PageProps> = CreateInertiaAppOptionsF
   SvelteInertiaAppConfig
 >
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>({
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>({
   id = 'app',
   resolve,
   setup,

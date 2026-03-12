@@ -54,6 +54,23 @@
     },
   })
 
+  // Client-side visit onSuccess should include shared props
+  router.push({
+    onSuccess: (page) => {
+      console.log(page.props.auth.user?.name)
+      // @ts-expect-error - 'email' does not exist on user
+      console.log(page.props.auth.user?.email)
+    },
+  })
+
+  router.replace({
+    onSuccess: (page) => {
+      console.log(page.props.auth.user?.name)
+      // @ts-expect-error - 'email' does not exist on user
+      console.log(page.props.auth.user?.email)
+    },
+  })
+
   console.log({
     userName,
     postTitles,
