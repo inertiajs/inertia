@@ -12,7 +12,6 @@ import {
   setupProgress,
 } from '@inertiajs/core'
 import { createApp, createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
-import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
@@ -44,7 +43,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueApp,
   VueInertiaAppConfig
 > & {
-  render: typeof renderToString
+  render: (app: VueApp) => Promise<string>
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
