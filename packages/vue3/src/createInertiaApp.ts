@@ -10,6 +10,7 @@ import {
   PageProps,
   router,
   setupProgress,
+  SharedPageProps,
 } from '@inertiajs/core'
 import { createApp, createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
@@ -18,7 +19,7 @@ import { VueInertiaAppConfig } from './types'
 
 type ComponentResolver = (
   name: string,
-  page?: Page,
+  page?: Page<SharedPageProps>,
 ) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
@@ -63,16 +64,16 @@ type RenderFunction<SharedProps extends PageProps> = (
   renderToString: RenderToString,
 ) => Promise<InertiaAppSSRResponse>
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<void>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForSSR<SharedProps>,
 ): Promise<InertiaAppSSRResponse>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options?: InertiaAppOptionsAuto<SharedProps>,
 ): Promise<void | RenderFunction<SharedProps>>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   {
     id = 'app',
     resolve,
