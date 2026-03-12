@@ -260,7 +260,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onFlash?: (flash: FlashData) => void
-  onSuccess?: (page: Page) => void
+  onSuccess?: (page: Page<SharedPageProps>) => void
 }
 
 export type PageResolver = (name: string, page?: Page) => Component

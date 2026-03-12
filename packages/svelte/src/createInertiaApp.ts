@@ -9,6 +9,7 @@ import {
   type InertiaAppSSRResponse,
   type Page,
   type PageProps,
+  type SharedPageProps,
 } from '@inertiajs/core'
 import { hydrate, mount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
@@ -47,13 +48,13 @@ type RenderFunction<SharedProps extends PageProps> = (
   render: SvelteServerRender,
 ) => Promise<InertiaAppSSRResponse>
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<InertiaAppSSRResponse | void>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options?: InertiaAppOptionsAuto<SharedProps>,
 ): Promise<void | RenderFunction<SharedProps>>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   {
     id = 'app',
     resolve,
