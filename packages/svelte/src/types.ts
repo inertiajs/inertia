@@ -2,7 +2,10 @@ import { type Page, type SharedPageProps } from '@inertiajs/core'
 import type { Component } from 'svelte'
 import type { RenderFunction, RenderProps } from './components/Render.svelte'
 
-export type ComponentResolver = (name: string, page?: Page<SharedPageProps>) => ResolvedComponent | Promise<ResolvedComponent>
+export type ComponentResolver = (
+  name: string,
+  page?: Page<SharedPageProps>,
+) => ResolvedComponent | Promise<ResolvedComponent>
 
 export type LayoutResolver = (h: RenderFunction, page: RenderProps) => RenderProps
 
