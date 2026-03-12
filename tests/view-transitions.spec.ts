@@ -72,7 +72,9 @@ test.describe('View Transitions', () => {
     await expect(consoleMessages.messages).toEqual([])
   })
 
-  test('does not throw InvalidStateError when document visibility is hidden during view transition', async ({ page }) => {
+  test('does not throw InvalidStateError when document visibility is hidden during view transition', async ({
+    page,
+  }) => {
     consoleMessages.listen(page)
 
     await page.goto('/view-transition/page-a')
