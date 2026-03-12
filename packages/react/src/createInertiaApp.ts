@@ -27,7 +27,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 
 type ComponentResolver = (
   name: string,
-  page?: Page,
+  page?: Page<SharedPageProps>,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<

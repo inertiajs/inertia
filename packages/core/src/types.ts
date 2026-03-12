@@ -263,7 +263,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   onSuccess?: (page: Page<SharedPageProps>) => void
 }
 
-export type PageResolver = (name: string, page?: Page) => Component
+export type PageResolver = (name: string, page?: Page<SharedPageProps>) => Component
 
 export type PageHandler<ComponentType = Component> = ({
   component,

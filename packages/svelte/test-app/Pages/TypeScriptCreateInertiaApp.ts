@@ -12,7 +12,11 @@ declare module '@inertiajs/core' {
 
 // createInertiaApp setup should include shared props without explicit generic
 createInertiaApp({
-  resolve: (name) => {
+  resolve: (name, page) => {
+    console.log(page?.props.auth.user?.name)
+    // @ts-expect-error - 'email' does not exist on user
+    console.log(page?.props.auth.user?.email)
+
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
     return pages[`./Pages/${name}.svelte`]
   },

@@ -19,7 +19,7 @@ import { VueInertiaAppConfig } from './types'
 
 type ComponentResolver = (
   name: string,
-  page?: Page,
+  page?: Page<SharedPageProps>,
 ) => DefineComponent | Promise<DefineComponent> | { default: DefineComponent }
 
 type SetupOptions<ElementType, SharedProps extends PageProps> = {
