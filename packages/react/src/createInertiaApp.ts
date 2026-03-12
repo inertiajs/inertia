@@ -10,6 +10,7 @@ import {
   PageProps,
   router,
   setupProgress,
+  SharedPageProps,
 } from '@inertiajs/core'
 import { createElement, ReactElement, StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
@@ -26,7 +27,7 @@ export type SetupOptions<ElementType, SharedProps extends PageProps> = {
 
 type ComponentResolver = (
   name: string,
-  page?: Page,
+  page?: Page<SharedPageProps>,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
@@ -71,16 +72,16 @@ type RenderFunction<SharedProps extends PageProps> = (
   renderToString: RenderToString,
 ) => Promise<InertiaAppSSRResponse>
 
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<void>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForSSR<SharedProps>,
 ): Promise<InertiaAppSSRResponse>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options?: InertiaAppOptionsAuto<SharedProps>,
 ): Promise<void | RenderFunction<SharedProps>>
-export default async function createInertiaApp<SharedProps extends PageProps = PageProps>(
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   {
     id = 'app',
     resolve,

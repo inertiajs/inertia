@@ -260,10 +260,10 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onFlash?: (flash: FlashData) => void
-  onSuccess?: (page: Page) => void
+  onSuccess?: (page: Page<SharedPageProps>) => void
 }
 
-export type PageResolver = (name: string, page?: Page) => Component
+export type PageResolver = (name: string, page?: Page<SharedPageProps>) => Component
 
 export type PageHandler<ComponentType = Component> = ({
   component,
@@ -357,23 +357,23 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   beforeUpdate: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
   navigate: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
   success: {
-    parameters: [Page]
+    parameters: [Page<SharedPageProps>]
     details: {
-      page: Page
+      page: Page<SharedPageProps>
     }
     result: void
   }
