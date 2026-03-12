@@ -14,32 +14,34 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
-CURRENT_VERSION=$(node -p "require('./package.json').version")
+# Read version from first package (root package.json has no version)
+CURRENT_VERSION=$(node -p "require('./packages/core/package.json').version")
 
 echo
 echo "Current version: $CURRENT_VERSION"
 echo
 
-# Determine version command: first beta needs an explicit version,
-# subsequent betas can use prerelease bump
-if [[ "$CURRENT_VERSION" == *"-beta."* ]]; then
-  VERSION_CMD="prerelease --preid beta"
-else
-  VERSION_CMD="3.0.0-beta.1"
-fi
+# Compute next beta version
+NEW_VERSION=$(node -e "
+  const v = '$CURRENT_VERSION'
+  const match = v.match(/^(.+)-beta\.(\d+)$/)
+  if (match) {
+    console.log(match[1] + '-beta.' + (parseInt(match[2]) + 1))
+  } else {
+    const [major, minor, patch] = v.split('.').map(Number)
+    console.log((major + 1) + '.0.0-beta.1')
+  }
+")
 
-# Bump version in each package without creating git tags
-NEW_VERSION=""
+echo "New version: $NEW_VERSION"
+echo
+
+# Set version in each package without creating git tags
 for pkg_json in packages/*/package.json; do
   pkg_dir=$(dirname "$pkg_json")
   echo "Bumping $pkg_dir..."
   cd "$pkg_dir"
-  OUT=$(pnpm version $VERSION_CMD --no-git-tag-version)
-  if [ -z "$NEW_VERSION" ]; then
-    # Capture the first reported version; strip leading 'v' if present
-    OUT_LAST=$(echo "$OUT" | tail -n1 | tr -d '\r')
-    NEW_VERSION=${OUT_LAST#v}
-  fi
+  pnpm version "$NEW_VERSION" --no-git-tag-version > /dev/null
   cd ../..
 done
 
