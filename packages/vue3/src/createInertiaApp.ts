@@ -11,7 +11,6 @@ import {
   SharedPageProps,
 } from '@inertiajs/core'
 import { createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
-import { renderToString } from 'vue/server-renderer'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
@@ -40,7 +39,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueApp,
   VueInertiaAppConfig
 > & {
-  render: typeof renderToString
+  render: (app: VueApp) => Promise<string>
 }
 
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
