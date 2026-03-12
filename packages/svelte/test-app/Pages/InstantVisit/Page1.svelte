@@ -73,7 +73,7 @@
     href={{
       url: '/instant-visit/target?delay=500',
       method: 'get',
-      component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      component: { 'InstantVisit/Target': 'InstantVisit/Target', 'InstantVisit/Other': 'InstantVisit/Other' },
     }}
     instant
     component="InstantVisit/Target"
@@ -84,7 +84,7 @@
     href={{
       url: '/instant-visit/target?delay=500',
       method: 'get',
-      component: ['InstantVisit/Target', 'InstantVisit/Other'],
+      component: { 'InstantVisit/Target': 'InstantVisit/Target', 'InstantVisit/Other': 'InstantVisit/Other' },
     }}
     instant
   >
