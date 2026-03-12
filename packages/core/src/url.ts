@@ -108,17 +108,9 @@ export function resolveUrlMethodPairComponent(pair: UrlMethodPair): string | nul
     return null
   }
 
-  if (Array.isArray(pair.component)) {
-    console.error(
-      `The "component" property on the URL method pair received an array of components (${pair.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
-    )
-
-    return null
-  }
-
   if (typeof pair.component !== 'string') {
     console.error(
-      `The "component" property on the URL method pair must be a string, but received ${typeof pair.component}`,
+      `The "component" property on the URL method pair received multiple components (${Object.keys(pair.component).join(', ')}), but only a single component string is supported for instant visits. Use the withComponent() method to specify which component to use.`,
     )
 
     return null
