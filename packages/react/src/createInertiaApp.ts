@@ -38,6 +38,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   ReactInertiaAppConfig
 > & {
   strictMode?: undefined
+  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
@@ -49,6 +50,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
 > & {
   render: typeof renderToString
   strictMode?: undefined
+  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
@@ -60,6 +62,7 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
   page?: Page<SharedProps>
   render?: undefined
   strictMode?: boolean
+  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
 }
 
 type RenderToString = (element: ReactElement) => string
@@ -91,6 +94,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     http,
     layout,
     strictMode = false,
+    withApp,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -140,6 +144,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         })
       } else {
         reactApp = wrapWithStrictMode(createElement(App, props))
+
+        if (withApp) {
+          reactApp = withApp(reactApp, { ssr: true })
+        }
       }
 
       const html = renderToString(reactApp)
@@ -184,7 +192,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       })
     }
 
-    const appElement = wrapWithStrictMode(createElement(App, props))
+    let appElement = wrapWithStrictMode(createElement(App, props))
+
+    if (withApp) {
+      appElement = withApp(appElement, { ssr: false })
+    }
 
     if (el.hasAttribute('data-server-rendered')) {
       hydrateRoot(el, appElement)

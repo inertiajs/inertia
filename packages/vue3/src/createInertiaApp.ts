@@ -35,7 +35,9 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<HTMLElement, SharedProps>,
   void,
   VueInertiaAppConfig
->
+> & {
+  withApp?: (app: VueApp, options: { ssr: boolean }) => void
+}
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
@@ -45,6 +47,7 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueInertiaAppConfig
 > & {
   render: (app: VueApp) => Promise<string>
+  withApp?: (app: VueApp, options: { ssr: boolean }) => void
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
@@ -55,6 +58,7 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOpti
 > & {
   page?: Page<SharedProps>
   render?: undefined
+  withApp?: (app: VueApp, options: { ssr: boolean }) => void
 }
 
 type RenderToString = (app: VueApp) => Promise<string>
@@ -85,6 +89,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     defaults = {},
     http,
     layout,
+    withApp,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -130,6 +135,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       } else {
         vueApp = createSSRApp({ render: () => h(App, props) })
         vueApp.use(plugin)
+
+        if (withApp) {
+          withApp(vueApp, { ssr: true })
+        }
       }
 
       const html = await renderToString(vueApp)
@@ -180,10 +189,20 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     if (el.hasAttribute('data-server-rendered')) {
       const app = createSSRApp({ render: () => h(App, props) })
       app.use(plugin)
+
+      if (withApp) {
+        withApp(app, { ssr: false })
+      }
+
       app.mount(el)
     } else {
       const app = createApp({ render: () => h(App, props) })
       app.use(plugin)
+
+      if (withApp) {
+        withApp(app, { ssr: false })
+      }
+
       app.mount(el)
     }
   })

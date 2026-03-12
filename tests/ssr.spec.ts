@@ -135,5 +135,13 @@ test.describe('SSR Auto Transform', () => {
       const health = await response.json()
       expect(health.status).toBe('OK')
     })
+
+    test('it applies withApp callback during SSR rendering', async ({ page }) => {
+      const response = await page.request.get('/ssr-auto/with-app')
+      const html = await response.text()
+
+      expect(html).toContain('SSR WithApp')
+      expect(html).toMatch(/Value:.*injected-via-withApp/)
+    })
   })
 })
