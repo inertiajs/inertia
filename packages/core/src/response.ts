@@ -84,8 +84,6 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
-    const previousFlash = currentPage.get().flash
-
     await this.setPage()
 
     const errors = currentPage.get().props.errors || {}
@@ -108,7 +106,7 @@ export class Response {
 
     const { flash } = currentPage.get()
 
-    if (Object.keys(flash).length > 0 && (!this.requestParams.isPartial() || !isEqual(flash, previousFlash))) {
+    if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
       fireFlashEvent(flash)
       this.requestParams.all().onFlash(flash)
     }
