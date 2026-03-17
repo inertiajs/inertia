@@ -24,6 +24,9 @@ export function setLayoutPropsFor(name: string, props: Record<string, unknown>):
 
 export function resetLayoutProps(): void {
   store.reset()
+  const snapshot = store.get()
+  storeState.shared = snapshot.shared
+  storeState.named = snapshot.named
 }
 
 export const LAYOUT_CONTEXT_KEY = Symbol('inertia-layout')

@@ -18,6 +18,7 @@ export function setLayoutPropsFor(name: string, props: Record<string, unknown>):
 
 export function resetLayoutProps(): void {
   store.reset()
+  state.value = store.get()
 }
 
 export const LAYOUT_CONTEXT_KEY: InjectionKey<string | undefined> = Symbol('inertia-layout')

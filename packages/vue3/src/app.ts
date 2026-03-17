@@ -122,6 +122,11 @@ const App: InertiaApp = defineComponent({
     key.value = undefined
 
     const isServer = typeof window === 'undefined'
+
+    if (isServer) {
+      resetLayoutProps()
+    }
+
     headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {

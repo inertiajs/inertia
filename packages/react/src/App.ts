@@ -77,6 +77,10 @@ export default function App<SharedProps extends PageProps = PageProps>({
   onHeadUpdate,
   defaultLayout,
 }: InertiaAppProps<SharedProps>) {
+  if (typeof window === 'undefined') {
+    resetLayoutProps()
+  }
+
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
     page: { ...initialPage, flash: initialPage.flash ?? {} },

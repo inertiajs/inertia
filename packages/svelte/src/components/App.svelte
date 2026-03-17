@@ -46,6 +46,10 @@
 
   const isServer = typeof window === 'undefined'
 
+  if (isServer) {
+    resetLayoutProps()
+  }
+
   if (!isServer) {
     // svelte-ignore state_referenced_locally
     router.init<ResolvedComponent>({

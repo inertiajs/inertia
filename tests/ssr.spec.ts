@@ -89,6 +89,40 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('layout props', () => {
+  test('it does not leak layout props between SSR requests', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
+
+    const responseA = await page.request.get('/ssr/layout-props-a')
+    const htmlA = await responseA.text()
+
+    expect(htmlA).toContain('Page A Content')
+
+    const responseB = await page.request.get('/ssr/layout-props-b')
+    const htmlB = await responseB.text()
+
+    expect(htmlB).toContain('Page B Content')
+    expect(htmlB).toContain('Default Title')
+    expect(htmlB).not.toContain('Page A Title')
+  })
+
+  test('it hydrates without errors after setLayoutProps was used in a previous SSR request', async ({
+    page,
+    browserName,
+  }) => {
+    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
+    consoleMessages.listen(page)
+
+    await page.request.get('/ssr/layout-props-a')
+    await page.goto('/ssr/layout-props-b')
+
+    await expect(page.getByTestId('layout-title')).toHaveText('Default Title')
+    await expect(page.getByTestId('page-content')).toHaveText('Page B Content')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})
+
 test.describe('SSR Auto Transform', () => {
   test.describe('Vite plugin SSR transform', () => {
     test('it renders HTML using the auto-transformed SSR entry', async ({ page }) => {
