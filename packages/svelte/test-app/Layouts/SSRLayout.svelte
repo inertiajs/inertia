@@ -1,12 +1,12 @@
 <script lang="ts">
-import { useLayoutProps } from '@inertiajs/svelte'
-import type { Snippet } from 'svelte'
+  import { useLayoutProps } from '@inertiajs/svelte'
+  import type { Snippet } from 'svelte'
 
-let { children }: { children: Snippet } = $props()
+  let { children }: { children: Snippet } = $props()
 
-const layoutProps = useLayoutProps({
-  title: 'Default Title',
-})
+  const layoutProps = useLayoutProps({
+    title: 'Default Title',
+  })
 </script>
 
 <div class="ssr-layout">

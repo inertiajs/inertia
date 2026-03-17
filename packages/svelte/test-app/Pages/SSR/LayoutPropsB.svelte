@@ -1,6 +1,6 @@
 <script lang="ts" module>
-import SSRLayout from '../../Layouts/SSRLayout.svelte'
-export const layout = SSRLayout
+  import SSRLayout from '../../Layouts/SSRLayout.svelte'
+  export const layout = SSRLayout
 </script>
 
 <div>
