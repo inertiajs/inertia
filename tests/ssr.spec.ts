@@ -119,6 +119,21 @@ test.describe('layout props', () => {
     await expect(page.getByTestId('layout-title')).toHaveText('Default Title')
     await expect(page.getByTestId('page-content')).toHaveText('Page B Content')
 
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('it hydrates without errors on a page that calls setLayoutProps', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layout-props-a')
+
+    await expect(page.getByTestId('page-content')).toHaveText('Page A Content')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
     expect(consoleMessages.errors).toHaveLength(0)
   })
 })
