@@ -48,12 +48,13 @@ jobs:
 
   test-chromium-ssr:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium SSR (${{ matrix.adapter }})
+    name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
+        node-version: ['22.x', '24.x', 'latest']
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -66,7 +67,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: ${{ matrix.node-version }}
           cache: pnpm
 
       - name: Install dependencies
@@ -85,5 +86,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr-node-${{ matrix.node-version }}
           path: test-results
