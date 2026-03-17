@@ -291,7 +291,7 @@ export type CancelToken = {
 
 export type CancelTokenCallback = (cancelToken: CancelToken) => void
 
-export type OptimisticCallback<TProps = Page['props']> = (props: TProps) => Partial<TProps> | void
+export type OptimisticCallback<TProps = Page<SharedPageProps>['props']> = (props: TProps) => Partial<TProps> | void
 
 export type Visit<T extends RequestPayload = RequestPayload> = {
   method: Method
@@ -730,7 +730,7 @@ export type FormComponentOptions = Pick<
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
-export type FormComponentOptimisticCallback<TProps = Page['props']> = (
+export type FormComponentOptimisticCallback<TProps = Page<SharedPageProps>['props']> = (
   props: TProps,
   formData: Record<string, FormDataConvertible>,
 ) => Partial<TProps> | void
