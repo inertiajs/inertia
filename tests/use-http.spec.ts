@@ -539,4 +539,14 @@ test.describe('useHttp', () => {
       await expect(page.locator('#all-email-error')).toContainText('The email must be a valid email address.')
     })
   })
+
+  test('it handles 204 no content responses without errors', async ({ page }) => {
+    await page.goto('/use-http/no-content')
+
+    await page.fill('#no-content-name', 'John')
+    await page.click('#no-content-button')
+
+    await expect(page.locator('#no-content-success')).toBeVisible()
+    await expect(page.locator('#no-content-response')).toContainText('Response: null')
+  })
 })
