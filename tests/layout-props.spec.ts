@@ -14,6 +14,11 @@ test.describe('layout props', () => {
     await page.getByRole('button', { name: 'Toggle Sidebar' }).click()
 
     await expect(page.locator('.sidebar')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Update Title' }).click()
+
+    await expect(page.locator('.app-title')).toHaveText('Updated Title')
+    await expect(page.locator('.sidebar')).toBeVisible()
   })
 
   test('it can pass static props via tuple syntax', async ({ page }) => {

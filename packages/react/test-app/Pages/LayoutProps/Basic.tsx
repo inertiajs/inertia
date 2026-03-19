@@ -21,6 +21,12 @@ const Basic = () => {
         <span>Sidebar: {sidebarVisible ? 'visible' : 'hidden'}</span>
       </div>
 
+      <div>
+        <button type="button" onClick={() => setLayoutProps({ title: 'Updated Title' })}>
+          Update Title
+        </button>
+      </div>
+
       <nav>
         <Link href="/layout-props/navigate">Go to Navigate Page</Link>
       </nav>
