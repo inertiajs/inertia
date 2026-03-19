@@ -1,6 +1,6 @@
 <script lang="ts">
   import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
-  import { get } from 'lodash-es'
+  import { get } from 'es-toolkit/compat'
   import { page } from '../index'
 
   interface Props {

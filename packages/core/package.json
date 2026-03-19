@@ -55,14 +55,13 @@
     "dev": "pnpx concurrently -c \"#ffcf00,#3178c6\" \"pnpm dev:build\" \"pnpm dev:types\" --names build,types",
     "dev:build": "./build.js --watch",
     "dev:types": "tsc --watch --preserveWatchOutput",
-    "es2020-check": "pnpm build:with-deps && es-check es2020 \"dist/index.js\" --checkFeatures --module --noCache --verbose",
+    "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/index.js\" --checkFeatures --module --noCache --verbose",
     "test": "vitest run"
   },
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
-    "@types/lodash-es": "^4.17.12",
-    "laravel-precognition": "2.0.0-beta.3",
-    "lodash-es": "^4.17.23"
+    "es-toolkit": "^1.33.0",
+    "laravel-precognition": "2.0.0-beta.3"
   },
   "peerDependencies": {
     "axios": "^1.13.2"

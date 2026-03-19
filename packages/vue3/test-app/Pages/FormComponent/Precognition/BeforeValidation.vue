@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3'
-import { isEqual } from 'lodash-es'
+import { isEqual } from 'es-toolkit'
 
 const handleBeforeValidation = (
   newRequest: { data: Record<string, unknown> | null; touched: string[] },

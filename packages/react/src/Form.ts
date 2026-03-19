@@ -14,8 +14,8 @@ import {
   UseFormUtils,
   VisitOptions,
 } from '@inertiajs/core'
+import { isEqual } from 'es-toolkit'
 import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
-import { isEqual } from 'lodash-es'
 import React, {
   createContext,
   createElement,

@@ -19,8 +19,8 @@ import {
   UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
+import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
 import { useIsomorphicLayoutEffect } from './react'
 import useFormState, { SetDataAction, SetDataByKeyValuePair, SetDataByMethod, SetDataByObject } from './useFormState'

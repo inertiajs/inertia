@@ -10,9 +10,10 @@ import type {
   UseFormWithPrecognitionArguments,
 } from '@inertiajs/core'
 import { router, UseFormUtils } from '@inertiajs/core'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, has, set } from 'es-toolkit/compat'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import { createValidator, resolveName, toSimpleValidationErrors } from 'laravel-precognition'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { config } from '.'
 
 type TransformCallback<TForm> = (data: TForm) => object

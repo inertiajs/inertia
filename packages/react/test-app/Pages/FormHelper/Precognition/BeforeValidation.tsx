@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react'
-import { isEqual } from 'lodash-es'
+import { isEqual } from 'es-toolkit'
 
 export default () => {
   const form = useForm({

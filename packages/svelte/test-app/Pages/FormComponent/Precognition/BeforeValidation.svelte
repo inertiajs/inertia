@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isEqual } from 'lodash-es'
+  import { isEqual } from 'es-toolkit'
   import { Form } from '@inertiajs/svelte'
 
   const handleBeforeValidation = (

@@ -1,4 +1,5 @@
-import { cloneDeep, get, isEqual, set } from 'lodash-es'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, set } from 'es-toolkit/compat'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'

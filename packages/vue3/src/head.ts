@@ -1,4 +1,4 @@
-import { escape } from 'lodash-es'
+import { escape } from 'es-toolkit/compat'
 import { defineComponent, DefineComponent, onBeforeUnmount, VNode } from 'vue'
 import { headManager } from './app'
 

@@ -1,5 +1,5 @@
 import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
-import { get } from 'lodash-es'
+import { get } from 'es-toolkit/compat'
 import { defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 import { usePage } from './app'
 
