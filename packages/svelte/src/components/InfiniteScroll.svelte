@@ -9,6 +9,7 @@
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
+  import { usePage } from '../page.svelte'
 
   interface Props {
     data: InfiniteScrollComponentBaseProps['data']
@@ -57,11 +58,13 @@
   let itemsElementRef: HTMLElement = $state(null!)
   let startElementRef: HTMLElement = $state(null!)
   let endElementRef: HTMLElement = $state(null!)
+  const scrollProp = usePage().scrollProps?.[data]
+
   let loadingPrevious = $state(false)
   let loadingNext = $state(false)
   let requestCount = $state(0)
-  let hasPreviousPage = $state(false)
-  let hasNextPage = $state(false)
+  let hasPreviousPage = $state(!!scrollProp?.previousPage)
+  let hasNextPage = $state(!!scrollProp?.nextPage)
 
   let infiniteScrollInstance: UseInfiniteScrollProps = $state(null!)
 

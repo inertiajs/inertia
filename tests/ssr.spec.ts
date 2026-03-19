@@ -89,6 +89,27 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('SSR InfiniteScroll', () => {
+  test('it renders correct slot props during SSR', async ({ page }) => {
+    const response = await page.request.get('/ssr/infinite-scroll')
+    const html = await response.text()
+
+    expect(html).toMatch(/Has previous:.*false/)
+    expect(html).toMatch(/Has next:.*true/)
+  })
+
+  test('it hydrates without mismatch', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/infinite-scroll')
+
+    await expect(page.getByTestId('has-previous')).toHaveText('Has previous: false')
+    await expect(page.getByTestId('has-next')).toHaveText('Has next: true')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})
+
 test.describe('SSR Auto Transform', () => {
   test.describe('Vite plugin SSR transform', () => {
     test('it renders HTML using the auto-transformed SSR entry', async ({ page }) => {

@@ -18,6 +18,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
+import usePage from './usePage'
 
 const resolveHTMLElement = (
   value: string | React.RefObject<HTMLElement | null> | null,
@@ -110,11 +111,13 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
     const [itemsElementFromRef, setItemsElementFromRef] = useState<HTMLElement | null>(null)
     const itemsElementRef = useCallback((node: HTMLElement | null) => setItemsElementFromRef(node), [])
 
+    const scrollProp = usePage().scrollProps?.[data]
+
     const [loadingPrevious, setLoadingPrevious] = useState(false)
     const [loadingNext, setLoadingNext] = useState(false)
     const [requestCount, setRequestCount] = useState(0)
-    const [hasPreviousPage, setHasPreviousPage] = useState(false)
-    const [hasNextPage, setHasNextPage] = useState(false)
+    const [hasPreviousPage, setHasPreviousPage] = useState(!!scrollProp?.previousPage)
+    const [hasNextPage, setHasNextPage] = useState(!!scrollProp?.nextPage)
 
     const [resolvedStartElement, setResolvedStartElement] = useState<HTMLElement | null>(null)
     const [resolvedEndElement, setResolvedEndElement] = useState<HTMLElement | null>(null)
