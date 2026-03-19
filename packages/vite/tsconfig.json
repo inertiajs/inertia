@@ -12,7 +12,7 @@
     "emitDeclarationOnly": true,
 
     "module": "ES2020",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
 

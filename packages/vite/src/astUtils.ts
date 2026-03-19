@@ -47,7 +47,7 @@ export class ParsedCode {
   /** Returns null if parsing fails (e.g. non-JS file content). */
   static from(code: string): ParsedCode | null {
     try {
-      return new ParsedCode(parseAst(code))
+      return new ParsedCode(parseAst(code) as unknown as Program)
     } catch {
       return null
     }
