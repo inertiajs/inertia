@@ -19,8 +19,8 @@ import {
   UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
+import { cloneDeep } from 'es-toolkit'
 import { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep } from 'lodash-es'
 import useFormState from './useFormState'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties

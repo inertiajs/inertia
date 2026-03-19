@@ -23,8 +23,8 @@ import type {
   VisitOptions,
 } from '@inertiajs/core'
 import { router, UseFormUtils } from '@inertiajs/core'
+import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep } from 'lodash-es'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
 
 // Reserved keys validation - logs console.error at runtime when form data keys conflict with form properties

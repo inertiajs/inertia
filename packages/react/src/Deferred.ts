@@ -1,5 +1,5 @@
 import { isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
-import { get } from 'lodash-es'
+import { get } from 'es-toolkit/compat'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'

@@ -1,5 +1,5 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { get } from 'lodash-es'
+import { get } from 'es-toolkit/compat'
 import { computed, defineComponent, h, nextTick, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
 import { usePage } from './app'
 

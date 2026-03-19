@@ -1,4 +1,5 @@
-import { get, isEqual, set } from 'lodash-es'
+import { isEqual } from 'es-toolkit'
+import { get, set } from 'es-toolkit/compat'
 import { router } from '.'
 import dialog from './dialog'
 import {

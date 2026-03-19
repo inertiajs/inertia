@@ -14,6 +14,6 @@ export default defineConfig({
       // Only externalize Svelte (peer dependency) - bundle everything else
       external: (id) => id === 'svelte' || id.startsWith('svelte/'),
     },
-    target: 'es2020',
+    target: 'es2022',
   },
 })

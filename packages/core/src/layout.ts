@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash-es'
+import { isEqual } from 'es-toolkit'
 
 export interface LayoutDefinition<Component> {
   component: Component

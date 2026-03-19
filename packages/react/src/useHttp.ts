@@ -24,8 +24,8 @@ import {
   UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
+import { cloneDeep } from 'es-toolkit'
 import { NamedInputEvent, toSimpleValidationErrors, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep } from 'lodash-es'
 import { useCallback, useRef, useState } from 'react'
 import useFormState, { SetDataAction } from './useFormState'
 import useRemember from './useRemember'

@@ -8,7 +8,7 @@ const config = {
   bundle: true,
   minify: false,
   sourcemap: true,
-  target: 'es2020',
+  target: 'es2022',
   plugins: [
     nodeExternalsPlugin(),
     {

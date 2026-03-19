@@ -1,5 +1,5 @@
 import { ReloadOptions, router } from '@inertiajs/core'
-import { get } from 'lodash-es'
+import { get } from 'es-toolkit/compat'
 import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import usePage from './usePage'
 

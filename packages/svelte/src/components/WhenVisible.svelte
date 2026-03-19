@@ -1,6 +1,6 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
-  import { get } from 'lodash-es'
+  import { get } from 'es-toolkit/compat'
   import { usePage } from '../page.svelte'
 
   interface Props {

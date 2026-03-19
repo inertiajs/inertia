@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import { isEqual } from 'lodash-es'
+import { isEqual } from 'es-toolkit'
 
 const form = useForm({
   name: '',
