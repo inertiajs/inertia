@@ -2,6 +2,7 @@
   import AppLayout from '@/Layouts/AppLayout.svelte'
 
   export const layout = AppLayout
+  export const layoutProps = { title: 'Basic Layout Props', showSidebar: true }
 </script>
 
 <script lang="ts">
@@ -9,10 +10,7 @@
 
   let sidebarVisible = $state(true)
 
-  setLayoutProps({
-    title: 'Basic Layout Props',
-    showSidebar: true,
-  })
+  setLayoutProps({ showSidebar: true })
 
   function toggleSidebar() {
     sidebarVisible = !sidebarVisible

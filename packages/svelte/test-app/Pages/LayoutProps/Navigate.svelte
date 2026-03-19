@@ -2,16 +2,11 @@
   import AppLayout from '@/Layouts/AppLayout.svelte'
 
   export const layout = AppLayout
+  export const layoutProps = { title: 'Navigate Page', showSidebar: false, theme: 'dark' }
 </script>
 
 <script lang="ts">
-  import { Link, setLayoutProps } from '@inertiajs/svelte'
-
-  setLayoutProps({
-    title: 'Navigate Page',
-    showSidebar: false,
-    theme: 'dark',
-  })
+  import { Link } from '@inertiajs/svelte'
 </script>
 
 <div>

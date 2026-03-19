@@ -1,5 +1,6 @@
 import {
   createHeadManager,
+  evaluateLayoutProps,
   HeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
@@ -22,7 +23,7 @@ import {
   ref,
   shallowRef,
 } from 'vue'
-import { LayoutProvider, resetLayoutProps } from './layoutProps'
+import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -123,10 +124,6 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
 
-    if (isServer) {
-      resetLayoutProps()
-    }
-
     headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {
@@ -178,12 +175,24 @@ const App: InertiaApp = defineComponent({
           )
 
           if (layouts.length > 0) {
+            const staticProps = evaluateLayoutProps(component.value.layoutProps, page.value!.props)
+            const dynamicProps = isServer ? { shared: {}, named: {} } : layoutPropsState.value
+
             return layouts.reduceRight((childNode, layout) => {
               const layoutComponent = layout.component as DefineComponent
               layoutComponent.inheritAttrs = !!layoutComponent.inheritAttrs
 
-              return h(LayoutProvider, { layoutName: layout.name }, () =>
-                h(layoutComponent, { ...page.value!.props, ...layout.props }, () => childNode),
+              return h(
+                layoutComponent,
+                {
+                  ...page.value!.props,
+                  ...layout.props,
+                  ...staticProps.shared,
+                  ...(layout.name ? staticProps.named[layout.name] || {} : {}),
+                  ...dynamicProps.shared,
+                  ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
+                },
+                () => childNode,
               )
             }, child)
           }

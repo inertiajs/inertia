@@ -39,23 +39,9 @@
 
 <script lang="ts">
   import Render from './Render.svelte'
-  import { setContext } from 'svelte'
-  import { LAYOUT_CONTEXT_KEY } from '../layoutProps.svelte'
 
   // svelte-ignore state_referenced_locally
-  const { component, props = {}, children = [], key = null, name }: RenderProps = $props()
-
-  // svelte-ignore state_referenced_locally
-  if (children.length > 0) {
-    setContext(LAYOUT_CONTEXT_KEY, {
-      get staticProps() {
-        return props
-      },
-      get name() {
-        return name
-      },
-    })
-  }
+  const { component, props = {}, children = [], key = null }: RenderProps = $props()
 </script>
 
 {#if component}

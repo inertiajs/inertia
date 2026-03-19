@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { setLayoutProps } from '@inertiajs/vue3'
 import SSRLayout from '../../Layouts/SSRLayout.vue'
 
 defineOptions({
   layout: SSRLayout,
+  layoutProps: { title: 'Page A Title' },
 })
-
-setLayoutProps({ title: 'Page A Title' })
 </script>
 
 <template>

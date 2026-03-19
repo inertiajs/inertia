@@ -6,24 +6,15 @@
     app: AppLayout,
     content: ContentLayout,
   }
+  export const layoutProps = (layout: (...args: unknown[]) => void) => {
+    layout({ title: 'Named Layouts Page' })
+    layout('app', { showSidebar: true, theme: 'light' })
+    layout('content', { padding: 'xl', maxWidth: '2xl' })
+  }
 </script>
 
 <script lang="ts">
-  import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/svelte'
-
-  setLayoutProps({
-    title: 'Named Layouts Page',
-  })
-
-  setLayoutPropsFor('app', {
-    showSidebar: true,
-    theme: 'light',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-    maxWidth: '2xl',
-  })
+  import { Link } from '@inertiajs/svelte'
 </script>
 
 <div>

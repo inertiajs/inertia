@@ -1,12 +1,8 @@
 <script lang="ts" module>
-import SSRLayout from '../../Layouts/SSRLayout.svelte'
-export const layout = SSRLayout
-</script>
+  import SSRLayout from '../../Layouts/SSRLayout.svelte'
 
-<script lang="ts">
-import { setLayoutProps } from '@inertiajs/svelte'
-
-setLayoutProps({ title: 'Page A Title' })
+  export const layout = SSRLayout
+  export const layoutProps = { title: 'Page A Title' }
 </script>
 
 <div>

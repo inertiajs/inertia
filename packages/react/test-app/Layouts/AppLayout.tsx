@@ -1,23 +1,26 @@
-import { useLayoutProps } from '@inertiajs/react'
 import { ReactNode, useId } from 'react'
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default function AppLayout({
+  title = 'Default Title',
+  showSidebar = true,
+  theme = 'light',
+  children,
+}: {
+  title?: string
+  showSidebar?: boolean
+  theme?: string
+  children: ReactNode
+}) {
   const layoutId = useId()
   window._inertia_app_layout_id = layoutId
 
-  const layoutProps = useLayoutProps({
-    title: 'Default Title',
-    showSidebar: true,
-    theme: 'light',
-  })
-
   return (
-    <div data-theme={layoutProps.theme} className="app-layout">
+    <div data-theme={theme} className="app-layout">
       <header>
-        <h1 className="app-title">{layoutProps.title}</h1>
+        <h1 className="app-title">{title}</h1>
       </header>
       <div className="app-content">
-        {layoutProps.showSidebar && (
+        {showSidebar && (
           <aside className="sidebar">
             <span>Sidebar</span>
           </aside>

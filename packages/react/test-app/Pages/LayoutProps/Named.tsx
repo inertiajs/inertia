@@ -1,22 +1,8 @@
-import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/react'
+import { Link } from '@inertiajs/react'
 import AppLayout from '../../Layouts/AppLayout'
 import ContentLayout from '../../Layouts/ContentLayout'
 
 const Named = () => {
-  setLayoutProps({
-    title: 'Named Layouts Page',
-  })
-
-  setLayoutPropsFor('app', {
-    showSidebar: true,
-    theme: 'light',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-    maxWidth: '2xl',
-  })
-
   return (
     <div>
       <h2>Named Layouts Page</h2>
@@ -34,6 +20,11 @@ const Named = () => {
 Named.layout = {
   app: AppLayout,
   content: ContentLayout,
+}
+Named.layoutProps = (layout: (...args: unknown[]) => void) => {
+  layout({ title: 'Named Layouts Page' })
+  layout('app', { showSidebar: true, theme: 'light' })
+  layout('content', { padding: 'xl', maxWidth: '2xl' })
 }
 
 export default Named

@@ -1,9 +1,6 @@
-import { setLayoutProps } from '@inertiajs/react'
 import SSRLayout from '../../Layouts/SSRLayout'
 
 const LayoutPropsA = () => {
-  setLayoutProps({ title: 'Page A Title' })
-
   return (
     <div>
       <p data-testid="page-content">Page A Content</p>
@@ -12,5 +9,6 @@ const LayoutPropsA = () => {
 }
 
 LayoutPropsA.layout = SSRLayout
+LayoutPropsA.layoutProps = { title: 'Page A Title' }
 
 export default LayoutPropsA

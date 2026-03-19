@@ -79,38 +79,43 @@ export function createLayoutPropsStore(): LayoutPropsStore {
   }
 }
 
-/**
- * Merges layout props from three sources with priority: dynamic > static > defaults.
- * Only keys present in `defaults` are included in the result.
- *
- * @example
- * ```ts
- * mergeLayoutProps(
- *   { title: 'Default', showSidebar: true },  // defaults declared in useLayoutProps()
- *   { title: 'My Page', color: 'blue' },       // static props from layout definition
- *   { showSidebar: false, fontSize: 16 },       // dynamic props from setLayoutProps()
- * )
- * // => { title: 'My Page', showSidebar: false }
- * // 'color' and 'fontSize' are excluded because they're not declared in defaults
- * ```
- */
-export function mergeLayoutProps<T extends Record<string, unknown>>(
-  defaults: T,
-  staticProps: Record<string, unknown>,
-  dynamicProps: Record<string, unknown>,
-): T {
-  const result: Record<string, unknown> = { ...defaults }
+export interface EvaluatedLayoutProps {
+  shared: Record<string, unknown>
+  named: Record<string, Record<string, unknown>>
+}
 
-  for (const key of Object.keys(defaults)) {
-    if (key in staticProps && staticProps[key] !== undefined) {
-      result[key] = staticProps[key]
-    }
-    if (key in dynamicProps && dynamicProps[key] !== undefined) {
-      result[key] = dynamicProps[key]
-    }
+type LayoutPropsHelper = {
+  (props: Record<string, unknown>): void
+  (name: string, props: Record<string, unknown>): void
+}
+
+export function evaluateLayoutProps(layoutProps: unknown, pageProps: Record<string, unknown>): EvaluatedLayoutProps {
+  if (!layoutProps) {
+    return { shared: {}, named: {} }
   }
 
-  return result as T
+  if (typeof layoutProps === 'function') {
+    const shared: Record<string, unknown> = {}
+    const named: Record<string, Record<string, unknown>> = {}
+
+    const helper: LayoutPropsHelper = (...args: unknown[]) => {
+      if (typeof args[0] === 'string') {
+        named[args[0] as string] = { ...(named[args[0] as string] || {}), ...(args[1] as Record<string, unknown>) }
+      } else {
+        Object.assign(shared, args[0] as Record<string, unknown>)
+      }
+    }
+
+    layoutProps(helper, pageProps)
+
+    return { shared, named }
+  }
+
+  if (typeof layoutProps === 'object' && !Array.isArray(layoutProps)) {
+    return { shared: layoutProps as Record<string, unknown>, named: {} }
+  }
+
+  return { shared: {}, named: {} }
 }
 
 type ComponentCheck<T> = (value: unknown) => value is T

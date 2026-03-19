@@ -6,6 +6,7 @@ export type LayoutComponent = ComponentType<{ children: ReactNode }>
 
 export type ReactComponent = ComponentType<any> & {
   layout?: LayoutComponent | LayoutComponent[] | LayoutFunction
+  layoutProps?: unknown
 }
 
 export type ReactPageHandlerArgs = Parameters<PageHandler<ComponentType>>[0]

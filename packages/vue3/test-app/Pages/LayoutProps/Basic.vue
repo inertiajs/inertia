@@ -3,6 +3,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 
 export default {
   layout: AppLayout,
+  layoutProps: { title: 'Basic Layout Props', showSidebar: true },
 }
 </script>
 
@@ -23,10 +24,6 @@ watch(
   },
   { immediate: true },
 )
-
-setLayoutProps({
-  title: 'Basic Layout Props',
-})
 </script>
 
 <template>

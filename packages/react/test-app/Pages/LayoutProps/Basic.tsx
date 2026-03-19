@@ -5,9 +5,7 @@ import AppLayout from '../../Layouts/AppLayout'
 const Basic = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true)
 
-  // Call setLayoutProps during render (not in useEffect) so it runs before the layout renders
   setLayoutProps({
-    title: 'Basic Layout Props',
     showSidebar: sidebarVisible,
   })
 
@@ -31,5 +29,6 @@ const Basic = () => {
 }
 
 Basic.layout = AppLayout
+Basic.layoutProps = { title: 'Basic Layout Props', showSidebar: true }
 
 export default Basic

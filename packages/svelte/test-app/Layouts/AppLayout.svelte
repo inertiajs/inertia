@@ -1,30 +1,26 @@
 <script lang="ts">
-  import { useLayoutProps } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
 
   interface Props {
+    title?: string
+    showSidebar?: boolean
+    theme?: string
     children?: import('svelte').Snippet
   }
 
-  let { children }: Props = $props()
+  let { title = 'Default Title', showSidebar = true, theme = 'light', children }: Props = $props()
 
   onMount(() => {
     window._inertia_app_layout_id = crypto.randomUUID()
   })
-
-  const layoutProps = useLayoutProps({
-    title: 'Default Title',
-    showSidebar: true,
-    theme: 'light',
-  })
 </script>
 
-<div data-theme={layoutProps.theme} class="app-layout">
+<div data-theme={theme} class="app-layout">
   <header>
-    <h1 class="app-title">{layoutProps.title}</h1>
+    <h1 class="app-title">{title}</h1>
   </header>
   <div class="app-content">
-    {#if layoutProps.showSidebar}
+    {#if showSidebar}
       <aside class="sidebar">
         <span>Sidebar</span>
       </aside>

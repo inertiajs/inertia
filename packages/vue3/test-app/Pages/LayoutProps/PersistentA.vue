@@ -7,19 +7,15 @@ export default {
     app: AppLayout,
     content: ContentLayout,
   },
+  layoutProps: (layout: (...args: unknown[]) => void) => {
+    layout({ title: 'Persistent Page A' })
+    layout('content', { padding: 'lg' })
+  },
 }
 </script>
 
 <script setup lang="ts">
-import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/vue3'
-
-setLayoutProps({
-  title: 'Persistent Page A',
-})
-
-setLayoutPropsFor('content', {
-  padding: 'lg',
-})
+import { Link } from '@inertiajs/vue3'
 </script>
 
 <template>

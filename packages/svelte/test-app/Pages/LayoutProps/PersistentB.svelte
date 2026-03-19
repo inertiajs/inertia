@@ -6,18 +6,14 @@
     app: AppLayout,
     content: ContentLayout,
   }
+  export const layoutProps = (layout: (...args: unknown[]) => void) => {
+    layout({ title: 'Persistent Page B' })
+    layout('content', { padding: 'xl' })
+  }
 </script>
 
 <script lang="ts">
-  import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/svelte'
-
-  setLayoutProps({
-    title: 'Persistent Page B',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-  })
+  import { Link } from '@inertiajs/svelte'
 </script>
 
 <div>

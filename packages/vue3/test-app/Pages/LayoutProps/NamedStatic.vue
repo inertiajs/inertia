@@ -7,27 +7,23 @@ export default {
     app: [AppLayout, { theme: 'dark' }],
     content: [ContentLayout, { padding: 'sm' }],
   },
+  layoutProps: (layout: (...args: unknown[]) => void) => {
+    layout({ title: 'Named Layouts with Static Props' })
+    layout('content', { maxWidth: '4xl' })
+  },
 }
 </script>
 
 <script setup lang="ts">
-import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/vue3'
-
-setLayoutProps({
-  title: 'Named Layouts with Static Props',
-})
-
-setLayoutPropsFor('content', {
-  maxWidth: '4xl',
-})
+import { Link } from '@inertiajs/vue3'
 </script>
 
 <template>
   <div>
     <h2>Named Layouts with Static Props</h2>
     <p>This page uses named layouts with both static and dynamic props.</p>
-    <p>AppLayout: title from setLayoutProps, theme="dark" (static)</p>
-    <p>ContentLayout: padding="sm" (static), maxWidth="4xl" (from setLayoutPropsFor)</p>
+    <p>AppLayout: title from layoutProps, theme="dark" (static)</p>
+    <p>ContentLayout: padding="sm" (static), maxWidth="4xl" (from layoutProps)</p>
 
     <nav>
       <Link href="/layout-props/basic">Go to Basic Page</Link>

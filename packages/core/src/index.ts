@@ -15,8 +15,9 @@ export { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpE
 export { default as useInfiniteScroll } from './infiniteScroll'
 export {
   createLayoutPropsStore,
-  mergeLayoutProps,
+  evaluateLayoutProps,
   normalizeLayouts,
+  type EvaluatedLayoutProps,
   type LayoutDefinition,
   type LayoutPropsStore,
 } from './layout'
