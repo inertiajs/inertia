@@ -18,12 +18,8 @@ const NamedStatic = () => {
 }
 
 NamedStatic.layout = {
-  app: [AppLayout, { theme: 'dark' }],
-  content: [ContentLayout, { padding: 'sm' }],
-}
-NamedStatic.layoutProps = (layout: (...args: unknown[]) => void) => {
-  layout({ title: 'Named Layouts with Static Props' })
-  layout('content', { maxWidth: '4xl' })
+  app: [AppLayout, { title: 'Named Layouts with Static Props', theme: 'dark' }],
+  content: [ContentLayout, { padding: 'sm', maxWidth: '4xl' }],
 }
 
 export default NamedStatic

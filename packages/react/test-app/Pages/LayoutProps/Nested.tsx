@@ -18,9 +18,8 @@ const Nested = () => {
 }
 
 Nested.layout = [
-  [AppLayout, { title: 'Nested Layouts', showSidebar: true }],
-  [ContentLayout, { padding: 'lg' }],
+  [AppLayout, { title: 'Nested Layouts', showSidebar: true, theme: 'dark' }],
+  [ContentLayout, { padding: 'lg', maxWidth: 'xl' }],
 ]
-Nested.layoutProps = { theme: 'dark', maxWidth: 'xl' }
 
 export default Nested

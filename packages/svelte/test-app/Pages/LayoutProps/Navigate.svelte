@@ -1,8 +1,7 @@
 <script module lang="ts">
   import AppLayout from '@/Layouts/AppLayout.svelte'
 
-  export const layout = AppLayout
-  export const layoutProps = { title: 'Navigate Page', showSidebar: false, theme: 'dark' }
+  export const layout = [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }]
 </script>
 
 <script lang="ts">

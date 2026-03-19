@@ -3,12 +3,8 @@
   import ContentLayout from '@/Layouts/ContentLayout.svelte'
 
   export const layout = {
-    app: AppLayout,
-    content: ContentLayout,
-  }
-  export const layoutProps = (layout: (...args: unknown[]) => void) => {
-    layout({ title: 'Persistent Page A' })
-    layout('content', { padding: 'lg' })
+    app: [AppLayout, { title: 'Persistent Page A' }],
+    content: [ContentLayout, { padding: 'lg' }],
   }
 </script>
 

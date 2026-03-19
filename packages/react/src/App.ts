@@ -1,6 +1,5 @@
 import {
   createHeadManager,
-  evaluateLayoutProps,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
   normalizeLayouts,
@@ -161,16 +160,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const layouts = normalizeLayouts(effectiveLayout, isComponent, Component.layout ? isRenderFunction : undefined)
 
       if (layouts.length > 0) {
-        const staticProps = evaluateLayoutProps(Component.layoutProps, props)
-
         return layouts.reduceRight((childNode, layout) => {
           return createElement(
             layout.component,
             {
               ...props,
               ...layout.props,
-              ...staticProps.shared,
-              ...(layout.name ? staticProps.named[layout.name] || {} : {}),
               ...dynamicLayoutProps.shared,
               ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
             },

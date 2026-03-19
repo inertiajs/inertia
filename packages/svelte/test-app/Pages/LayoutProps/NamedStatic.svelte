@@ -3,12 +3,8 @@
   import ContentLayout from '@/Layouts/ContentLayout.svelte'
 
   export const layout = {
-    app: [AppLayout, { theme: 'dark' }],
-    content: [ContentLayout, { padding: 'sm' }],
-  }
-  export const layoutProps = (layout: (...args: unknown[]) => void) => {
-    layout({ title: 'Named Layouts with Static Props' })
-    layout('content', { maxWidth: '4xl' })
+    app: [AppLayout, { title: 'Named Layouts with Static Props', theme: 'dark' }],
+    content: [ContentLayout, { padding: 'sm', maxWidth: '4xl' }],
   }
 </script>
 

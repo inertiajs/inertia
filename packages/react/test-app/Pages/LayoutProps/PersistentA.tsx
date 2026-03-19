@@ -15,12 +15,8 @@ const PersistentA = () => {
 }
 
 PersistentA.layout = {
-  app: AppLayout,
-  content: ContentLayout,
-}
-PersistentA.layoutProps = (layout: (...args: unknown[]) => void) => {
-  layout({ title: 'Persistent Page A' })
-  layout('content', { padding: 'lg' })
+  app: [AppLayout, { title: 'Persistent Page A' }],
+  content: [ContentLayout, { padding: 'lg' }],
 }
 
 export default PersistentA

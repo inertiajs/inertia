@@ -124,7 +124,7 @@ test.describe('layout props', () => {
     expect(consoleMessages.errors).toHaveLength(0)
   })
 
-  test('it hydrates without errors on a page that uses Component.layoutProps', async ({ page, browserName }) => {
+  test('it hydrates without errors on a page that uses layout tuple props', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
     consoleMessages.listen(page)
 
@@ -137,7 +137,7 @@ test.describe('layout props', () => {
     expect(consoleMessages.errors).toHaveLength(0)
   })
 
-  test('it renders Component.layoutProps values in SSR HTML', async ({ page, browserName }) => {
+  test('it renders layout tuple props in SSR HTML', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
 
     const response = await page.request.get('/ssr/layout-props-a')
@@ -145,30 +145,6 @@ test.describe('layout props', () => {
 
     expect(html).toContain('Page A Title')
     expect(html).toContain('Page A Content')
-  })
-
-  test('it supports the function form of Component.layoutProps in SSR', async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
-
-    const response = await page.request.get('/ssr/layout-props-fn')
-    const html = await response.text()
-
-    expect(html).toContain('Function Form Title')
-    expect(html).toContain('Function Form Content')
-  })
-
-  test('it hydrates Component.layoutProps with function form without errors', async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
-    consoleMessages.listen(page)
-
-    await page.goto('/ssr/layout-props-fn')
-
-    await expect(page.getByTestId('layout-title')).toHaveText('Function Form Title')
-    await expect(page.getByTestId('page-content')).toHaveText('Function Form Content')
-
-    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
-    expect(hydrationErrors).toHaveLength(0)
-    expect(consoleMessages.errors).toHaveLength(0)
   })
 })
 

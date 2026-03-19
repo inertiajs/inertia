@@ -8,7 +8,6 @@ const LayoutPropsA = () => {
   )
 }
 
-LayoutPropsA.layout = SSRLayout
-LayoutPropsA.layoutProps = { title: 'Page A Title' }
+LayoutPropsA.layout = [SSRLayout, { title: 'Page A Title' }]
 
 export default LayoutPropsA

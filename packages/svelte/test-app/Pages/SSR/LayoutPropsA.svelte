@@ -1,8 +1,7 @@
 <script lang="ts" module>
   import SSRLayout from '../../Layouts/SSRLayout.svelte'
 
-  export const layout = SSRLayout
-  export const layoutProps = { title: 'Page A Title' }
+  export const layout = [SSRLayout, { title: 'Page A Title' }]
 </script>
 
 <div>

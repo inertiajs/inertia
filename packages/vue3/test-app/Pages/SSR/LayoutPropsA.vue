@@ -2,8 +2,7 @@
 import SSRLayout from '../../Layouts/SSRLayout.vue'
 
 defineOptions({
-  layout: SSRLayout,
-  layoutProps: { title: 'Page A Title' },
+  layout: [SSRLayout, { title: 'Page A Title' }],
 })
 </script>
 

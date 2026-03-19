@@ -2,8 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 export default {
-  layout: AppLayout,
-  layoutProps: { title: 'Navigate Page', showSidebar: false, theme: 'dark' },
+  layout: [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }],
 }
 </script>
 

@@ -1,6 +1,5 @@
 import {
   createHeadManager,
-  evaluateLayoutProps,
   HeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
@@ -175,7 +174,6 @@ const App: InertiaApp = defineComponent({
           )
 
           if (layouts.length > 0) {
-            const staticProps = evaluateLayoutProps(component.value.layoutProps, page.value!.props)
             const dynamicProps = isServer ? { shared: {}, named: {} } : layoutPropsState.value
 
             return layouts.reduceRight((childNode, layout) => {
@@ -187,8 +185,6 @@ const App: InertiaApp = defineComponent({
                 {
                   ...page.value!.props,
                   ...layout.props,
-                  ...staticProps.shared,
-                  ...(layout.name ? staticProps.named[layout.name] || {} : {}),
                   ...dynamicProps.shared,
                   ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
                 },

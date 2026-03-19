@@ -15,7 +15,6 @@ const Navigate = () => {
   )
 }
 
-Navigate.layout = AppLayout
-Navigate.layoutProps = { title: 'Navigate Page', showSidebar: false, theme: 'dark' }
+Navigate.layout = [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }]
 
 export default Navigate

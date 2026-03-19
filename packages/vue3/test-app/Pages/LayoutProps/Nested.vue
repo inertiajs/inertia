@@ -4,10 +4,9 @@ import ContentLayout from '@/Layouts/ContentLayout.vue'
 
 export default {
   layout: [
-    [AppLayout, { title: 'Nested Layouts', showSidebar: true }],
-    [ContentLayout, { padding: 'lg' }],
+    [AppLayout, { title: 'Nested Layouts', showSidebar: true, theme: 'dark' }],
+    [ContentLayout, { padding: 'lg', maxWidth: 'xl' }],
   ],
-  layoutProps: { theme: 'dark', maxWidth: 'xl' },
 }
 </script>
 

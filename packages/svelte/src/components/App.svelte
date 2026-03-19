@@ -13,7 +13,7 @@
 <script lang="ts">
   import type { Component } from 'svelte'
   import type { LayoutType, LayoutResolver } from '../types'
-  import { evaluateLayoutProps, normalizeLayouts } from '@inertiajs/core'
+  import { normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page.svelte'
@@ -100,9 +100,7 @@
 
     const effectiveLayout = (component.layout ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
 
-    return effectiveLayout
-      ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout, component)
-      : child
+    return effectiveLayout ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout) : child
   }
 
   function resolveLayout(
@@ -111,7 +109,6 @@
     pageProps: PageProps,
     key: number | null,
     isFromPage: boolean = true,
-    comp?: ResolvedComponent,
   ): RenderProps {
     if (isFromPage && isRenderFunction(layout)) {
       return (layout as LayoutResolver)(h, child)
@@ -120,7 +117,6 @@
     const layouts = normalizeLayouts(layout, isComponent, isFromPage ? isRenderFunction : undefined)
 
     if (layouts.length > 0) {
-      const staticProps = evaluateLayoutProps(comp?.layoutProps, pageProps)
       const dynamicProps = isServer ? { shared: {}, named: {} } : { shared: storeState.shared, named: storeState.named }
 
       return layouts.reduceRight((child, layout) => {
@@ -130,8 +126,6 @@
             {
               ...pageProps,
               ...layout.props,
-              ...staticProps.shared,
-              ...(layout.name ? staticProps.named[layout.name] || {} : {}),
               ...dynamicProps.shared,
               ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
             },

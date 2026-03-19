@@ -84,13 +84,6 @@ app.get('/ssr/layout-props-b', (req, res) =>
   }),
 )
 
-app.get('/ssr/layout-props-fn', (req, res) =>
-  inertia.renderSSR(req, res, {
-    component: 'SSR/LayoutPropsFn',
-    props: { pageTitle: 'Function Form Title' },
-  }),
-)
-
 // SSR auto-transform test routes (uses the Vite plugin SSR transform)
 app.get('/ssr-auto/page1', (req, res) =>
   inertia.renderSSRAuto(req, res, {

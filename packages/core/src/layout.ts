@@ -79,45 +79,6 @@ export function createLayoutPropsStore(): LayoutPropsStore {
   }
 }
 
-export interface EvaluatedLayoutProps {
-  shared: Record<string, unknown>
-  named: Record<string, Record<string, unknown>>
-}
-
-type LayoutPropsHelper = {
-  (props: Record<string, unknown>): void
-  (name: string, props: Record<string, unknown>): void
-}
-
-export function evaluateLayoutProps(layoutProps: unknown, pageProps: Record<string, unknown>): EvaluatedLayoutProps {
-  if (!layoutProps) {
-    return { shared: {}, named: {} }
-  }
-
-  if (typeof layoutProps === 'function') {
-    const shared: Record<string, unknown> = {}
-    const named: Record<string, Record<string, unknown>> = {}
-
-    const helper: LayoutPropsHelper = (...args: unknown[]) => {
-      if (typeof args[0] === 'string') {
-        named[args[0] as string] = { ...(named[args[0] as string] || {}), ...(args[1] as Record<string, unknown>) }
-      } else {
-        Object.assign(shared, args[0] as Record<string, unknown>)
-      }
-    }
-
-    layoutProps(helper, pageProps)
-
-    return { shared, named }
-  }
-
-  if (typeof layoutProps === 'object' && !Array.isArray(layoutProps)) {
-    return { shared: layoutProps as Record<string, unknown>, named: {} }
-  }
-
-  return { shared: {}, named: {} }
-}
-
 type ComponentCheck<T> = (value: unknown) => value is T
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

@@ -3,10 +3,9 @@
   import ContentLayout from '@/Layouts/ContentLayout.svelte'
 
   export const layout = [
-    [AppLayout, { title: 'Nested Layouts', showSidebar: true }],
-    [ContentLayout, { padding: 'lg' }],
+    [AppLayout, { title: 'Nested Layouts', showSidebar: true, theme: 'dark' }],
+    [ContentLayout, { padding: 'lg', maxWidth: 'xl' }],
   ]
-  export const layoutProps = { theme: 'dark', maxWidth: 'xl' }
 </script>
 
 <script lang="ts">

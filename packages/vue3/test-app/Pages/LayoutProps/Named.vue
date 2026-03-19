@@ -4,13 +4,8 @@ import ContentLayout from '@/Layouts/ContentLayout.vue'
 
 export default {
   layout: {
-    app: AppLayout,
-    content: ContentLayout,
-  },
-  layoutProps: (layout: (...args: unknown[]) => void) => {
-    layout({ title: 'Named Layouts Page' })
-    layout('app', { showSidebar: true, theme: 'light' })
-    layout('content', { padding: 'xl', maxWidth: '2xl' })
+    app: [AppLayout, { title: 'Named Layouts Page', showSidebar: true, theme: 'light' }],
+    content: [ContentLayout, { padding: 'xl', maxWidth: '2xl' }],
   },
 }
 </script>

@@ -2,8 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 export default {
-  layout: AppLayout,
-  layoutProps: { title: 'Basic Layout Props', showSidebar: true },
+  layout: [AppLayout, { title: 'Basic Layout Props', showSidebar: true }],
 }
 </script>
 

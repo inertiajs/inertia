@@ -4,12 +4,8 @@ import ContentLayout from '@/Layouts/ContentLayout.vue'
 
 export default {
   layout: {
-    app: AppLayout,
-    content: ContentLayout,
-  },
-  layoutProps: (layout: (...args: unknown[]) => void) => {
-    layout({ title: 'Persistent Page B' })
-    layout('content', { padding: 'xl' })
+    app: [AppLayout, { title: 'Persistent Page B' }],
+    content: [ContentLayout, { padding: 'xl' }],
   },
 }
 </script>

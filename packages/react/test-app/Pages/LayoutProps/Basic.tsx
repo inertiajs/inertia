@@ -28,7 +28,6 @@ const Basic = () => {
   )
 }
 
-Basic.layout = AppLayout
-Basic.layoutProps = { title: 'Basic Layout Props', showSidebar: true }
+Basic.layout = [AppLayout, { title: 'Basic Layout Props', showSidebar: true }]
 
 export default Basic
