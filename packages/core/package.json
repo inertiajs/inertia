@@ -61,7 +61,7 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "2.0.0-beta.3"
+    "laravel-precognition": "2.0.0-beta.5"
   },
   "peerDependencies": {
     "axios": "^1.13.2"
