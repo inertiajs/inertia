@@ -1,4 +1,4 @@
-import { get } from 'lodash-es'
+import { get } from 'es-toolkit/compat'
 import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'

@@ -10,6 +10,8 @@ import {
   UseFormUtils,
   UseFormWithPrecognitionArguments,
 } from '@inertiajs/core'
+import { cloneDeep, isEqual } from 'es-toolkit'
+import { get, has, set } from 'es-toolkit/compat'
 import {
   createValidator,
   NamedInputEvent,
@@ -18,7 +20,6 @@ import {
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { config } from '.'
 

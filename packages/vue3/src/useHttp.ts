@@ -24,8 +24,8 @@ import {
   UseHttpSubmitArguments,
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
+import { cloneDeep } from 'es-toolkit'
 import { NamedInputEvent, toSimpleValidationErrors, ValidationConfig, Validator } from 'laravel-precognition'
-import { cloneDeep } from 'lodash-es'
 import useFormState from './useFormState'
 
 export interface UseHttpProps<TForm extends object, TResponse = unknown> {

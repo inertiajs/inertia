@@ -8,7 +8,7 @@ const withDeps = process.argv.slice(1).includes('--with-deps')
 
 // For regular builds, externalize all dependencies to keep the bundle size small (using nodeExternalsPlugin).
 // For builds with dependencies, only externalize peer dependencies and bundle everything
-// else so we can check ES2020 compatibility without checking framework code.
+// else so we can check ES2022 compatibility without checking framework code.
 let externalDependencies = undefined
 
 if (withDeps) {
@@ -20,7 +20,7 @@ const config = {
   bundle: true,
   minify: false,
   sourcemap: withDeps ? false : true,
-  target: 'es2020',
+  target: 'es2022',
   external: externalDependencies,
   plugins: [
     ...(withDeps ? [] : [nodeExternalsPlugin()]),

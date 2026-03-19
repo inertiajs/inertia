@@ -1,6 +1,6 @@
 <script lang="ts">
   import { useForm } from '@inertiajs/svelte'
-  import { isEqual } from 'lodash-es'
+  import { isEqual } from 'es-toolkit'
 
   const form = useForm({
     name: '',

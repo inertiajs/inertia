@@ -99,7 +99,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           sourcemap: ssr.sourcemap !== false ? (config.build?.sourcemap ?? true) : undefined,
           rollupOptions: ssrEntry
             ? {
-                input: config.build?.rollupOptions?.input ?? ssrEntry,
+                input: config.build?.rollupOptions?.input ?? (config.build as any)?.rolldownOptions?.input ?? ssrEntry,
               }
             : undefined,
         },

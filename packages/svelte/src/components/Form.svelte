@@ -16,7 +16,7 @@
     UseFormUtils,
   } from '@inertiajs/core'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
-  import { isEqual } from 'lodash-es'
+  import { isEqual } from 'es-toolkit'
   import { onMount } from 'svelte'
   import { setFormContext } from './formContext'
   import useForm from '../useForm.svelte'

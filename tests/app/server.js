@@ -119,6 +119,16 @@ app.get('/ssr-auto/with-app', (req, res) =>
   }),
 )
 
+app.get('/ssr/infinite-scroll', (req, res) => {
+  const { paginated, scrollProp } = paginateUsers(1, 15, 40)
+
+  return inertia.renderSSR(req, res, {
+    component: 'SSR/InfiniteScroll',
+    props: { users: paginated },
+    scrollProps: { users: scrollProp },
+  })
+})
+
 // createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {

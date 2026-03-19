@@ -1,4 +1,5 @@
-import { cloneDeep, get } from 'lodash-es'
+import { cloneDeep } from 'es-toolkit'
+import { get } from 'es-toolkit/compat'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
