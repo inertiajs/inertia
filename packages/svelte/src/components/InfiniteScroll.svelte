@@ -8,6 +8,9 @@
     useInfiniteScroll,
   } from '@inertiajs/core'
   import { onDestroy, onMount } from 'svelte'
+  import { usePage } from '../page'
+
+  const page = usePage()
 
   export let data: InfiniteScrollComponentBaseProps['data']
   export let buffer: InfiniteScrollComponentBaseProps['buffer'] = 0
@@ -29,8 +32,9 @@
   let loadingPrevious = false
   let loadingNext = false
   let requestCount = 0
-  let hasPreviousPage = false
-  let hasNextPage = false
+  const scrollProp = $page.scrollProps?.[data]
+  let hasPreviousPage = !!scrollProp?.previousPage
+  let hasNextPage = !!scrollProp?.nextPage
 
   $: resolvedItemsElement = resolveHTMLElement(itemsElement, itemsElementRef)
   $: scrollableParent = resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null

@@ -70,6 +70,17 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+app.get('/ssr/infinite-scroll', (req, res) => {
+  const { paginated, scrollProp } = paginateUsers(1, 15, 40)
+
+  return inertia.renderSSR(req, res, {
+    component: 'SSR/InfiniteScroll',
+    props: { users: paginated },
+    scrollProps: { users: scrollProp },
+  })
+})
+
+
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
