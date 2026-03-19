@@ -3042,6 +3042,10 @@ app.post('/api/mixed', upload.any(), (req, res) => {
   })
 })
 
+app.post('/api/no-content', upload.none(), (req, res) => {
+  res.status(204).send()
+})
+
 app.get('/use-http', (req, res) => inertia.render(req, res, { component: 'UseHttp/Index' }))
 app.get('/use-http/methods', (req, res) => inertia.render(req, res, { component: 'UseHttp/Methods' }))
 app.get('/use-http/file-upload', (req, res) => inertia.render(req, res, { component: 'UseHttp/FileUpload' }))

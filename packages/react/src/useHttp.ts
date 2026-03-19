@@ -242,7 +242,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           },
         })
 
-        const responseData = JSON.parse(httpResponse.data) as TResponse
+        const responseData = (httpResponse.data ? JSON.parse(httpResponse.data) : null) as TResponse
 
         if (httpResponse.status >= 200 && httpResponse.status < 300) {
           if (isMounted.current) {

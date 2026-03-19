@@ -221,7 +221,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         },
       })
 
-      const responseData = JSON.parse(response.data) as TResponse
+      const responseData = (response.data ? JSON.parse(response.data) : null) as TResponse
 
       if (response.status >= 200 && response.status < 300) {
         markAsSuccessful()
