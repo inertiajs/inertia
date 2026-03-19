@@ -8,7 +8,16 @@ import {
   PageProps,
   router,
 } from '@inertiajs/core'
-import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import {
+  createElement,
+  FunctionComponent,
+  isValidElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
 import { resetLayoutProps, store } from './layoutProps'
@@ -153,7 +162,30 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const child = createElement(Component, { key, ...props })
 
       if (Component.layout && isRenderFunction(Component.layout)) {
-        return (Component.layout as LayoutFunction)(child)
+        const result = (Component.layout as Function)(props)
+
+        if (isValidElement(result)) {
+          return (Component.layout as LayoutFunction)(child)
+        }
+
+        const layouts = normalizeLayouts(result, isComponent)
+
+        if (layouts.length > 0) {
+          return layouts.reduceRight((childNode, layout) => {
+            return createElement(
+              layout.component,
+              {
+                ...props,
+                ...layout.props,
+                ...dynamicLayoutProps.shared,
+                ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
+              },
+              childNode,
+            )
+          }, child)
+        }
+
+        return child
       }
 
       const effectiveLayout = Component.layout ?? defaultLayout?.(current.page.component, current.page)

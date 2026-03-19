@@ -91,8 +91,6 @@ test.describe('SSR', () => {
 
 test.describe('layout props', () => {
   test('it does not leak layout props between SSR requests', async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
-
     const responseA = await page.request.get('/ssr/layout-props-a')
     const htmlA = await responseA.text()
 
@@ -110,7 +108,6 @@ test.describe('layout props', () => {
     page,
     browserName,
   }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
     consoleMessages.listen(page)
 
     await page.request.get('/ssr/layout-props-a')
@@ -125,7 +122,6 @@ test.describe('layout props', () => {
   })
 
   test('it hydrates without errors on a page that uses layout tuple props', async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
     consoleMessages.listen(page)
 
     await page.goto('/ssr/layout-props-a')
@@ -138,13 +134,32 @@ test.describe('layout props', () => {
   })
 
   test('it renders layout tuple props in SSR HTML', async ({ page, browserName }) => {
-    test.skip(browserName !== 'chromium', 'SSR store leak test only needs one browser')
-
     const response = await page.request.get('/ssr/layout-props-a')
     const html = await response.text()
 
     expect(html).toContain('Page A Title')
     expect(html).toContain('Page A Content')
+  })
+
+  test('it supports a layout callback that receives page props during SSR', async ({ page, browserName }) => {
+    const response = await page.request.get('/ssr/layout-props-callback')
+    const html = await response.text()
+
+    expect(html).toContain('Profile: Callback Title')
+    expect(html).toContain('Callback Content')
+  })
+
+  test('it hydrates a layout callback page without errors', async ({ page, browserName }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layout-props-callback')
+
+    await expect(page.getByTestId('layout-title')).toHaveText('Profile: Callback Title')
+    await expect(page.getByTestId('page-content')).toHaveText('Callback Content')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
   })
 })
 

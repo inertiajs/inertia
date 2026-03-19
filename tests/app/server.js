@@ -84,6 +84,13 @@ app.get('/ssr/layout-props-b', (req, res) =>
   }),
 )
 
+app.get('/ssr/layout-props-callback', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/LayoutPropsCallback',
+    props: { pageTitle: 'Callback Title' },
+  }),
+)
+
 // SSR auto-transform test routes (uses the Vite plugin SSR transform)
 app.get('/ssr-auto/page1', (req, res) =>
   inertia.renderSSRAuto(req, res, {
@@ -904,6 +911,7 @@ app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {})
 app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
 app.get('/layout-props/persistent-a', (req, res) => inertia.render(req, res, {}))
 app.get('/layout-props/persistent-b', (req, res) => inertia.render(req, res, {}))
+app.get('/layout-props/callback', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
 
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),

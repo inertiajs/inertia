@@ -164,7 +164,18 @@ const App: InertiaApp = defineComponent({
           return (component.value.layout as Function)(h, child)
         }
 
-        const effectiveLayout = component.value.layout ?? defaultLayout?.(page.value!.component, page.value!)
+        let effectiveLayout: unknown
+        const layoutValue = component.value.layout
+
+        if (
+          typeof layoutValue === 'function' &&
+          (layoutValue as Function).length <= 1 &&
+          typeof (layoutValue as Function).prototype === 'undefined'
+        ) {
+          effectiveLayout = (layoutValue as Function)(page.value!.props)
+        } else {
+          effectiveLayout = layoutValue ?? defaultLayout?.(page.value!.component, page.value!)
+        }
 
         if (effectiveLayout) {
           const layouts = normalizeLayouts(

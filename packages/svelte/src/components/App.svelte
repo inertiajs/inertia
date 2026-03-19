@@ -98,7 +98,18 @@
       return (component.layout as LayoutResolver)(h, child)
     }
 
-    const effectiveLayout = (component.layout ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
+    let effectiveLayout: LayoutType | undefined
+    const layoutValue = component.layout
+
+    if (
+      typeof layoutValue === 'function' &&
+      (layoutValue as Function).length <= 1 &&
+      typeof (layoutValue as Function).prototype === 'undefined'
+    ) {
+      effectiveLayout = (layoutValue as Function)(page.props) as LayoutType | undefined
+    } else {
+      effectiveLayout = (layoutValue ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
+    }
 
     return effectiveLayout ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout) : child
   }
