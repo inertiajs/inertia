@@ -8,6 +8,7 @@ import {
   useInfiniteScroll,
 } from '@inertiajs/core'
 import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
+import { usePage } from './app'
 
 // Vue-specific element resolver
 const resolveHTMLElement = (
@@ -159,6 +160,15 @@ const InfiniteScroll = defineComponent({
     })
 
     syncStateFromDataManager()
+
+    if (typeof window === 'undefined') {
+      const scrollProp = usePage().scrollProps?.[props.data]
+
+      if (scrollProp) {
+        hasPreviousPage.value = !!scrollProp.previousPage
+        hasNextPage.value = !!scrollProp.nextPage
+      }
+    }
 
     const autoLoad = computed<boolean>(() => !manualMode.value)
     const manualMode = computed<boolean>(
