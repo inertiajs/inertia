@@ -23,8 +23,7 @@ const layout: LayoutCallback = (props) => {
 export default { layout }
 </script>
 
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div />

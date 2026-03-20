@@ -1,7 +1,7 @@
 <script module lang="ts">
   import AppLayout from '@/Layouts/AppLayout.svelte'
 
-  export const layout = (props: Record<string, unknown>) => [
+  export const layout = (props: { userName: string }) => [
     AppLayout,
     { title: 'Profile: ' + props.userName, showSidebar: false },
   ]

@@ -2,7 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 export default {
-  layout: (props: Record<string, unknown>) => [AppLayout, { title: 'Profile: ' + props.userName, showSidebar: false }],
+  layout: (props: { userName: string }) => [AppLayout, { title: 'Profile: ' + props.userName, showSidebar: false }],
 }
 </script>
 

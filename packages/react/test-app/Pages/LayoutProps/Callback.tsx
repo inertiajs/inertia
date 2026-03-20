@@ -14,7 +14,7 @@ const Callback = () => {
   )
 }
 
-Callback.layout = (props: Record<string, unknown>) => [
+Callback.layout = (props: { userName: string }) => [
   AppLayout,
   { title: 'Profile: ' + props.userName, showSidebar: false },
 ]
