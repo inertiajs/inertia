@@ -14,7 +14,7 @@ export { default as createInertiaApp } from './createInertiaApp'
 export { resetLayoutProps, setLayoutProps, setLayoutPropsFor } from './layoutProps.svelte'
 export { default as inertia } from './link'
 export { default as page, usePage } from './page.svelte'
-export { type ResolvedComponent, type SvelteInertiaAppConfig } from './types'
+export { type LayoutCallback, type ResolvedComponent, type SvelteInertiaAppConfig } from './types'
 export {
   default as useForm,
   type InertiaForm,

@@ -9,6 +9,8 @@ export type ComponentResolver = (
 
 export type LayoutResolver = (h: RenderFunction, page: RenderProps) => RenderProps
 
+export type LayoutCallback = (props: SharedPageProps) => unknown
+
 /**
  * Layout tuple: [Component, { props }]
  */
@@ -32,6 +34,7 @@ export type NamedLayouts = Record<string, Component | LayoutTuple | LayoutObject
  */
 export type LayoutType =
   | LayoutResolver
+  | LayoutCallback
   | Component
   | Component[]
   | LayoutTuple
