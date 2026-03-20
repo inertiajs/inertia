@@ -58,7 +58,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
     <K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): void
     (errors: FormDataErrors<TForm>): void
   }
-  submit: (...args: UseHttpSubmitArguments<TResponse, TForm>) => Promise<TResponse>
+  submit: <R = TResponse>(...args: UseHttpSubmitArguments<R, TForm>) => Promise<R>
   get: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
   post: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
   put: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>

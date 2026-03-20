@@ -15,9 +15,15 @@
     email: '',
   })
 
+  const untypedForm = useHttp<{ name: string; email: string }>({
+    name: '',
+    email: '',
+  })
+
   let submitResult: UserResponse | null = $state(null)
   let submitWithMethodResult: UserResponse | null = $state(null)
   let submitWithWayfinderResult: UserResponse | null = $state(null)
+  let submitOverrideResult: UserResponse | null = $state(null)
 
   const performSubmit = async () => {
     try {
@@ -43,6 +49,15 @@
       submitWithWayfinderResult = result
     } catch (e) {
       console.error('Submit with wayfinder failed:', e)
+    }
+  }
+
+  const performSubmitWithOverride = async () => {
+    try {
+      const result = await untypedForm.submit<UserResponse>('post', '/api/users')
+      submitOverrideResult = result
+    } catch (e) {
+      console.error('Submit with type override failed:', e)
     }
   }
 </script>
@@ -92,6 +107,26 @@
     {#if submitWithWayfinderResult}
       <div id="submit-wayfinder-result">
         PATCH Success - ID: {submitWithWayfinderResult.id}, Name: {submitWithWayfinderResult.user.name}, Email: {submitWithWayfinderResult
+          .user.email}
+      </div>
+    {/if}
+  </section>
+
+  <!-- Submit with response type override -->
+  <section id="submit-override-test">
+    <h2>Submit with response type override</h2>
+    <label>
+      Name
+      <input type="text" id="submit-override-name" bind:value={untypedForm.name} />
+    </label>
+    <label>
+      Email
+      <input type="email" id="submit-override-email" bind:value={untypedForm.email} />
+    </label>
+    <button onclick={performSubmitWithOverride} id="submit-override-button">Submit (typed at call site)</button>
+    {#if submitOverrideResult}
+      <div id="submit-override-result">
+        Override Success - ID: {submitOverrideResult.id}, Name: {submitOverrideResult.user.name}, Email: {submitOverrideResult
           .user.email}
       </div>
     {/if}

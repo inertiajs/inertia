@@ -52,7 +52,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
-  submit(...args: UseHttpSubmitArguments<TResponse, TForm>): Promise<TResponse>
+  submit<R = TResponse>(...args: UseHttpSubmitArguments<R, TForm>): Promise<R>
   get<R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>): Promise<R>
   post<R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>): Promise<R>
   put<R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>): Promise<R>

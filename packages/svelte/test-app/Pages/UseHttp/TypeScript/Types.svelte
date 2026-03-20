@@ -30,7 +30,10 @@
     const patchUser: UserResponse = await form.patch<UserResponse>('/users/1')
     const deleteResult: { deleted: boolean } = await form.delete<{ deleted: boolean }>('/users/1')
 
-    console.log(unknown, user, order, putUser, patchUser, deleteResult)
+    // Override TResponse on submit
+    const submitted: UserResponse = await form.submit<UserResponse>('post', '/users')
+
+    console.log(unknown, user, order, putUser, patchUser, deleteResult, submitted)
   }
 
   async function typedAtUseHttpLevel() {

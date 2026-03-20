@@ -16,47 +16,47 @@ interface OrderResponse {
   total: number
 }
 
-async function typedAtCallSite() {
-  const form = useHttp<UserForm>({ name: '', email: '' })
-
-  // Default TResponse (unknown)
-  const unknown: unknown = await form.post('/users')
-
-  // Override TResponse per method
-  const user: UserResponse = await form.post<UserResponse>('/users')
-  const order: OrderResponse = await form.get<OrderResponse>('/orders/123')
-  const putUser: UserResponse = await form.put<UserResponse>('/users/1')
-  const patchUser: UserResponse = await form.patch<UserResponse>('/users/1')
-  const deleteResult: { deleted: boolean } = await form.delete<{ deleted: boolean }>('/users/1')
-
-  console.log(unknown, user, order, putUser, patchUser, deleteResult)
-}
-
-async function typedAtUseHttpLevel() {
-  const form = useHttp<UserForm, UserResponse>({ name: '', email: '' })
-
-  // Default TResponse is UserResponse
-  const user: UserResponse = await form.post('/users')
-
-  // Override TResponse per method
-  const order: OrderResponse = await form.get<OrderResponse>('/orders/123')
-
-  console.log(user, order)
-}
-
-async function typedOptionsCallbacks() {
-  const form = useHttp<UserForm>({ name: '', email: '' })
-
-  await form.post<UserResponse>('/users', {
-    onSuccess: (response) => {
-      const id: number = response.id
-      const name: string = response.name
-      console.log(id, name)
-    },
-  })
-}
-
 export default () => {
+  const form = useHttp<UserForm>({ name: '', email: '' })
+  const typedForm = useHttp<UserForm, UserResponse>({ name: '', email: '' })
+
+  async function typedAtCallSite() {
+    // Default TResponse (unknown)
+    const unknown: unknown = await form.post('/users')
+
+    // Override TResponse per method
+    const user: UserResponse = await form.post<UserResponse>('/users')
+    const order: OrderResponse = await form.get<OrderResponse>('/orders/123')
+    const putUser: UserResponse = await form.put<UserResponse>('/users/1')
+    const patchUser: UserResponse = await form.patch<UserResponse>('/users/1')
+    const deleteResult: { deleted: boolean } = await form.delete<{ deleted: boolean }>('/users/1')
+
+    // Override TResponse on submit
+    const submitted: UserResponse = await form.submit<UserResponse>('post', '/users')
+
+    console.log(unknown, user, order, putUser, patchUser, deleteResult, submitted)
+  }
+
+  async function typedAtUseHttpLevel() {
+    // Default TResponse is UserResponse
+    const user: UserResponse = await typedForm.post('/users')
+
+    // Override TResponse per method
+    const order: OrderResponse = await typedForm.get<OrderResponse>('/orders/123')
+
+    console.log(user, order)
+  }
+
+  async function typedOptionsCallbacks() {
+    await form.post<UserResponse>('/users', {
+      onSuccess: (response) => {
+        const id: number = response.id
+        const name: string = response.name
+        console.log(id, name)
+      },
+    })
+  }
+
   return (
     <div>
       {typedAtCallSite.toString()}
