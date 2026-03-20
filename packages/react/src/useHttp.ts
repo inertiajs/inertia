@@ -59,11 +59,11 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
     (errors: FormDataErrors<TForm>): void
   }
   submit: (...args: UseHttpSubmitArguments<TResponse, TForm>) => Promise<TResponse>
-  get: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
-  post: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
-  put: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
-  patch: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
-  delete: (url: string, options?: UseHttpSubmitOptions<TResponse, TForm>) => Promise<TResponse>
+  get: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
+  post: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
+  put: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
+  patch: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
+  delete: <R = TResponse>(url: string, options?: UseHttpSubmitOptions<R, TForm>) => Promise<R>
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => UseHttpProps<TForm, TResponse>
   optimistic: (callback: (currentData: TForm) => Partial<TForm>) => UseHttpProps<TForm, TResponse>
