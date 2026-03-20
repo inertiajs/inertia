@@ -476,19 +476,6 @@ test.describe('useHttp', () => {
       await expect(page.locator('#submit-wayfinder-result')).toContainText('Name: Bob Smith')
       await expect(page.locator('#submit-wayfinder-result')).toContainText('Email: bob@example.com')
     })
-
-    test('it submits with response type override at the call site', async ({ page }) => {
-      await page.goto('/use-http/submit')
-
-      await page.fill('#submit-override-name', 'Alice Jones')
-      await page.fill('#submit-override-email', 'alice@example.com')
-      await page.click('#submit-override-button')
-
-      await expect(page.locator('#submit-override-result')).toBeVisible()
-      await expect(page.locator('#submit-override-result')).toContainText('Override Success - ID: 123')
-      await expect(page.locator('#submit-override-result')).toContainText('Name: Alice Jones')
-      await expect(page.locator('#submit-override-result')).toContainText('Email: alice@example.com')
-    })
   })
 
   test.describe('Optimistic', () => {

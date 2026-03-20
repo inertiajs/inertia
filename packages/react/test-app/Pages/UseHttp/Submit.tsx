@@ -16,15 +16,9 @@ export default () => {
     email: '',
   })
 
-  const untypedForm = useHttp<{ name: string; email: string }>({
-    name: '',
-    email: '',
-  })
-
   const [submitResult, setSubmitResult] = useState<UserResponse | null>(null)
   const [submitWithMethodResult, setSubmitWithMethodResult] = useState<UserResponse | null>(null)
   const [submitWithWayfinderResult, setSubmitWithWayfinderResult] = useState<UserResponse | null>(null)
-  const [submitOverrideResult, setSubmitOverrideResult] = useState<UserResponse | null>(null)
 
   const performSubmit = async () => {
     try {
@@ -50,15 +44,6 @@ export default () => {
       setSubmitWithWayfinderResult(result)
     } catch (e) {
       console.error('Submit with wayfinder failed:', e)
-    }
-  }
-
-  const performSubmitWithOverride = async () => {
-    try {
-      const result = await untypedForm.submit<UserResponse>('post', '/api/users')
-      setSubmitOverrideResult(result)
-    } catch (e) {
-      console.error('Submit with type override failed:', e)
     }
   }
 
@@ -123,38 +108,6 @@ export default () => {
           <div id="submit-wayfinder-result">
             PATCH Success - ID: {submitWithWayfinderResult.id}, Name: {submitWithWayfinderResult.user.name}, Email:{' '}
             {submitWithWayfinderResult.user.email}
-          </div>
-        )}
-      </section>
-
-      {/* Submit with response type override */}
-      <section id="submit-override-test">
-        <h2>Submit with response type override</h2>
-        <label>
-          Name
-          <input
-            type="text"
-            id="submit-override-name"
-            value={untypedForm.data.name}
-            onChange={(e) => untypedForm.setData('name', e.target.value)}
-          />
-        </label>
-        <label>
-          Email
-          <input
-            type="email"
-            id="submit-override-email"
-            value={untypedForm.data.email}
-            onChange={(e) => untypedForm.setData('email', e.target.value)}
-          />
-        </label>
-        <button onClick={performSubmitWithOverride} id="submit-override-button">
-          Submit (typed at call site)
-        </button>
-        {submitOverrideResult && (
-          <div id="submit-override-result">
-            Override Success - ID: {submitOverrideResult.id}, Name: {submitOverrideResult.user.name}, Email:{' '}
-            {submitOverrideResult.user.email}
           </div>
         )}
       </section>

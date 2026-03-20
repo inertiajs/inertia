@@ -17,16 +17,9 @@ const form = useHttp<{ name: string; email: string }, UserResponse>('post', '/ap
   email: '',
 })
 
-// Form without pre-configured response type
-const untypedForm = useHttp<{ name: string; email: string }>({
-  name: '',
-  email: '',
-})
-
 const submitResult = ref<UserResponse | null>(null)
 const submitWithMethodResult = ref<UserResponse | null>(null)
 const submitWithWayfinderResult = ref<UserResponse | null>(null)
-const submitOverrideResult = ref<UserResponse | null>(null)
 
 const performSubmit = async () => {
   try {
@@ -52,15 +45,6 @@ const performSubmitWithWayfinder = async () => {
     submitWithWayfinderResult.value = result
   } catch (e) {
     console.error('Submit with wayfinder failed:', e)
-  }
-}
-
-const performSubmitWithOverride = async () => {
-  try {
-    const result = await untypedForm.submit<UserResponse>('post', '/api/users')
-    submitOverrideResult.value = result
-  } catch (e) {
-    console.error('Submit with type override failed:', e)
   }
 }
 </script>
@@ -106,24 +90,6 @@ const performSubmitWithOverride = async () => {
       <div v-if="submitWithWayfinderResult" id="submit-wayfinder-result">
         PATCH Success - ID: {{ submitWithWayfinderResult.id }}, Name: {{ submitWithWayfinderResult.user.name }}, Email:
         {{ submitWithWayfinderResult.user.email }}
-      </div>
-    </section>
-
-    <!-- Submit with response type override -->
-    <section id="submit-override-test">
-      <h2>Submit with response type override</h2>
-      <label>
-        Name
-        <input type="text" id="submit-override-name" v-model="untypedForm.name" />
-      </label>
-      <label>
-        Email
-        <input type="email" id="submit-override-email" v-model="untypedForm.email" />
-      </label>
-      <button @click="performSubmitWithOverride" id="submit-override-button">Submit (typed at call site)</button>
-      <div v-if="submitOverrideResult" id="submit-override-result">
-        Override Success - ID: {{ submitOverrideResult.id }}, Name: {{ submitOverrideResult.user.name }}, Email:
-        {{ submitOverrideResult.user.email }}
       </div>
     </section>
   </div>
