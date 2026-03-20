@@ -540,6 +540,21 @@ test.describe('useHttp', () => {
     })
   })
 
+  test('it returns a stable reference that does not cause infinite re-renders in dependency arrays', async ({
+    page,
+  }) => {
+    await page.goto('/use-http/stable-reference')
+
+    await expect(page.locator('#result')).toBeVisible()
+    await expect(page.locator('#recently-successful')).toBeVisible()
+    await expect(page.locator('#recently-successful')).not.toBeVisible()
+
+    const renderCount = await page.locator('#render-count').textContent()
+    const count = parseInt(renderCount!.replace('Render count: ', ''))
+
+    expect(count).toBeLessThan(7)
+  })
+
   test('it handles 204 no content responses without errors', async ({ page }) => {
     await page.goto('/use-http/no-content')
 

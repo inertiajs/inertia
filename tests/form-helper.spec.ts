@@ -1040,6 +1040,19 @@ test.describe('Nested', () => {
   })
 })
 
+test('it returns a stable reference that does not cause infinite re-renders in dependency arrays', async ({ page }) => {
+  await page.goto('/form-helper/stable-reference')
+
+  await expect(page.locator('#was-successful')).toBeVisible()
+  await expect(page.locator('#recently-successful')).toBeVisible()
+  await expect(page.locator('#recently-successful')).not.toBeVisible()
+
+  const renderCount = await page.locator('#render-count').textContent()
+  const count = parseInt(renderCount!.replace('Render count: ', ''))
+
+  expect(count).toBeLessThan(7)
+})
+
 test.describe('React', () => {
   test.skip(process.env.PACKAGE !== 'react', 'Only for React')
 
