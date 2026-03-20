@@ -8,10 +8,19 @@ import {
   PageProps,
   router,
 } from '@inertiajs/core'
-import { createElement, FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react'
+import {
+  createElement,
+  FunctionComponent,
+  isValidElement,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { flushSync } from 'react-dom'
 import HeadContext from './HeadContext'
-import { LayoutPropsContext, resetLayoutProps } from './layoutProps'
+import { resetLayoutProps, store } from './layoutProps'
 import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
@@ -68,6 +77,11 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
 
 export type InertiaApp = FunctionComponent<InertiaAppProps>
 
+const emptySnapshot = {
+  shared: {} as Record<string, unknown>,
+  named: {} as Record<string, Record<string, unknown>>,
+}
+
 export default function App<SharedProps extends PageProps = PageProps>({
   children,
   initialPage,
@@ -90,6 +104,8 @@ export default function App<SharedProps extends PageProps = PageProps>({
       onHeadUpdate || (() => {}),
     )
   }, [])
+
+  const dynamicLayoutProps = useSyncExternalStore(store.subscribe, store.get, () => emptySnapshot)
 
   if (!routerIsInitialized) {
     router.init<ReactComponent>({
@@ -146,7 +162,30 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const child = createElement(Component, { key, ...props })
 
       if (Component.layout && isRenderFunction(Component.layout)) {
-        return (Component.layout as LayoutFunction)(child)
+        const result = (Component.layout as Function)(props)
+
+        if (isValidElement(result)) {
+          return (Component.layout as LayoutFunction)(child)
+        }
+
+        const layouts = normalizeLayouts(result, isComponent)
+
+        if (layouts.length > 0) {
+          return layouts.reduceRight((childNode, layout) => {
+            return createElement(
+              layout.component,
+              {
+                ...props,
+                ...layout.props,
+                ...dynamicLayoutProps.shared,
+                ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
+              },
+              childNode,
+            )
+          }, child)
+        }
+
+        return child
       }
 
       const effectiveLayout = Component.layout ?? defaultLayout?.(current.page.component, current.page)
@@ -155,9 +194,14 @@ export default function App<SharedProps extends PageProps = PageProps>({
       if (layouts.length > 0) {
         return layouts.reduceRight((childNode, layout) => {
           return createElement(
-            LayoutPropsContext.Provider,
-            { value: { staticProps: { ...props, ...layout.props }, name: layout.name } },
-            createElement(layout.component, { ...props, ...layout.props }, childNode),
+            layout.component,
+            {
+              ...props,
+              ...layout.props,
+              ...dynamicLayoutProps.shared,
+              ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
+            },
+            childNode,
           )
         }, child)
       }

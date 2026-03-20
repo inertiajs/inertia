@@ -14,6 +14,11 @@ test.describe('layout props', () => {
     await page.getByRole('button', { name: 'Toggle Sidebar' }).click()
 
     await expect(page.locator('.sidebar')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Update Title' }).click()
+
+    await expect(page.locator('.app-title')).toHaveText('Updated Title')
+    await expect(page.locator('.sidebar')).toBeVisible()
   })
 
   test('it can pass static props via tuple syntax', async ({ page }) => {
@@ -104,5 +109,18 @@ test.describe('layout props', () => {
     const contentLayoutIdAfter = await page.evaluate(() => window._inertia_content_layout_id)
     await expect(appLayoutIdAfter).toEqual(appLayoutId)
     await expect(contentLayoutIdAfter).toEqual(contentLayoutId)
+  })
+
+  test('it supports a layout callback that derives props from page props', async ({ page }) => {
+    await page.goto('/layout-props/callback')
+
+    await expect(page.locator('.app-title')).toHaveText('Profile: Jane')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+
+    await page.getByRole('link', { name: 'Go to Basic Page' }).click()
+
+    await expect(page).toHaveURL('/layout-props/basic')
+    await expect(page.locator('.app-title')).toHaveText('Basic Layout Props')
+    await expect(page.locator('.sidebar')).toBeVisible()
   })
 })

@@ -2,7 +2,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 export default {
-  layout: AppLayout,
+  layout: [AppLayout, { title: 'Basic Layout Props', showSidebar: true }],
 }
 </script>
 
@@ -23,10 +23,6 @@ watch(
   },
   { immediate: true },
 )
-
-setLayoutProps({
-  title: 'Basic Layout Props',
-})
 </script>
 
 <template>
@@ -37,6 +33,10 @@ setLayoutProps({
     <div>
       <button type="button" @click="toggleSidebar">Toggle Sidebar</button>
       <span>Sidebar: {{ sidebarVisible ? 'visible' : 'hidden' }}</span>
+    </div>
+
+    <div>
+      <button type="button" @click="setLayoutProps({ title: 'Updated Title' })">Update Title</button>
     </div>
 
     <nav>

@@ -22,7 +22,7 @@ import {
   ref,
   shallowRef,
 } from 'vue'
-import { LayoutProvider, resetLayoutProps } from './layoutProps'
+import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
 import useForm from './useForm'
@@ -122,6 +122,7 @@ const App: InertiaApp = defineComponent({
     key.value = undefined
 
     const isServer = typeof window === 'undefined'
+
     headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
 
     if (!isServer) {
@@ -163,7 +164,18 @@ const App: InertiaApp = defineComponent({
           return (component.value.layout as Function)(h, child)
         }
 
-        const effectiveLayout = component.value.layout ?? defaultLayout?.(page.value!.component, page.value!)
+        let effectiveLayout: unknown
+        const layoutValue = component.value.layout
+
+        if (
+          typeof layoutValue === 'function' &&
+          (layoutValue as Function).length <= 1 &&
+          typeof (layoutValue as Function).prototype === 'undefined'
+        ) {
+          effectiveLayout = (layoutValue as Function)(page.value!.props)
+        } else {
+          effectiveLayout = layoutValue ?? defaultLayout?.(page.value!.component, page.value!)
+        }
 
         if (effectiveLayout) {
           const layouts = normalizeLayouts(
@@ -173,12 +185,21 @@ const App: InertiaApp = defineComponent({
           )
 
           if (layouts.length > 0) {
+            const dynamicProps = isServer ? { shared: {}, named: {} } : layoutPropsState.value
+
             return layouts.reduceRight((childNode, layout) => {
               const layoutComponent = layout.component as DefineComponent
               layoutComponent.inheritAttrs = !!layoutComponent.inheritAttrs
 
-              return h(LayoutProvider, { layoutName: layout.name }, () =>
-                h(layoutComponent, { ...page.value!.props, ...layout.props }, () => childNode),
+              return h(
+                layoutComponent,
+                {
+                  ...page.value!.props,
+                  ...layout.props,
+                  ...dynamicProps.shared,
+                  ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
+                },
+                () => childNode,
               )
             }, child)
           }

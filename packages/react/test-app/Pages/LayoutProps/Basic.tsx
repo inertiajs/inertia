@@ -5,9 +5,7 @@ import AppLayout from '../../Layouts/AppLayout'
 const Basic = () => {
   const [sidebarVisible, setSidebarVisible] = useState(true)
 
-  // Call setLayoutProps during render (not in useEffect) so it runs before the layout renders
   setLayoutProps({
-    title: 'Basic Layout Props',
     showSidebar: sidebarVisible,
   })
 
@@ -23,6 +21,12 @@ const Basic = () => {
         <span>Sidebar: {sidebarVisible ? 'visible' : 'hidden'}</span>
       </div>
 
+      <div>
+        <button type="button" onClick={() => setLayoutProps({ title: 'Updated Title' })}>
+          Update Title
+        </button>
+      </div>
+
       <nav>
         <Link href="/layout-props/navigate">Go to Navigate Page</Link>
       </nav>
@@ -30,6 +34,6 @@ const Basic = () => {
   )
 }
 
-Basic.layout = AppLayout
+Basic.layout = [AppLayout, { title: 'Basic Layout Props', showSidebar: true }]
 
 export default Basic

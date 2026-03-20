@@ -1,4 +1,5 @@
 import { isEqual } from 'es-toolkit'
+import type { LayoutProps, NamedLayoutProps } from './types'
 
 export interface LayoutDefinition<Component> {
   component: Component
@@ -7,8 +8,8 @@ export interface LayoutDefinition<Component> {
 }
 
 export interface LayoutPropsStore {
-  set(props: Record<string, unknown>): void
-  setFor(name: string, props: Record<string, unknown>): void
+  set(props: Partial<LayoutProps>): void
+  setFor<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
   get(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
   reset(): void
   subscribe(callback: () => void): () => void
@@ -77,40 +78,6 @@ export function createLayoutPropsStore(): LayoutPropsStore {
 
     get: () => snapshot,
   }
-}
-
-/**
- * Merges layout props from three sources with priority: dynamic > static > defaults.
- * Only keys present in `defaults` are included in the result.
- *
- * @example
- * ```ts
- * mergeLayoutProps(
- *   { title: 'Default', showSidebar: true },  // defaults declared in useLayoutProps()
- *   { title: 'My Page', color: 'blue' },       // static props from layout definition
- *   { showSidebar: false, fontSize: 16 },       // dynamic props from setLayoutProps()
- * )
- * // => { title: 'My Page', showSidebar: false }
- * // 'color' and 'fontSize' are excluded because they're not declared in defaults
- * ```
- */
-export function mergeLayoutProps<T extends Record<string, unknown>>(
-  defaults: T,
-  staticProps: Record<string, unknown>,
-  dynamicProps: Record<string, unknown>,
-): T {
-  const result: Record<string, unknown> = { ...defaults }
-
-  for (const key of Object.keys(defaults)) {
-    if (key in staticProps && staticProps[key] !== undefined) {
-      result[key] = staticProps[key]
-    }
-    if (key in dynamicProps && dynamicProps[key] !== undefined) {
-      result[key] = dynamicProps[key]
-    }
-  }
-
-  return result as T
 }
 
 type ComponentCheck<T> = (value: unknown) => value is T

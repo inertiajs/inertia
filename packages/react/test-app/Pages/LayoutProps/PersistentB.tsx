@@ -1,16 +1,8 @@
-import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/react'
+import { Link } from '@inertiajs/react'
 import AppLayout from '../../Layouts/AppLayout'
 import ContentLayout from '../../Layouts/ContentLayout'
 
 const PersistentB = () => {
-  setLayoutProps({
-    title: 'Persistent Page B',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-  })
-
   return (
     <div>
       <h2>Persistent Page B</h2>
@@ -23,8 +15,8 @@ const PersistentB = () => {
 }
 
 PersistentB.layout = {
-  app: AppLayout,
-  content: ContentLayout,
+  app: [AppLayout, { title: 'Persistent Page B' }],
+  content: [ContentLayout, { padding: 'xl' }],
 }
 
 export default PersistentB

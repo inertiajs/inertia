@@ -1,7 +1,7 @@
 <script module lang="ts">
   import AppLayout from '@/Layouts/AppLayout.svelte'
 
-  export const layout = AppLayout
+  export const layout = [AppLayout, { title: 'Basic Layout Props', showSidebar: true }]
 </script>
 
 <script lang="ts">
@@ -9,10 +9,7 @@
 
   let sidebarVisible = $state(true)
 
-  setLayoutProps({
-    title: 'Basic Layout Props',
-    showSidebar: true,
-  })
+  setLayoutProps({ showSidebar: true })
 
   function toggleSidebar() {
     sidebarVisible = !sidebarVisible
@@ -27,6 +24,10 @@
   <div>
     <button type="button" onclick={toggleSidebar}>Toggle Sidebar</button>
     <span>Sidebar: {sidebarVisible ? 'visible' : 'hidden'}</span>
+  </div>
+
+  <div>
+    <button type="button" onclick={() => setLayoutProps({ title: 'Updated Title' })}>Update Title</button>
   </div>
 
   <nav>

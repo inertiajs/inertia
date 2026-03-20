@@ -1,13 +1,7 @@
-import { Link, setLayoutProps } from '@inertiajs/react'
+import { Link } from '@inertiajs/react'
 import AppLayout from '../../Layouts/AppLayout'
 
 const Navigate = () => {
-  setLayoutProps({
-    title: 'Navigate Page',
-    showSidebar: false,
-    theme: 'dark',
-  })
-
   return (
     <div>
       <h2>Navigate Page</h2>
@@ -21,6 +15,6 @@ const Navigate = () => {
   )
 }
 
-Navigate.layout = AppLayout
+Navigate.layout = [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }]
 
 export default Navigate

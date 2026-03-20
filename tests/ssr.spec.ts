@@ -89,6 +89,80 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('layout props', () => {
+  test('it does not leak layout props between SSR requests', async ({ page, browserName }) => {
+    const responseA = await page.request.get('/ssr/layout-props-a')
+    const htmlA = await responseA.text()
+
+    expect(htmlA).toContain('Page A Content')
+
+    const responseB = await page.request.get('/ssr/layout-props-b')
+    const htmlB = await responseB.text()
+
+    expect(htmlB).toContain('Page B Content')
+    expect(htmlB).toContain('Default Title')
+    expect(htmlB).not.toContain('Page A Title')
+  })
+
+  test('it hydrates without errors after setLayoutProps was used in a previous SSR request', async ({
+    page,
+    browserName,
+  }) => {
+    consoleMessages.listen(page)
+
+    await page.request.get('/ssr/layout-props-a')
+    await page.goto('/ssr/layout-props-b')
+
+    await expect(page.getByTestId('layout-title')).toHaveText('Default Title')
+    await expect(page.getByTestId('page-content')).toHaveText('Page B Content')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('it hydrates without errors on a page that uses layout tuple props', async ({ page, browserName }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layout-props-a')
+
+    await expect(page.getByTestId('page-content')).toHaveText('Page A Content')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('it renders layout tuple props in SSR HTML', async ({ page, browserName }) => {
+    const response = await page.request.get('/ssr/layout-props-a')
+    const html = await response.text()
+
+    expect(html).toContain('Page A Title')
+    expect(html).toContain('Page A Content')
+  })
+
+  test('it supports a layout callback that receives page props during SSR', async ({ page, browserName }) => {
+    const response = await page.request.get('/ssr/layout-props-callback')
+    const html = await response.text()
+
+    expect(html).toContain('Profile: Callback Title')
+    expect(html).toContain('Callback Content')
+  })
+
+  test('it hydrates a layout callback page without errors', async ({ page, browserName }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layout-props-callback')
+
+    await expect(page.getByTestId('layout-title')).toHaveText('Profile: Callback Title')
+    await expect(page.getByTestId('page-content')).toHaveText('Callback Content')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})
+
 test.describe('SSR InfiniteScroll', () => {
   test('it renders correct slot props during SSR', async ({ page }) => {
     const response = await page.request.get('/ssr/infinite-scroll')

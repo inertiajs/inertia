@@ -1,17 +1,19 @@
-import { useLayoutProps } from '@inertiajs/react'
 import { ReactNode, useId } from 'react'
 
-export default function ContentLayout({ children }: { children: ReactNode }) {
+export default function ContentLayout({
+  padding = 'md',
+  maxWidth = 'lg',
+  children,
+}: {
+  padding?: string
+  maxWidth?: string
+  children: ReactNode
+}) {
   const layoutId = useId()
   window._inertia_content_layout_id = layoutId
 
-  const layoutProps = useLayoutProps({
-    padding: 'md',
-    maxWidth: 'lg',
-  })
-
   return (
-    <div className="content-layout" data-padding={layoutProps.padding} data-max-width={layoutProps.maxWidth}>
+    <div className="content-layout" data-padding={padding} data-max-width={maxWidth}>
       <div className="content-wrapper">{children}</div>
     </div>
   )

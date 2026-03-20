@@ -17,7 +17,7 @@
   import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page.svelte'
-  import { resetLayoutProps } from '../layoutProps.svelte'
+  import { resetLayoutProps, storeState } from '../layoutProps.svelte'
 
   interface Props {
     initialComponent: InertiaAppProps['initialComponent']
@@ -98,7 +98,18 @@
       return (component.layout as LayoutResolver)(h, child)
     }
 
-    const effectiveLayout = (component.layout ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
+    let effectiveLayout: LayoutType | undefined
+    const layoutValue = component.layout
+
+    if (
+      typeof layoutValue === 'function' &&
+      (layoutValue as Function).length <= 1 &&
+      typeof (layoutValue as Function).prototype === 'undefined'
+    ) {
+      effectiveLayout = (layoutValue as Function)(page.props) as LayoutType | undefined
+    } else {
+      effectiveLayout = (layoutValue ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
+    }
 
     return effectiveLayout ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout) : child
   }
@@ -117,9 +128,21 @@
     const layouts = normalizeLayouts(layout, isComponent, isFromPage ? isRenderFunction : undefined)
 
     if (layouts.length > 0) {
+      const dynamicProps = isServer ? { shared: {}, named: {} } : { shared: storeState.shared, named: storeState.named }
+
       return layouts.reduceRight((child, layout) => {
         return {
-          ...h(layout.component, { ...pageProps, ...layout.props }, [child], key),
+          ...h(
+            layout.component,
+            {
+              ...pageProps,
+              ...layout.props,
+              ...dynamicProps.shared,
+              ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
+            },
+            [child],
+            key,
+          ),
           name: layout.name,
         }
       }, child)

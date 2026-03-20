@@ -4,22 +4,14 @@ import ContentLayout from '@/Layouts/ContentLayout.vue'
 
 export default {
   layout: {
-    app: AppLayout,
-    content: ContentLayout,
+    app: [AppLayout, { title: 'Persistent Page A' }],
+    content: [ContentLayout, { padding: 'lg' }],
   },
 }
 </script>
 
 <script setup lang="ts">
-import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/vue3'
-
-setLayoutProps({
-  title: 'Persistent Page A',
-})
-
-setLayoutPropsFor('content', {
-  padding: 'lg',
-})
+import { Link } from '@inertiajs/vue3'
 </script>
 
 <template>

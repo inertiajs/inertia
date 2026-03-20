@@ -54,6 +54,8 @@ export type DefaultInertiaConfig = {
   errorValueType: string
   flashDataType: PageFlashData
   sharedPageProps: PageProps
+  layoutProps: Record<string, unknown>
+  namedLayoutProps: Record<string, Record<string, unknown>>
 }
 /**
  * Designed to allow overriding of some core types using TypeScript
@@ -74,6 +76,14 @@ export type DefaultInertiaConfig = {
  *     sharedPageProps: {
  *       auth: { user: User | null }
  *     }
+ *     layoutProps: {
+ *       title: string
+ *       showSidebar: boolean
+ *     }
+ *     namedLayoutProps: {
+ *       app: { title: string; theme: string }
+ *       content: { padding: string; maxWidth: string }
+ *     }
  *   }
  * }
  * ```
@@ -85,6 +95,8 @@ export type InertiaConfigFor<Key extends keyof DefaultInertiaConfig> = Key exten
 export type ErrorValue = InertiaConfigFor<'errorValueType'>
 export type FlashData = InertiaConfigFor<'flashDataType'>
 export type SharedPageProps = InertiaConfigFor<'sharedPageProps'>
+export type LayoutProps = InertiaConfigFor<'layoutProps'>
+export type NamedLayoutProps = InertiaConfigFor<'namedLayoutProps'>
 
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>

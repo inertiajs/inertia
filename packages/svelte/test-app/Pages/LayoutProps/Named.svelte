@@ -3,27 +3,13 @@
   import ContentLayout from '@/Layouts/ContentLayout.svelte'
 
   export const layout = {
-    app: AppLayout,
-    content: ContentLayout,
+    app: [AppLayout, { title: 'Named Layouts Page', showSidebar: true, theme: 'light' }],
+    content: [ContentLayout, { padding: 'xl', maxWidth: '2xl' }],
   }
 </script>
 
 <script lang="ts">
-  import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/svelte'
-
-  setLayoutProps({
-    title: 'Named Layouts Page',
-  })
-
-  setLayoutPropsFor('app', {
-    showSidebar: true,
-    theme: 'light',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-    maxWidth: '2xl',
-  })
+  import { Link } from '@inertiajs/svelte'
 </script>
 
 <div>

@@ -3,21 +3,13 @@
   import ContentLayout from '@/Layouts/ContentLayout.svelte'
 
   export const layout = {
-    app: AppLayout,
-    content: ContentLayout,
+    app: [AppLayout, { title: 'Persistent Page B' }],
+    content: [ContentLayout, { padding: 'xl' }],
   }
 </script>
 
 <script lang="ts">
-  import { Link, setLayoutProps, setLayoutPropsFor } from '@inertiajs/svelte'
-
-  setLayoutProps({
-    title: 'Persistent Page B',
-  })
-
-  setLayoutPropsFor('content', {
-    padding: 'xl',
-  })
+  import { Link } from '@inertiajs/svelte'
 </script>
 
 <div>
