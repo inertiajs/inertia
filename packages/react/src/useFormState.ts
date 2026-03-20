@@ -340,7 +340,10 @@ export default function useFormState<TForm extends object>(
     [touchedFields],
   )
 
-  const form = {
+  const formRef = useRef({} as FormState<TForm>)
+  const form = formRef.current
+
+  Object.assign(form, {
     data,
     setData: setDataFunction,
     isDirty,
@@ -356,7 +359,7 @@ export default function useFormState<TForm extends object>(
     setError,
     clearErrors,
     resetAndClearErrors,
-  } as FormState<TForm>
+  })
 
   const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
     if (typeof field === 'object' && !('target' in field)) {
