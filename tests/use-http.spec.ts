@@ -546,9 +546,8 @@ test.describe('useHttp', () => {
     await page.goto('/use-http/stable-reference')
 
     await expect(page.locator('#result')).toBeVisible()
-
-    // Wait for the recentlySuccessful timer (2s) to fire and settle
-    await page.waitForTimeout(2500)
+    await expect(page.locator('#recently-successful')).toBeVisible()
+    await expect(page.locator('#recently-successful')).not.toBeVisible()
 
     const renderCount = await page.locator('#render-count').textContent()
     const count = parseInt(renderCount!.replace('Render count: ', ''))

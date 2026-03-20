@@ -35,6 +35,7 @@ watch(
   <div>
     <h1>useHttp Stable Reference Test</h1>
     <div id="render-count">Render count: {{ renderCount }}</div>
+    <div v-if="http.recentlySuccessful" id="recently-successful">Recently successful</div>
     <div v-if="result" id="result">Items: {{ result.items.join(', ') }}</div>
   </div>
 </template>

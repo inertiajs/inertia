@@ -26,6 +26,9 @@
 <div>
   <h1>useHttp Stable Reference Test</h1>
   <div id="render-count">Render count: {count}</div>
+  {#if http.recentlySuccessful}
+    <div id="recently-successful">Recently successful</div>
+  {/if}
   {#if result}
     <div id="result">Items: {result.items.join(', ')}</div>
   {/if}

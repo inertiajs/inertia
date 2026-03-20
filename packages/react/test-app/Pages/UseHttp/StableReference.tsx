@@ -31,6 +31,7 @@ export default () => {
     <div>
       <h1>useHttp Stable Reference Test</h1>
       <div id="render-count">Render count: {renderCount.current}</div>
+      {http.recentlySuccessful && <div id="recently-successful">Recently successful</div>}
       {result && <div id="result">Items: {result.items.join(', ')}</div>}
     </div>
   )
