@@ -326,10 +326,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     [submit],
   )
 
-  const formRef = useRef({} as UseHttpProps<TForm, TResponse>)
-  const form = formRef.current
-
-  Object.assign(form, baseForm, {
+  // Add useHttp-specific methods to the form object (mutate in place like Svelte)
+  Object.assign(baseForm, {
     response,
     submit: submitWithArgs,
     get: createSubmitMethod('get'),
@@ -353,6 +351,9 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       return form
     },
   })
+
+  // Cast to the full form type (baseForm now has HTTP methods)
+  const form = baseForm as unknown as UseHttpProps<TForm, TResponse>
 
   // Wrap withPrecognition to return the correct type with HTTP methods
   const originalWithPrecognition = baseForm.withPrecognition
