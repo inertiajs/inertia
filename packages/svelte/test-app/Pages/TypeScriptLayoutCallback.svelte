@@ -14,7 +14,7 @@
     const name: string | undefined = props.auth.user?.name
 
     // @ts-expect-error - 'nonExistent' does not exist on shared page props
-    const _invalid = props.nonExistent
+    console.log(props.nonExistent)
 
     return [AppLayout, { title: name }]
   }
