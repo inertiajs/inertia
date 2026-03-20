@@ -1,12 +1,15 @@
-import { createLayoutPropsStore } from '@inertiajs/core'
+import { createLayoutPropsStore, type LayoutProps, type NamedLayoutProps } from '@inertiajs/core'
 
 export const store = createLayoutPropsStore()
 
-export function setLayoutProps(props: Record<string, unknown>): void {
+export function setLayoutProps(props: Partial<LayoutProps>): void {
   store.set(props)
 }
 
-export function setLayoutPropsFor(name: string, props: Record<string, unknown>): void {
+export function setLayoutPropsFor<K extends keyof NamedLayoutProps>(
+  name: K,
+  props: Partial<NamedLayoutProps[K]>,
+): void {
   store.setFor(name, props)
 }
 

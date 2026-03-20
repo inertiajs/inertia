@@ -1,4 +1,5 @@
 import { isEqual } from 'es-toolkit'
+import type { LayoutProps, NamedLayoutProps } from './types'
 
 export interface LayoutDefinition<Component> {
   component: Component
@@ -7,8 +8,8 @@ export interface LayoutDefinition<Component> {
 }
 
 export interface LayoutPropsStore {
-  set(props: Record<string, unknown>): void
-  setFor(name: string, props: Record<string, unknown>): void
+  set(props: Partial<LayoutProps>): void
+  setFor<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
   get(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
   reset(): void
   subscribe(callback: () => void): () => void
