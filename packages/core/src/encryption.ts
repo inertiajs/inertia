@@ -1,8 +1,19 @@
 import { SessionStorage } from './sessionStorage'
 
-export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
+let warned = false
+
+export const encryptHistory = async <T>(data: T): Promise<ArrayBuffer | T> => {
   if (typeof window === 'undefined') {
     throw new Error('Unable to encrypt history')
+  }
+
+  if (typeof window.crypto.subtle === 'undefined') {
+    if (!warned) {
+      console.warn('Encryption is not supported in this environment. SSL is required.')
+      warned = true
+    }
+
+    return data
   }
 
   const iv = getIv()
@@ -35,16 +46,6 @@ export const decryptHistory = async (data: BufferSource): Promise<any> => {
 }
 
 const encryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
-  if (typeof window === 'undefined') {
-    throw new Error('Unable to encrypt history')
-  }
-
-  if (typeof window.crypto.subtle === 'undefined') {
-    console.warn('Encryption is not supported in this environment. SSL is required.')
-
-    return Promise.resolve(data)
-  }
-
   const textEncoder = new TextEncoder()
   const str = JSON.stringify(data)
   const encoded = new Uint8Array(str.length * 3)
@@ -95,12 +96,6 @@ const getIv = (): BufferSource => {
 }
 
 const createKey = async () => {
-  if (typeof window.crypto.subtle === 'undefined') {
-    console.warn('Encryption is not supported in this environment. SSL is required.')
-
-    return Promise.resolve(null)
-  }
-
   return window.crypto.subtle.generateKey(
     {
       name: 'AES-GCM',
@@ -112,12 +107,6 @@ const createKey = async () => {
 }
 
 const saveKey = async (key: CryptoKey) => {
-  if (typeof window.crypto.subtle === 'undefined') {
-    console.warn('Encryption is not supported in this environment. SSL is required.')
-
-    return Promise.resolve()
-  }
-
   const keyData = await window.crypto.subtle.exportKey('raw', key)
 
   SessionStorage.set(historySessionStorageKeys.key, Array.from(new Uint8Array(keyData)))
