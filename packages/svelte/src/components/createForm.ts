@@ -1,9 +1,11 @@
-import type { FormComponentSlotProps } from '@inertiajs/core'
+import type { FormComponentProps, FormComponentSlotProps } from '@inertiajs/core'
 import type { Component, ComponentProps, Snippet } from 'svelte'
 import Form from './Form.svelte'
 
 type TypedFormComponent<TForm extends Record<string, any>> = Component<
-  Omit<ComponentProps<typeof Form>, 'children'> & {
+  Omit<ComponentProps<typeof Form>, 'children' | 'optimistic' | 'transform'> & {
+    optimistic?: FormComponentProps<TForm>['optimistic']
+    transform?: FormComponentProps<TForm>['transform']
     children?: Snippet<[FormComponentSlotProps<TForm>]>
   }
 >

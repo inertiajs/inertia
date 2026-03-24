@@ -402,8 +402,12 @@ export function useFormContext<TForm extends object = Record<string, any>>(): Fo
   return inject(FormContextKey) as FormComponentRef<TForm> | undefined
 }
 
-type TypedFormComponent<TForm extends Record<string, any>> = typeof Form & {
-  new (): {
+type TypedFormComponent<TForm extends Record<string, any>> = Omit<typeof Form, 'new'> & {
+  new (...args: ConstructorParameters<typeof Form>): Omit<InstanceType<typeof Form>, '$props' | '$slots'> & {
+    $props: Omit<InstanceType<typeof Form>['$props'], 'optimistic' | 'transform'> & {
+      optimistic?: FormComponentProps<TForm>['optimistic']
+      transform?: FormComponentProps<TForm>['transform']
+    }
     $slots: {
       default: (props: FormComponentSlotProps<TForm>) => any
     }

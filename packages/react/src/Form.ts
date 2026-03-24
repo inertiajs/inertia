@@ -36,7 +36,7 @@ const deferStateUpdate = (callback: () => void) => {
   typeof React.startTransition === 'function' ? React.startTransition(callback) : setTimeout(callback, 0)
 }
 
-type FormProps<TForm extends object = Record<string, any>> = FormComponentProps &
+type FormProps<TForm extends object = Record<string, any>> = FormComponentProps<TForm> &
   Omit<React.FormHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> &
   Omit<React.AllHTMLAttributes<HTMLFormElement>, keyof FormComponentProps | 'children'> & {
     children: ReactNode | ((props: FormComponentSlotProps<TForm>) => ReactNode)
