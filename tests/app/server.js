@@ -951,6 +951,11 @@ app.get('/prefetch/preserve-state', (req, res) => {
   })
 })
 
+// Registered explicitly to prevent the :pageNumber catch-all below from matching
+app.get('/prefetch/after-error', (req, res) => inertia.render(req, res, { component: 'Prefetch/AfterError' }))
+app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
+app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
+
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/Page',
