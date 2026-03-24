@@ -256,7 +256,6 @@ app.get('/links/partial-reloads', (req, res) =>
     },
   }),
 )
-app.all('/error-modal', (req, res) => inertia.render(req, res, { component: 'ErrorModal' }))
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )
@@ -301,11 +300,8 @@ app.get('/links/as-warning-false/:method', (req, res) =>
 app.get('/links/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Links/Headers', version: 'example-version-header' }),
 )
-app.get('/links/data-loading', (req, res) => inertia.render(req, res, { component: 'Links/DataLoading' }))
-app.get('/links/prop-update', (req, res) => inertia.render(req, res, { component: 'Links/PropUpdate' }))
 app.get('/links/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
 app.get('/links/sub/sub', (req, res) => inertia.render(req, res, { component: 'Links/PathTraversal' }))
-app.get('/links/reactivity', (req, res) => inertia.render(req, res, { component: 'Links/Reactivity' }))
 app.get('/links/as-component/:page', (req, res) =>
   inertia.render(req, res, { component: 'Links/AsComponent', props: { page: req.params.page } }),
 )
@@ -517,19 +513,6 @@ app.post('/form-helper/data', (req, res) =>
 )
 
 app.post('/form-helper/data/redirect-back', (req, res) => res.redirect(303, '/form-helper/data'))
-
-app.get('/form-helper/nested', (req, res) =>
-  inertia.render(req, res, {
-    component: 'FormHelper/Nested',
-  }),
-)
-
-app.get('/form-helper/dirty', (req, res) =>
-  inertia.render(req, res, {
-    component: 'FormHelper/Dirty',
-    props: {},
-  }),
-)
 
 app.post('/form-helper/effect-count', (req, res) =>
   inertia.render(req, res, {
@@ -905,29 +888,12 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
 )
 
 app.get('/default-layout', (req, res) => inertia.render(req, res, { component: 'DefaultLayout/Index' }))
-app.get('/default-layout/with-own-layout', (req, res) =>
-  inertia.render(req, res, { component: 'DefaultLayout/WithOwnLayout' }),
-)
-app.get('/default-layout/callback-excluded', (req, res) =>
-  inertia.render(req, res, { component: 'DefaultLayout/CallbackExcluded' }),
-)
-
-app.get('/layout-props/basic', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/static', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/named', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/navigate', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/nested', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/named-static', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/default', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/persistent-a', (req, res) => inertia.render(req, res, {}))
-app.get('/layout-props/persistent-b', (req, res) => inertia.render(req, res, {}))
 app.get('/layout-props/callback', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
 
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
 
-app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/Hook', props: {} }))
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 app.get('/poll/unchanged-data', (req, res) =>
@@ -963,16 +929,6 @@ app.post('/poll/preserve-errors', (req, res) => {
   res.redirect(303, '/poll/preserve-errors')
 })
 
-app.get('/prefetch/after-error', (req, res) => {
-  inertia.render(req, res, { component: 'Prefetch/AfterError' })
-})
-
-app.get('/prefetch/test-page', (req, res) =>
-  inertia.render(req, res, {
-    component: 'Prefetch/TestPage',
-  }),
-)
-
 app.get('/prefetch/form', (req, res) =>
   inertia.render(req, res, {
     component: 'Prefetch/Form',
@@ -985,12 +941,6 @@ app.get('/prefetch/form', (req, res) =>
 app.post('/prefetch/form', (req, res) => res.redirect(303, '/prefetch/form'))
 app.post('/prefetch/redirect-back', (req, res) => res.redirect(303, '/prefetch/form'))
 
-app.get('/prefetch/wayfinder', (req, res) => {
-  inertia.render(req, res, {
-    component: 'Prefetch/Wayfinder',
-  })
-})
-
 app.get('/prefetch/preserve-state', (req, res) => {
   inertia.render(req, res, {
     component: 'Prefetch/PreserveState',
@@ -1000,6 +950,11 @@ app.get('/prefetch/preserve-state', (req, res) => {
     },
   })
 })
+
+// Registered explicitly to prevent the :pageNumber catch-all below from matching
+app.get('/prefetch/after-error', (req, res) => inertia.render(req, res, { component: 'Prefetch/AfterError' }))
+app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
+app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {
@@ -1265,8 +1220,6 @@ app.get('/progress/:pageNumber', (req, res) => {
     500,
   )
 })
-
-app.get('/progress-component', (req, res) => inertia.render(req, res, { component: 'ProgressComponent' }))
 
 app.get('/merge-props', (req, res) => {
   inertia.render(req, res, {
@@ -1882,10 +1835,6 @@ app.get('/inertia-error-page', (req, res) => {
   )
 })
 
-app.get('/form-component/child-component', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/ChildComponent' }),
-)
-
 let defaultValueForErrors = {}
 
 app.get('/form-component/default-value', (req, res) => {
@@ -1914,7 +1863,6 @@ app.get('/form-component/elements', (req, res) =>
     },
   }),
 )
-app.get('/form-component/errors', (req, res) => inertia.render(req, res, { component: 'FormComponent/Errors' }))
 app.post('/form-component/errors', (req, res) =>
   inertia.render(req, res, {
     component: 'FormComponent/Errors',
@@ -1928,7 +1876,6 @@ app.post('/form-component/errors/bag', (req, res) =>
   }),
 )
 
-app.get('/form-component/events', (req, res) => inertia.render(req, res, { component: 'FormComponent/Events' }))
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
@@ -1962,37 +1909,8 @@ app.post('/form-component/events/errors', async (req, res) =>
   }),
 )
 
-app.get('/form-component/headers', (req, res) => inertia.render(req, res, { component: 'FormComponent/Headers' }))
-app.get('/form-component/options', (req, res) => inertia.render(req, res, { component: 'FormComponent/Options' }))
-app.get('/form-component/progress', (req, res) => inertia.render(req, res, { component: 'FormComponent/Progress' }))
 app.post('/form-component/progress', async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Progress' }), 500),
-)
-
-app.get('/form-component/submit-complete/reset', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
-)
-app.get('/form-component/submit-complete/defaults', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
-)
-app.post('/form-component/submit-complete/reset', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Reset' }),
-)
-app.post('/form-component/submit-complete/defaults', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Defaults' }),
-)
-
-app.get('/form-component/state', (req, res) => inertia.render(req, res, { component: 'FormComponent/State' }))
-app.get('/form-component/dotted-keys', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/DottedKeys' }),
-)
-app.get('/form-component/ref', (req, res) => inertia.render(req, res, { component: 'FormComponent/Ref' }))
-app.get('/form-component/reset', (req, res) => inertia.render(req, res, { component: 'FormComponent/Reset' }))
-app.get('/form-component/submit-button', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitButton' }),
-)
-app.get('/form-component/uppercase-method', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/UppercaseMethod' }),
 )
 
 app.get('/form-component/reset-on-error', (req, res) =>
@@ -2029,13 +1947,6 @@ app.post('/form-component/reset-on-success-fields', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/ResetAttributes/ResetOnSuccessFields' }),
 )
 
-app.get('/form-component/set-defaults-on-success', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
-)
-app.post('/form-component/set-defaults-on-success', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SetDefaultsOnSuccess' }),
-)
-
 app.get('/form-component/url/with/segements', (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/EmptyAction' }),
 )
@@ -2046,9 +1957,6 @@ app.post('/form-component/url/with/segements', async (req, res) =>
   }),
 )
 
-app.get('/form-component/submit-complete/redirect', (req, res) =>
-  inertia.render(req, res, { component: 'FormComponent/SubmitComplete/Redirect' }),
-)
 app.post('/form-component/submit-complete/redirect', (req, res) => res.redirect(303, '/'))
 app.post('/form-component/wayfinder', (req, res) => {
   inertia.render(req, res, { component: 'FormComponent/Wayfinder' })
@@ -2474,7 +2382,6 @@ app.post('/view-transition/form-errors', (req, res) =>
   }),
 )
 
-app.get('/flash/events', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
 app.post('/flash/events/with-data', (req, res) =>
   inertia.render(req, res, {
     component: 'Flash/Events',
@@ -2482,8 +2389,6 @@ app.post('/flash/events/with-data', (req, res) =>
   }),
 )
 app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
-app.get('/flash/client-side-visits', (req, res) => inertia.render(req, res, { component: 'Flash/ClientSideVisits' }))
-app.get('/flash/router-flash', (req, res) => inertia.render(req, res, { component: 'Flash/RouterFlash' }))
 app.get('/flash/initial', (req, res) =>
   inertia.render(req, res, {
     component: 'Flash/InitialFlash',
@@ -2587,12 +2492,6 @@ app.get('/once-props/page-b', (req, res) => {
       bar: 'bar-b',
     },
     onceProps: { foo: { prop: 'foo', expiresAt: null } },
-  })
-})
-
-app.get('/once-props/page-c', (req, res) => {
-  inertia.render(req, res, {
-    component: 'OnceProps/PageC',
   })
 })
 
@@ -3057,18 +2956,6 @@ app.post('/api/no-content', upload.none(), (req, res) => {
 })
 
 app.get('/use-http', (req, res) => inertia.render(req, res, { component: 'UseHttp/Index' }))
-app.get('/use-http/methods', (req, res) => inertia.render(req, res, { component: 'UseHttp/Methods' }))
-app.get('/use-http/file-upload', (req, res) => inertia.render(req, res, { component: 'UseHttp/FileUpload' }))
-app.get('/use-http/headers', (req, res) => inertia.render(req, res, { component: 'UseHttp/Headers' }))
-app.get('/use-http/nested-data', (req, res) => inertia.render(req, res, { component: 'UseHttp/NestedData' }))
-app.get('/use-http/transform', (req, res) => inertia.render(req, res, { component: 'UseHttp/Transform' }))
-app.get('/use-http/lifecycle', (req, res) => inertia.render(req, res, { component: 'UseHttp/Lifecycle' }))
-app.get('/use-http/mixed-content', (req, res) => inertia.render(req, res, { component: 'UseHttp/MixedContent' }))
-app.get('/use-http/remember', (req, res) => inertia.render(req, res, { component: 'UseHttp/Remember' }))
-app.get('/use-http/submit', (req, res) => inertia.render(req, res, { component: 'UseHttp/Submit' }))
-app.get('/use-http/optimistic', (req, res) => inertia.render(req, res, { component: 'UseHttp/Optimistic' }))
-app.get('/use-http/with-all-errors', (req, res) => inertia.render(req, res, { component: 'UseHttp/WithAllErrors' }))
-app.get('/use-http/stable-reference', (req, res) => inertia.render(req, res, { component: 'UseHttp/StableReference' }))
 
 app.get('/reload/concurrent-with-data', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
@@ -3099,12 +2986,6 @@ app.get('/reload/concurrent-with-data', (req, res) => {
   )
 })
 
-app.get('/preserve-fragment', (req, res) =>
-  inertia.render(req, res, {
-    component: 'PreserveFragment',
-  }),
-)
-
 app.get('/preserve-fragment/redirect', (req, res) => res.redirect(303, '/preserve-fragment/target'))
 
 app.get('/preserve-fragment/target', (req, res) =>
@@ -3114,13 +2995,9 @@ app.get('/preserve-fragment/target', (req, res) =>
   }),
 )
 
-app.get('/http-handlers', (req, res) => inertia.render(req, res, { component: 'HttpHandlers', props: {} }))
-
 app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
-
-app.get('/network-error', (req, res) => inertia.render(req, res, { component: 'NetworkError' }))
 
 // Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
 const optimisticSessions = {}
