@@ -7,11 +7,13 @@ export default () => {
 
   renderCount.current++
 
+  const { post } = form
+
   const submitForm = useCallback(() => {
-    form.post('/form-helper/stable-reference', {
+    post('/form-helper/stable-reference', {
       preserveState: true,
     })
-  }, [form])
+  }, [post])
 
   useEffect(() => {
     submitForm()

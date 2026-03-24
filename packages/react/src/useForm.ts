@@ -21,7 +21,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useIsomorphicLayoutEffect } from './react'
 import useFormState, { SetDataAction, SetDataByKeyValuePair, SetDataByMethod, SetDataByObject } from './useFormState'
 import useRemember from './useRemember'
@@ -136,6 +136,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setDefaultsState,
     transformRef,
     precognitionEndpointRef,
+    dataRef,
     isMounted,
     setProcessing,
     setProgress,
@@ -251,7 +252,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       _options.optimistic = _options.optimistic ?? pendingOptimisticRef.current ?? undefined
       pendingOptimisticRef.current = null
 
-      const transformedData = transformRef.current(baseForm.data) as RequestPayload
+      const transformedData = transformRef.current(dataRef.current) as RequestPayload
 
       if (method === 'delete') {
         router.delete(url, { ..._options, data: transformedData })
@@ -259,7 +260,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         router[method](url, transformedData, _options)
       }
     },
-    [baseForm.data, clearErrors, setError, transformRef],
+    [clearErrors, setError, transformRef],
   )
 
   const cancel = useCallback(() => {
@@ -268,20 +269,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     }
   }, [])
 
-  const createSubmitMethod =
-    (method: Method) =>
-    (url: string, options: VisitOptions = {}) => {
-      submit(method, url, options)
-    }
+  const submitMethods = useMemo(
+    () => ({
+      get: (url: string, options: VisitOptions = {}) => submit('get', url, options),
+      post: (url: string, options: VisitOptions = {}) => submit('post', url, options),
+      put: (url: string, options: VisitOptions = {}) => submit('put', url, options),
+      patch: (url: string, options: VisitOptions = {}) => submit('patch', url, options),
+      delete: (url: string, options: VisitOptions = {}) => submit('delete', url, options),
+    }),
+    [submit],
+  )
 
-  // Add useForm-specific methods to the form object (mutate in place like Svelte)
+  // Add useForm-specific methods to the form object
   Object.assign(baseForm, {
     submit,
-    get: createSubmitMethod('get'),
-    post: createSubmitMethod('post'),
-    put: createSubmitMethod('put'),
-    patch: createSubmitMethod('patch'),
-    delete: createSubmitMethod('delete'),
+    ...submitMethods,
     cancel,
     dontRemember: <K extends FormDataKeys<TForm>>(...keys: K[]) => {
       excludeKeysRef.current = keys

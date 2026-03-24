@@ -14,14 +14,16 @@ export default () => {
 
   renderCount.current++
 
+  const { get } = http
+
   const fetchData = useCallback(async () => {
     try {
-      const data = await http.get('/api/data')
+      const data = await get('/api/data')
       setResult(data)
     } catch {
       // ignore
     }
-  }, [http])
+  }, [get])
 
   useEffect(() => {
     fetchData()

@@ -26,7 +26,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
 import { NamedInputEvent, toSimpleValidationErrors, ValidationConfig, Validator } from 'laravel-precognition'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import useFormState, { SetDataAction } from './useFormState'
 import useRemember from './useRemember'
 
@@ -311,12 +311,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     }
   }, [])
 
-  const createSubmitMethod =
-    (method: Method) =>
-    async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> => {
-      return submit(method, url, options)
-    }
-
   const submitWithArgs = useCallback(
     (...args: UseHttpSubmitArguments<TResponse, TForm>): Promise<TResponse> => {
       const parsed = UseFormUtils.parseSubmitArguments(args as any, precognitionEndpointRef.current)
@@ -326,15 +320,27 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     [submit],
   )
 
-  // Add useHttp-specific methods to the form object (mutate in place like Svelte)
+  const submitMethods = useMemo(
+    () => ({
+      get: async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> =>
+        submit('get', url, options),
+      post: async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> =>
+        submit('post', url, options),
+      put: async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> =>
+        submit('put', url, options),
+      patch: async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> =>
+        submit('patch', url, options),
+      delete: async (url: string, options: UseHttpSubmitOptions<TResponse, TForm> = {}): Promise<TResponse> =>
+        submit('delete', url, options),
+    }),
+    [submit],
+  )
+
+  // Add useHttp-specific methods to the form object
   Object.assign(baseForm, {
     response,
     submit: submitWithArgs,
-    get: createSubmitMethod('get'),
-    post: createSubmitMethod('post'),
-    put: createSubmitMethod('put'),
-    patch: createSubmitMethod('patch'),
-    delete: createSubmitMethod('delete'),
+    ...submitMethods,
     cancel,
     dontRemember: <K extends FormDataKeys<TForm>>(...keys: K[]) => {
       excludeKeysRef.current = keys

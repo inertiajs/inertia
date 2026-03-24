@@ -20,7 +20,7 @@ import {
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { config } from '.'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
@@ -386,41 +386,15 @@ export default function useFormState<TForm extends object>(
     [touchedFields],
   )
 
-  // Stable form object created once. Getters read from snapshotRef so they
-  // always return the latest React state without requiring a new object identity.
-  const form = useMemo(() => {
-    return {
-      get data() {
-        return snapshotRef.current.data
-      },
-      get isDirty() {
-        return !isEqual(snapshotRef.current.data, snapshotRef.current.defaults)
-      },
-      get errors() {
-        return snapshotRef.current.errors
-      },
-      get hasErrors() {
-        return Object.keys(snapshotRef.current.errors).length > 0
-      },
-      get processing() {
-        return snapshotRef.current.processing
-      },
-      get progress() {
-        return snapshotRef.current.progress
-      },
-      get wasSuccessful() {
-        return snapshotRef.current.wasSuccessful
-      },
-      get recentlySuccessful() {
-        return snapshotRef.current.recentlySuccessful
-      },
-    } as FormState<TForm>
-  }, [])
-
-  // Assign methods onto the stable object each render. Methods may have changing
-  // deps (e.g. reset depends on defaults) so we reassign them, but the object
-  // identity stays the same.
-  Object.assign(form, {
+  const form = {
+    data,
+    isDirty: !isEqual(data, defaults),
+    errors,
+    hasErrors: Object.keys(errors).length > 0,
+    processing,
+    progress,
+    wasSuccessful,
+    recentlySuccessful,
     setData: setDataFunction,
     transform: transformFunction,
     setDefaults: setDefaultsFunction,
@@ -428,7 +402,7 @@ export default function useFormState<TForm extends object>(
     setError,
     clearErrors,
     resetAndClearErrors,
-  })
+  } as FormState<TForm>
 
   const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
     if (typeof field === 'object' && !('target' in field)) {
@@ -485,9 +459,7 @@ export default function useFormState<TForm extends object>(
     }
 
     const precognitiveForm = Object.assign(form, {
-      get validating() {
-        return snapshotRef.current.validating
-      },
+      validating,
       validator: () => validatorRef.current!,
       valid,
       invalid,
