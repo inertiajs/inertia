@@ -303,26 +303,15 @@ export let users
 
 ### Polling
 
-Automatically refresh data at intervals:
+Use the `usePoll` hook to automatically refresh data at intervals. It handles cleanup on unmount and throttles polling when the tab is inactive.
 
-@boostsnippet("Polling Example", "svelte")
+@boostsnippet("Basic Polling", "svelte")
 <script>
-import { router } from '@inertiajs/svelte'
-import { onMount, onDestroy } from 'svelte'
+import { usePoll } from '@inertiajs/svelte'
 
 export let stats
 
-let interval
-
-onMount(() => {
-    interval = setInterval(() => {
-        router.reload({ only: ['stats'] })
-    }, 5000) // Poll every 5 seconds
-})
-
-onDestroy(() => {
-    clearInterval(interval)
-})
+usePoll(5000)
 </script>
 
 <div>
@@ -330,6 +319,37 @@ onDestroy(() => {
     <div>Active Users: {stats.activeUsers}</div>
 </div>
 @endboostsnippet
+
+@boostsnippet("Polling With Request Options and Manual Control", "svelte")
+<script>
+import { usePoll } from '@inertiajs/svelte'
+
+export let stats
+
+const { start, stop } = usePoll(5000, {
+    only: ['stats'],
+    onStart() {
+        console.log('Polling request started')
+    },
+    onFinish() {
+        console.log('Polling request finished')
+    },
+}, {
+    autoStart: false,
+    keepAlive: true,
+})
+</script>
+
+<div>
+    <h1>Dashboard</h1>
+    <div>Active Users: {stats.activeUsers}</div>
+    <button on:click={start}>Start Polling</button>
+    <button on:click={stop}>Stop Polling</button>
+</div>
+@endboostsnippet
+
+- `autoStart` (default `true`) — set to `false` to start polling manually via the returned `start()` function
+- `keepAlive` (default `false`) — set to `true` to prevent throttling when the browser tab is inactive
 
 ### WhenVisible
 
@@ -345,7 +365,6 @@ export let stats
 <div>
     <h1>Dashboard</h1>
 
-    <!-- stats prop is loaded only when this section scrolls into view -->
     <WhenVisible data="stats" buffer={200}>
         <div>
             <p>Total Users: {stats.total_users}</p>
@@ -358,6 +377,26 @@ export let stats
     </WhenVisible>
 </div>
 @endboostsnippet
+
+### InfiniteScroll
+
+Automatically load additional pages of paginated data as users scroll:
+
+@boostsnippet("InfiniteScroll Example", "svelte")
+<script>
+import { InfiniteScroll } from '@inertiajs/svelte'
+
+export let users
+</script>
+
+<InfiniteScroll data="users">
+    {#each users.data as user (user.id)}
+        <div>{user.name}</div>
+    {/each}
+</InfiniteScroll>
+@endboostsnippet
+
+The server must use `Inertia::scroll()` to configure the paginated data. Use the `search-docs` tool with a query of `infinite scroll` for detailed guidance on buffers, manual loading, reverse mode, and custom trigger elements.
 
 ## Server-Side Patterns
 
