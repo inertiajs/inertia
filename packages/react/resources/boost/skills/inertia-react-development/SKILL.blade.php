@@ -1,6 +1,6 @@
 ---
 name: inertia-react-development
-description: "Develops Inertia.js v3 React client-side applications. Activates when creating React pages, forms, or navigation; using <Link>, <Form>, useForm, useHttp, useLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions React with Inertia, React pages, React forms, or React navigation."
+description: "Develops Inertia.js v3 React client-side applications. Activates when creating React pages, forms, or navigation; using <Link>, <Form>, useForm, useHttp, setLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions React with Inertia, React pages, React forms, or React navigation."
 license: MIT
 metadata:
   author: laravel
@@ -17,7 +17,7 @@ Activate this skill when:
 - Creating or modifying React page components for Inertia
 - Working with forms in React (using `<Form>`, `useForm`, or `useHttp`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, once props, flash data, or polling
+- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, or polling
 - Building React-specific features with the Inertia protocol
 
 ## Documentation
@@ -358,14 +358,7 @@ import { Link } from '@inertiajs/react'
 Share dynamic data between pages and persistent layouts:
 
 @boostsnippet("Layout Props in Layout", "react")
-import { useLayoutProps } from '@inertiajs/react'
-
-export default function Layout({ children }) {
-    const { title, showSidebar } = useLayoutProps({
-        title: 'My App',
-        showSidebar: true,
-    })
-
+export default function Layout({ title = 'My App', showSidebar = true, children }) {
     return (
         <>
             <header>{title}</header>
@@ -417,20 +410,13 @@ export default function UsersIndex({ users }) {
 
 ### Polling
 
-Automatically refresh data at intervals:
+Use the `usePoll` hook to automatically refresh data at intervals. It handles cleanup on unmount and throttles polling when the tab is inactive.
 
-@boostsnippet("Polling Example", "react")
-import { router } from '@inertiajs/react'
-import { useEffect } from 'react'
+@boostsnippet("Basic Polling", "react")
+import { usePoll } from '@inertiajs/react'
 
 export default function Dashboard({ stats }) {
-    useEffect(() => {
-        const interval = setInterval(() => {
-            router.reload({ only: ['stats'] })
-        }, 5000)
-
-        return () => clearInterval(interval)
-    }, [])
+    usePoll(5000)
 
     return (
         <div>
@@ -440,6 +426,37 @@ export default function Dashboard({ stats }) {
     )
 }
 @endboostsnippet
+
+@boostsnippet("Polling With Request Options and Manual Control", "react")
+import { usePoll } from '@inertiajs/react'
+
+export default function Dashboard({ stats }) {
+    const { start, stop } = usePoll(5000, {
+        only: ['stats'],
+        onStart() {
+            console.log('Polling request started')
+        },
+        onFinish() {
+            console.log('Polling request finished')
+        },
+    }, {
+        autoStart: false,
+        keepAlive: true,
+    })
+
+    return (
+        <div>
+            <h1>Dashboard</h1>
+            <div>Active Users: {stats.activeUsers}</div>
+            <button onClick={start}>Start Polling</button>
+            <button onClick={stop}>Stop Polling</button>
+        </div>
+    )
+}
+@endboostsnippet
+
+- `autoStart` (default `true`) - set to `false` to start polling manually via the returned `start()` function
+- `keepAlive` (default `false`) - set to `true` to prevent throttling when the browser tab is inactive
 
 ### WhenVisible
 
@@ -466,6 +483,26 @@ export default function Dashboard({ stats }) {
     )
 }
 @endboostsnippet
+
+### InfiniteScroll
+
+Automatically load additional pages of paginated data as users scroll:
+
+@boostsnippet("InfiniteScroll Example", "react")
+import { InfiniteScroll } from '@inertiajs/react'
+
+export default function Users({ users }) {
+    return (
+        <InfiniteScroll data="users">
+            {users.data.map(user => (
+                <div key={user.id}>{user.name}</div>
+            ))}
+        </InfiniteScroll>
+    )
+}
+@endboostsnippet
+
+The server must use `Inertia::scroll()` to configure the paginated data. Use the `search-docs` tool with a query of `infinite scroll` for detailed guidance on buffers, manual loading, reverse mode, and custom trigger elements.
 
 ## Server-Side Patterns
 
