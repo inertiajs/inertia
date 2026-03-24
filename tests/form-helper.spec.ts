@@ -1056,6 +1056,23 @@ test('it returns a stable reference that does not cause infinite re-renders in d
 test.describe('React', () => {
   test.skip(process.env.PACKAGE !== 'react', 'Only for React')
 
+  test('it re-renders the component when setData is called programmatically', async ({ page }) => {
+    await page.goto('/form-helper/set-data-rerender')
+
+    await expect(page.locator('#current-value')).toHaveText('Current value: initial')
+    await expect(page.locator('#memo-value')).toHaveText('Memo value: initial')
+
+    await page.getByRole('button', { name: 'Set forward' }).click()
+
+    await expect(page.locator('#current-value')).toHaveText('Current value: forward')
+    await expect(page.locator('#memo-value')).toHaveText('Memo value: forward')
+
+    await page.getByRole('button', { name: 'Set goalkeeper' }).click()
+
+    await expect(page.locator('#current-value')).toHaveText('Current value: goalkeeper')
+    await expect(page.locator('#memo-value')).toHaveText('Memo value: goalkeeper')
+  })
+
   test('setDefaults callback in useEffect executes once per change', async ({ page }) => {
     await page.goto('/form-helper/effect-count')
 
