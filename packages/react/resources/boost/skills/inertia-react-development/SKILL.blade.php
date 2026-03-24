@@ -17,7 +17,7 @@ Activate this skill when:
 - Creating or modifying React page components for Inertia
 - Working with forms in React (using `<Form>`, `useForm`, or `useHttp`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, or polling
+- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, once props, flash data, or polling
 - Building React-specific features with the Inertia protocol
 
 ## Documentation

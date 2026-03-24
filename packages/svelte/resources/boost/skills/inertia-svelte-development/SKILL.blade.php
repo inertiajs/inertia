@@ -17,7 +17,7 @@ Activate this skill when:
 - Creating or modifying Svelte page components for Inertia
 - Working with forms in Svelte (using `<Form>`, `useForm`, or `useHttp`)
 - Implementing client-side navigation with `<Link>` or `router`
-- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, or polling
+- Using v3 features: deferred props, prefetching, optimistic updates, instant visits, layout props, HTTP requests, WhenVisible, InfiniteScroll, once props, flash data, or polling
 - Building Svelte-specific features with the Inertia protocol
 
 ## Important: Svelte 5 Required
