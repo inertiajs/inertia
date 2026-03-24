@@ -102,8 +102,8 @@ export interface UseFormStateReturn<TForm extends object> {
   precognitionEndpointRef: React.MutableRefObject<(() => UrlMethodPair) | null>
   dataRef: React.MutableRefObject<TForm>
   isMounted: React.MutableRefObject<boolean>
-  setProcessing: (value: boolean) => void
-  setProgress: (value: Progress | null) => void
+  setProcessing: React.Dispatch<React.SetStateAction<boolean>>
+  setProgress: React.Dispatch<React.SetStateAction<Progress | null>>
   markAsSuccessful: () => void
   clearErrors: (...fields: string[]) => void
   setError: (fieldOrFields: FormDataKeys<TForm> | FormDataErrors<TForm>, maybeValue?: ErrorValue) => void
@@ -130,8 +130,8 @@ export default function useFormState<TForm extends object>(
 
   const [data, setData] = useDataState ? useDataState() : useState(cloneDeep(initialData))
   const [errors, setErrors] = useErrorsState ? useErrorsState() : useState({} as FormDataErrors<TForm>)
-  const [processing, _setProcessing] = useState(false)
-  const [progress, _setProgress] = useState<Progress | null>(null)
+  const [processing, setProcessing] = useState(false)
+  const [progress, setProgress] = useState<Progress | null>(null)
   const [wasSuccessful, setWasSuccessful] = useState(false)
   const [recentlySuccessful, setRecentlySuccessful] = useState(false)
 
@@ -157,44 +157,6 @@ export default function useFormState<TForm extends object>(
     return () => {
       isMounted.current = false
     }
-  }, [])
-
-  // Snapshot ref keeps state values accessible to the stable form object's getters.
-  // Reassigned each render so getters always return the latest React state.
-  const snapshotRef = useRef({
-    data,
-    defaults,
-    errors,
-    processing,
-    progress,
-    wasSuccessful,
-    recentlySuccessful,
-    validating,
-    touchedFields,
-    validFields,
-  })
-
-  snapshotRef.current = {
-    data,
-    defaults,
-    errors,
-    processing,
-    progress,
-    wasSuccessful,
-    recentlySuccessful,
-    validating,
-    touchedFields,
-    validFields,
-  }
-
-  const setProcessing = useCallback((value: boolean) => {
-    _setProcessing(value)
-    snapshotRef.current.processing = value
-  }, [])
-
-  const setProgress = useCallback((value: Progress | null) => {
-    _setProgress(value)
-    snapshotRef.current.progress = value
   }, [])
 
   const setDataFunction = useCallback(
@@ -287,7 +249,6 @@ export default function useFormState<TForm extends object>(
           ...(typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields),
         }
 
-        snapshotRef.current.errors = newErrors as FormDataErrors<TForm>
         validatorRef.current?.setErrors(newErrors)
 
         return newErrors
@@ -306,8 +267,6 @@ export default function useFormState<TForm extends object>(
           }),
           {},
         )
-
-        snapshotRef.current.errors = newErrors as FormDataErrors<TForm>
 
         if (validatorRef.current) {
           if (fields.length === 0) {
@@ -331,33 +290,23 @@ export default function useFormState<TForm extends object>(
     [reset, clearErrors],
   )
 
-  const setWasSuccessfulWithSnapshot = useCallback((value: boolean) => {
-    setWasSuccessful(value)
-    snapshotRef.current.wasSuccessful = value
-  }, [])
-
-  const setRecentlySuccessfulWithSnapshot = useCallback((value: boolean) => {
-    setRecentlySuccessful(value)
-    snapshotRef.current.recentlySuccessful = value
-  }, [])
-
   const markAsSuccessful = useCallback(() => {
     clearErrors()
-    setWasSuccessfulWithSnapshot(true)
-    setRecentlySuccessfulWithSnapshot(true)
+    setWasSuccessful(true)
+    setRecentlySuccessful(true)
 
     recentlySuccessfulTimeoutId.current = window.setTimeout(() => {
       if (isMounted.current) {
-        setRecentlySuccessfulWithSnapshot(false)
+        setRecentlySuccessful(false)
       }
     }, config.get('form.recentlySuccessfulDuration'))
-  }, [clearErrors, setWasSuccessfulWithSnapshot, setRecentlySuccessfulWithSnapshot])
+  }, [clearErrors, setWasSuccessful, setRecentlySuccessful])
 
   const resetBeforeSubmit = useCallback(() => {
-    setWasSuccessfulWithSnapshot(false)
-    setRecentlySuccessfulWithSnapshot(false)
+    setWasSuccessful(false)
+    setRecentlySuccessful(false)
     clearTimeout(recentlySuccessfulTimeoutId.current)
-  }, [setWasSuccessfulWithSnapshot, setRecentlySuccessfulWithSnapshot])
+  }, [setWasSuccessful, setRecentlySuccessful])
 
   const finishProcessing = useCallback(() => {
     setProcessing(false)
@@ -453,7 +402,6 @@ export default function useFormState<TForm extends object>(
             : toSimpleValidationErrors(validator.errors())
 
           setErrors(validationErrors as FormDataErrors<TForm>)
-          snapshotRef.current.errors = validationErrors as FormDataErrors<TForm>
           setValidFields(validator.valid())
         })
     }
