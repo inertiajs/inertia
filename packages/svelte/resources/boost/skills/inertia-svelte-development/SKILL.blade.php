@@ -1,6 +1,6 @@
 ---
 name: inertia-svelte-development
-description: "Develops Inertia.js v3 Svelte 5 client-side applications. Activates when creating Svelte pages, forms, or navigation; using Link, Form, useForm, useHttp, useLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions Svelte with Inertia, Svelte pages, Svelte forms, or Svelte navigation."
+description: "Develops Inertia.js v3 Svelte 5 client-side applications. Activates when creating Svelte pages, forms, or navigation; using Link, Form, useForm, useHttp, setLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions Svelte with Inertia, Svelte pages, Svelte forms, or Svelte navigation."
 license: MIT
 metadata:
   author: laravel
@@ -379,18 +379,11 @@ Share dynamic data between pages and persistent layouts:
 
 @boostsnippet("Layout Props in Layout", "svelte")
 <script>
-import { useLayoutProps } from '@inertiajs/svelte'
-
-const layout = useLayoutProps({
-    title: 'My App',
-    showSidebar: true,
-})
-
-let { children } = $props()
+let { title = 'My App', showSidebar = true, children } = $props()
 </script>
 
-<header>{layout.title}</header>
-{#if layout.showSidebar}
+<header>{title}</header>
+{#if showSidebar}
     <aside>Sidebar</aside>
 {/if}
 <main>
@@ -439,22 +432,15 @@ let { users } = $props()
 
 ### Polling
 
-Automatically refresh data at intervals:
+Use the `usePoll` hook to automatically refresh data at intervals. It handles cleanup on unmount and throttles polling when the tab is inactive.
 
-@boostsnippet("Polling Example", "svelte")
+@boostsnippet("Basic Polling", "svelte")
 <script>
-import { router } from '@inertiajs/svelte'
-import { onMount } from 'svelte'
+import { usePoll } from '@inertiajs/svelte'
 
 let { stats } = $props()
 
-onMount(() => {
-    const interval = setInterval(() => {
-        router.reload({ only: ['stats'] })
-    }, 5000)
-
-    return () => clearInterval(interval)
-})
+usePoll(5000)
 </script>
 
 <div>
@@ -462,6 +448,37 @@ onMount(() => {
     <div>Active Users: {stats.activeUsers}</div>
 </div>
 @endboostsnippet
+
+@boostsnippet("Polling With Request Options and Manual Control", "svelte")
+<script>
+import { usePoll } from '@inertiajs/svelte'
+
+let { stats } = $props()
+
+const { start, stop } = usePoll(5000, {
+    only: ['stats'],
+    onStart() {
+        console.log('Polling request started')
+    },
+    onFinish() {
+        console.log('Polling request finished')
+    },
+}, {
+    autoStart: false,
+    keepAlive: true,
+})
+</script>
+
+<div>
+    <h1>Dashboard</h1>
+    <div>Active Users: {stats.activeUsers}</div>
+    <button onclick={start}>Start Polling</button>
+    <button onclick={stop}>Stop Polling</button>
+</div>
+@endboostsnippet
+
+- `autoStart` (default `true`) - set to `false` to start polling manually via the returned `start()` function
+- `keepAlive` (default `false`) - set to `true` to prevent throttling when the browser tab is inactive
 
 ### WhenVisible
 
@@ -489,6 +506,26 @@ let { stats } = $props()
     </WhenVisible>
 </div>
 @endboostsnippet
+
+### InfiniteScroll
+
+Automatically load additional pages of paginated data as users scroll:
+
+@boostsnippet("InfiniteScroll Example", "svelte")
+<script>
+import { InfiniteScroll } from '@inertiajs/svelte'
+
+let { users } = $props()
+</script>
+
+<InfiniteScroll data="users">
+    {#each users.data as user (user.id)}
+        <div>{user.name}</div>
+    {/each}
+</InfiniteScroll>
+@endboostsnippet
+
+The server must use `Inertia::scroll()` to configure the paginated data. Use the `search-docs` tool with a query of `infinite scroll` for detailed guidance on buffers, manual loading, reverse mode, and custom trigger elements.
 
 ## Server-Side Patterns
 

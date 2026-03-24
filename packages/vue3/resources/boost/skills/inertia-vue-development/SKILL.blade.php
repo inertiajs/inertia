@@ -1,6 +1,6 @@
 ---
 name: inertia-vue-development
-description: "Develops Inertia.js v3 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using <Link>, <Form>, useForm, useHttp, useLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation."
+description: "Develops Inertia.js v3 Vue client-side applications. Activates when creating Vue pages, forms, or navigation; using <Link>, <Form>, useForm, useHttp, setLayoutProps, or router; working with deferred props, prefetching, optimistic updates, instant visits, or polling; or when user mentions Vue with Inertia, Vue pages, Vue forms, or Vue navigation."
 license: MIT
 metadata:
   author: laravel
@@ -389,17 +389,18 @@ Share dynamic data between pages and persistent layouts:
 @verbatim
 @boostsnippet("Layout Props in Layout", "vue")
 <script setup>
-import { useLayoutProps } from '@inertiajs/vue3'
-
-const layout = useLayoutProps({
+withDefaults(defineProps({
+    title: String,
+    showSidebar: Boolean,
+}), {
     title: 'My App',
     showSidebar: true,
 })
 </script>
 
 <template>
-    <header>{{ layout.title }}</header>
-    <aside v-if="layout.showSidebar">Sidebar</aside>
+    <header>{{ title }}</header>
+    <aside v-if="showSidebar">Sidebar</aside>
     <main>
         <slot />
     </main>
@@ -453,29 +454,18 @@ defineProps({
 
 ### Polling
 
-Automatically refresh data at intervals:
+Use the `usePoll` composable to automatically refresh data at intervals. It handles cleanup on unmount and throttles polling when the tab is inactive.
 
 @verbatim
-@boostsnippet("Polling Example", "vue")
+@boostsnippet("Basic Polling", "vue")
 <script setup>
-import { router } from '@inertiajs/vue3'
-import { onMounted, onUnmounted } from 'vue'
+import { usePoll } from '@inertiajs/vue3'
 
 defineProps({
     stats: Object
 })
 
-let interval
-
-onMounted(() => {
-    interval = setInterval(() => {
-        router.reload({ only: ['stats'] })
-    }, 5000)
-})
-
-onUnmounted(() => {
-    clearInterval(interval)
-})
+usePoll(5000)
 </script>
 
 <template>
@@ -486,6 +476,43 @@ onUnmounted(() => {
 </template>
 @endboostsnippet
 @endverbatim
+
+@verbatim
+@boostsnippet("Polling With Request Options and Manual Control", "vue")
+<script setup>
+import { usePoll } from '@inertiajs/vue3'
+
+defineProps({
+    stats: Object
+})
+
+const { start, stop } = usePoll(5000, {
+    only: ['stats'],
+    onStart() {
+        console.log('Polling request started')
+    },
+    onFinish() {
+        console.log('Polling request finished')
+    },
+}, {
+    autoStart: false,
+    keepAlive: true,
+})
+</script>
+
+<template>
+    <div>
+        <h1>Dashboard</h1>
+        <div>Active Users: {{ stats.activeUsers }}</div>
+        <button @click="start">Start Polling</button>
+        <button @click="stop">Stop Polling</button>
+    </div>
+</template>
+@endboostsnippet
+@endverbatim
+
+- `autoStart` (default `true`) - set to `false` to start polling manually via the returned `start()` function
+- `keepAlive` (default `false`) - set to `true` to prevent throttling when the browser tab is inactive
 
 ### WhenVisible
 
@@ -522,6 +549,32 @@ defineProps({
 </template>
 @endboostsnippet
 @endverbatim
+
+### InfiniteScroll
+
+Automatically load additional pages of paginated data as users scroll:
+
+@verbatim
+@boostsnippet("InfiniteScroll Example", "vue")
+<script setup>
+import { InfiniteScroll } from '@inertiajs/vue3'
+
+defineProps({
+    users: Object
+})
+</script>
+
+<template>
+    <InfiniteScroll data="users">
+        <div v-for="user in users.data" :key="user.id">
+            {{ user.name }}
+        </div>
+    </InfiniteScroll>
+</template>
+@endboostsnippet
+@endverbatim
+
+The server must use `Inertia::scroll()` to configure the paginated data. Use the `search-docs` tool with a query of `infinite scroll` for detailed guidance on buffers, manual loading, reverse mode, and custom trigger elements.
 
 ## Server-Side Patterns
 
