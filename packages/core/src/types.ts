@@ -742,12 +742,12 @@ export type FormComponentOptions = Pick<
   'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
 >
 
-export type FormComponentOptimisticCallback<TProps = Page<SharedPageProps>['props']> = (
-  props: TProps,
-  formData: Record<string, FormDataConvertible>,
-) => Partial<TProps> | void
+export type FormComponentOptimisticCallback<
+  TProps = Page<SharedPageProps>['props'],
+  TForm = Record<string, FormDataConvertible>,
+> = (props: TProps, formData: TForm) => Partial<TProps> | void
 
-export type FormComponentProps = Partial<
+export type FormComponentProps<TForm = Record<string, FormDataConvertible>> = Partial<
   Pick<Visit, 'headers' | 'queryStringArrayFormat' | 'errorBag' | 'showProgress' | 'invalidateCacheTags'> &
     Omit<VisitCallbacks, 'onPrefetched' | 'onPrefetching'>
 > & {
@@ -755,8 +755,8 @@ export type FormComponentProps = Partial<
   action?: string | UrlMethodPair
   component?: string
   instant?: boolean
-  transform?: (data: Record<string, FormDataConvertible>) => Record<string, FormDataConvertible>
-  optimistic?: FormComponentOptimisticCallback
+  transform?: (data: TForm) => Record<string, FormDataConvertible>
+  optimistic?: FormComponentOptimisticCallback<Page<SharedPageProps>['props'], TForm>
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentOnSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
