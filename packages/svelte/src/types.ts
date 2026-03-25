@@ -34,7 +34,7 @@ export type NamedLayouts = Record<string, Component | LayoutTuple | LayoutObject
  */
 export type LayoutType =
   | LayoutResolver
-  | LayoutCallback
+  | ((props: any) => any)
   | Component
   | Component[]
   | LayoutTuple

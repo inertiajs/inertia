@@ -6,7 +6,7 @@ export type LayoutCallback = (props: SharedPageProps) => LayoutCallbackReturn<Co
 export type LayoutComponent = ComponentType<{ children: ReactNode }>
 
 export type ReactComponent = ComponentType<any> & {
-  layout?: LayoutComponent | LayoutComponent[] | LayoutFunction | LayoutCallback
+  layout?: LayoutComponent | LayoutComponent[] | LayoutFunction | ((props: any) => any)
 }
 
 export type ReactPageHandlerArgs = Parameters<PageHandler<ComponentType>>[0]
