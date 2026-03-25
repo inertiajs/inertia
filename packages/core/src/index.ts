@@ -17,6 +17,7 @@ export {
   createLayoutPropsStore,
   isPropsObject,
   normalizeLayouts,
+  type LayoutCallbackReturn,
   type LayoutDefinition,
   type LayoutPropsStore,
 } from './layout'
