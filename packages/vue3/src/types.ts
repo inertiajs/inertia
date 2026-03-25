@@ -39,7 +39,12 @@ declare module 'vue' {
       | [DefineComponent<any, any, any>, Record<string, unknown>?]
       | (DefineComponent<any, any, any> | [DefineComponent<any, any, any>, Record<string, unknown>?])[]
       | { component: DefineComponent<any, any, any>; props?: Record<string, unknown> }
-      | Record<string, DefineComponent<any, any, any> | [DefineComponent<any, any, any>, Record<string, unknown>?] | { component: DefineComponent<any, any, any>; props?: Record<string, unknown> }>
+      | Record<
+          string,
+          | DefineComponent<any, any, any>
+          | [DefineComponent<any, any, any>, Record<string, unknown>?]
+          | { component: DefineComponent<any, any, any>; props?: Record<string, unknown> }
+        >
       | Partial<LayoutProps>
     remember?:
       | string
