@@ -334,10 +334,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Hint')
     })
 
-    it('includes stack trace when handleErrors is enabled', async () => {
+    it('includes stack trace when formatErrors is enabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { handleErrors: true } })
+      const plugin = inertia({ ssr: { formatErrors: true } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 
@@ -360,10 +360,10 @@ describe('SSR', () => {
       expect(loggedMessage).toContain('Dashboard.vue:10')
     })
 
-    it('throws raw error when handleErrors is disabled', async () => {
+    it('throws raw error when formatErrors is disabled', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
-      const plugin = inertia({ ssr: { handleErrors: false } })
+      const plugin = inertia({ ssr: { formatErrors: false } })
       const logger = createMockLogger()
       const server = createMockServer(logger)
 

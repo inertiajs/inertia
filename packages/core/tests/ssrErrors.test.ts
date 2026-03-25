@@ -234,7 +234,7 @@ describe('SSR Errors', () => {
       expect(sourceLine).not.toContain('/Users/dev/project')
     })
 
-    it('returns one-liner when handleErrors is false', () => {
+    it('returns one-liner when formatErrors is false', () => {
       const classified = classifySSRError(new Error('window is not defined'), 'Dashboard')
       const output = formatConsoleError(classified, undefined, false)
 
