@@ -1,36 +1,40 @@
 import { HttpResponse } from './types'
 
-export class HttpResponseError extends Error {
-  public readonly response: HttpResponse
+export class HttpError extends Error {
+  public readonly code: string
   public readonly url?: string
+
+  constructor(message: string, code: string, url?: string) {
+    super(url ? `${message} (${url})` : message)
+    this.name = 'HttpError'
+    this.code = code
+    this.url = url
+  }
+}
+
+export class HttpResponseError extends HttpError {
+  public readonly response: HttpResponse
 
   constructor(message: string, response: HttpResponse, url?: string) {
-    super(url ? `${message} (${url})` : message)
+    super(message, 'ERR_HTTP_RESPONSE', url)
     this.name = 'HttpResponseError'
     this.response = response
-    this.url = url
   }
 }
 
-export class HttpCancelledError extends Error {
-  public readonly url?: string
-
+export class HttpCancelledError extends HttpError {
   constructor(message: string = 'Request was cancelled', url?: string) {
-    super(url ? `${message} (${url})` : message)
+    super(message, 'ERR_CANCELLED', url)
     this.name = 'HttpCancelledError'
-    this.url = url
   }
 }
 
-export class HttpNetworkError extends Error {
+export class HttpNetworkError extends HttpError {
   public readonly cause?: Error
-  public readonly code = 'ERR_NETWORK'
-  public readonly url?: string
 
   constructor(message: string, url?: string, cause?: Error) {
-    super(url ? `${message} (${url})` : message)
+    super(message, 'ERR_NETWORK', url)
     this.name = 'HttpNetworkError'
-    this.url = url
     this.cause = cause
   }
 }
