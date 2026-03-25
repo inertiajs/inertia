@@ -182,6 +182,9 @@ const App: InertiaApp = defineComponent({
           } else {
             effectiveLayout = result
           }
+        } else if (isPropsObject(layoutValue, isComponent)) {
+          effectiveLayout = defaultLayout?.(page.value!.component, page.value!)
+          callbackProps = layoutValue as Record<string, unknown>
         } else {
           effectiveLayout = layoutValue ?? defaultLayout?.(page.value!.component, page.value!)
         }

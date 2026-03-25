@@ -130,4 +130,18 @@ test.describe('layout props', () => {
     await expect(page.locator('.app-title')).toHaveText('Profile: Jane')
     await expect(page.locator('.sidebar')).not.toBeVisible()
   })
+
+  test('it supports a zero-arg layout callback that returns only props', async ({ page }) => {
+    await page.goto('/layout-props/callback-static?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Static Callback Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
+  test('it supports a static props object as layout and uses the default layout', async ({ page }) => {
+    await page.goto('/layout-props/static-object?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Static Object Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
 })

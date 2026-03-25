@@ -116,6 +116,9 @@
       } else {
         effectiveLayout = result as LayoutType | undefined
       }
+    } else if (isPropsObject(layoutValue, isComponent)) {
+      effectiveLayout = defaultLayout?.(page.component, page) as LayoutType | undefined
+      callbackProps = layoutValue as Record<string, unknown>
     } else {
       effectiveLayout = (layoutValue ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
     }
