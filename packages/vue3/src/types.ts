@@ -1,7 +1,6 @@
 import {
   createHeadManager,
   type LayoutCallbackReturn,
-  type LayoutProps,
   Page,
   PageHandler,
   PageProps,
@@ -31,16 +30,7 @@ declare module 'vue' {
   }
 
   export interface ComponentCustomOptions {
-    layout?:
-      | ((props: any) => any)
-      | LayoutRenderFunction
-      | DefineComponent<any, any, any>
-      | DefineComponent<any, any, any>[]
-      | [DefineComponent<any, any, any>, Record<string, unknown>?]
-      | (DefineComponent<any, any, any> | [DefineComponent<any, any, any>, Record<string, unknown>?])[]
-      | { component: DefineComponent<any, any, any>; props?: Record<string, unknown> }
-      | Record<string, DefineComponent<any, any, any> | [DefineComponent<any, any, any>, Record<string, unknown>?] | { component: DefineComponent<any, any, any>; props?: Record<string, unknown> }>
-      | Partial<LayoutProps>
+    layout?: LayoutCallbackReturn<DefineComponent<any, any, any>> | ((props: any) => any) | LayoutRenderFunction
     remember?:
       | string
       | string[]

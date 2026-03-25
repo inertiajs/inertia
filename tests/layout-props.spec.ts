@@ -144,4 +144,29 @@ test.describe('layout props', () => {
     await expect(page.locator('.app-title')).toHaveText('Static Object Title')
     await expect(page.locator('.sidebar')).not.toBeVisible()
   })
+
+  test('it supports named layouts with { component, props } object syntax', async ({ page }) => {
+    await page.goto('/layout-props/named-object')
+
+    await expect(page.locator('.app-title')).toHaveText('Named Object Page')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+    await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'sm')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-max-width', '4xl')
+  })
+
+  test('it can dynamically update named layout props with setLayoutProps', async ({ page }) => {
+    await page.goto('/layout-props/named-dynamic')
+
+    await expect(page.locator('.app-title')).toHaveText('Named Dynamic Page')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'md')
+
+    await page.getByRole('button', { name: 'Update App Title' }).click()
+
+    await expect(page.locator('.app-title')).toHaveText('Updated App Title')
+
+    await page.getByRole('button', { name: 'Update Content Padding' }).click()
+
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'xl')
+  })
 })
