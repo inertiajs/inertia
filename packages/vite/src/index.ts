@@ -129,7 +129,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
         result =
           wrapWithServerBootstrap(
             result,
-            { port: ssr.port, cluster: ssr.cluster, handleErrors: ssr.handleErrors },
+            { port: ssr.port, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
             frameworks,
           ) ?? result
       }
@@ -147,7 +147,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           return next()
         }
 
-        await handleSSRRequest(server, entry!, req, res, ssr.handleErrors ?? true)
+        await handleSSRRequest(server, entry!, req, res, ssr.formatErrors ?? true)
       })
 
       server.config.logger.info(`Inertia SSR dev endpoint: ${SSR_ENDPOINT}`)

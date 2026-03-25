@@ -111,5 +111,5 @@ export interface SSROptions {
    * When disabled, errors are thrown raw for debugging.
    * Defaults to true.
    */
-  handleErrors?: boolean
+  formatErrors?: boolean
 }

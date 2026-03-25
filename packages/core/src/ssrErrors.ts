@@ -267,10 +267,10 @@ function makeRelative(path: string, root?: string): string {
 export function formatConsoleError(
   classified: ClassifiedSSRError,
   root?: string,
-  handleErrors: boolean = true,
+  formatErrors: boolean = true,
   suppressedWarnings: string[] = [],
 ): string {
-  if (!handleErrors) {
+  if (!formatErrors) {
     const component = classified.component ? `[${classified.component}]` : ''
     return `SSR Error ${component}: ${classified.error}`
   }
