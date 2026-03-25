@@ -168,31 +168,6 @@ export default function App<SharedProps extends PageProps = PageProps>({
         if (isValidElement(result)) {
           return (Component.layout as LayoutFunction)(child)
         }
-
-        let layouts = normalizeLayouts(result, isComponent)
-
-        if (layouts.length === 0 && defaultLayout && isPropsObject(result, isComponent)) {
-          layouts = normalizeLayouts(defaultLayout(current.page.component, current.page), isComponent)
-          const callbackProps = result as Record<string, unknown>
-          layouts = layouts.map((l) => ({ ...l, props: { ...l.props, ...callbackProps } }))
-        }
-
-        if (layouts.length > 0) {
-          return layouts.reduceRight((childNode, layout) => {
-            return createElement(
-              layout.component,
-              {
-                ...props,
-                ...layout.props,
-                ...dynamicLayoutProps.shared,
-                ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
-              },
-              childNode,
-            )
-          }, child)
-        }
-
-        return child
       }
 
       let effectiveLayout: unknown
