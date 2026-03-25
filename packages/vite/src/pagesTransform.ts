@@ -40,7 +40,11 @@ import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStr
 import type { FrameworkConfig } from './types'
 
 /** Returns the transformed code, or null if no transformation was needed. */
-export function transformPageResolution(code: string, frameworks: Record<string, FrameworkConfig>): string | null {
+export function transformPageResolution(
+  code: string,
+  frameworks: Record<string, FrameworkConfig>,
+  hasAtAlias: boolean = false,
+): string | null {
   if (!code.includes('InertiaApp')) {
     return null
   }
@@ -61,11 +65,11 @@ export function transformPageResolution(code: string, frameworks: Record<string,
   const extractDefault = framework.config.extractDefault ?? true
 
   if (parsed.pagesProperty) {
-    return replacePages(code, parsed.pagesProperty, extensions, extractDefault)
+    return replacePages(code, parsed.pagesProperty, extensions, extractDefault, hasAtAlias)
   }
 
   if (parsed.callWithoutResolver) {
-    return injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault)
+    return injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault, hasAtAlias)
   }
 
   return null
@@ -82,6 +86,7 @@ function replacePages(
   property: NodeWithPos<Property>,
   defaultExtensions: string[],
   extractDefault: boolean,
+  hasAtAlias: boolean = false,
 ): string {
   const config = extractPagesConfig(property.value, code)
 
@@ -99,7 +104,7 @@ function replacePages(
 
   const resolver = config.directory
     ? buildResolver(config.directory.replace(/\/$/, ''), extensions, extractDefault, eager, config.transform)
-    : buildDefaultResolver(extensions, extractDefault, eager)
+    : buildDefaultResolver(extensions, extractDefault, eager, hasAtAlias)
 
   return code.slice(0, property.start) + resolver + code.slice(property.end)
 }
@@ -117,8 +122,9 @@ function injectResolver(
   call: { callEnd: number; options?: { start: number; end: number; isEmpty: boolean } },
   extensions: string[],
   extractDefault: boolean,
+  hasAtAlias: boolean = false,
 ): string {
-  const resolver = buildDefaultResolver(extensions, extractDefault)
+  const resolver = buildDefaultResolver(extensions, extractDefault, false, hasAtAlias)
 
   if (!call.options) {
     return code.slice(0, call.callEnd - 1) + `{ ${resolver} })` + code.slice(call.callEnd)
@@ -214,8 +220,15 @@ function buildResolver(
   }`
 }
 
-function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
-  return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
+function buildDefaultResolver(
+  extensions: string[],
+  extractDefault: boolean,
+  eager: boolean = false,
+  hasAtAlias: boolean = false,
+): string {
+  const directories = ['./pages', './Pages', ...(hasAtAlias ? ['@/pages', '@/Pages'] : [])]
+
+  return buildResolver(directories, extensions, extractDefault, eager)
 }
 
 function buildGlob(directory: string, extensions: string[]): string {

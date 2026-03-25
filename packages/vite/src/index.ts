@@ -82,6 +82,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
   let entry: string | null = null
+  let hasAtAlias = false
 
   return {
     name: '@inertiajs/vite',
@@ -107,6 +108,8 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
     },
 
     configResolved(config) {
+      hasAtAlias = config.resolve.alias.some((a) => a.find === '@')
+
       if (ssrDisabled) {
         return
       }
@@ -134,7 +137,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           ) ?? result
       }
 
-      return transformPageResolution(result, frameworks) ?? (result !== code ? result : null)
+      return transformPageResolution(result, frameworks, hasAtAlias) ?? (result !== code ? result : null)
     },
 
     configureServer(server) {

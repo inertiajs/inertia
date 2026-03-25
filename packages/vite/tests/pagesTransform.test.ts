@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { defaultFrameworks } from '../src/frameworks/index'
 import { transformPageResolution } from '../src/pagesTransform'
 
-const transform = (code: string) => transformPageResolution(code, defaultFrameworks)
+const transform = (code: string, hasAtAlias: boolean = false) =>
+  transformPageResolution(code, defaultFrameworks, hasAtAlias)
 
 describe('Pages Transform', () => {
   describe('returns null when no transform needed', () => {
@@ -307,6 +308,44 @@ export default createInertiaApp({
 
         // Footer comment"
       `)
+    })
+  })
+
+  describe('@ alias support', () => {
+    it('includes @/pages and @/Pages when hasAtAlias is true', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp()`
+
+      const result = transform(code, true)
+      expect(result).toContain('@/pages/')
+      expect(result).toContain('@/Pages/')
+    })
+
+    it('does not include @/pages when hasAtAlias is false', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp()`
+
+      const result = transform(code)
+      expect(result).not.toContain('@/pages/')
+      expect(result).not.toContain('@/Pages/')
+    })
+
+    it('includes @/pages for pages object without path', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: { lazy: true } })`
+
+      const result = transform(code, true)
+      expect(result).toContain('@/pages/')
+      expect(result).toContain('@/Pages/')
+    })
+
+    it('does not include @/pages when explicit path is set', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: './Custom' })`
+
+      const result = transform(code, true)
+      expect(result).not.toContain('@/pages/')
+      expect(result).toContain('./Custom/')
     })
   })
 })
