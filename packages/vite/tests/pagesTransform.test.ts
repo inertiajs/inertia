@@ -152,8 +152,8 @@ export default createInertiaApp({ pages: { lazy: true } })`
       expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name, page) => {
-            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'], { eager: false })
-            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`])?.()
+            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue', '@/pages/**/*.vue', '@/Pages/**/*.vue'], { eager: false })
+            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`] || pages[\`@/pages/\${name}.vue\`] || pages[\`@/Pages/\${name}.vue\`])?.()
             if (!module) throw new Error(\`Page not found: \${name}\`)
             return module.default ?? module
           } })"
@@ -169,8 +169,8 @@ export default createInertiaApp()`
       expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name, page) => {
-            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'], { eager: false })
-            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`])?.()
+            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue', '@/pages/**/*.vue', '@/Pages/**/*.vue'], { eager: false })
+            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`] || pages[\`@/pages/\${name}.vue\`] || pages[\`@/Pages/\${name}.vue\`])?.()
             if (!module) throw new Error(\`Page not found: \${name}\`)
             return module.default ?? module
           } })"
@@ -184,8 +184,8 @@ export default createInertiaApp({})`
       expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name, page) => {
-            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'], { eager: false })
-            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`])?.()
+            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue', '@/pages/**/*.vue', '@/Pages/**/*.vue'], { eager: false })
+            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`] || pages[\`@/pages/\${name}.vue\`] || pages[\`@/Pages/\${name}.vue\`])?.()
             if (!module) throw new Error(\`Page not found: \${name}\`)
             return module.default ?? module
           } })"
@@ -199,8 +199,8 @@ export default createInertiaApp({ title: t => t })`
       expect(transform(code)).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/vue3'
         export default createInertiaApp({ resolve: async (name, page) => {
-            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue'], { eager: false })
-            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`])?.()
+            const pages = import.meta.glob(['./pages/**/*.vue', './Pages/**/*.vue', '@/pages/**/*.vue', '@/Pages/**/*.vue'], { eager: false })
+            const module = await (pages[\`./pages/\${name}.vue\`] || pages[\`./Pages/\${name}.vue\`] || pages[\`@/pages/\${name}.vue\`] || pages[\`@/Pages/\${name}.vue\`])?.()
             if (!module) throw new Error(\`Page not found: \${name}\`)
             return module.default ?? module
           }, title: t => t })"

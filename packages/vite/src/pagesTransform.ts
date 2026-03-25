@@ -215,7 +215,7 @@ function buildResolver(
 }
 
 function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
-  return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
+  return buildResolver(['./pages', './Pages', '@/pages', '@/Pages'], extensions, extractDefault, eager)
 }
 
 function buildGlob(directory: string, extensions: string[]): string {
