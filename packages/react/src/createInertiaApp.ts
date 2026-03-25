@@ -30,6 +30,8 @@ type ComponentResolver = (
   page?: Page<SharedPageProps>,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
+type ReactWithApp = (app: ReactElement, options: { ssr: boolean }) => ReactElement
+
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
@@ -38,7 +40,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   ReactInertiaAppConfig
 > & {
   strictMode?: undefined
-  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
+  withApp?: never
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
@@ -50,20 +52,25 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
 > & {
   render: typeof renderToString
   strictMode?: undefined
-  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
+  withApp?: never
 }
 
-type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
-  ComponentResolver,
-  SetupOptions<HTMLElement | null, SharedProps>,
-  ReactElement | void,
-  ReactInertiaAppConfig
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
+  CreateInertiaAppOptions<
+    ComponentResolver,
+    SetupOptions<HTMLElement | null, SharedProps>,
+    ReactElement | void,
+    ReactInertiaAppConfig
+  >,
+  'setup'
 > & {
   page?: Page<SharedProps>
   render?: undefined
   strictMode?: boolean
-  withApp?: (app: ReactElement, options: { ssr: boolean }) => ReactElement
-}
+} & (
+    | { setup?: undefined; withApp?: ReactWithApp }
+    | { setup: (options: SetupOptions<HTMLElement | null, SharedProps>) => ReactElement | void; withApp?: never }
+  )
 
 type RenderToString = (element: ReactElement) => string
 

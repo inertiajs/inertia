@@ -29,6 +29,8 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
   plugin: Plugin
 }
 
+type VueWithApp = (app: VueApp, options: { ssr: boolean }) => void
+
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
@@ -36,7 +38,7 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   void,
   VueInertiaAppConfig
 > & {
-  withApp?: (app: VueApp, options: { ssr: boolean }) => void
+  withApp?: never
 }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
@@ -47,19 +49,24 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueInertiaAppConfig
 > & {
   render: (app: VueApp) => Promise<string>
-  withApp?: (app: VueApp, options: { ssr: boolean }) => void
+  withApp?: never
 }
 
-type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
-  ComponentResolver,
-  SetupOptions<HTMLElement | null, SharedProps>,
-  VueApp | void,
-  VueInertiaAppConfig
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
+  CreateInertiaAppOptions<
+    ComponentResolver,
+    SetupOptions<HTMLElement | null, SharedProps>,
+    VueApp | void,
+    VueInertiaAppConfig
+  >,
+  'setup'
 > & {
   page?: Page<SharedProps>
   render?: undefined
-  withApp?: (app: VueApp, options: { ssr: boolean }) => void
-}
+} & (
+    | { setup?: undefined; withApp?: VueWithApp }
+    | { setup: (options: SetupOptions<HTMLElement | null, SharedProps>) => VueApp | void; withApp?: never }
+  )
 
 type RenderToString = (app: VueApp) => Promise<string>
 
