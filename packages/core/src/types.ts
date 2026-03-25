@@ -537,7 +537,8 @@ type PagesOption =
   | {
       path: string
       extension?: string | string[]
-      transform?: (name: string) => string
+      lazy?: boolean
+      transform?: (name: string, page: Page) => string
     }
 
 export type ProgressOptions = {

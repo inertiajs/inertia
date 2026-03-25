@@ -24,6 +24,8 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
+type SvelteWithApp = (context: Map<any, any>, options: { ssr: boolean }) => void
+
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
   ComponentResolver,
@@ -31,18 +33,23 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SvelteRenderResult | void,
   SvelteInertiaAppConfig
 > & {
-  withApp?: (context: Map<any, any>, options: { ssr: boolean }) => void
+  withApp?: never
 }
 
-type InertiaAppOptionsAuto<SharedProps extends PageProps> = CreateInertiaAppOptions<
-  ComponentResolver,
-  SetupOptions<SharedProps>,
-  SvelteRenderResult | void,
-  SvelteInertiaAppConfig
+type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
+  CreateInertiaAppOptions<
+    ComponentResolver,
+    SetupOptions<SharedProps>,
+    SvelteRenderResult | void,
+    SvelteInertiaAppConfig
+  >,
+  'setup'
 > & {
   page?: Page<SharedProps>
-  withApp?: (context: Map<any, any>, options: { ssr: boolean }) => void
-}
+} & (
+    | { setup?: undefined; withApp?: SvelteWithApp }
+    | { setup: (options: SetupOptions<SharedProps>) => SvelteRenderResult | void; withApp?: never }
+  )
 
 type SvelteServerRender = (
   component: typeof App,
