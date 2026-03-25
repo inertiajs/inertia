@@ -58,6 +58,7 @@
   let itemsElementRef: HTMLElement = $state(null!)
   let startElementRef: HTMLElement = $state(null!)
   let endElementRef: HTMLElement = $state(null!)
+  // svelte-ignore state_referenced_locally
   const scrollProp = usePage().scrollProps?.[data]
 
   let loadingPrevious = $state(false)

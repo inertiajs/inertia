@@ -37,6 +37,7 @@
 
   // Synchronous initialization so the global page store is populated during SSR
   // ($effect.pre does not run during Svelte 5 SSR)
+  // svelte-ignore state_referenced_locally
   setPage(page)
 
   // Reactively update the global page state when local page state changes
