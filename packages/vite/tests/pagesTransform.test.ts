@@ -208,6 +208,50 @@ export default createInertiaApp({ title: t => t })`
     })
   })
 
+  describe('setup does not affect transform', () => {
+    it('injects resolver alongside setup', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({
+  setup({ App, props, plugin }) {
+    return createSSRApp({ render: () => h(App, props) }).use(plugin)
+  },
+})`
+
+      const result = transform(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('resolve: async (name, page) =>')
+      expect(result).toContain('setup({ App, props, plugin })')
+    })
+
+    it('skips when resolve is present even with setup', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({
+  resolve: (name) => name,
+  setup({ App, props, plugin }) {
+    return createSSRApp({ render: () => h(App, props) }).use(plugin)
+  },
+})`
+
+      expect(transform(code)).toBeNull()
+    })
+
+    it('transforms pages alongside setup', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({
+  pages: './Pages',
+  setup({ App, props, plugin }) {
+    return createSSRApp({ render: () => h(App, props) }).use(plugin)
+  },
+})`
+
+      const result = transform(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('resolve: async (name, page) =>')
+      expect(result).toContain('setup({ App, props, plugin })')
+      expect(result).not.toContain('pages:')
+    })
+  })
+
   describe('preserves surrounding code', () => {
     it('keeps other config options', () => {
       const code = `import { createInertiaApp } from '@inertiajs/vue3'

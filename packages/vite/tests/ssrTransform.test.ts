@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { defaultFrameworks } from '../src/frameworks/index'
+import { transformPageResolution } from '../src/pagesTransform'
 import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 
 const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, options, defaultFrameworks)
+const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)
 
 describe('SSR Transform', () => {
   describe('findInertiaAppExport', () => {
@@ -288,6 +290,143 @@ import createServer from '@inertiajs/vue3/server'
 export default createServer((page) => createInertiaApp({ page }))`
 
       expect(wrap(code)).toBeNull()
+    })
+
+    it('wraps with only resolve provided (no setup)', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({
+  resolve: (name) => require(\`./Pages/\${name}\`),
+})`
+
+      const result = wrap(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('resolve: (name) => require')
+      expect(result).toContain('createServer(renderPage)')
+    })
+
+    it('wraps with only setup provided (no resolve)', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({
+  setup({ App, props, plugin }) {
+    return createSSRApp({ render: () => h(App, props) }).use(plugin)
+  },
+})`
+
+      const result = wrap(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('setup({ App, props, plugin })')
+    })
+
+    it('wraps with both resolve and setup provided', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({
+  resolve: (name) => require(\`./Pages/\${name}\`),
+  setup({ App, props, plugin }) {
+    return createSSRApp({ render: () => h(App, props) }).use(plugin)
+  },
+})`
+
+      const result = wrap(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('resolve: (name) => require')
+      expect(result).toContain('setup({ App, props, plugin })')
+    })
+
+    it('wraps with neither resolve nor setup', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({})`
+
+      const result = wrap(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('const render = await createInertiaApp({})')
+    })
+
+    it('wraps with resolve and withApp but no setup', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({
+  resolve: (name) => require(\`./Pages/\${name}\`),
+  withApp(app) {
+    app.provide('key', 'value')
+  },
+})`
+
+      const result = wrap(code)
+      expect(result).not.toBeNull()
+      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('resolve: (name) => require')
+      expect(result).toContain('withApp(app)')
+      expect(result).toContain('createServer(renderPage)')
+    })
+  })
+
+  describe('pages transform then SSR transform composition', () => {
+    it('composes both transforms on a minimal call', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp()`
+
+      const afterPages = transformPages(code)
+      expect(afterPages).not.toBeNull()
+      expect(afterPages).toContain('resolve: async (name, page) =>')
+
+      const afterSSR = wrap(afterPages!)
+      expect(afterSSR).not.toBeNull()
+      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('resolve: async (name, page) =>')
+      expect(afterSSR).toContain('createServer(renderPage)')
+    })
+
+    it('composes both transforms with pages shorthand', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+createInertiaApp({ pages: './Pages' })`
+
+      const afterPages = transformPages(code)
+      expect(afterPages).not.toBeNull()
+      expect(afterPages).toContain('resolve: async (name, page) =>')
+
+      const afterSSR = wrap(afterPages!)
+      expect(afterSSR).not.toBeNull()
+      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('resolve: async (name, page) =>')
+      expect(afterSSR).toContain("import { renderToString } from 'react-dom/server'")
+    })
+
+    it('composes both transforms with pages shorthand and withApp', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/svelte'
+createInertiaApp({
+  pages: './Pages',
+  withApp(context) {
+    context.set('key', 'value')
+  },
+})`
+
+      const afterPages = transformPages(code)
+      expect(afterPages).not.toBeNull()
+      expect(afterPages).toContain('resolve: async (name, page) =>')
+      expect(afterPages).toContain('withApp(context)')
+
+      const afterSSR = wrap(afterPages!)
+      expect(afterSSR).not.toBeNull()
+      expect(afterSSR).toContain('const ssr = await createInertiaApp')
+      expect(afterSSR).toContain('resolve: async (name, page) =>')
+      expect(afterSSR).toContain('withApp(context)')
+      expect(afterSSR).toContain("import { render } from 'svelte/server'")
+    })
+
+    it('skips pages transform when resolve is already present, then applies SSR transform', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+createInertiaApp({
+  resolve: (name) => require(\`./Pages/\${name}\`),
+})`
+
+      expect(transformPages(code)).toBeNull()
+
+      const afterSSR = wrap(code)
+      expect(afterSSR).not.toBeNull()
+      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('resolve: (name) => require')
     })
   })
 })
