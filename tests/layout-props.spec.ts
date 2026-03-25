@@ -29,7 +29,7 @@ test.describe('layout props', () => {
     await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
   })
 
-  test('it can target specific layouts with named layouts and setLayoutPropsFor', async ({ page }) => {
+  test('it can target specific named layouts with setLayoutProps', async ({ page }) => {
     await page.goto('/layout-props/named')
 
     await expect(page.locator('.app-title')).toHaveText('Named Layouts Page')
@@ -122,5 +122,51 @@ test.describe('layout props', () => {
     await expect(page).toHaveURL('/layout-props/basic')
     await expect(page.locator('.app-title')).toHaveText('Basic Layout Props')
     await expect(page.locator('.sidebar')).toBeVisible()
+  })
+
+  test('it supports a layout callback that returns only props and uses the default layout', async ({ page }) => {
+    await page.goto('/layout-props/callback-default?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Profile: Jane')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
+  test('it supports a zero-arg layout callback that returns only props', async ({ page }) => {
+    await page.goto('/layout-props/callback-static?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Static Callback Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
+  test('it supports a static props object as layout and uses the default layout', async ({ page }) => {
+    await page.goto('/layout-props/static-object?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Static Object Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
+  test('it supports named layouts with { component, props } object syntax', async ({ page }) => {
+    await page.goto('/layout-props/named-object')
+
+    await expect(page.locator('.app-title')).toHaveText('Named Object Page')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+    await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'sm')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-max-width', '4xl')
+  })
+
+  test('it can dynamically update named layout props with setLayoutProps', async ({ page }) => {
+    await page.goto('/layout-props/named-dynamic')
+
+    await expect(page.locator('.app-title')).toHaveText('Named Dynamic Page')
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'md')
+
+    await page.getByRole('button', { name: 'Update App Title' }).click()
+
+    await expect(page.locator('.app-title')).toHaveText('Updated App Title')
+
+    await page.getByRole('button', { name: 'Update Content Padding' }).click()
+
+    await expect(page.locator('.content-layout')).toHaveAttribute('data-padding', 'xl')
   })
 })

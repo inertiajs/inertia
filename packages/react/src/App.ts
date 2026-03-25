@@ -2,6 +2,7 @@ import {
   createHeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  isPropsObject,
   normalizeLayouts,
   Page,
   PageHandler,
@@ -161,35 +162,43 @@ export default function App<SharedProps extends PageProps = PageProps>({
     (({ Component, props, key }) => {
       const child = createElement(Component, { key, ...props })
 
-      if (Component.layout && isRenderFunction(Component.layout)) {
-        const result = (Component.layout as Function)(props)
+      let effectiveLayout: unknown
+      let callbackProps: Record<string, unknown> | null = null
+      const layoutValue = Component.layout
+
+      if (
+        typeof layoutValue === 'function' &&
+        (layoutValue as Function).length <= 1 &&
+        typeof (layoutValue as Function).prototype === 'undefined'
+      ) {
+        const result = (layoutValue as Function)(props)
 
         if (isValidElement(result)) {
-          return (Component.layout as LayoutFunction)(child)
+          return (layoutValue as LayoutFunction)(child)
         }
 
-        const layouts = normalizeLayouts(result, isComponent)
-
-        if (layouts.length > 0) {
-          return layouts.reduceRight((childNode, layout) => {
-            return createElement(
-              layout.component,
-              {
-                ...props,
-                ...layout.props,
-                ...dynamicLayoutProps.shared,
-                ...(layout.name ? dynamicLayoutProps.named[layout.name] || {} : {}),
-              },
-              childNode,
-            )
-          }, child)
+        if (isPropsObject(result, isComponent)) {
+          effectiveLayout = defaultLayout?.(current.page.component, current.page)
+          callbackProps = result as Record<string, unknown>
+        } else {
+          effectiveLayout = result
         }
-
-        return child
+      } else if (isPropsObject(layoutValue, isComponent)) {
+        effectiveLayout = defaultLayout?.(current.page.component, current.page)
+        callbackProps = layoutValue as unknown as Record<string, unknown>
+      } else {
+        effectiveLayout = layoutValue ?? defaultLayout?.(current.page.component, current.page)
       }
 
-      const effectiveLayout = Component.layout ?? defaultLayout?.(current.page.component, current.page)
-      const layouts = normalizeLayouts(effectiveLayout, isComponent, Component.layout ? isRenderFunction : undefined)
+      let layouts = normalizeLayouts(
+        effectiveLayout,
+        isComponent,
+        layoutValue && !callbackProps ? isRenderFunction : undefined,
+      )
+
+      if (callbackProps) {
+        layouts = layouts.map((l) => ({ ...l, props: { ...l.props, ...callbackProps } }))
+      }
 
       if (layouts.length > 0) {
         return layouts.reduceRight((childNode, layout) => {

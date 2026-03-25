@@ -13,7 +13,14 @@ export { default as createHeadManager } from './head'
 export { http } from './http'
 export { HttpCancelledError, HttpError, HttpNetworkError, HttpResponseError } from './httpErrors'
 export { default as useInfiniteScroll } from './infiniteScroll'
-export { createLayoutPropsStore, normalizeLayouts, type LayoutDefinition, type LayoutPropsStore } from './layout'
+export {
+  createLayoutPropsStore,
+  isPropsObject,
+  normalizeLayouts,
+  type LayoutCallbackReturn,
+  type LayoutDefinition,
+  type LayoutPropsStore,
+} from './layout'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'

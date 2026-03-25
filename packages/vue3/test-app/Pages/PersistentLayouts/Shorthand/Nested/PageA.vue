@@ -1,14 +1,12 @@
-<script lang="ts">
+<script setup lang="ts">
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
-
-export default {
-  layout: [SiteLayout, NestedLayout],
-}
-</script>
-
-<script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3'
+
+defineOptions({
+  layout: [SiteLayout, NestedLayout],
+})
+
 window._inertia_page_props = usePage().props
 </script>
 

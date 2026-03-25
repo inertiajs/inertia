@@ -6,7 +6,7 @@ const Named = () => {
   return (
     <div>
       <h2>Named Layouts Page</h2>
-      <p>This page uses named layouts with setLayoutPropsFor.</p>
+      <p>This page uses named layouts with setLayoutProps.</p>
       <p>App layout should have sidebar visible and light theme.</p>
       <p>Content layout should have xl padding and 2xl maxWidth.</p>
 

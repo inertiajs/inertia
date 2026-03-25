@@ -889,6 +889,9 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
 
 app.get('/default-layout', (req, res) => inertia.render(req, res, { component: 'DefaultLayout/Index' }))
 app.get('/layout-props/callback', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
+app.get('/layout-props/callback-default', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
+app.get('/layout-props/callback-static', (req, res) => inertia.render(req, res))
+app.get('/layout-props/static-object', (req, res) => inertia.render(req, res))
 
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),

@@ -1,17 +1,14 @@
-<script lang="ts">
+<script setup lang="ts">
 import AppLayout from '@/Layouts/AppLayout.vue'
 import ContentLayout from '@/Layouts/ContentLayout.vue'
+import { Link } from '@inertiajs/vue3'
 
-export default {
+defineOptions({
   layout: {
     app: [AppLayout, { title: 'Persistent Page B' }],
     content: [ContentLayout, { padding: 'xl' }],
   },
-}
-</script>
-
-<script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
+})
 </script>
 
 <template>

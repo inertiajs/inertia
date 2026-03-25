@@ -1,4 +1,4 @@
-import { type Page, type SharedPageProps } from '@inertiajs/core'
+import { type LayoutCallbackReturn, type Page, type SharedPageProps } from '@inertiajs/core'
 import type { Component } from 'svelte'
 import type { RenderFunction, RenderProps } from './components/Render.svelte'
 
@@ -9,7 +9,7 @@ export type ComponentResolver = (
 
 export type LayoutResolver = (h: RenderFunction, page: RenderProps) => RenderProps
 
-export type LayoutCallback = (props: SharedPageProps) => unknown
+export type LayoutCallback = (props: SharedPageProps) => LayoutCallbackReturn<Component>
 
 /**
  * Layout tuple: [Component, { props }]
@@ -34,7 +34,7 @@ export type NamedLayouts = Record<string, Component | LayoutTuple | LayoutObject
  */
 export type LayoutType =
   | LayoutResolver
-  | LayoutCallback
+  | ((props: any) => any)
   | Component
   | Component[]
   | LayoutTuple

@@ -1,11 +1,20 @@
-import { createHeadManager, Page, PageHandler, PageProps, router, SharedPageProps } from '@inertiajs/core'
-import { Component, DefineComponent } from 'vue'
+import {
+  createHeadManager,
+  type LayoutCallbackReturn,
+  Page,
+  PageHandler,
+  PageProps,
+  router,
+  SharedPageProps,
+} from '@inertiajs/core'
+import { Component, DefineComponent, VNode } from 'vue'
 import useForm from './useForm'
 
 export type VuePageHandlerArgs = Parameters<PageHandler<DefineComponent>>[0]
 export type VueInertiaAppConfig = {}
 
-export type LayoutCallback = (props: SharedPageProps) => unknown
+export type LayoutCallback = (props: SharedPageProps) => LayoutCallbackReturn<Component>
+export type LayoutRenderFunction = (h: (component: Component, children: Component[]) => VNode, page: Component) => VNode
 
 declare module '@inertiajs/core' {
   export interface Router {
@@ -21,7 +30,7 @@ declare module 'vue' {
   }
 
   export interface ComponentCustomOptions {
-    layout?: Component | Component[] | LayoutCallback
+    layout?: LayoutCallbackReturn<DefineComponent<any, any, any>> | ((props: any) => any) | LayoutRenderFunction
     remember?:
       | string
       | string[]

@@ -7,6 +7,15 @@ export interface LayoutDefinition<Component> {
   name?: string
 }
 
+export type LayoutCallbackReturn<C> =
+  | C
+  | [C, Record<string, unknown>?]
+  | C[]
+  | (C | [C, Record<string, unknown>?])[]
+  | { component: C; props?: Record<string, unknown> }
+  | Record<string, C | [C, Record<string, unknown>?] | { component: C; props?: Record<string, unknown> }>
+  | Partial<LayoutProps>
+
 export interface LayoutPropsStore {
   set(props: Partial<LayoutProps>): void
   setFor<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
@@ -94,7 +103,14 @@ function isNamedLayouts<T>(value: unknown, isComponent: ComponentCheck<T>): valu
   if (!isPlainObject(value) || isComponent(value) || 'component' in value) {
     return false
   }
-  return Object.values(value).some((v) => isComponent(v) || (Array.isArray(v) && isComponent(v[0])))
+  return Object.values(value).some(
+    (v) =>
+      isComponent(v) || (Array.isArray(v) && isComponent(v[0])) || (hasComponentKey(v) && isComponent(v.component)),
+  )
+}
+
+export function isPropsObject<T>(value: unknown, isComponent: ComponentCheck<T>): boolean {
+  return isPlainObject(value) && !isComponent(value) && !('component' in value) && !isNamedLayouts(value, isComponent)
 }
 
 function isTuple<T>(value: unknown, isComponent: ComponentCheck<T>): value is [T, Record<string, unknown>?] {
