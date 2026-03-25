@@ -256,6 +256,10 @@
     } else {
       form.withoutFileValidation()
     }
+
+    if (withAllErrors ?? config.get('form.withAllErrors')) {
+      form.withAllErrors()
+    }
   }
 
   $: slotErrors = $form.errors as Errors
