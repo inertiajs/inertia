@@ -151,6 +151,11 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       })
 
       server.config.logger.info(`Inertia SSR dev endpoint: ${SSR_ENDPOINT}`)
+
+      // Warm up the SSR module graph...
+      server.httpServer?.once('listening', () => {
+        server.ssrLoadModule(entry!).catch(() => {})
+      })
     },
   }
 }
