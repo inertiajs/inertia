@@ -20,6 +20,7 @@
   import { onMount } from 'svelte'
   import { setFormContext } from './formContext'
   import useForm from '../useForm.svelte'
+  import { config } from '..'
 
   const noop = () => undefined
 
@@ -82,7 +83,7 @@
     validateFiles = false,
     validationTimeout = 1500,
     optimistic,
-    withAllErrors = false,
+    withAllErrors = null,
     component = undefined,
     instant = false,
     children,
@@ -292,7 +293,7 @@
       form.withoutFileValidation()
     }
 
-    if (withAllErrors) {
+    if (withAllErrors ?? config.get('form.withAllErrors')) {
       form.withAllErrors()
     }
   })
