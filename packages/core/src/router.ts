@@ -186,13 +186,6 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
-  /**
-   * @deprecated Use cancelAll() instead.
-   */
-  public cancel(): void {
-    this.syncRequestStream.cancelInFlight()
-  }
-
   public hasPendingOptimistic(): boolean {
     return this.asyncRequestStream.hasPendingOptimistic()
   }
