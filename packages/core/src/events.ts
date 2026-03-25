@@ -15,8 +15,8 @@ export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors) => {
   return fireEvent('error', { detail: { errors } })
 }
 
-export const fireNetworkErrorEvent: GlobalEventTrigger<'networkError'> = (exception) => {
-  return fireEvent('networkError', { cancelable: true, detail: { exception } })
+export const fireNetworkErrorEvent: GlobalEventTrigger<'networkError'> = (error) => {
+  return fireEvent('networkError', { cancelable: true, detail: { error } })
 }
 
 export const fireFinishEvent: GlobalEventTrigger<'finish'> = (visit) => {

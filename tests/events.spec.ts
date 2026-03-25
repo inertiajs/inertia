@@ -81,8 +81,8 @@ const assertResponseObject = async (response) => {
 }
 
 const assertExceptionObject = async (detail) => {
-  await expect(detail.exception).toBeDefined()
-  await expect(detail.exception.code).toBe('ERR_NETWORK')
+  await expect(detail.error).toBeDefined()
+  await expect(detail.error.code).toBe('ERR_NETWORK')
 }
 
 const assertGlobalFinishEvent = async (event) => {

@@ -406,7 +406,7 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
   networkError: {
     parameters: [Error]
     details: {
-      exception: Error
+      error: Error
     }
     result: boolean | void
   }
