@@ -46,7 +46,7 @@ export interface InertiaSSROptions {
    * When enabled, SSR errors are formatted with hints instead of thrown raw.
    * Defaults to true.
    */
-  handleErrors?: boolean
+  formatErrors?: boolean
 
   /**
    * Enable sourcemaps for SSR builds so error stacks map to original files.
@@ -95,7 +95,7 @@ export async function handleSSRRequest(
   entry: string,
   req: IncomingMessage,
   res: ServerResponse,
-  handleErrors: boolean = true,
+  formatErrors: boolean = true,
 ): Promise<void> {
   let component: string | undefined
   let url: string | undefined
@@ -109,7 +109,7 @@ export async function handleSSRRequest(
     const message = args[0]?.toString() ?? ''
 
     if (message.includes('[Vue warn]') || message.includes('at <')) {
-      if (handleErrors) {
+      if (formatErrors) {
         suppressedWarnings.push(args.map(String).join(' '))
       }
 
@@ -140,7 +140,7 @@ export async function handleSSRRequest(
     res.setHeader('Content-Type', 'application/json')
     res.end(JSON.stringify(result))
   } catch (error) {
-    handleSSRError(server, res, error as Error, component, url, handleErrors, suppressedWarnings)
+    handleSSRError(server, res, error as Error, component, url, formatErrors, suppressedWarnings)
   } finally {
     console.warn = originalWarn
   }
@@ -201,18 +201,18 @@ function handleSSRError(
   error: Error,
   component?: string,
   url?: string,
-  handleErrors: boolean = true,
+  formatErrors: boolean = true,
   suppressedWarnings: string[] = [],
 ): void {
   server.ssrFixStacktrace(error)
 
-  if (!handleErrors) {
+  if (!formatErrors) {
     throw error
   }
 
   const classified = classifySSRError(error, component, url)
 
-  server.config.logger.error(formatConsoleError(classified, server.config.root, handleErrors, suppressedWarnings))
+  server.config.logger.error(formatConsoleError(classified, server.config.root, formatErrors, suppressedWarnings))
 
   res.setHeader('Content-Type', 'application/json')
   res.statusCode = 500

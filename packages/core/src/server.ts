@@ -57,7 +57,7 @@ type RouteHandler = (request: IncomingMessage, response: ServerResponse) => Prom
 type ServerOptions = {
   port?: number
   cluster?: boolean
-  handleErrors?: boolean
+  formatErrors?: boolean
 }
 type Port = number
 
@@ -71,7 +71,7 @@ const readableToString: (readable: IncomingMessage) => Promise<string> = (readab
 
 export default (render: AppCallback, options?: Port | ServerOptions): AppCallback => {
   const opts = typeof options === 'number' ? { port: options } : options
-  const { port = 13714, cluster: useCluster = false, handleErrors = true } = opts ?? {}
+  const { port = 13714, cluster: useCluster = false, formatErrors = true } = opts ?? {}
 
   const log = (message: string) => {
     console.log(
@@ -107,7 +107,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
 
-    if (handleErrors) {
+    if (formatErrors) {
       console.warn = () => {}
     }
 
@@ -119,7 +119,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     } catch (e) {
       const error = e as Error
 
-      if (!handleErrors) {
+      if (!formatErrors) {
         throw error
       }
 
