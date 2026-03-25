@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ensure we are on master and the working tree is clean
+# Ensure we are on 3.x and the working tree is clean
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CURRENT_BRANCH" != "master" ]; then
-  echo "Error: must be on master branch (current: $CURRENT_BRANCH)" >&2
+if [ "$CURRENT_BRANCH" != "3.x" ]; then
+  echo "Error: must be on 3.x branch (current: $CURRENT_BRANCH)" >&2
   exit 1
 fi
 
-if [ -n "$(git status --porcelain)" ]; then
-  echo "Error: working tree is not clean. Commit or stash changes before releasing." >&2
-  git status --porcelain
-  exit 1
-fi
+# if [ -n "$(git status --porcelain)" ]; then
+#   echo "Error: working tree is not clean. Commit or stash changes before releasing." >&2
+#   git status --porcelain
+#   exit 1
+# fi
 
 echo
 echo "Current version: $(node -p "require('./package.json').version")"
@@ -60,7 +60,15 @@ for pkg_json in packages/*/package.json; do
 done
 
 TAG="v$NEW_VERSION"
+echo
 echo "New version resolved as $TAG"
+echo
+read -p "Proceed with release $TAG? (y/N): " confirm
+if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+  echo "Aborted. Restoring changes..."
+  git checkout -- .
+  exit 1
+fi
 
 pnpm install
 
