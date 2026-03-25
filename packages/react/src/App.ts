@@ -162,14 +162,6 @@ export default function App<SharedProps extends PageProps = PageProps>({
     (({ Component, props, key }) => {
       const child = createElement(Component, { key, ...props })
 
-      if (Component.layout && isRenderFunction(Component.layout)) {
-        const result = (Component.layout as Function)(props)
-
-        if (isValidElement(result)) {
-          return (Component.layout as LayoutFunction)(child)
-        }
-      }
-
       let effectiveLayout: unknown
       let callbackProps: Record<string, unknown> | null = null
       const layoutValue = Component.layout
@@ -180,6 +172,10 @@ export default function App<SharedProps extends PageProps = PageProps>({
         typeof (layoutValue as Function).prototype === 'undefined'
       ) {
         const result = (layoutValue as Function)(props)
+
+        if (isValidElement(result)) {
+          return (layoutValue as LayoutFunction)(child)
+        }
 
         if (isPropsObject(result, isComponent)) {
           effectiveLayout = defaultLayout?.(current.page.component, current.page)

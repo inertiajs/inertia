@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/vue3'
 
 defineOptions({
-  layout: (props: { userName: string }) => ({ title: 'Profile: ' + props.userName, showSidebar: false }),
+  layout: (props) => ({ title: 'Profile: ' + props.userName, showSidebar: false }),
 })
 </script>
 
