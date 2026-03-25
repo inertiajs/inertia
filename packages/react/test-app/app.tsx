@@ -2,6 +2,7 @@ import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
+import AppLayout from './Layouts/AppLayout'
 import DefaultLayout from './Layouts/DefaultLayout'
 
 window.testing = { Inertia: router }
@@ -57,6 +58,9 @@ createInertiaApp({
   }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
+  }),
+  ...(params.has('withDefaultAppLayout') && {
+    layout: () => AppLayout,
   }),
   ...(params.has('withDefaultLayoutCallback') && {
     layout: (name: string) => {

@@ -1,14 +1,11 @@
-<script lang="ts">
+<script setup lang="ts">
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
-
-export default {
-  layout: [SiteLayout, NestedLayout],
-}
-</script>
-
-<script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
+
+defineOptions({
+  layout: [SiteLayout, NestedLayout],
+})
 </script>
 
 <template>

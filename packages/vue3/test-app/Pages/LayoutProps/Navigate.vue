@@ -1,13 +1,10 @@
-<script lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue'
-
-export default {
-  layout: [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }],
-}
-</script>
-
 <script setup lang="ts">
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link } from '@inertiajs/vue3'
+
+defineOptions({
+  layout: [AppLayout, { title: 'Navigate Page', showSidebar: false, theme: 'dark' }],
+})
 </script>
 
 <template>

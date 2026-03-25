@@ -2,6 +2,7 @@ import {
   createHeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  isPropsObject,
   normalizeLayouts,
   Page,
   PageHandler,
@@ -168,7 +169,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
           return (Component.layout as LayoutFunction)(child)
         }
 
-        const layouts = normalizeLayouts(result, isComponent)
+        let layouts = normalizeLayouts(result, isComponent)
+
+        if (layouts.length === 0 && defaultLayout && isPropsObject(result, isComponent)) {
+          layouts = normalizeLayouts(defaultLayout(current.page.component, current.page), isComponent)
+          const callbackProps = result as Record<string, unknown>
+          layouts = layouts.map((l) => ({ ...l, props: { ...l.props, ...callbackProps } }))
+        }
 
         if (layouts.length > 0) {
           return layouts.reduceRight((childNode, layout) => {

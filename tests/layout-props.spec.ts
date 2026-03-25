@@ -29,7 +29,7 @@ test.describe('layout props', () => {
     await expect(page.locator('.app-layout')).toHaveAttribute('data-theme', 'dark')
   })
 
-  test('it can target specific layouts with named layouts and setLayoutPropsFor', async ({ page }) => {
+  test('it can target specific named layouts with setLayoutProps', async ({ page }) => {
     await page.goto('/layout-props/named')
 
     await expect(page.locator('.app-title')).toHaveText('Named Layouts Page')
@@ -122,5 +122,12 @@ test.describe('layout props', () => {
     await expect(page).toHaveURL('/layout-props/basic')
     await expect(page.locator('.app-title')).toHaveText('Basic Layout Props')
     await expect(page.locator('.sidebar')).toBeVisible()
+  })
+
+  test('it supports a layout callback that returns only props and uses the default layout', async ({ page }) => {
+    await page.goto('/layout-props/callback-default?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Profile: Jane')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
   })
 })

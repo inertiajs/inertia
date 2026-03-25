@@ -13,7 +13,7 @@
 <script lang="ts">
   import type { Component } from 'svelte'
   import type { LayoutType, LayoutResolver } from '../types'
-  import { normalizeLayouts } from '@inertiajs/core'
+  import { isPropsObject, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page.svelte'
@@ -100,6 +100,7 @@
     }
 
     let effectiveLayout: LayoutType | undefined
+    let callbackProps: Record<string, unknown> | null = null
     const layoutValue = component.layout
 
     if (
@@ -107,12 +108,21 @@
       (layoutValue as Function).length <= 1 &&
       typeof (layoutValue as Function).prototype === 'undefined'
     ) {
-      effectiveLayout = (layoutValue as Function)(page.props) as LayoutType | undefined
+      const result = (layoutValue as Function)(page.props)
+
+      if (isPropsObject(result, isComponent)) {
+        effectiveLayout = defaultLayout?.(page.component, page) as LayoutType | undefined
+        callbackProps = result as Record<string, unknown>
+      } else {
+        effectiveLayout = result as LayoutType | undefined
+      }
     } else {
       effectiveLayout = (layoutValue ?? defaultLayout?.(page.component, page)) as LayoutType | undefined
     }
 
-    return effectiveLayout ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout) : child
+    return effectiveLayout
+      ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout && !callbackProps, callbackProps)
+      : child
   }
 
   function resolveLayout(
@@ -121,12 +131,17 @@
     pageProps: PageProps,
     key: number | null,
     isFromPage: boolean = true,
+    callbackProps: Record<string, unknown> | null = null,
   ): RenderProps {
     if (isFromPage && isRenderFunction(layout)) {
       return (layout as LayoutResolver)(h, child)
     }
 
-    const layouts = normalizeLayouts(layout, isComponent, isFromPage ? isRenderFunction : undefined)
+    let layouts = normalizeLayouts(layout, isComponent, isFromPage ? isRenderFunction : undefined)
+
+    if (callbackProps) {
+      layouts = layouts.map((l) => ({ ...l, props: { ...l.props, ...callbackProps } }))
+    }
 
     if (layouts.length > 0) {
       const dynamicProps = isServer ? { shared: {}, named: {} } : { shared: storeState.shared, named: storeState.named }

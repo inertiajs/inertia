@@ -3,6 +3,7 @@ import {
   HeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  isPropsObject,
   normalizeLayouts,
   Page,
   PageProps,
@@ -165,6 +166,7 @@ const App: InertiaApp = defineComponent({
         }
 
         let effectiveLayout: unknown
+        let callbackProps: Record<string, unknown> | null = null
         const layoutValue = component.value.layout
 
         if (
@@ -172,17 +174,28 @@ const App: InertiaApp = defineComponent({
           (layoutValue as Function).length <= 1 &&
           typeof (layoutValue as Function).prototype === 'undefined'
         ) {
-          effectiveLayout = (layoutValue as Function)(page.value!.props)
+          const result = (layoutValue as Function)(page.value!.props)
+
+          if (isPropsObject(result, isComponent)) {
+            effectiveLayout = defaultLayout?.(page.value!.component, page.value!)
+            callbackProps = result as Record<string, unknown>
+          } else {
+            effectiveLayout = result
+          }
         } else {
           effectiveLayout = layoutValue ?? defaultLayout?.(page.value!.component, page.value!)
         }
 
         if (effectiveLayout) {
-          const layouts = normalizeLayouts(
+          let layouts = normalizeLayouts(
             effectiveLayout,
             isComponent,
-            component.value.layout ? isRenderFunction : undefined,
+            component.value.layout && !callbackProps ? isRenderFunction : undefined,
           )
+
+          if (callbackProps) {
+            layouts = layouts.map((l) => ({ ...l, props: { ...l.props, ...callbackProps } }))
+          }
 
           if (layouts.length > 0) {
             const dynamicProps = isServer ? { shared: {}, named: {} } : layoutPropsState.value

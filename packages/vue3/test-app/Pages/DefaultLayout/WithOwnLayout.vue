@@ -1,13 +1,10 @@
-<script lang="ts">
-import PageLayout from '@/Layouts/PageLayout.vue'
-
-export default {
-  layout: PageLayout,
-}
-</script>
-
 <script setup lang="ts">
+import PageLayout from '@/Layouts/PageLayout.vue'
 import { Link } from '@inertiajs/vue3'
+
+defineOptions({
+  layout: PageLayout,
+})
 </script>
 
 <template>

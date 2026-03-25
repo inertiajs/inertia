@@ -1,14 +1,11 @@
-<script lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue'
-
-export default {
-  layout: [AppLayout, { title: 'Basic Layout Props', showSidebar: true }],
-}
-</script>
-
 <script setup lang="ts">
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link, setLayoutProps } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+
+defineOptions({
+  layout: [AppLayout, { title: 'Basic Layout Props', showSidebar: true }],
+})
 
 const sidebarVisible = ref(true)
 

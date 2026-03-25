@@ -1,13 +1,10 @@
-<script lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue'
-
-export default {
-  layout: (props: { userName: string }) => [AppLayout, { title: 'Profile: ' + props.userName, showSidebar: false }],
-}
-</script>
-
 <script setup lang="ts">
+import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link } from '@inertiajs/vue3'
+
+defineOptions({
+  layout: (props: { userName: string }) => [AppLayout, { title: 'Profile: ' + props.userName, showSidebar: false }],
+})
 </script>
 
 <template>

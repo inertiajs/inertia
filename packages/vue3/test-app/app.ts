@@ -3,6 +3,7 @@ import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
+import AppLayout from './Layouts/AppLayout.vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
 
 window.testing = { Inertia: router }
@@ -60,6 +61,9 @@ createInertiaApp({
   }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
+  }),
+  ...(params.has('withDefaultAppLayout') && {
+    layout: () => AppLayout,
   }),
   ...(params.has('withDefaultLayoutCallback') && {
     layout: (name: string) => {

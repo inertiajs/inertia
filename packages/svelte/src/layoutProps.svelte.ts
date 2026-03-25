@@ -13,15 +13,16 @@ store.subscribe(() => {
   storeState.named = snapshot.named
 })
 
-export function setLayoutProps(props: Partial<LayoutProps>): void {
-  store.set(props)
-}
-
-export function setLayoutPropsFor<K extends keyof NamedLayoutProps>(
-  name: K,
-  props: Partial<NamedLayoutProps[K]>,
-): void {
-  store.setFor(name, props)
+export function setLayoutProps(props: Partial<LayoutProps>): void
+export function setLayoutProps<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
+export function setLayoutProps<T = never>(props: Partial<NoInfer<T>>): void
+export function setLayoutProps<T = never>(name: string, props: Partial<NoInfer<T>>): void
+export function setLayoutProps(nameOrProps: string | Record<string, unknown>, props?: Record<string, unknown>): void {
+  if (typeof nameOrProps === 'string') {
+    store.setFor(nameOrProps, props!)
+  } else {
+    store.set(nameOrProps)
+  }
 }
 
 export function resetLayoutProps(): void {
