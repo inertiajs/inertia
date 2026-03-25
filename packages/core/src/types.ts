@@ -915,7 +915,7 @@ export type UseHttpOptions<TResponse = unknown> = {
 
 export type UseHttpSubmitOptions<TResponse = unknown, TForm = unknown> = UseHttpOptions<TResponse> & {
   headers?: HttpRequestHeaders
-  optimistic?: (currentData: TForm) => Partial<TForm>
+  optimistic?: (currentData: TForm) => Partial<TForm> | void
 }
 
 declare global {
