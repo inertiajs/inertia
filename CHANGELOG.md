@@ -7,9 +7,110 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.16...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.0...3.x)
 
 - Nothing yet
+
+## [v3.0.0](https://github.com/inertiajs/inertia/compare/v2.3.16...v3.0.0) - 2026-03-25
+
+### What's Changed
+
+* [3.x] Drop support for Svelte 4 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2713
+* [3.x] Remove qs dependency by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2791
+* [3.x] Svelte 5 Adapter based on #2586 by [@puRe1337](https://github.com/puRe1337) in https://github.com/inertiajs/inertia/pull/2677
+* [3.x] Drop support for React < 19 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2712
+* [3.x] Pass props as second argument to resolve() in createInertiaApp() by [@HichemTab-tech](https://github.com/HichemTab-tech) in https://github.com/inertiajs/inertia/pull/2485
+* [3.x] Only reset useForm processing and progress with onFinish by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2838
+* [3.x] Bump Node.js to v24 + Bump GitHub CI Actions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2847
+* [3.x] Remove unused `pendingVisitOptions` parameter by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2853
+* [3.x] Remove `hideProgress()` and `revealProgress()` exports by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2852
+* [3.x] Svelte 5 improvements by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2863
+* [3.x] Built-in XHR HTTP client + make Axios an optional peer dependency by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2833
+* [3.x] Add `useHttp` hook for standalone HTTP requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2840
+* [3.x] Generics in `<Form>` Component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2849
+* [3.x] Add layout props helpers by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2859
+* [3.x] Upgrade Svelte playground to Svelte 5 syntax by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2868
+* [3.x] Migrate `future` options to be new defaults by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2867
+* [3.x] Add `reloading` slot prop to `<Deferred>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2860
+* [3.x] Rename `useDataElementForInitialPage` to `useDataAttributeForInitialPage` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2871
+* [3.x] Add `preserveErrors` option to preserve validation errors during partial requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2819
+* [3.x] SSR support in Vite development mode + simplified setup by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2864
+* [3.x] Rename `invalid` and `exception` events and add visit callbacks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2869
+* [3.x] Optimistic updates for `router`, `useForm`, and `useHttp` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2866
+* [3.x] Streamline adapter `index.ts` exports by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2872
+* [3.x] Drop CJS builds in favor of ESM-only output by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2873
+* [3.x] Use Precognition 2.x and bump all deps by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2877
+* [3.x] Support for `withAllErrors` in `useHttp` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2880
+* [3.x] Add `optimistic` prop to `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2881
+* [3.x] Add test for named layout persistence across navigations by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2882
+* [3.x] Allow calling `createInertiaApp()` without arguments by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2883
+* [3.x] Add `layout` option to `createInertiaApp()` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2884
+* [3.x] Update Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2885
+* [3.x] Add a singleton for the usePage function by [@DavidCCoimbra](https://github.com/DavidCCoimbra) in https://github.com/inertiajs/inertia/pull/2874
+* [3.x] Remove `legacy.useDataAttributeForInitialPage` config option by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2887
+* [3.x] Concurrent optimistic updates by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2898
+* [3.x] Preserve URL fragment across redirects with server-side `preserveFragment` option by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2897
+* [3.x] Hash fragment redirect support by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2899
+* [3.x] Support nested dot-notation prop types by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2901
+* [3.x] Add strictMode option to React's createInertiaApp by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2909
+* [3.x] Fix FOUC during SSR development by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2911
+* [3.x] Make `clearHistory` and `encryptHistory` optional in page object by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2908
+* [3.x] Instant visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2907
+* Include resources directory in published packages by [@pushpak1300](https://github.com/pushpak1300) in https://github.com/inertiajs/inertia/pull/2914
+* [3.x] Consolidate SSR error handling by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2915
+* [3.x] Use the popover API for the progress bar by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2917
+* [3.x] Minor clean up core package by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2918
+* [3.x] Fix axios adapter being required by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2926
+* [3.x] Fire `onHttpException` for server-rendered Inertia error pages by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2927
+* [3.x] Fix duplicate base path in Vite SSR CSS link URLs by [@isaackaara](https://github.com/isaackaara) in https://github.com/inertiajs/inertia/pull/2936
+* [3.x] Populate global page store during Svelte 5 SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2938
+* [3.x] Stop collecting CSS sub-dependencies during SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2937
+* [v3.x] refactor(svelte)!: migrate useLayoutProps from stores to runes by [@peaklabs-dev](https://github.com/peaklabs-dev) in https://github.com/inertiajs/inertia/pull/2944
+* [3.x] fix: remove request from stream on network failure by [@Anthony14FR](https://github.com/Anthony14FR) in https://github.com/inertiajs/inertia/pull/2940
+* [3.x] Support more createInertiaApp() patterns in SSR transform by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/2929
+* [v3.x] fix(types): module augmentation example by [@peaklabs-dev](https://github.com/peaklabs-dev) in https://github.com/inertiajs/inertia/pull/2945
+* [3.x] Convert Vue adapter components to Composition API by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2947
+* [3.x] fix: always fire flash event regardless of partial reload equality by [@Anthony14FR](https://github.com/Anthony14FR) in https://github.com/inertiajs/inertia/pull/2941
+* [3.x] Include `SharedPageProps` in `createInertiaApp` and event types by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2956
+* [3.x] Add `withApp` callback to `createInertiaApp` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2949
+* [3.x] fix(type): add Record<string, string> to UrlMethodPair type by [@stafast](https://github.com/stafast) in https://github.com/inertiajs/inertia/pull/2952
+* [3.x] Improve optimistic update rollback with multiple pending requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2958
+* [3.x] Prevent useHttp from parsing empty 204 responses by [@entity](https://github.com/entity) in https://github.com/inertiajs/inertia/pull/2967
+* [3.x] Include `SharedPageProps` in optimistic update callback types by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2968
+* [3.x] Test SSR across multiple Node.js versions in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2969
+* [3.x] Migrate from `lodash-es` to `es-toolkit` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2973
+* [3.x] Add Vite 8 support, drop Vite 6 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2974
+* [3.x] Fix Infinite Scroll SSR hydration by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2975
+* [3.x] Simplify layout props by passing them directly as component prop by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2972
+* [3.x] Improve form state stability by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2976
+* [3.x] Allow overriding `useHttp` response type per method call by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2979
+* Revert "[3.x] Allow overriding `useHttp` response type per method call" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2980
+* [3.x] Fix React form not re-rendering memoized children on `setData` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2986
+* [3.x] Update Boost skills by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2987
+* [3.x] Add generic type inference for <Form> `optimistic` and `transform` callbacks by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2990
+* [3.x] Cleanup of `server.js` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2991
+* [3.x] Clean up leftover `snapshotRef` in `useFormState` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2992
+* [3.x] Additional Vite tests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2994
+* [3.x] Svelte linting fixes by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2995
+* [3.x] Rename `networkError` event detail key to `error` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2996
+* [3.x] Fix `PagesOption` type and make `setup`/`withApp` mutually exclusive by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2997
+* [3.x] Guard against `void` return from `useHttp` optimistic callback by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3001
+* [3.x] Fix Svelte Form ignoring global `withAllErrors` config by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2998
+* [3.x] Add `HttpError` base class by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2999
+* [3.x] Rename `handleErrors` SSR option to `formatErrors` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3000
+* [3.x] Remove deprecated router.cancel() method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3002
+* [3.x] Bump Precognition package by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3006
+* [3.x] Refactor Layout Props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3005
+
+### New Contributors
+
+* [@puRe1337](https://github.com/puRe1337) made their first contribution in https://github.com/inertiajs/inertia/pull/2677
+* [@DavidCCoimbra](https://github.com/DavidCCoimbra) made their first contribution in https://github.com/inertiajs/inertia/pull/2874
+* [@Anthony14FR](https://github.com/Anthony14FR) made their first contribution in https://github.com/inertiajs/inertia/pull/2940
+* [@stafast](https://github.com/stafast) made their first contribution in https://github.com/inertiajs/inertia/pull/2952
+* [@entity](https://github.com/entity) made their first contribution in https://github.com/inertiajs/inertia/pull/2967
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.16...v3.0.0
 
 ## [v2.3.16](https://github.com/inertiajs/inertia/compare/v2.3.15...v2.3.16) - 2026-02-24
 
