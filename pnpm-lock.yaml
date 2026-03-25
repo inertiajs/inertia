@@ -37,8 +37,8 @@ importers:
         specifier: ^1.33.0
         version: 1.45.1
       laravel-precognition:
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(axios@1.13.5)
+        specifier: ^2.0.0
+        version: 2.0.0(axios@1.13.5)
     devDependencies:
       '@types/node':
         specifier: ^24.10.13
@@ -71,8 +71,8 @@ importers:
         specifier: ^1.33.0
         version: 1.45.1
       laravel-precognition:
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(axios@1.13.5)
+        specifier: ^2.0.0
+        version: 2.0.0(axios@1.13.5)
     devDependencies:
       '@types/react':
         specifier: ^19.2.14
@@ -172,8 +172,8 @@ importers:
         specifier: ^1.33.0
         version: 1.45.1
       laravel-precognition:
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(axios@1.13.5)
+        specifier: ^2.0.0
+        version: 2.0.0(axios@1.13.5)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^7.0.1
@@ -304,8 +304,8 @@ importers:
         specifier: ^1.33.0
         version: 1.45.1
       laravel-precognition:
-        specifier: 2.0.0-beta.5
-        version: 2.0.0-beta.5(axios@1.13.5)
+        specifier: ^2.0.0
+        version: 2.0.0(axios@1.13.5)
     devDependencies:
       axios:
         specifier: ^1.13.5
@@ -2323,8 +2323,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@2.0.0-beta.5:
-    resolution: {integrity: sha512-m2AYf8nf35kWgrKXJEJfg//PR8Qg0VbnoxAYkon2bEKrZikg+54ubBncm7mpZlnY5crN3zKwoK9P5rI6wXeO4w==}
+  laravel-precognition@2.0.0:
+    resolution: {integrity: sha512-dmA4HGc9m+TsVNsJs9/XQBI8u6j7coilN+qKkBuhuXQzH3HypwS/c5dFQ4UqUGjBbcxIM7zdk91kM/SRZwIvWQ==}
     peerDependencies:
       axios: ^1.4.0
     peerDependenciesMeta:
@@ -5363,7 +5363,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@2.0.0-beta.5(axios@1.13.5):
+  laravel-precognition@2.0.0(axios@1.13.5):
     dependencies:
       es-toolkit: 1.45.1
     optionalDependencies:
