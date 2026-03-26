@@ -168,7 +168,9 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
         server
           .ssrLoadModule(entry!)
           .then(() => server.config.logger.info('Inertia SSR module graph warmed up'))
-          .catch((error) => server.config.logger.warn(`Failed to warm up Inertia SSR module graph: ${error?.message ?? error}`))
+          .catch((error) =>
+            server.config.logger.warn(`Failed to warm up Inertia SSR module graph: ${error?.message ?? error}`),
+          )
           .finally(() => {
             warmingUp = false
           })
