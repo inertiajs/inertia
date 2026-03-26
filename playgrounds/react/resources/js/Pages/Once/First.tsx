@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import Layout from './Layout'
 
-const First = ({ foo, bar, baz1, qux }: { foo: string; bar: string; baz1: string; qux?: string }) => {
+export default function First({ foo, bar, baz1, qux }: { foo: string; bar: string; baz1: string; qux?: string }) {
   return (
     <>
       <Head title="Once Props: First Page" />
@@ -15,5 +15,3 @@ const First = ({ foo, bar, baz1, qux }: { foo: string; bar: string; baz1: string
 }
 
 First.layout = Layout
-
-export default First

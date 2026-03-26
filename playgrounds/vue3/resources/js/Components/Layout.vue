@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Link, useLayoutProps, usePage } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+
+const { padding = true } = defineProps<{ padding?: boolean }>()
 
 const page = usePage()
 
 const appName = computed(() => page.props.appName)
-const layoutProps = useLayoutProps({ padding: true })
 </script>
 
 <template>
@@ -32,7 +33,7 @@ const layoutProps = useLayoutProps({ padding: true })
     <Link href="/error/404" class="hover:underline">Errors</Link>
     <Link href="/ssr-debug" class="hover:underline">SSR Debug</Link>
   </nav>
-  <main :class="layoutProps.padding ? 'px-10 py-8' : ''">
+  <main :class="padding ? 'px-10 py-8' : ''">
     <slot />
   </main>
 </template>

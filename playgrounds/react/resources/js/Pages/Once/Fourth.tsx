@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import Layout from './Layout'
 
-const Fourth = ({ foo, bar, baz4, qux }: { foo: string; bar: string; baz4: string; qux?: string }) => {
+export default function Fourth({ foo, bar, baz4, qux }: { foo: string; bar: string; baz4: string; qux?: string }) {
   return (
     <>
       <Head title="Once Props: Fourth Page" />
@@ -15,5 +15,3 @@ const Fourth = ({ foo, bar, baz4, qux }: { foo: string; bar: string; baz4: strin
 }
 
 Fourth.layout = Layout
-
-export default Fourth

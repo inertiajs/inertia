@@ -1,10 +1,8 @@
-<script lang="ts">
-import Layout from './Layout.vue'
-export default { layout: Layout }
-</script>
-
 <script setup lang="ts">
+import Layout from './Layout.vue'
 import { Head } from '@inertiajs/vue3'
+
+defineOptions({ layout: Layout })
 
 defineProps<{
   foo: string
