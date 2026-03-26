@@ -1,8 +1,3 @@
-<script lang="ts">
-import Layout from '../Components/Layout.vue'
-export default { layout: [Layout, { padding: false }] }
-</script>
-
 <script setup lang="ts">
 import { Head, InfiniteScroll, router } from '@inertiajs/vue3'
 import { useStream } from '@laravel/stream-vue'
@@ -12,6 +7,8 @@ import PaperAirplaneIcon from '../Components/PaperAirplaneIcon.vue'
 import Spinner from '../Components/Spinner.vue'
 import StreamingIndicator from '../Components/StreamingIndicator.vue'
 import Textarea from '../Components/Textarea.vue'
+
+defineOptions({ layout: { padding: false } })
 
 const props = defineProps<{
   messages: {
@@ -24,8 +21,13 @@ const pendingResponse = ref<string>('')
 const requestCount = ref<number>(0)
 const scrollContainer = ref<HTMLElement | null>(null)
 
+const csrfToken =
+  typeof window !== 'undefined'
+    ? (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string)
+    : ''
+
 const { isFetching, isStreaming, send } = useStream('messages', {
-  csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string,
+  csrfToken,
   onData: (data) => (pendingResponse.value += data),
   onFinish: () => {
     router.prependToProp('messages.data', {

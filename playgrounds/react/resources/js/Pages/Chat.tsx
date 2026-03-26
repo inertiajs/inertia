@@ -1,27 +1,31 @@
 import { Head, InfiniteScroll, router } from '@inertiajs/react'
 import { useStream } from '@laravel/stream-react'
 import { FormEvent, useMemo, useRef, useState } from 'react'
-import Layout from '../Components/Layout'
 import MessageComponent, { Message } from '../Components/Message'
 import PaperAirplaneIcon from '../Components/PaperAirplaneIcon'
 import Spinner from '../Components/Spinner'
 import StreamingIndicator from '../Components/StreamingIndicator'
 import Textarea from '../Components/Textarea'
 
-const Chat = ({
+export default function Chat({
   messages = { data: [] },
 }: {
   messages?: {
     data: Message[]
   }
-}) => {
+}) {
   const [newPrompt, setNewPrompt] = useState('')
   const [pendingResponse, setPendingResponse] = useState('')
   const [requestCount, setRequestCount] = useState(0)
   const scrollContainer = useRef<HTMLDivElement>(null)
 
+  const csrfToken =
+    typeof window !== 'undefined'
+      ? (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string)
+      : ''
+
   const { isFetching, isStreaming, send } = useStream('messages', {
-    csrfToken: document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') as string,
+    csrfToken,
     onData: (data) => setPendingResponse((prev) => prev + data),
     onFinish: () => {
       router.prependToProp('messages.data', {
@@ -153,6 +157,4 @@ const Chat = ({
   )
 }
 
-Chat.layout = [Layout, { padding: false }]
-
-export default Chat
+Chat.layout = { padding: false }
