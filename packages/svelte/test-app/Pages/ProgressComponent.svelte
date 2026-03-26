@@ -2,6 +2,7 @@
   declare global {
     interface Window {
       progressTests: unknown[]
+      cancelDelayedStart?: () => void
     }
   }
 </script>
@@ -22,6 +23,23 @@
   const testStart = () => {
     progress.start()
     log('started')
+  }
+
+  const testStartWithDelay = () => {
+    const cancel = progress.startWithDelay()
+    window.cancelDelayedStart = cancel
+    log('startWithDelay')
+  }
+
+  const testStartWithCustomDelay = () => {
+    const cancel = progress.startWithDelay(500)
+    window.cancelDelayedStart = cancel
+    log('startWithDelay:500')
+  }
+
+  const testCancelDelayedStart = () => {
+    window.cancelDelayedStart?.()
+    log('cancelled')
   }
 
   const testSet25 = () => {
@@ -83,6 +101,9 @@
 
   <div>
     <button onclick={testStart}>Start</button>
+    <button onclick={testStartWithDelay}>Start With Delay</button>
+    <button onclick={testStartWithCustomDelay}>Start With Custom Delay</button>
+    <button onclick={testCancelDelayedStart}>Cancel Delayed Start</button>
     <button onclick={testSet25}>Set 25%</button>
     <button onclick={testSet50}>Set 50%</button>
     <button onclick={testSet75}>Set 75%</button>

@@ -5,6 +5,7 @@ import { ref } from 'vue'
 declare global {
   interface Window {
     progressTests: unknown[]
+    cancelDelayedStart?: () => void
   }
 }
 
@@ -21,6 +22,23 @@ const log = (...args: unknown[]) => {
 const testStart = () => {
   progress.start()
   log('started')
+}
+
+const testStartWithDelay = () => {
+  const cancel = progress.startWithDelay()
+  window.cancelDelayedStart = cancel
+  log('startWithDelay')
+}
+
+const testStartWithCustomDelay = () => {
+  const cancel = progress.startWithDelay(500)
+  window.cancelDelayedStart = cancel
+  log('startWithDelay:500')
+}
+
+const testCancelDelayedStart = () => {
+  window.cancelDelayedStart?.()
+  log('cancelled')
 }
 
 const testSet25 = () => {
@@ -83,6 +101,9 @@ const clearLogs = () => {
 
     <div>
       <button @click="testStart">Start</button>
+      <button @click="testStartWithDelay">Start With Delay</button>
+      <button @click="testStartWithCustomDelay">Start With Custom Delay</button>
+      <button @click="testCancelDelayedStart">Cancel Delayed Start</button>
       <button @click="testSet25">Set 25%</button>
       <button @click="testSet50">Set 50%</button>
       <button @click="testSet75">Set 75%</button>

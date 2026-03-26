@@ -162,6 +162,42 @@ test.describe('Progress Component', () => {
     await expect(bar).toBeVisible()
   })
 
+  test('startWithDelay() starts the progress bar after the configured delay', async ({ page }) => {
+    await page.getByRole('button', { name: 'Start With Delay', exact: true }).click()
+
+    await expect(page.locator('#nprogress .bar')).not.toBeVisible()
+
+    await page.waitForTimeout(300)
+
+    await expect(page.locator('#nprogress .bar')).toBeVisible()
+  })
+
+  test('startWithDelay() accepts a custom delay', async ({ page }) => {
+    await page.getByRole('button', { name: 'Start With Custom Delay' }).click()
+
+    await expect(page.locator('#nprogress .bar')).not.toBeVisible()
+
+    await page.waitForTimeout(300)
+
+    await expect(page.locator('#nprogress .bar')).not.toBeVisible()
+
+    await page.waitForTimeout(300)
+
+    await expect(page.locator('#nprogress .bar')).toBeVisible()
+  })
+
+  test('startWithDelay() returns a cancel function that prevents the bar from starting', async ({ page }) => {
+    await page.getByRole('button', { name: 'Start With Delay', exact: true }).click()
+
+    await expect(page.locator('#nprogress .bar')).not.toBeVisible()
+
+    await page.getByRole('button', { name: 'Cancel Delayed Start' }).click()
+
+    await page.waitForTimeout(400)
+
+    await expect(page.locator('#nprogress .bar')).not.toBeVisible()
+  })
+
   test('isStarted() reflects actual DOM state', async ({ page }) => {
     await page.getByRole('button', { name: 'Is Started' }).click()
     let tests = await page.evaluate(() => (window as any).progressTests)

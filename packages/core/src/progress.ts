@@ -1,11 +1,23 @@
 import ProgressComponent from './progress-component'
 import { GlobalEvent, ProgressOptions } from './types'
 
+const DEFAULT_DELAY = 250
+
+let configuredDelay = DEFAULT_DELAY
+
 class Progress {
   public hideCount = 0
 
   public start(): void {
     ProgressComponent.start()
+  }
+
+  public startWithDelay(delay?: number): () => void {
+    const ms = delay ?? configuredDelay
+
+    const timeout = setTimeout(() => this.start(), ms)
+
+    return () => clearTimeout(timeout)
   }
 
   public reveal(force: boolean = false): void {
@@ -50,18 +62,26 @@ class Progress {
 
 export const progress = new Progress()
 
-function addEventListeners(delay: number): void {
-  document.addEventListener('inertia:start', (e) => handleStartEvent(e, delay))
+function addEventListeners(): void {
+  document.addEventListener('inertia:start', handleStartEvent)
   document.addEventListener('inertia:progress', handleProgressEvent)
 }
 
-function handleStartEvent(event: GlobalEvent<'start'>, delay: number): void {
+function handleStartEvent(event: GlobalEvent<'start'>): void {
   if (!event.detail.visit.showProgress) {
     progress.hide()
   }
 
-  const timeout = setTimeout(() => progress.start(), delay)
-  document.addEventListener('inertia:finish', (e) => finish(e, timeout), { once: true })
+  const cancel = progress.startWithDelay()
+
+  document.addEventListener(
+    'inertia:finish',
+    (e) => {
+      cancel()
+      finish(e)
+    },
+    { once: true },
+  )
 }
 
 function handleProgressEvent(event: GlobalEvent<'progress'>): void {
@@ -70,9 +90,7 @@ function handleProgressEvent(event: GlobalEvent<'progress'>): void {
   }
 }
 
-function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
-  clearTimeout(timeout!)
-
+function finish(event: GlobalEvent<'finish'>): void {
   if (!progress.isStarted()) {
     return
   }
@@ -87,12 +105,13 @@ function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
 }
 
 export default function setupProgress({
-  delay = 250,
+  delay = DEFAULT_DELAY,
   color = '#29d',
   includeCSS = true,
   showSpinner = false,
   popover = null,
 }: ProgressOptions = {}): void {
-  addEventListeners(delay)
+  configuredDelay = delay
+  addEventListeners()
   ProgressComponent.configure({ showSpinner, includeCSS, color, popover })
 }

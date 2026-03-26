@@ -4,6 +4,7 @@ import { useState } from 'react'
 declare global {
   interface Window {
     progressTests: unknown[]
+    cancelDelayedStart?: () => void
   }
 }
 
@@ -21,6 +22,23 @@ export default () => {
   const testStart = () => {
     progress.start()
     log('started')
+  }
+
+  const testStartWithDelay = () => {
+    const cancel = progress.startWithDelay()
+    window.cancelDelayedStart = cancel
+    log('startWithDelay')
+  }
+
+  const testStartWithCustomDelay = () => {
+    const cancel = progress.startWithDelay(500)
+    window.cancelDelayedStart = cancel
+    log('startWithDelay:500')
+  }
+
+  const testCancelDelayedStart = () => {
+    window.cancelDelayedStart?.()
+    log('cancelled')
   }
 
   const testSet25 = () => {
@@ -82,6 +100,9 @@ export default () => {
 
       <div>
         <button onClick={testStart}>Start</button>
+        <button onClick={testStartWithDelay}>Start With Delay</button>
+        <button onClick={testStartWithCustomDelay}>Start With Custom Delay</button>
+        <button onClick={testCancelDelayedStart}>Cancel Delayed Start</button>
         <button onClick={testSet25}>Set 25%</button>
         <button onClick={testSet50}>Set 50%</button>
         <button onClick={testSet75}>Set 75%</button>
