@@ -8,22 +8,12 @@ use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
+    public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
+    public function boot(): void
     {
         Inertia::handleExceptionsUsing(function (ExceptionResponse $response) {
             if (in_array($response->statusCode(), [403, 404, 500, 503])) {

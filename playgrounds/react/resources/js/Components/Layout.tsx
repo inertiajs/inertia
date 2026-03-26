@@ -1,8 +1,7 @@
-import { Link, useLayoutProps, usePage } from '@inertiajs/react'
+import { Link, usePage } from '@inertiajs/react'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children, padding = true }: { children: React.ReactNode; padding?: boolean }) {
   const { appName } = usePage().props
-  const { padding } = useLayoutProps({ padding: true })
 
   return (
     <>
