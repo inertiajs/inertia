@@ -142,7 +142,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
         return
       }
 
-      let warmingUp = true
+      let warmingUp = false
 
       server.middlewares.use(SSR_ENDPOINT, async (req, res, next) => {
         if (req.method !== 'POST') {
@@ -162,12 +162,13 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       server.config.logger.info(`Inertia SSR dev endpoint: ${SSR_ENDPOINT}`)
 
       server.httpServer?.once('listening', () => {
+        warmingUp = true
         server.config.logger.info('Warming up Inertia SSR module graph...')
 
         server
           .ssrLoadModule(entry!)
           .then(() => server.config.logger.info('Inertia SSR module graph warmed up'))
-          .catch(() => server.config.logger.warn('Failed to warm up Inertia SSR module graph'))
+          .catch((error) => server.config.logger.warn(`Failed to warm up Inertia SSR module graph: ${error?.message ?? error}`))
           .finally(() => {
             warmingUp = false
           })
