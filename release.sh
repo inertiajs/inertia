@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ensure we are on master and the working tree is clean
+# Ensure we are on 2.x and the working tree is clean
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-if [ "$CURRENT_BRANCH" != "master" ]; then
-  echo "Error: must be on master branch (current: $CURRENT_BRANCH)" >&2
+if [ "$CURRENT_BRANCH" != "2.x" ]; then
+  echo "Error: must be on 2.x branch (current: $CURRENT_BRANCH)" >&2
   exit 1
 fi
 
@@ -71,7 +71,7 @@ git tag -a "$TAG" -m "$TAG"
 git push
 git push --tags
 
-gh release create "$TAG" --generate-notes
+gh release create "$TAG" --generate-notes --latest=false
 
 echo ""
 echo "✅ Release $TAG completed successfully, publishing kicked off in CI."
