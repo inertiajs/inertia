@@ -59,17 +59,6 @@ for pkg_json in packages/*/package.json; do
   cd ..
 done
 
-TAG="v$NEW_VERSION"
-echo
-echo "New version resolved as $TAG"
-echo
-read -p "Proceed with release $TAG? (y/N): " confirm
-if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-  echo "Aborted. Restoring changes..."
-  git checkout -- .
-  exit 1
-fi
-
 pnpm install
 
 # Commit changes and create tag
