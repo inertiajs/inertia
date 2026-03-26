@@ -80,7 +80,6 @@ app.get('/ssr/infinite-scroll', (req, res) => {
   })
 })
 
-
 // Intercepts all CSS and JS assets (including files loaded via code splitting)
 app.get(/.*\.(?:js|css)$/, (req, res) => {
   const filePath = path.resolve(__dirname, '../../packages/', inertia.package, 'test-app/dist', req.path.substring(1))
