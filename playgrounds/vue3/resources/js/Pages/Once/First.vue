@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Layout from './Layout.vue'
 import { Head } from '@inertiajs/vue3'
+import Layout from './Layout.vue'
 
 defineOptions({ layout: Layout })
 

@@ -12,17 +12,17 @@
     "@inertiajs/vite": "workspace:*",
     "@laravel/stream-react": "^0.3.13",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.2.1",
+    "@tailwindcss/vite": "^4.2.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.4",
+    "@vitejs/plugin-react": "^6.0.0",
     "autosize": "^6.0.1",
-    "laravel-vite-plugin": "^2.1.0",
+    "laravel-vite-plugin": "^3.0.0",
     "marked": "^17.0.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1"
+    "vite": "^8.0.0"
   }
 }
