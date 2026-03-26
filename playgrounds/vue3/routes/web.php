@@ -195,7 +195,7 @@ Route::get('/login', function () {
 
 Route::get('/async', function () {
     return inertia('Async', [
-        'sleep' => Inertia::lazy(function () {
+        'sleep' => Inertia::optional(function () {
             sleep(4);
         }),
         'jonathan' => Cache::get('jonathan', false),
