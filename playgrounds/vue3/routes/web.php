@@ -496,7 +496,7 @@ Route::get('/defer', function () {
 });
 
 Route::get('/goodbye', function () {
-    return Inertia::location('https://inertiajs.com/redirects');
+    return Inertia::location('https://inertiajs.com/docs/v3/the-basics/redirects');
 });
 
 Route::get('/poll', function () {
