@@ -36,6 +36,14 @@ test('it applies the default layout after navigating to a page without its own l
   await expect(page.locator('#page-layout')).not.toBeVisible()
 })
 
+test('it supports anonymous arrow functions as layout components', async ({ page }) => {
+  await page.goto('/default-layout?withAnonymousDefaultLayout')
+
+  await expect(page.locator('#default-layout')).toBeVisible()
+  await expect(page.getByText('Default Layout')).toBeVisible()
+  await expect(page.locator('#text')).toHaveText('DefaultLayout/Index')
+})
+
 test('it supports a callback that conditionally returns a layout', async ({ page }) => {
   await page.goto('/default-layout?withDefaultLayoutCallback')
 

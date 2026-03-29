@@ -59,6 +59,16 @@ createInertiaApp({
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
   }),
+  ...(params.has('withAnonymousDefaultLayout') && {
+    layout:
+      () =>
+      ({ children }: { children: React.ReactNode }) => (
+        <div id="default-layout">
+          <span>Default Layout</span>
+          {children}
+        </div>
+      ),
+  }),
   ...(params.has('withDefaultAppLayout') && {
     layout: () => AppLayout,
   }),
