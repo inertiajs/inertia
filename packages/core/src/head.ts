@@ -39,6 +39,10 @@ const Renderer = {
       this.isInertiaManagedElement(element as Element),
     )
 
+    if (sourceElements.some((element) => element instanceof HTMLTitleElement)) {
+      document.head.querySelectorAll('title:not([data-inertia])').forEach((title) => title.remove())
+    }
+
     targetElements.forEach((targetElement) => {
       const index = this.findMatchingElementIndex(targetElement as Element, sourceElements)
       if (index === -1) {
@@ -52,7 +56,9 @@ const Renderer = {
       }
     })
 
-    sourceElements.forEach((element) => document.head.appendChild(element))
+    sourceElements.forEach((element) => {
+      document.head.appendChild(element)
+    })
   }, 1),
 }
 

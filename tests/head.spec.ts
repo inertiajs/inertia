@@ -31,6 +31,22 @@ test.describe('Head component', () => {
     expect(titles.allHaveInertiaAttribute).toBe(true)
   })
 
+  test('replaces a plain title element without data-inertia attribute', async ({ page }) => {
+    await page.goto('/head/plain-title')
+    await page.waitForSelector('title[data-inertia]', { state: 'attached' })
+
+    const titles = await page.evaluate(() => {
+      const allTitles = Array.from(document.querySelectorAll('title'))
+      return {
+        total: allTitles.length,
+        inertiaTitle: allTitles.find((t) => t.hasAttribute('data-inertia'))?.textContent,
+      }
+    })
+
+    expect(titles.total).toBe(1)
+    expect(titles.inertiaTitle).toBe('Test Head Component')
+  })
+
   test('renders the title tag and children with proper escaping', async ({ page }) => {
     await page.goto('/head')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })

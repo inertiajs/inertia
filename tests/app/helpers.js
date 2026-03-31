@@ -86,6 +86,24 @@ module.exports = {
         .replace("'{{ placeholder }}'", JSON.stringify(data)),
     )
   },
+  renderWithPlainTitle: (req, res, data) => {
+    data = buildPageData(req, data)
+    data = processPartialProps(req, data)
+
+    if (req.get('X-Inertia')) {
+      res.header('Vary', 'Accept')
+      res.header('X-Inertia', true)
+      return res.status(200).json(data)
+    }
+
+    return res.status(200).send(
+      fs
+        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
+        .toString()
+        .replace(' {{ headAttribute }}', '')
+        .replace("'{{ placeholder }}'", JSON.stringify(data)),
+    )
+  },
   renderUnified: (req, res, data) => {
     data = buildPageData(req, data)
     data = processPartialProps(req, data)
