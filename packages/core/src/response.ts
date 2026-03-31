@@ -426,10 +426,11 @@ export class Response {
       }
     }
 
-    // Preserve flash data and merge with new flash data on non-deferred requests
-    pageResponse.flash = {
-      ...currentPage.get().flash,
-      ...(this.requestParams.isDeferredPropsRequest() ? {} : pageResponse.flash),
+    // Preserve flash data on deferred props requests (background fetches that replay
+    // the same flash from the initial load), but let regular partial reloads use
+    // whatever the server sent (which may be empty, clearing stale flash)
+    if (this.requestParams.isDeferredPropsRequest()) {
+      pageResponse.flash = { ...currentPage.get().flash }
     }
 
     const currentOriginalDeferred = currentPage.get().initialDeferredProps
