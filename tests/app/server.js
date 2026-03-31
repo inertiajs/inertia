@@ -3476,6 +3476,10 @@ app.get('/nested-props/deferred-with-siblings', (req, res) => {
   )
 })
 
+app.get('/head/plain-title', (req, res) =>
+  inertia.renderWithPlainTitle(req, res, { component: 'Head/Dataset' }),
+)
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)
