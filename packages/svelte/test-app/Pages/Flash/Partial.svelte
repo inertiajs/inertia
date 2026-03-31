@@ -20,6 +20,10 @@
   const reloadWithDifferentFlash = () => {
     router.reload({ only: ['count'], data: { flashType: 'different', count: Date.now() } })
   }
+
+  const reloadWithoutFlash = () => {
+    router.reload({ only: ['count'], data: { flashType: 'none', count: Date.now() } })
+  }
 </script>
 
 <div>
@@ -29,4 +33,5 @@
 
   <button onclick={reloadWithSameFlash}>Reload with same flash</button>
   <button onclick={reloadWithDifferentFlash}>Reload with different flash</button>
+  <button onclick={reloadWithoutFlash}>Reload without flash</button>
 </div>
