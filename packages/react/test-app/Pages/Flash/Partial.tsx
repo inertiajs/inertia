@@ -21,6 +21,10 @@ export default ({ count }: { count: number }) => {
     router.reload({ only: ['count'], data: { flashType: 'different', count: Date.now() } })
   }
 
+  const reloadWithoutFlash = () => {
+    router.reload({ only: ['count'], data: { flashType: 'none', count: Date.now() } })
+  }
+
   return (
     <div>
       <span id="flash">{JSON.stringify(page.flash)}</span>
@@ -29,6 +33,7 @@ export default ({ count }: { count: number }) => {
 
       <button onClick={reloadWithSameFlash}>Reload with same flash</button>
       <button onClick={reloadWithDifferentFlash}>Reload with different flash</button>
+      <button onClick={reloadWithoutFlash}>Reload without flash</button>
     </div>
   )
 }

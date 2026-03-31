@@ -2194,13 +2194,17 @@ app.get('/flash/partial', (req, res) => {
 
   let flash = { message: 'Initial flash' }
   if (req.headers['x-inertia-partial-data']) {
-    flash = flashType === 'different' ? { message: `Updated flash ${count}` } : { message: 'Initial flash' }
+    if (flashType === 'different') {
+      flash = { message: `Updated flash ${count}` }
+    } else if (flashType === 'none') {
+      flash = {}
+    }
   }
 
   inertia.render(req, res, {
     component: 'Flash/Partial',
     props: { count },
-    flash,
+    flash: Object.keys(flash).length > 0 ? flash : undefined,
   })
 })
 const getOncePropsData = (req, prop = 'foo') => {
