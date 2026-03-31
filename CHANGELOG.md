@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.1...3.x)
 
 - Nothing yet
+
+## [v3.0.1](https://github.com/inertiajs/inertia/compare/v3.0.0...v3.0.1) - 2026-03-31
+
+### What's Changed
+
+* [3.x] Update Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3013
+* [3.x] Support anonymous arrow functions as React layout components by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3016
+* [3.x] Fix `WhenVisible` crash during SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3021
+* [3.x] Remove plain <title> when Head component sets a title by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3022
+* [3.x] Fix `defineOptions({ layout: [...] })` type error with nested layouts by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3023
+* [3.x] Fix flash data re-firing on partial reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3024
+* [3.x] Warm up SSR module graph on dev server start by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3007
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.0.0...v3.0.1
 
 ## [v3.0.0](https://github.com/inertiajs/inertia/compare/v2.3.16...v3.0.0) - 2026-03-25
 
