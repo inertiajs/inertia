@@ -30,7 +30,11 @@ declare module 'vue' {
   }
 
   export interface ComponentCustomOptions {
-    layout?: LayoutCallbackReturn<DefineComponent<any, any, any>> | ((props: any) => any) | LayoutRenderFunction
+    layout?:
+      | LayoutCallbackReturn<DefineComponent<any, any, any>>
+      | Component[]
+      | ((props: any) => any)
+      | LayoutRenderFunction
     remember?:
       | string
       | string[]
