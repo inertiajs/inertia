@@ -26,20 +26,7 @@ import PageContext from './PageContext'
 import { LayoutFunction, ReactComponent, ReactPageHandlerArgs } from './types'
 
 function isComponent(value: unknown): value is ReactComponent {
-  if (!value) {
-    return false
-  }
-
-  if (typeof value === 'object' && '$$typeof' in value) {
-    return true
-  }
-
-  if (typeof value === 'function') {
-    const fn = value as Function & { displayName?: string; prototype?: { isReactComponent?: boolean } }
-    return fn.prototype?.isReactComponent === true || fn.name !== '' || fn.displayName !== undefined
-  }
-
-  return false
+  return typeof value === 'function' || (typeof value === 'object' && value !== null && '$$typeof' in value)
 }
 
 function isRenderFunction(value: unknown): boolean {
@@ -49,6 +36,14 @@ function isRenderFunction(value: unknown): boolean {
 
   const fn = value as Function
   return fn.length === 1 && typeof fn.prototype === 'undefined'
+}
+
+function isLayoutResolver(value: unknown): boolean {
+  return (
+    typeof value === 'function' &&
+    (value as Function).length <= 1 &&
+    typeof (value as Function).prototype === 'undefined'
+  )
 }
 
 let currentIsInitialPage = true
@@ -166,11 +161,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
       let callbackProps: Record<string, unknown> | null = null
       const layoutValue = Component.layout
 
-      if (
-        typeof layoutValue === 'function' &&
-        (layoutValue as Function).length <= 1 &&
-        typeof (layoutValue as Function).prototype === 'undefined'
-      ) {
+      if (isLayoutResolver(layoutValue)) {
         const result = (layoutValue as Function)(props)
 
         if (isValidElement(result)) {
