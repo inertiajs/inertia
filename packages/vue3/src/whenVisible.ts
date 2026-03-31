@@ -51,6 +51,10 @@ export default defineComponent({
     }
 
     function registerObserver() {
+      if (typeof window === 'undefined') {
+        return
+      }
+
       observer.value?.disconnect()
 
       observer.value = new IntersectionObserver(
