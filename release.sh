@@ -59,6 +59,10 @@ for pkg_json in packages/*/package.json; do
   cd ..
 done
 
+TAG="v$NEW_VERSION"
+echo
+echo "New version resolved as $TAG"
+
 pnpm install
 
 # Commit changes and create tag
