@@ -64,7 +64,7 @@
     "laravel-precognition": "^2.0.0"
   },
   "peerDependencies": {
-    "axios": "^1.13.2"
+    "axios": ">=1.11.0 <=1.14.0"
   },
   "peerDependenciesMeta": {
     "axios": {
@@ -73,7 +73,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.13",
-    "axios": "^1.13.5",
+    "axios": ">=1.11.0 <=1.14.0",
     "es-check": "^9.6.1",
     "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",
