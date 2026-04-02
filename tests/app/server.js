@@ -2347,6 +2347,34 @@ app.get('/infinite-scroll/deferred', (req, res) => {
   )
 })
 
+// Optional scroll prop via WhenVisible - simulates Inertia::optional(fn() => Inertia::scroll(...))
+app.get('/infinite-scroll/optional-when-visible', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  if (!partialReload) {
+    // Initial page load - no users prop and no scrollProps (optional prop excluded)
+    return inertia.render(req, res, {
+      component: 'InfiniteScroll/OptionalWhenVisible',
+      props: {},
+    })
+  }
+
+  // WhenVisible partial reload - send both the data AND scrollProps
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'InfiniteScroll/OptionalWhenVisible',
+        props: { users: paginated },
+        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+        scrollProps: { users: scrollProp },
+      }),
+    250,
+  )
+})
+
 let infiniteScrollPreserveErrorsState = {}
 
 app.get('/infinite-scroll/preserve-errors', (req, res) => {
