@@ -34,7 +34,10 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit
 
       - name: 'Publish ${{ matrix.adapter }}'
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }} build
