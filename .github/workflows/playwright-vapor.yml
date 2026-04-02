@@ -22,23 +22,24 @@ jobs:
           cache: pnpm
 
       - name: Override Vue to 3.6 beta
-        run: node -e "
-          const fs = require('fs');
-          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          pkg.pnpm.overrides = {
-            ...pkg.pnpm.overrides,
-            'vue': 'beta',
-            '@vue/compiler-core': 'beta',
-            '@vue/compiler-dom': 'beta',
-            '@vue/compiler-sfc': 'beta',
-            '@vue/reactivity': 'beta',
-            '@vue/runtime-core': 'beta',
-            '@vue/runtime-dom': 'beta',
-            '@vue/server-renderer': 'beta',
-            '@vue/shared': 'beta'
-          };
-          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+            pkg.pnpm.overrides = {
+              ...pkg.pnpm.overrides,
+              "vue": "beta",
+              "@vue/compiler-core": "beta",
+              "@vue/compiler-dom": "beta",
+              "@vue/compiler-sfc": "beta",
+              "@vue/reactivity": "beta",
+              "@vue/runtime-core": "beta",
+              "@vue/runtime-dom": "beta",
+              "@vue/server-renderer": "beta",
+              "@vue/shared": "beta"
+            };
+            fs.writeFileSync("package.json", JSON.stringify(pkg, null, 2) + "\n");
+          '
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
