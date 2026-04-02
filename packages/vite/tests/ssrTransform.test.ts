@@ -4,7 +4,7 @@ import { transformPageResolution } from '../src/pagesTransform'
 import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 
 const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, options, defaultFrameworks)
-const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)
+const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)?.code ?? null
 
 describe('SSR Transform', () => {
   describe('findInertiaAppExport', () => {

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { defaultFrameworks } from '../src/frameworks/index'
 import { transformPageResolution } from '../src/pagesTransform'
 
-const transform = (code: string) => transformPageResolution(code, defaultFrameworks)
+const transformFull = (code: string) => transformPageResolution(code, defaultFrameworks)
+const transform = (code: string) => transformFull(code)?.code ?? null
 
 describe('Pages Transform', () => {
   describe('returns null when no transform needed', () => {
@@ -307,6 +308,43 @@ export default createInertiaApp({
 
         // Footer comment"
       `)
+    })
+  })
+
+  describe('pageGlobs', () => {
+    it('returns default globs when no pages property', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp()`
+
+      expect(transformFull(code)?.pageGlobs).toEqual(['./pages/**/*.vue', './Pages/**/*.vue'])
+    })
+
+    it('returns globs for custom directory', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: './Views' })`
+
+      expect(transformFull(code)?.pageGlobs).toEqual(['./Views/**/*.vue'])
+    })
+
+    it('returns globs for custom directory via path option', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+export default createInertiaApp({ pages: { path: './CustomPages' } })`
+
+      expect(transformFull(code)?.pageGlobs).toEqual(['./CustomPages/**/*{.tsx,.jsx}'])
+    })
+
+    it('returns globs with custom extensions', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/react'
+export default createInertiaApp({ pages: { path: './Pages', extension: '.tsx' } })`
+
+      expect(transformFull(code)?.pageGlobs).toEqual(['./Pages/**/*.tsx'])
+    })
+
+    it('returns default globs for pages object without path', () => {
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: { lazy: true } })`
+
+      expect(transformFull(code)?.pageGlobs).toEqual(['./pages/**/*.vue', './Pages/**/*.vue'])
     })
   })
 })

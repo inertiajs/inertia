@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { join, resolve } from 'node:path'
+import { describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
 
 describe('plugin', () => {
@@ -176,3 +178,77 @@ function transform(code: string): string | null {
   const plugin = inertia()
   return plugin.transform!(code, 'app.ts') as string | null
 }
+
+describe('page warmup', () => {
+  const tmpDir = resolve(__dirname, '.tmp-warmup-test')
+  const pagesDir = join(tmpDir, 'Pages')
+
+  function setup() {
+    mkdirSync(join(pagesDir, 'Auth'), { recursive: true })
+    writeFileSync(join(pagesDir, 'Home.vue'), '<template>Home</template>')
+    writeFileSync(join(pagesDir, 'About.vue'), '<template>About</template>')
+    writeFileSync(join(pagesDir, 'Auth', 'Login.vue'), '<template>Login</template>')
+  }
+
+  function cleanup() {
+    rmSync(tmpDir, { recursive: true, force: true })
+  }
+
+  it('calls warmupRequest for all page files', async () => {
+    setup()
+
+    try {
+      const warmupRequest = vi.fn()
+      const plugin = inertia({ ssr: false })
+
+      plugin.configureServer!({ warmupRequest } as any)
+
+      const appFile = join(tmpDir, 'app.ts')
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp()`
+
+      plugin.transform!(code, appFile)
+
+      await vi.waitFor(() => {
+        expect(warmupRequest).toHaveBeenCalledTimes(3)
+      })
+
+      const warmedFiles = warmupRequest.mock.calls.map((call: any) => call[0]).sort()
+
+      expect(warmedFiles).toEqual([
+        join(pagesDir, 'About.vue'),
+        join(pagesDir, 'Auth', 'Login.vue'),
+        join(pagesDir, 'Home.vue'),
+      ])
+    } finally {
+      cleanup()
+    }
+  })
+
+  it('does not call warmupRequest when server is not available', () => {
+    const plugin = inertia({ ssr: false })
+
+    const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: './Pages' })`
+
+    const result = plugin.transform!(code, 'app.ts')
+
+    expect(result).not.toBeNull()
+  })
+
+  it('handles glob errors gracefully', async () => {
+    const warmupRequest = vi.fn()
+    const plugin = inertia({ ssr: false })
+
+    plugin.configureServer!({ warmupRequest } as any)
+
+    const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp({ pages: './NonExistentDir' })`
+
+    plugin.transform!(code, '/some/fake/path/app.ts')
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+
+    expect(warmupRequest).not.toHaveBeenCalled()
+  })
+})
