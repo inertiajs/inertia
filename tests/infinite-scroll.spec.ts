@@ -2477,6 +2477,39 @@ test.describe('Deferred scroll props', () => {
   })
 })
 
+test.describe('Optional scroll props via WhenVisible', () => {
+  test('it loads optional scroll props via WhenVisible and enables InfiniteScroll', async ({ page }) => {
+    requests.listen(page)
+
+    await page.goto('/infinite-scroll/optional-when-visible')
+
+    await expect(page.getByText('Users prop present: false')).toBeVisible()
+    await expect(page.getByText('User 1')).toBeHidden()
+
+    await page.evaluate(() => (window as any).scrollTo(0, 3000))
+    await expect(page.getByText('Loading optional scroll prop...')).toBeVisible()
+
+    await page.waitForResponse(page.url())
+    await expect(page.getByText('Loading optional scroll prop...')).toBeHidden()
+
+    await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+    await expect(page.getByText('User 15')).toBeVisible()
+    await expect(page.getByText('User 16')).toBeHidden()
+
+    await expect(page.getByText('Has more next items: true')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Load next items' }).click()
+    await expect(page.getByText('Loading next items...')).toBeVisible()
+
+    await expect(page.getByText('User 16')).toBeVisible()
+    await expect(page.getByText('User 30')).toBeVisible()
+    await expect(page.getByText('Loading next items...')).toBeHidden()
+
+    const pageRequests = infiniteScrollRequests()
+    expect(pageRequests.length).toBe(2)
+  })
+})
+
 test('it preserves validation errors when InfiniteScroll loads more data', async ({ page }) => {
   await page.goto('/infinite-scroll/preserve-errors')
 
