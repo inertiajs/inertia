@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vite",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "license": "MIT",
   "description": "Vite plugin for Inertia.js with SSR dev mode support.",
   "contributors": [
