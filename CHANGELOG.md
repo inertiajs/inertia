@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.2...3.x)
 
 - Nothing yet
+
+## [v3.0.2](https://github.com/inertiajs/inertia/compare/v3.0.1...v3.0.2) - 2026-04-02
+
+### What's Changed
+
+* [3.x] Populate `percentage` in upload progress events by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3030
+* [3.x] Add test for optional scroll props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3032
+* [3.x] Warm up lazy-loaded page dependencies in Vite plugin by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3035
+* [3.x] Harden CI workflows and fix dependency vulnerabilities by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3031
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.0.1...v3.0.2
 
 ## [v3.0.1](https://github.com/inertiajs/inertia/compare/v3.0.0...v3.0.1) - 2026-03-31
 
