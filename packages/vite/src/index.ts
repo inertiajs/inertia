@@ -17,8 +17,9 @@
  */
 
 import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
-import type { Plugin } from 'vite'
+import { dirname, resolve } from 'node:path'
+import { glob } from 'tinyglobby'
+import type { Plugin, ViteDevServer } from 'vite'
 import { defaultFrameworks } from './frameworks/index'
 import { transformPageResolution } from './pagesTransform'
 import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT, SSR_ENTRY_CANDIDATES } from './ssr'
@@ -76,12 +77,26 @@ function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<
   return Object.fromEntries(configs.map((config) => [config.package, config]))
 }
 
+/**
+ * Warm up page component files so Vite discovers their dependencies upfront.
+ *
+ * The pages shorthand (or default) is transformed into import.meta.glob during the transform
+ * hook, which is too late for Vite's initial dependency scanner. Without warmup, first
+ * navigation to a lazy-loaded page can trigger a disruptive re-optimization.
+ */
+async function warmupPageFiles(server: ViteDevServer, sourceFile: string, pageGlobs: string[]): Promise<void> {
+  const files = await glob(pageGlobs, { cwd: dirname(sourceFile), absolute: true })
+
+  files.forEach((file) => server.warmupRequest(file))
+}
+
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {
   const ssrDisabled = options.ssr === false
   const ssr = typeof options.ssr === 'string' ? { entry: options.ssr } : options.ssr || {}
   const frameworks = { ...defaultFrameworks, ...toFrameworkRecord(options.frameworks) }
 
   let entry: string | null = null
+  let devServer: ViteDevServer | null = null
 
   return {
     name: '@inertiajs/vite',
@@ -134,10 +149,22 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           ) ?? result
       }
 
-      return transformPageResolution(result, frameworks) ?? (result !== code ? result : null)
+      const pageTransform = transformPageResolution(result, frameworks)
+
+      if (pageTransform) {
+        if (devServer && pageTransform.pageGlobs.length > 0) {
+          warmupPageFiles(devServer, id, pageTransform.pageGlobs).catch(() => {})
+        }
+
+        return pageTransform.code
+      }
+
+      return result !== code ? result : null
     },
 
     configureServer(server) {
+      devServer = server
+
       if (!entry) {
         return
       }

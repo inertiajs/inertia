@@ -37,7 +37,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@inertiajs/core": "workspace:*"
+    "@inertiajs/core": "workspace:*",
+    "tinyglobby": "^0.2.15"
   },
   "peerDependencies": {
     "vite": "^7.0.0 || ^8.0.0"

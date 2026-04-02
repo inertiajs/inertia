@@ -39,8 +39,16 @@ import type { Property } from 'estree'
 import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStringArray } from './astUtils'
 import type { FrameworkConfig } from './types'
 
-/** Returns the transformed code, or null if no transformation was needed. */
-export function transformPageResolution(code: string, frameworks: Record<string, FrameworkConfig>): string | null {
+export interface PageTransformResult {
+  code: string
+  pageGlobs: string[]
+}
+
+/** Returns the transformed code with page globs, or null if no transformation was needed. */
+export function transformPageResolution(
+  code: string,
+  frameworks: Record<string, FrameworkConfig>,
+): PageTransformResult | null {
   if (!code.includes('InertiaApp')) {
     return null
   }
@@ -61,11 +69,18 @@ export function transformPageResolution(code: string, frameworks: Record<string,
   const extractDefault = framework.config.extractDefault ?? true
 
   if (parsed.pagesProperty) {
-    return replacePages(code, parsed.pagesProperty, extensions, extractDefault)
+    const result = replacePages(code, parsed.pagesProperty, extensions, extractDefault)
+
+    return result ? { code: result.code, pageGlobs: result.globs } : null
   }
 
   if (parsed.callWithoutResolver) {
-    return injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault)
+    const defaultGlobs = buildDefaultGlobs(extensions)
+
+    return {
+      code: injectResolver(code, parsed.callWithoutResolver, extensions, extractDefault),
+      pageGlobs: defaultGlobs,
+    }
   }
 
   return null
@@ -82,11 +97,11 @@ function replacePages(
   property: NodeWithPos<Property>,
   defaultExtensions: string[],
   extractDefault: boolean,
-): string {
+): { code: string; globs: string[] } | null {
   const config = extractPagesConfig(property.value, code)
 
   if (!config) {
-    return code
+    return null
   }
 
   const extensions = config.extensions
@@ -97,11 +112,17 @@ function replacePages(
 
   const eager = !(config.lazy ?? true)
 
-  const resolver = config.directory
-    ? buildResolver(config.directory.replace(/\/$/, ''), extensions, extractDefault, eager, config.transform)
-    : buildDefaultResolver(extensions, extractDefault, eager)
+  const directories = config.directory
+    ? [config.directory.replace(/\/$/, '')]
+    : ['./pages', './Pages']
 
-  return code.slice(0, property.start) + resolver + code.slice(property.end)
+  const resolver = buildResolver(directories, extensions, extractDefault, eager, config.transform)
+  const globs = directories.map((d) => buildGlob(d, extensions))
+
+  return {
+    code: code.slice(0, property.start) + resolver + code.slice(property.end),
+    globs,
+  }
 }
 
 /**
@@ -214,8 +235,14 @@ function buildResolver(
   }`
 }
 
+const DEFAULT_PAGE_DIRECTORIES = ['./pages', './Pages']
+
 function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
-  return buildResolver(['./pages', './Pages'], extensions, extractDefault, eager)
+  return buildResolver(DEFAULT_PAGE_DIRECTORIES, extensions, extractDefault, eager)
+}
+
+function buildDefaultGlobs(extensions: string[]): string[] {
+  return DEFAULT_PAGE_DIRECTORIES.map((d) => buildGlob(d, extensions))
 }
 
 function buildGlob(directory: string, extensions: string[]): string {
