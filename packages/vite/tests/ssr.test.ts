@@ -857,7 +857,15 @@ function createMockConfig(
   ssr: boolean,
   { base = '/' }: { base?: string } = {},
 ): ResolvedConfig {
-  return { root: '/project', logger, plugins: [], build: { ssr }, command: 'build', base } as unknown as ResolvedConfig
+  return {
+    root: '/project',
+    logger,
+    plugins: [],
+    build: { ssr },
+    command: 'build',
+    base,
+    resolve: { alias: [] },
+  } as unknown as ResolvedConfig
 }
 
 function createMockServer(
