@@ -254,6 +254,20 @@ test.describe('useHttp', () => {
       await expect(page.locator('#upload-result')).toContainText('file2.txt')
     })
 
+    test('it reports upload progress with percentage', async ({ page }) => {
+      await page.goto('/use-http/file-upload')
+
+      await page.setInputFiles('#upload-file', {
+        name: 'large-file.txt',
+        mimeType: 'text/plain',
+        buffer: Buffer.alloc(1024 * 1024, 'a'),
+      })
+      await page.click('#upload-button')
+
+      await expect(page.locator('#upload-result')).toBeVisible()
+      await expect(page.locator('#upload-progress')).toContainText('Progress: 100%')
+    })
+
     test('it uses multipart/form-data for file uploads', async ({ page }) => {
       await page.goto('/use-http/file-upload')
 
