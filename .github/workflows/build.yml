@@ -1,5 +1,9 @@
 name: Build
 on: [push, pull_request]
+
+permissions:
+  contents: read
+
 jobs:
   core:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
@@ -23,7 +27,10 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
 
       - name: Build Inertia
         run: pnpm build:all
@@ -56,7 +63,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Override Vite version
         run: pnpm --filter './packages/vite' add -D vite@^${{ matrix.vite }}.0.0

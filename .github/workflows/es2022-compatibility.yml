@@ -1,5 +1,9 @@
 name: Compatibility Checks
 on: [push, pull_request]
+
+permissions:
+  contents: read
+
 jobs:
   es2022-compatibility:
     name: ES2022 (${{ matrix.adapter }})
@@ -28,7 +32,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build core package
         if: matrix.adapter != 'core'
