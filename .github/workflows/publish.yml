@@ -49,4 +49,4 @@ jobs:
           fi
 
       - name: 'Publish ${{ matrix.adapter }} to npm'
-        run: cd ./packages/${{ matrix.adapter }} && pnpm publish --no-git-checks --provenance ${{ steps.tag.outputs.flag }}
+        run: cd ./packages/${{ matrix.adapter }} && pnpm publish --no-git-checks ${{ steps.tag.outputs.flag }}
