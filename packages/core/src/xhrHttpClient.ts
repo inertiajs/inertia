@@ -123,8 +123,11 @@ export class XhrHttpClient implements HttpClient {
 
       if (config.onUploadProgress) {
         xhr.upload.onprogress = (event: ProgressEvent) => {
+          const progress = event.lengthComputable ? event.loaded / event.total : undefined
+
           config.onUploadProgress!({
-            progress: event.lengthComputable ? event.loaded / event.total : undefined,
+            progress,
+            percentage: progress ? Math.round(progress * 100) : 0,
             loaded: event.loaded,
             total: event.lengthComputable ? event.total : undefined,
           })

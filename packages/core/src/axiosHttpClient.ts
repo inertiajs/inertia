@@ -35,6 +35,7 @@ function normalizeHeaders(headers: unknown): HttpResponseHeaders {
 function toHttpProgressEvent(axiosEvent: AxiosProgressEvent): HttpProgressEvent {
   return {
     progress: axiosEvent.progress,
+    percentage: axiosEvent.progress ? Math.round(axiosEvent.progress * 100) : 0,
     loaded: axiosEvent.loaded,
     total: axiosEvent.total,
   }

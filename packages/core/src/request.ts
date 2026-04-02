@@ -152,7 +152,6 @@ export class Request {
 
   protected onProgress(progress: HttpProgressEvent): void {
     if (this.requestParams.data() instanceof FormData) {
-      progress.percentage = progress.progress ? Math.round(progress.progress * 100) : 0
       fireProgressEvent(progress)
       this.requestParams.all().onProgress(progress)
     }
