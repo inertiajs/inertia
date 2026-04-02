@@ -112,9 +112,7 @@ function replacePages(
 
   const eager = !(config.lazy ?? true)
 
-  const directories = config.directory
-    ? [config.directory.replace(/\/$/, '')]
-    : ['./pages', './Pages']
+  const directories = config.directory ? [config.directory.replace(/\/$/, '')] : ['./pages', './Pages']
 
   const resolver = buildResolver(directories, extensions, extractDefault, eager, config.transform)
   const globs = directories.map((d) => buildGlob(d, extensions))
