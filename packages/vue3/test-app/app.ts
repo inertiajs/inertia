@@ -42,11 +42,19 @@ createInertiaApp({
 
     return pages[`./Pages/${name}.vue`]
   },
-  setup({ el, App, props, plugin }) {
+  async setup({ el, App, props, plugin }) {
     const inst = createApp({ render: () => h(App, props) })
 
     if (!window.location.pathname.startsWith('/plugin/without')) {
       inst.use(plugin)
+    }
+
+    if (import.meta.env.VITE_VAPOR === 'true') {
+      const vue = (await import('vue')) as Record<string, any>
+
+      if (vue.vaporInteropPlugin) {
+        inst.use(vue.vaporInteropPlugin)
+      }
     }
 
     inst.mount(el)
