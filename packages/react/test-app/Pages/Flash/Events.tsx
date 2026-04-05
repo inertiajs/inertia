@@ -42,6 +42,28 @@ export default () => {
     )
   }
 
+  const visitWithErrorsAndFlash = () => {
+    router.on('flash', (event) => {
+      internalAlert('Inertia.on(flash)')
+      internalAlert(event.detail.flash)
+    })
+
+    router.post(
+      '/flash/events/with-errors',
+      {},
+      {
+        onFlash: (flash) => {
+          internalAlert('onFlash')
+          internalAlert(flash)
+        },
+        onError: (errors) => {
+          internalAlert('onError')
+          internalAlert(errors)
+        },
+      },
+    )
+  }
+
   const visitWithoutFlash = () => {
     router.on('flash', () => {
       internalAlert('Inertia.on(flash)')
@@ -82,6 +104,16 @@ export default () => {
         className="with-flash"
       >
         Visit with flash
+      </a>
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault()
+          visitWithErrorsAndFlash()
+        }}
+        className="with-errors-and-flash"
+      >
+        Visit with errors and flash
       </a>
       <a
         href="#"

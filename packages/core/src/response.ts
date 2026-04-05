@@ -87,6 +87,13 @@ export class Response {
 
     await this.setPage()
 
+    const { flash } = currentPage.get()
+
+    if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
+      fireFlashEvent(flash)
+      this.requestParams.all().onFlash(flash)
+    }
+
     const errors = currentPage.get().props.errors || {}
 
     if (Object.keys(errors).length > 0) {
@@ -103,13 +110,6 @@ export class Response {
       // We end up here other than from the prefetch cache, so we assume this response is
       // newer than the cached one and therefore flush the cache.
       router.flush(currentPage.get().url)
-    }
-
-    const { flash } = currentPage.get()
-
-    if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
-      fireFlashEvent(flash)
-      this.requestParams.all().onFlash(flash)
     }
 
     fireSuccessEvent(currentPage.get())
