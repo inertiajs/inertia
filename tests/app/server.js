@@ -2433,6 +2433,7 @@ app.get('/flash/initial', (req, res) =>
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/location-visit', (req, res) => inertia.location(res, '/flash/initial'))
 app.get('/flash/with-infinite-scroll', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']
