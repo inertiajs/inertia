@@ -10,11 +10,13 @@ const props = withDefaults(
     title?: string
     showSidebar?: boolean
     theme?: string
+    formatTitle?: (name: string) => string
   }>(),
   {
     title: 'Default Title',
     showSidebar: true,
     theme: 'light',
+    formatTitle: undefined,
   },
 )
 </script>
@@ -22,7 +24,7 @@ const props = withDefaults(
 <template>
   <div :data-theme="props.theme" class="app-layout">
     <header>
-      <h1 class="app-title">{{ props.title }}</h1>
+      <h1 class="app-title">{{ props.formatTitle ? props.formatTitle('User') : props.title }}</h1>
     </header>
     <div class="app-content">
       <aside v-if="props.showSidebar" class="sidebar">
