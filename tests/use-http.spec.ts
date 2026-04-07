@@ -130,6 +130,25 @@ test.describe('useHttp', () => {
     await expect(page.locator('#error-message')).toContainText('Server returned 500 error')
   })
 
+  test('it fires the onHttpException callback for non-422 errors', async ({ page }) => {
+    await page.goto('/use-http')
+
+    await page.click('#http-exception-button')
+
+    await expect(page.locator('#http-exception-status')).toContainText('Status: 500')
+    await expect(page.locator('#http-exception-body')).toContainText('Internal server error')
+  })
+
+  test('it fires the onNetworkError callback on network failure', async ({ page }) => {
+    await page.goto('/use-http')
+
+    await page.route('**/api/network-error-test', (route) => route.abort('failed'))
+
+    await page.click('#network-error-button')
+
+    await expect(page.locator('#network-error-message')).toBeVisible()
+  })
+
   test('it resets form to defaults', async ({ page }) => {
     await page.goto('/use-http')
 

@@ -906,8 +906,10 @@ export type UseHttpOptions<TResponse = unknown> = {
   onBefore?: () => boolean | void
   onStart?: () => void
   onProgress?: (progress: HttpProgressEvent) => void
-  onSuccess?: (response: TResponse) => void
+  onSuccess?: (response: TResponse, httpResponse: HttpResponse) => void
   onError?: (errors: Errors) => void
+  onHttpException?: (response: HttpResponse) => boolean | void
+  onNetworkError?: (error: Error) => boolean | void
   onFinish?: () => void
   onCancel?: () => void
   onCancelToken?: (cancelToken: CancelToken) => void
