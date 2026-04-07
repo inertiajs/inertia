@@ -114,7 +114,12 @@ function isNamedLayouts<T>(value: unknown, isComponent: ComponentCheck<T>): valu
 }
 
 export function isPropsObject<T>(value: unknown, isComponent: ComponentCheck<T>): boolean {
-  return isPlainObject(value) && !isComponent(value) && !hasComponentEntry(value, isComponent) && !isNamedLayouts(value, isComponent)
+  return (
+    isPlainObject(value) &&
+    !isComponent(value) &&
+    !hasComponentEntry(value, isComponent) &&
+    !isNamedLayouts(value, isComponent)
+  )
 }
 
 export function isPropsObjectOrCallback<T>(value: unknown, isComponent: ComponentCheck<T>): boolean {
