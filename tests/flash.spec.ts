@@ -133,6 +133,21 @@ test.describe('Flash Data', () => {
       expect(flashAfter).toBe('{}')
     })
 
+    test('receives flash data and fires event callbacks when there are errors', async ({ page }) => {
+      await page.getByRole('link', { name: 'Visit with errors and flash' }).click()
+
+      const messages = await waitForMessages(page, 6)
+
+      expect(messages).toEqual([
+        'Inertia.on(flash)',
+        { foo: 'bar' },
+        'onFlash',
+        { foo: 'bar' },
+        'onError',
+        { name: 'The name field is required.' },
+      ])
+    })
+
     test('does not fire flash event when no flash data is present', async ({ page }) => {
       await page.getByRole('link', { name: 'Visit without flash' }).click()
 

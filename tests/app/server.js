@@ -2423,6 +2423,13 @@ app.post('/flash/events/with-data', (req, res) =>
   }),
 )
 app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.post('/flash/events/with-errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/Events',
+    props: { errors: { name: 'The name field is required.' } },
+    flash: { foo: 'bar' },
+  }),
+)
 app.get('/flash/initial', (req, res) =>
   inertia.render(req, res, {
     component: 'Flash/InitialFlash',
