@@ -1,5 +1,5 @@
 // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
-import { FormComponentOnSubmitCompleteArguments, FormComponentSlotProps } from '@inertiajs/core'
+import { FormComponentOnSubmitCompleteArguments, FormComponentProps, FormComponentSlotProps } from '@inertiajs/core'
 
 interface UserForm {
   name: string
@@ -34,11 +34,33 @@ function handleSubmitComplete(props: FormComponentOnSubmitCompleteArguments<User
   defaults()
 }
 
+function checkResetProps() {
+  const valid: FormComponentProps<UserForm> = {
+    resetOnSuccess: ['name', 'email'],
+    resetOnError: ['name'],
+  }
+
+  const validBoolean: FormComponentProps<UserForm> = {
+    resetOnSuccess: true,
+    resetOnError: false,
+  }
+
+  const invalid: FormComponentProps<UserForm> = {
+    // @ts-expect-error - 'invalid_field' should not be a valid key
+    resetOnSuccess: ['invalid_field'],
+    // @ts-expect-error - 'another_invalid' should not be a valid key
+    resetOnError: ['another_invalid'],
+  }
+
+  return { valid, validBoolean, invalid }
+}
+
 export default () => {
   return (
     <div>
       {renderFormContent.toString()}
       {handleSubmitComplete.toString()}
+      {checkResetProps.toString()}
     </div>
   )
 }
