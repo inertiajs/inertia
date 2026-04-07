@@ -15,6 +15,7 @@ export { HttpCancelledError, HttpError, HttpNetworkError, HttpResponseError } fr
 export { default as useInfiniteScroll } from './infiniteScroll'
 export {
   createLayoutPropsStore,
+  isPropsObjectOrCallback,
   isPropsObject,
   normalizeLayouts,
   type LayoutCallbackReturn,

@@ -2,6 +2,7 @@ import {
   createHeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  isPropsObjectOrCallback,
   isPropsObject,
   normalizeLayouts,
   Page,
@@ -168,7 +169,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
           return (layoutValue as LayoutFunction)(child)
         }
 
-        if (isPropsObject(result, isComponent)) {
+        if (isPropsObjectOrCallback(result, isComponent)) {
           effectiveLayout = defaultLayout?.(current.page.component, current.page)
           callbackProps = result as Record<string, unknown>
         } else {

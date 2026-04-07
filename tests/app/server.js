@@ -893,6 +893,8 @@ app.get('/layout-props/callback-default', (req, res) => inertia.render(req, res,
 app.get('/layout-props/callback-static', (req, res) => inertia.render(req, res))
 app.get('/layout-props/static-object', (req, res) => inertia.render(req, res))
 app.get('/layout-props/callback-function-prop', (req, res) => inertia.render(req, res))
+app.get('/layout-props/callback-all-function-props', (req, res) => inertia.render(req, res))
+app.get('/layout-props/callback-component-prop', (req, res) => inertia.render(req, res))
 
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),

@@ -3,6 +3,7 @@ import {
   HeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
+  isPropsObjectOrCallback,
   isPropsObject,
   normalizeLayouts,
   Page,
@@ -176,7 +177,7 @@ const App: InertiaApp = defineComponent({
         ) {
           const result = (layoutValue as Function)(page.value!.props)
 
-          if (isPropsObject(result, isComponent)) {
+          if (isPropsObjectOrCallback(result, isComponent)) {
             effectiveLayout = defaultLayout?.(page.value!.component, page.value!)
             callbackProps = result as Record<string, unknown>
           } else {
