@@ -761,8 +761,8 @@ export type FormComponentProps<TForm = Record<string, FormDataConvertible>> = Pa
   options?: FormComponentOptions
   onSubmitComplete?: (props: FormComponentOnSubmitCompleteArguments) => void
   disableWhileProcessing?: boolean
-  resetOnSuccess?: boolean | FormDataKeys<TForm>[]
-  resetOnError?: boolean | FormDataKeys<TForm>[]
+  resetOnSuccess?: boolean | NoInfer<FormDataKeys<TForm>>[]
+  resetOnError?: boolean | NoInfer<FormDataKeys<TForm>>[]
   setDefaultsOnSuccess?: boolean
   validateFiles?: boolean
   validationTimeout?: number
