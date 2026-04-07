@@ -34,12 +34,7 @@ export default () => {
         }}
       </Form>
 
-      <Form<UserForm>
-        method="post"
-        action="/form-component/types"
-        resetOnSuccess={true}
-        resetOnError={false}
-      >
+      <Form<UserForm> method="post" action="/form-component/types" resetOnSuccess={true} resetOnError={false}>
         {() => <div>Boolean reset</div>}
       </Form>
 

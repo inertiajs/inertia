@@ -12,8 +12,10 @@
 
 <TypedForm method="post" action="/form-component/types" resetOnSuccess={['name', 'email']} resetOnError={['name']}>
   {#snippet children({ errors, getData, clearErrors, reset })}
-    {errors.name} {errors.email}
-    {getData().name} {getData().email}
+    {errors.name}
+    {errors.email}
+    {getData().name}
+    {getData().email}
     {clearErrors('name', 'email')}
     {reset('name')}
     {reset('email')}

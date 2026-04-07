@@ -19,8 +19,7 @@ const TypedForm = createForm<UserForm>()
       :reset-on-error="['name']"
     >
       <template #default="{ errors, getData, clearErrors, reset }">
-        {{ errors.name }} {{ errors.email }}
-        {{ getData().name }} {{ getData().email }}
+        {{ errors.name }} {{ errors.email }} {{ getData().name }} {{ getData().email }}
         {{ clearErrors('name', 'email') }}
         {{ reset('name') }}
         {{ reset('email') }}
