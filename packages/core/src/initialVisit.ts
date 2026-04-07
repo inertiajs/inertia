@@ -78,7 +78,7 @@ export class InitialVisit {
               Scroll.restore(scrollRegions)
             }
 
-            fireNavigateEvent(currentPage.get())
+            this.fireInitialEvents()
           })
       })
       .catch(() => {
@@ -100,15 +100,17 @@ export class InitialVisit {
         Scroll.scrollToAnchor()
       }
 
-      const page = currentPage.get()
-
-      fireNavigateEvent(page)
-
-      const flash = page.flash
-
-      if (Object.keys(flash).length > 0) {
-        queueMicrotask(() => fireFlashEvent(flash))
-      }
+      this.fireInitialEvents()
     })
+  }
+
+  protected static fireInitialEvents(): void {
+    const page = currentPage.get()
+
+    fireNavigateEvent(page)
+
+    if (Object.keys(page.flash).length > 0) {
+      queueMicrotask(() => fireFlashEvent(page.flash))
+    }
   }
 }

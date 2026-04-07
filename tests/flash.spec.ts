@@ -20,6 +20,17 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash-events')).toContainText('Hello from server')
   })
 
+  test('fires flash event after a location visit triggers a full page reload', async ({ page }) => {
+    await page.goto('/flash/initial')
+    await expect(page.locator('#flash-events')).toContainText('Hello from server')
+
+    await page.evaluate(() => (window as any).testing.Inertia.visit('/flash/location-visit'))
+    await page.waitForURL('**/flash/initial')
+
+    await expect(page.locator('#flash')).toContainText('Hello from server')
+    await expect(page.locator('#flash-events')).toContainText('Hello from server')
+  })
+
   test('preserves flash data after deferred props load and does not fire event again', async ({ page }) => {
     // Set up response listener before navigating to catch the deferred request
     const deferredResponse = page.waitForResponse((res) => res.url().includes('/flash/with-deferred'))
