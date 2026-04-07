@@ -30,8 +30,24 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
+      - name: Get Playwright Version
+        id: playwright-version
+        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Browsers
-        run: pnpm playwright install chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm playwright install --with-deps chromium
+
+      - name: Install Playwright Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run Playwright Tests
         run: pnpm test:${{ matrix.adapter }}
@@ -72,8 +88,24 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter ./packages/core --filter ./packages/${{ matrix.adapter }}* build
 
+      - name: Get Playwright Version
+        id: playwright-version
+        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-${{ steps.playwright-version.outputs.version }}
+
       - name: Install Playwright Browsers
-        run: pnpm playwright install chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm playwright install --with-deps chromium
+
+      - name: Install Playwright Dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run Playwright SSR Tests
         run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
