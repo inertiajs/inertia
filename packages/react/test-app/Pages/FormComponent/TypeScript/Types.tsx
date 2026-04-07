@@ -17,6 +17,9 @@ export default () => {
         onSubmitComplete={({ reset }) => {
           reset('name')
           reset('email')
+
+          // @ts-expect-error - 'invalid_field' should not be a valid key
+          reset('invalid_field')
         }}
       >
         {({ errors, getData, clearErrors }) => {
@@ -34,12 +37,7 @@ export default () => {
         }}
       </Form>
 
-      <Form<UserForm>
-        method="post"
-        action="/form-component/types"
-        resetOnSuccess={true}
-        resetOnError={false}
-      >
+      <Form<UserForm> method="post" action="/form-component/types" resetOnSuccess={true} resetOnError={false}>
         {() => <div>Boolean reset</div>}
       </Form>
 

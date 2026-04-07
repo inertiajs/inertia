@@ -1,5 +1,6 @@
 <!-- This component is used for checking the TypeScript implementation; there is no Playwright test depending on it. -->
 <script setup lang="ts">
+import type { FormComponentOnSubmitCompleteArguments } from '@inertiajs/core'
 import { createForm } from '@inertiajs/vue3'
 
 interface UserForm {
@@ -8,6 +9,11 @@ interface UserForm {
 }
 
 const TypedForm = createForm<UserForm>()
+
+function handleSubmitComplete({ reset }: FormComponentOnSubmitCompleteArguments<UserForm>) {
+  reset('name')
+  reset('email')
+}
 </script>
 
 <template>
@@ -17,10 +23,10 @@ const TypedForm = createForm<UserForm>()
       action="/form-component/types"
       :reset-on-success="['name', 'email']"
       :reset-on-error="['name']"
+      :on-submit-complete="handleSubmitComplete"
     >
       <template #default="{ errors, getData, clearErrors, reset }">
-        {{ errors.name }} {{ errors.email }}
-        {{ getData().name }} {{ getData().email }}
+        {{ errors.name }} {{ errors.email }} {{ getData().name }} {{ getData().email }}
         {{ clearErrors('name', 'email') }}
         {{ reset('name') }}
         {{ reset('email') }}
