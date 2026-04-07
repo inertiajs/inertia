@@ -759,10 +759,10 @@ export type FormComponentProps<TForm = Record<string, FormDataConvertible>> = Pa
   transform?: (data: TForm) => Record<string, FormDataConvertible>
   optimistic?: FormComponentOptimisticCallback<Page<SharedPageProps>['props'], TForm>
   options?: FormComponentOptions
-  onSubmitComplete?: (props: FormComponentOnSubmitCompleteArguments) => void
+  onSubmitComplete?: (props: FormComponentOnSubmitCompleteArguments<TForm & object>) => void
   disableWhileProcessing?: boolean
-  resetOnSuccess?: boolean | string[]
-  resetOnError?: boolean | string[]
+  resetOnSuccess?: boolean | NoInfer<FormDataKeys<TForm>>[]
+  resetOnError?: boolean | NoInfer<FormDataKeys<TForm>>[]
   setDefaultsOnSuccess?: boolean
   validateFiles?: boolean
   validationTimeout?: number
