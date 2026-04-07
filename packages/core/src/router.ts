@@ -631,6 +631,19 @@ export class Router {
       ? defaultVisitOptionsCallback(href.toString(), cloneDeep(options)) || {}
       : {}
 
+    // Strip explicit undefined values so they don't overwrite defaults during spread.
+    // TypeScript's Partial<> allows { only: undefined } which would overwrite the
+    // default [] and later crash on .length access (see #3018).
+    const stripUndefined = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
+      const result: Partial<T> = {}
+      for (const key of Object.keys(obj) as (keyof T)[]) {
+        if (obj[key] !== undefined) {
+          result[key] = obj[key]
+        }
+      }
+      return result
+    }
+
     const mergedOptions: Visit = {
       method: 'get',
       data: {},
@@ -654,8 +667,8 @@ export class Router {
       viewTransition: false,
       component: null,
       pageProps: null,
-      ...options,
-      ...configuredOptions,
+      ...stripUndefined(options),
+      ...stripUndefined(configuredOptions),
     }
 
     const [url, _data] = transformUrlAndData(
