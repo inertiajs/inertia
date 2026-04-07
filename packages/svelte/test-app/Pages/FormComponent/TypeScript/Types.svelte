@@ -1,6 +1,10 @@
 <!-- This component is used for checking the TypeScript implementation; there is no Playwright test depending on it. -->
 <script lang="ts">
-  import type { FormComponentProps, FormComponentSlotProps, FormComponentOnSubmitCompleteArguments } from '@inertiajs/core'
+  import type {
+    FormComponentProps,
+    FormComponentSlotProps,
+    FormComponentOnSubmitCompleteArguments,
+  } from '@inertiajs/core'
 
   interface UserForm {
     name: string
