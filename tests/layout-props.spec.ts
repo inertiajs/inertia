@@ -138,6 +138,27 @@ test.describe('layout props', () => {
     await expect(page.locator('.sidebar')).not.toBeVisible()
   })
 
+  test('it supports a layout callback that returns props containing a function value', async ({ page }) => {
+    await page.goto('/layout-props/callback-function-prop?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Function Prop Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
+  test('it supports a layout callback that returns only function-valued props', async ({ page }) => {
+    await page.goto('/layout-props/callback-all-function-props?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Profile: User')
+    await expect(page.locator('.sidebar')).toBeVisible()
+  })
+
+  test('it treats a component key as a regular prop when its value is not a component', async ({ page }) => {
+    await page.goto('/layout-props/callback-component-prop?withDefaultAppLayout')
+
+    await expect(page.locator('.app-title')).toHaveText('Component Prop Title')
+    await expect(page.locator('.sidebar')).not.toBeVisible()
+  })
+
   test('it supports a static props object as layout and uses the default layout', async ({ page }) => {
     await page.goto('/layout-props/static-object?withDefaultAppLayout')
 
