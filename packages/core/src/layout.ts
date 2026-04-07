@@ -103,7 +103,7 @@ function isNamedLayouts<T>(value: unknown, isComponent: ComponentCheck<T>): valu
   if (!isPlainObject(value) || isComponent(value) || 'component' in value) {
     return false
   }
-  return Object.values(value).some(
+  return Object.values(value).every(
     (v) =>
       isComponent(v) || (Array.isArray(v) && isComponent(v[0])) || (hasComponentKey(v) && isComponent(v.component)),
   )
