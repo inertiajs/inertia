@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.2...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.0.3...3.x)
 
 - Nothing yet
+
+## [v3.0.3](https://github.com/inertiajs/inertia/compare/v3.0.2...v3.0.3) - 2026-04-07
+
+### What's Changed
+
+* [3.x] Bump Vite and Vitest by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3046
+* [3.x] Update TSConfig and bump CI actions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3047
+* [3.x] Infer form data keys in `resetOnSuccess` and `resetOnError` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3048
+* [3.x] Fix layout props callback misclassifying function-valued props as named layouts by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3049
+* [3.x] Fix flash event not firing when response contains errors by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/3038
+* [3.x] Fire flash event after full reload by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/3041
+* [3.x] Improve Playwright CI cache by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3051
+* [3.x] Add `onHttpException`, `onNetworkError`, and response to `onSuccess` in `useHttp` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3050
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.0.2...v3.0.3
 
 ## [v3.0.2](https://github.com/inertiajs/inertia/compare/v3.0.1...v3.0.2) - 2026-04-02
 
