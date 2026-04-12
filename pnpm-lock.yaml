@@ -41,14 +41,14 @@ importers:
         version: 1.45.1
       laravel-precognition:
         specifier: ^2.0.0
-        version: 2.0.0(axios@1.13.5)
+        version: 2.0.0(axios@1.15.0)
     devDependencies:
       '@types/node':
         specifier: ^24.10.13
         version: 24.10.13
       axios:
-        specifier: ^1.13.5
-        version: 1.13.5
+        specifier: ^1.15.0
+        version: 1.15.0
       es-check:
         specifier: ^9.6.4
         version: 9.6.4
@@ -75,7 +75,7 @@ importers:
         version: 1.45.1
       laravel-precognition:
         specifier: ^2.0.0
-        version: 2.0.0(axios@1.13.5)
+        version: 2.0.0(axios@1.15.0)
     devDependencies:
       '@types/react':
         specifier: ^19.2.14
@@ -84,8 +84,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
       axios:
-        specifier: ^1.13.5
-        version: 1.13.5
+        specifier: ^1.15.0
+        version: 1.15.0
       es-check:
         specifier: ^9.6.1
         version: 9.6.1
@@ -176,7 +176,7 @@ importers:
         version: 1.45.1
       laravel-precognition:
         specifier: ^2.0.0
-        version: 2.0.0(axios@1.13.5)
+        version: 2.0.0(axios@1.15.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^7.0.1
@@ -191,8 +191,8 @@ importers:
         specifier: ^7.0.0
         version: 7.0.0(svelte@5.53.5)(vite@8.0.5(@types/node@25.0.9)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.3))
       axios:
-        specifier: ^1.13.5
-        version: 1.13.5
+        specifier: ^1.15.0
+        version: 1.15.0
       es-check:
         specifier: 9.5.3
         version: 9.5.3
@@ -311,11 +311,11 @@ importers:
         version: 1.45.1
       laravel-precognition:
         specifier: ^2.0.0
-        version: 2.0.0(axios@1.13.5)
+        version: 2.0.0(axios@1.15.0)
     devDependencies:
       axios:
-        specifier: ^1.13.5
-        version: 1.13.5
+        specifier: ^1.15.0
+        version: 1.15.0
       es-check:
         specifier: ^9.6.1
         version: 9.6.1
@@ -1457,8 +1457,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  axios@1.13.5:
-    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
+  axios@1.15.0:
+    resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -2765,8 +2765,9 @@ packages:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
 
-  proxy-from-env@1.1.0:
-    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
+  proxy-from-env@2.1.0:
+    resolution: {integrity: sha512-cJ+oHTW1VAEa8cJslgmUZrc+sjRKgAKl3Zyse6+PV38hZe/V6Z14TbCuXcan9F9ghlz4QrFr2c92TNF82UkYHA==}
+    engines: {node: '>=10'}
 
   pstree.remy@1.1.8:
     resolution: {integrity: sha512-77DZwxQmxKnu3aR542U+X8FypNzbfJ+C5XQDk3uWjWxn6151aIMGthWYRXTqT1E5oJvg+ljaa2OJi+VfvCOQ8w==}
@@ -4356,11 +4357,11 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios@1.13.5:
+  axios@1.15.0:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5
-      proxy-from-env: 1.1.0
+      proxy-from-env: 2.1.0
     transitivePeerDependencies:
       - debug
 
@@ -5400,11 +5401,11 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@2.0.0(axios@1.13.5):
+  laravel-precognition@2.0.0(axios@1.15.0):
     dependencies:
       es-toolkit: 1.45.1
     optionalDependencies:
-      axios: 1.13.5
+      axios: 1.15.0
 
   laravel-vite-plugin@3.0.0(vite@8.0.5(@types/node@25.0.9)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.3)):
     dependencies:
@@ -5753,7 +5754,7 @@ snapshots:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
-  proxy-from-env@1.1.0: {}
+  proxy-from-env@2.1.0: {}
 
   pstree.remy@1.1.8: {}
 
