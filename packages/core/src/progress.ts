@@ -90,9 +90,10 @@ export default function setupProgress({
   delay = 250,
   color = '#29d',
   includeCSS = true,
+  nonce,
   showSpinner = false,
   popover = null,
 }: ProgressOptions = {}): void {
   addEventListeners(delay)
-  ProgressComponent.configure({ showSpinner, includeCSS, color, popover })
+  ProgressComponent.configure({ showSpinner, includeCSS, nonce, color, popover })
 }
