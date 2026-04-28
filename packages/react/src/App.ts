@@ -79,6 +79,18 @@ const emptySnapshot = {
   named: {} as Record<string, Record<string, unknown>>,
 }
 
+const RENDER_FN_MARKER = Symbol('inertia.renderFn')
+
+type RenderLayoutResult = { readonly fn: LayoutFunction; readonly [RENDER_FN_MARKER]: true }
+
+export function renderLayout(fn: LayoutFunction): RenderLayoutResult {
+  return { fn, [RENDER_FN_MARKER]: true }
+}
+
+function isRenderLayoutResult(value: unknown): value is RenderLayoutResult {
+  return typeof value === 'object' && value !== null && (value as any)[RENDER_FN_MARKER] === true
+}
+
 export default function App<SharedProps extends PageProps = PageProps>({
   children,
   initialPage,
@@ -162,7 +174,9 @@ export default function App<SharedProps extends PageProps = PageProps>({
       let callbackProps: Record<string, unknown> | null = null
       const layoutValue = Component.layout
 
-      if (isLayoutResolver(layoutValue)) {
+      if (isRenderLayoutResult(layoutValue)) {
+        return layoutValue.fn(child)
+      } else if (isLayoutResolver(layoutValue)) {
         const result = (layoutValue as Function)(props)
 
         if (isValidElement(result)) {

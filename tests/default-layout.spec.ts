@@ -46,6 +46,35 @@ test('it supports anonymous arrow functions as layout components', async ({ page
   await expect(page.locator('#text')).toHaveText('DefaultLayout/Index')
 })
 
+test.describe('react layouts', () => {
+  test.skip(process.env.PACKAGE !== 'react', 'React-only')
+
+  test('it renders arrow function components assigned directly to Page.layout', async ({ page }) => {
+    await page.goto('/default-layout/with-arrow-component-layout')
+
+    await expect(page.locator('#arrow-layout')).toBeVisible()
+    await expect(page.getByText('Arrow Layout')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithArrowComponentLayout')
+  })
+
+  test('it supports renderLayout() for arrow function render functions', async ({ page }) => {
+    await page.goto('/default-layout/with-render-layout')
+
+    await expect(page.locator('#page-layout')).toBeVisible()
+    await expect(page.getByText('Page Layout')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithRenderLayout')
+  })
+
+  test('it supports renderLayout() with page.props access', async ({ page }) => {
+    await page.goto('/default-layout/with-render-layout-page-props')
+
+    await expect(page.locator('#props-layout')).toBeVisible()
+    await expect(page.locator('#props-layout')).toHaveAttribute('data-title', 'Hello from Props')
+    await expect(page.locator('#layout-title')).toHaveText('Hello from Props')
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithRenderLayoutPageProps')
+  })
+})
+
 test('it supports a callback that conditionally returns a layout', async ({ page }) => {
   await page.goto('/default-layout?withDefaultLayoutCallback')
 

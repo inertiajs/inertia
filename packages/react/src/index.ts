@@ -2,7 +2,7 @@ import { config as coreConfig } from '@inertiajs/core'
 import type { ReactInertiaAppConfig } from './types'
 
 export { http, progress, router } from '@inertiajs/core'
-export { default as App } from './App'
+export { default as App, renderLayout } from './App'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
 export { default as Form, useFormContext } from './Form'

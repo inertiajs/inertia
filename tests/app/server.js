@@ -888,6 +888,9 @@ app.get('/persistent-layouts/shorthand/nested/page-a', (req, res) =>
 )
 
 app.get('/default-layout', (req, res) => inertia.render(req, res, { component: 'DefaultLayout/Index' }))
+app.get('/default-layout/with-render-layout-page-props', (req, res) =>
+  inertia.render(req, res, { component: 'DefaultLayout/WithRenderLayoutPageProps', props: { title: 'Hello from Props' } }),
+)
 app.get('/layout-props/callback', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
 app.get('/layout-props/callback-default', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
 app.get('/layout-props/callback-static', (req, res) => inertia.render(req, res))
