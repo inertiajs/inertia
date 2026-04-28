@@ -7,11 +7,15 @@ const WithRenderLayoutPageProps = ({ title }: { title: string }) => (
   </div>
 )
 
-WithRenderLayoutPageProps.layout = renderLayout((page: React.ReactElement<{ title: string }>) => (
-  <div id="props-layout" data-title={page.props.title}>
-    <span id="layout-title">{page.props.title}</span>
-    {page}
-  </div>
-))
+WithRenderLayoutPageProps.layout = renderLayout((page) => {
+  const { title } = (page as React.ReactElement<{ title: string }>).props
+
+  return (
+    <div id="props-layout" data-title={title}>
+      <span id="layout-title">{title}</span>
+      {page}
+    </div>
+  )
+})
 
 export default WithRenderLayoutPageProps
