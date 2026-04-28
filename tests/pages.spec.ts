@@ -89,4 +89,40 @@ test.describe('persistent layouts', () => {
     await expect(nestedLayoutProps.foo).toBeDefined()
     await expect(nestedLayoutProps.baz).toBeDefined()
   })
+
+  test.describe('React-only', () => {
+    test.skip(process.env.PACKAGE !== 'react', 'React-only test')
+
+    test('can have a persistent layout (array of components)', async ({ page }) => {
+      await page.goto('/persistent-layouts/array-arrow/simple/page-a')
+
+      const layoutAId = await page.evaluate(() => (window as any)._inertia_layout_id)
+      await expect(layoutAId).not.toBeNull()
+
+      await expect(page.getByText('Simple Persistent Layout - Page A')).toBeVisible()
+      await page.getByRole('link', { name: 'Page B' }).click()
+
+      await expect(page).toHaveURL('/persistent-layouts/array-arrow/simple/page-b')
+      await expect(page.getByText('Simple Persistent Layout - Page B')).toBeVisible()
+
+      const layoutBId = await page.evaluate(() => (window as any)._inertia_layout_id)
+      await expect(layoutBId).toEqual(layoutAId)
+    })
+
+    test('can have a persistent layout (function declaration component)', async ({ page }) => {
+      await page.goto('/persistent-layouts/function-declaration/simple/page-a')
+
+      const layoutAId = await page.evaluate(() => (window as any)._inertia_layout_id)
+      await expect(layoutAId).not.toBeNull()
+
+      await expect(page.getByText('Simple Persistent Layout - Page A')).toBeVisible()
+      await page.getByRole('link', { name: 'Page B' }).click()
+
+      await expect(page).toHaveURL('/persistent-layouts/function-declaration/simple/page-b')
+      await expect(page.getByText('Simple Persistent Layout - Page B')).toBeVisible()
+
+      const layoutBId = await page.evaluate(() => (window as any)._inertia_layout_id)
+      await expect(layoutBId).toEqual(layoutAId)
+    })
+  })
 })
