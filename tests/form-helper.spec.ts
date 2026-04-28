@@ -32,6 +32,30 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test.describe('SetData then post', () => {
+    test('submits latest data when setData and post are called synchronously', async ({ page }) => {
+      await page.goto('/form-helper/set-data-then-post')
+      await page.getByRole('button', { name: 'Set and POST', exact: true }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.code).toEqual('123456')
+    })
+
+    test('submits reset data when reset and post are called synchronously', async ({ page }) => {
+      await page.goto('/form-helper/set-data-then-post')
+
+      await page.getByRole('button', { name: 'Dirty' }).click()
+      await expect(page.locator('#current-code')).toHaveText('dirty')
+
+      await page.getByRole('button', { name: 'Reset and POST' }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.code).toEqual('initial')
+    })
+  })
+
   test.describe('Transform', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
