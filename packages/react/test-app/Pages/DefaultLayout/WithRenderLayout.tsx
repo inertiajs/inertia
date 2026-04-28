@@ -1,5 +1,5 @@
-import { Link, renderLayout } from '@inertiajs/react'
 import PageLayout from '@/Layouts/PageLayout'
+import { Link, renderLayout } from '@inertiajs/react'
 
 const WithRenderLayout = () => (
   <div>
