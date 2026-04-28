@@ -71,6 +71,43 @@ function containsRef(result: unknown, target: unknown): boolean {
   return false
 }
 
+type LayoutType = 'render-fn' | 'component' | 'resolver'
+
+const layoutTypeCache = new WeakMap<Function, LayoutType>()
+
+export function classifyLayout(component: ReactComponent): void {
+  const fn = component.layout
+
+  if (!fn || !isLayoutResolver(fn as Function) || layoutTypeCache.has(fn as Function)) {
+    return
+  }
+
+  const probe = createElement('div')
+
+  try {
+    const probeResult = (fn as Function)(probe)
+
+    if (isValidElement(probeResult) && containsRef(probeResult, probe)) {
+      layoutTypeCache.set(fn as Function, 'render-fn')
+      return
+    }
+
+    if (isValidElement(probeResult)) {
+      layoutTypeCache.set(fn as Function, 'component')
+      return
+    }
+
+    // Not a React element — could be resolver or zero-arg component returning null.
+    // Call with empty props to distinguish: components return React elements, resolvers return plain objects.
+    const resolverProbeResult = (fn as Function)({})
+    layoutTypeCache.set(fn as Function, isValidElement(resolverProbeResult) ? 'component' : 'resolver')
+  } catch {
+    // Probe threw — layout function uses hooks which are only valid inside a React render.
+    // That means it's an arrow function component, not a render function.
+    layoutTypeCache.set(fn as Function, 'component')
+  }
+}
+
 let currentIsInitialPage = true
 let routerIsInitialized = false
 let swapComponent: PageHandler<ReactComponent> = async () => {
@@ -153,6 +190,8 @@ export default function App<SharedProps extends PageProps = PageProps>({
         return
       }
 
+      classifyLayout(component)
+
       if (!preserveState) {
         resetLayoutProps()
       }
@@ -187,21 +226,25 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const layoutValue = Component.layout
 
       if (isLayoutResolver(layoutValue)) {
-        const renderResult = (layoutValue as LayoutFunction)(child)
+        const layoutType = layoutTypeCache.get(layoutValue as Function)
 
-        if (isValidElement(renderResult) && containsRef(renderResult, child)) {
-          return renderResult
+        if (layoutType === 'render-fn') {
+          return (layoutValue as LayoutFunction)(child)
         }
 
-        const resolverResult = (layoutValue as Function)(props)
-
-        if (isValidElement(resolverResult)) {
+        if (layoutType === 'component') {
           effectiveLayout = [layoutValue]
-        } else if (isPropsObjectOrCallback(resolverResult, isComponent)) {
-          effectiveLayout = defaultLayout?.(current.page.component, current.page)
-          callbackProps = resolverResult as Record<string, unknown>
         } else {
-          effectiveLayout = resolverResult
+          const resolverResult = (layoutValue as Function)(props)
+
+          if (isValidElement(resolverResult)) {
+            effectiveLayout = [layoutValue]
+          } else if (isPropsObjectOrCallback(resolverResult, isComponent)) {
+            effectiveLayout = defaultLayout?.(current.page.component, current.page)
+            callbackProps = resolverResult as Record<string, unknown>
+          } else {
+            effectiveLayout = resolverResult
+          }
         }
       } else if (isPropsObject(layoutValue, isComponent)) {
         effectiveLayout = defaultLayout?.(current.page.component, current.page)

@@ -15,7 +15,7 @@ import {
 import { createElement, ReactElement, StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
-import App, { InertiaAppProps, type InertiaApp } from './App'
+import App, { classifyLayout, InertiaAppProps, type InertiaApp } from './App'
 import { config } from './index'
 import { ReactComponent, ReactInertiaAppConfig } from './types'
 
@@ -132,6 +132,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
       const initialComponent = await resolveComponent(page.component, page)
 
+      classifyLayout(initialComponent)
+
       const props: InertiaAppProps<SharedProps> = {
         initialPage: page,
         initialComponent,
@@ -172,6 +174,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
+    classifyLayout(initialComponent)
+
     const props: InertiaAppProps<SharedProps> = {
       initialPage,
       initialComponent,

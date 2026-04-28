@@ -51,6 +51,22 @@ test('it supports a callback that conditionally returns a layout', async ({ page
 test.describe('react layouts', () => {
   test.skip(process.env.PACKAGE !== 'react', 'React-only test')
 
+  test('it renders arrow function components with hooks and survives navigation away', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+
+    await page.goto('/default-layout/with-hook-layout')
+
+    await expect(page.locator('#hook-layout')).toBeVisible()
+    await expect(page.getByText('Hook Layout')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithHookLayout')
+
+    await page.getByRole('link', { name: 'Navigate Away' }).click()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/Index')
+
+    expect(errors).toHaveLength(0)
+  })
+
   test('it supports anonymous arrow functions as layout components', async ({ page }) => {
     await page.goto('/default-layout?withAnonymousDefaultLayout')
 
