@@ -36,16 +36,6 @@ test('it applies the default layout after navigating to a page without its own l
   await expect(page.locator('#page-layout')).not.toBeVisible()
 })
 
-test('it supports anonymous arrow functions as layout components', async ({ page }) => {
-  test.skip(process.env.PACKAGE !== 'react', 'React-only test')
-
-  await page.goto('/default-layout?withAnonymousDefaultLayout')
-
-  await expect(page.locator('#default-layout')).toBeVisible()
-  await expect(page.getByText('Default Layout')).toBeVisible()
-  await expect(page.locator('#text')).toHaveText('DefaultLayout/Index')
-})
-
 test('it supports a callback that conditionally returns a layout', async ({ page }) => {
   await page.goto('/default-layout?withDefaultLayoutCallback')
 
@@ -56,4 +46,47 @@ test('it supports a callback that conditionally returns a layout', async ({ page
   await expect(page.locator('#text')).toHaveText('DefaultLayout/CallbackExcluded')
 
   await expect(page.locator('#default-layout')).not.toBeVisible()
+})
+
+test.describe('react layouts', () => {
+  test.skip(process.env.PACKAGE !== 'react', 'React-only test')
+
+  test('it supports anonymous arrow functions as layout components', async ({ page }) => {
+    await page.goto('/default-layout?withAnonymousDefaultLayout')
+
+    await expect(page.locator('#default-layout')).toBeVisible()
+    await expect(page.getByText('Default Layout')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/Index')
+  })
+
+  test('it renders arrow function components assigned directly to Page.layout', async ({ page }) => {
+    await page.goto('/default-layout/with-arrow-function-layout')
+
+    await expect(page.locator('#page-layout')).toBeVisible()
+    await expect(page.getByText('Page Layout')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithArrowFunctionLayout')
+  })
+
+  test('it supports render functions with sibling elements at depth 1', async ({ page }) => {
+    await page.goto('/default-layout/with-sibling-render-function')
+
+    await expect(page.locator('#render-layout')).toBeVisible()
+    await expect(page.locator('#layout-sibling')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithSiblingRenderFunction')
+  })
+
+  test('it supports render functions with sibling elements nested at depth 2', async ({ page }) => {
+    await page.goto('/default-layout/with-nested-sibling-render-function')
+
+    await expect(page.locator('#outer-layout')).toBeVisible()
+    await expect(page.locator('#inner-layout')).toBeVisible()
+    await expect(page.locator('#layout-sibling')).toBeVisible()
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithNestedSiblingRenderFunction')
+  })
+
+  test('it supports render functions that return the page directly', async ({ page }) => {
+    await page.goto('/default-layout/with-passthrough-render-function')
+
+    await expect(page.locator('#text')).toHaveText('DefaultLayout/WithPassthroughRenderFunction')
+  })
 })

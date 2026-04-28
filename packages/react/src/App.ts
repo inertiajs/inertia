@@ -47,6 +47,30 @@ function isLayoutResolver(value: unknown): boolean {
   )
 }
 
+function containsRef(result: unknown, target: unknown): boolean {
+  if (result === target) {
+    return true
+  }
+
+  let node: unknown = result
+
+  while (isValidElement(node)) {
+    const { children } = (node as any).props ?? {}
+
+    if (children === target) {
+      return true
+    }
+
+    if (Array.isArray(children)) {
+      return children.includes(target)
+    }
+
+    node = children
+  }
+
+  return false
+}
+
 let currentIsInitialPage = true
 let routerIsInitialized = false
 let swapComponent: PageHandler<ReactComponent> = async () => {
@@ -163,17 +187,21 @@ export default function App<SharedProps extends PageProps = PageProps>({
       const layoutValue = Component.layout
 
       if (isLayoutResolver(layoutValue)) {
-        const result = (layoutValue as Function)(props)
+        const renderResult = (layoutValue as LayoutFunction)(child)
 
-        if (isValidElement(result)) {
-          return (layoutValue as LayoutFunction)(child)
+        if (isValidElement(renderResult) && containsRef(renderResult, child)) {
+          return renderResult
         }
 
-        if (isPropsObjectOrCallback(result, isComponent)) {
+        const resolverResult = (layoutValue as Function)(props)
+
+        if (isValidElement(resolverResult)) {
+          effectiveLayout = [layoutValue]
+        } else if (isPropsObjectOrCallback(resolverResult, isComponent)) {
           effectiveLayout = defaultLayout?.(current.page.component, current.page)
-          callbackProps = result as Record<string, unknown>
+          callbackProps = resolverResult as Record<string, unknown>
         } else {
-          effectiveLayout = result
+          effectiveLayout = resolverResult
         }
       } else if (isPropsObject(layoutValue, isComponent)) {
         effectiveLayout = defaultLayout?.(current.page.component, current.page)
