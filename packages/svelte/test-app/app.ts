@@ -75,7 +75,11 @@ createInertiaApp({
   ...(params.get('popover') === 'false' && {
     progress: { popover: false },
   }),
-  ...(params.has('nonce') && {
-    progress: { nonce: 'test-nonce' },
+  ...(params.get('nonce') === 'default' && {
+    progress: { nonce: true },
   }),
+  ...(params.has('nonce') &&
+    params.get('nonce') !== 'default' && {
+      progress: { nonce: 'test-nonce' },
+    }),
 })
