@@ -21,8 +21,7 @@ import {
 } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
-import { useCallback, useMemo, useRef, useState } from 'react'
-import { useIsomorphicLayoutEffect } from './react'
+import { useCallback, useMemo, useRef } from 'react'
 import useFormState, { SetDataAction, SetDataByKeyValuePair, SetDataByMethod, SetDataByObject } from './useFormState'
 import useRemember from './useRemember'
 
@@ -152,36 +151,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     useDataState,
     useErrorsState,
   })
-
-  // Handle dataAsDefaults pattern for setDefaults synchronization
-  // When setDefaults() is called without args immediately after setData(),
-  // dataRef.current may be stale. This layout effect ensures the current
-  // data state is used as defaults.
-  const [dataAsDefaults, setDataAsDefaults] = useState(false)
-
-  const originalSetDefaults = baseForm.setDefaults
-  baseForm.setDefaults = useCallback(
-    (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
-      if (typeof fieldOrFields === 'undefined') {
-        setDataAsDefaults(true)
-      }
-
-      return originalSetDefaults(fieldOrFields as any, maybeValue as any)
-    },
-    [originalSetDefaults],
-  ) as typeof baseForm.setDefaults
-
-  useIsomorphicLayoutEffect(() => {
-    if (!dataAsDefaults) {
-      return
-    }
-
-    if (baseForm.isDirty) {
-      setDefaultsState(baseForm.data)
-    }
-
-    setDataAsDefaults(false)
-  }, [dataAsDefaults])
 
   const submit = useCallback(
     (...args: UseFormSubmitArguments) => {

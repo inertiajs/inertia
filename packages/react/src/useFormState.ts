@@ -159,17 +159,25 @@ export default function useFormState<TForm extends object>(
     }
   }, [])
 
+  const commitData = useCallback(
+    (next: TForm) => {
+      dataRef.current = next
+      setData(next)
+    },
+    [setData],
+  )
+
   const setDataFunction = useCallback(
     (keyOrData: FormDataKeys<TForm> | Function | Partial<TForm>, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
+        commitData(set(cloneDeep(dataRef.current), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
-        setData((data) => keyOrData(data))
+        commitData(keyOrData(dataRef.current))
       } else {
-        setData(keyOrData as TForm)
+        commitData(keyOrData as TForm)
       }
     },
-    [setData],
+    [commitData],
   )
 
   const setDefaultsFunction = useCallback(
@@ -210,7 +218,7 @@ export default function useFormState<TForm extends object>(
         if (isDataFunction) {
           setDefaultsState(clonedData)
         }
-        setData(clonedData)
+        commitData(clonedData)
       } else {
         if (isDataFunction) {
           setDefaultsState((currentDefaults) => {
@@ -224,21 +232,20 @@ export default function useFormState<TForm extends object>(
           })
         }
 
-        setData((data) =>
-          (fields as Array<FormDataKeys<TForm>>)
-            .filter((key) => has(clonedData, key))
-            .reduce(
-              (carry, key) => {
-                return set(carry, key, get(clonedData, key))
-              },
-              { ...data } as TForm,
-            ),
-        )
+        const next = (fields as Array<FormDataKeys<TForm>>)
+          .filter((key) => has(clonedData, key))
+          .reduce(
+            (carry, key) => {
+              return set(carry, key, get(clonedData, key))
+            },
+            { ...dataRef.current } as TForm,
+          )
+        commitData(next)
       }
 
       validatorRef.current?.reset(...fields)
     },
-    [setData, defaults],
+    [commitData, defaults],
   )
 
   const setError = useCallback(
