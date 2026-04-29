@@ -4,11 +4,13 @@ export default function AppLayout({
   title = 'Default Title',
   showSidebar = true,
   theme = 'light',
+  formatTitle,
   children,
 }: {
   title?: string
   showSidebar?: boolean
   theme?: string
+  formatTitle?: (name: string) => string
   children: ReactNode
 }) {
   const layoutId = useId()
@@ -17,7 +19,7 @@ export default function AppLayout({
   return (
     <div data-theme={theme} className="app-layout">
       <header>
-        <h1 className="app-title">{title}</h1>
+        <h1 className="app-title">{formatTitle ? formatTitle('User') : title}</h1>
       </header>
       <div className="app-content">
         {showSidebar && (

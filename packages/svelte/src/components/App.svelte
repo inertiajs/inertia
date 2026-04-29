@@ -13,7 +13,7 @@
 <script lang="ts">
   import type { Component } from 'svelte'
   import type { LayoutType, LayoutResolver } from '../types'
-  import { isPropsObject, normalizeLayouts } from '@inertiajs/core'
+  import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import Render, { h, type RenderProps } from './Render.svelte'
   import { setPage } from '../page.svelte'
@@ -110,7 +110,7 @@
     ) {
       const result = (layoutValue as Function)(page.props)
 
-      if (isPropsObject(result, isComponent)) {
+      if (isPropsObjectOrCallback(result, isComponent)) {
         effectiveLayout = defaultLayout?.(page.component, page) as LayoutType | undefined
         callbackProps = result as Record<string, unknown>
       } else {

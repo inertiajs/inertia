@@ -5,10 +5,11 @@
     title?: string
     showSidebar?: boolean
     theme?: string
+    formatTitle?: (name: string) => string
     children?: import('svelte').Snippet
   }
 
-  let { title = 'Default Title', showSidebar = true, theme = 'light', children }: Props = $props()
+  let { title = 'Default Title', showSidebar = true, theme = 'light', formatTitle, children }: Props = $props()
 
   onMount(() => {
     window._inertia_app_layout_id = crypto.randomUUID()
@@ -17,7 +18,7 @@
 
 <div data-theme={theme} class="app-layout">
   <header>
-    <h1 class="app-title">{title}</h1>
+    <h1 class="app-title">{formatTitle ? formatTitle('User') : title}</h1>
   </header>
   <div class="app-content">
     {#if showSidebar}

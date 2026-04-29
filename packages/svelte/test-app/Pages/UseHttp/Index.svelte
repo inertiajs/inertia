@@ -46,12 +46,17 @@
   const slowRequest = useHttp<Record<string, never>, { result: string }>({})
 
   const errorHttp = useHttp<Record<string, never>, never>({})
+  const httpExceptionHttp = useHttp<Record<string, never>, never>({})
+  const networkErrorHttp = useHttp<Record<string, never>, never>({})
 
   let lastGetResponse: SearchResponse | null = $state(null)
   let lastPostResponse: UserResponse | null = $state(null)
   let lastDeleteResponse: DeleteResponse | null = $state(null)
   let cancelledMessage = $state('')
   let errorMessage = $state('')
+  let httpExceptionStatus: number | null = $state(null)
+  let httpExceptionBody = $state('')
+  let networkErrorMessage = $state('')
 
   const performSearch = async () => {
     try {
@@ -114,6 +119,34 @@
           errorMessage = 'Server returned 500 error'
         }
       }
+    }
+  }
+
+  const triggerHttpException = async () => {
+    httpExceptionStatus = null
+    httpExceptionBody = ''
+    try {
+      await httpExceptionHttp.post('/api/error', {
+        onHttpException: (response) => {
+          httpExceptionStatus = response.status
+          httpExceptionBody = response.data
+        },
+      })
+    } catch {
+      // Expected
+    }
+  }
+
+  const triggerNetworkError = async () => {
+    networkErrorMessage = ''
+    try {
+      await networkErrorHttp.get('/api/network-error-test', {
+        onNetworkError: (error) => {
+          networkErrorMessage = error.message || 'Network error occurred'
+        },
+      })
+    } catch {
+      // Expected
     }
   }
 </script>
@@ -245,6 +278,27 @@
     <button onclick={triggerServerError} id="error-button">Trigger Server Error</button>
     {#if errorMessage}
       <div id="error-message">{errorMessage}</div>
+    {/if}
+  </section>
+
+  <!-- HTTP Exception Callback Test -->
+  <section id="http-exception-test">
+    <h2>HTTP Exception Callback</h2>
+    <button onclick={triggerHttpException} id="http-exception-button">Trigger HTTP Exception</button>
+    {#if httpExceptionStatus}
+      <div id="http-exception-status">Status: {httpExceptionStatus}</div>
+    {/if}
+    {#if httpExceptionBody}
+      <div id="http-exception-body">Body: {httpExceptionBody}</div>
+    {/if}
+  </section>
+
+  <!-- Network Error Callback Test -->
+  <section id="network-error-test">
+    <h2>Network Error Callback</h2>
+    <button onclick={triggerNetworkError} id="network-error-button">Trigger Network Error</button>
+    {#if networkErrorMessage}
+      <div id="network-error-message">{networkErrorMessage}</div>
     {/if}
   </section>
 

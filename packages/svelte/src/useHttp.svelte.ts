@@ -229,7 +229,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         markAsSuccessful()
         setFormState('response', responseData)
 
-        options.onSuccess?.(responseData)
+        options.onSuccess?.(responseData, response)
 
         if (!wasDefaultsCalledInOnSuccess()) {
           setDefaults(cloneDeep(form.data()))
@@ -258,6 +258,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
           form.clearErrors().setError(processedErrors)
           options.onError?.(processedErrors as Errors)
+        } else {
+          options.onHttpException?.(error.response)
         }
 
         throw error
@@ -267,6 +269,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         options.onCancel?.()
         throw new HttpCancelledError('Request was cancelled', url)
       }
+
+      options.onNetworkError?.(error instanceof Error ? error : new Error('Unknown error'))
 
       throw error
     } finally {

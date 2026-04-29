@@ -20,6 +20,17 @@ test.describe('Flash Data', () => {
     await expect(page.locator('#flash-events')).toContainText('Hello from server')
   })
 
+  test('fires flash event after a location visit triggers a full page reload', async ({ page }) => {
+    await page.goto('/flash/initial')
+    await expect(page.locator('#flash-events')).toContainText('Hello from server')
+
+    await page.evaluate(() => (window as any).testing.Inertia.visit('/flash/location-visit'))
+    await page.waitForURL('**/flash/initial')
+
+    await expect(page.locator('#flash')).toContainText('Hello from server')
+    await expect(page.locator('#flash-events')).toContainText('Hello from server')
+  })
+
   test('preserves flash data after deferred props load and does not fire event again', async ({ page }) => {
     // Set up response listener before navigating to catch the deferred request
     const deferredResponse = page.waitForResponse((res) => res.url().includes('/flash/with-deferred'))
@@ -131,6 +142,21 @@ test.describe('Flash Data', () => {
 
       const flashAfter = await page.locator('#flash').textContent()
       expect(flashAfter).toBe('{}')
+    })
+
+    test('receives flash data and fires event callbacks when there are errors', async ({ page }) => {
+      await page.getByRole('link', { name: 'Visit with errors and flash' }).click()
+
+      const messages = await waitForMessages(page, 6)
+
+      expect(messages).toEqual([
+        'Inertia.on(flash)',
+        { foo: 'bar' },
+        'onFlash',
+        { foo: 'bar' },
+        'onError',
+        { name: 'The name field is required.' },
+      ])
     })
 
     test('does not fire flash event when no flash data is present', async ({ page }) => {

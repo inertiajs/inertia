@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -64,7 +64,7 @@
     "laravel-precognition": "^2.0.0"
   },
   "peerDependencies": {
-    "axios": "^1.13.2"
+    "axios": "^1.15.2"
   },
   "peerDependenciesMeta": {
     "axios": {
@@ -73,11 +73,11 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.13",
-    "axios": "^1.13.5",
+    "axios": "^1.15.2",
     "es-check": "^9.6.4",
     "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.1.2"
   }
 }

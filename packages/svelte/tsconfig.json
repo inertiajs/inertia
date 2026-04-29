@@ -12,9 +12,9 @@
     "declaration": true,
     "declarationDir": "dist",
 
-    "module": "ES2020",
-    "moduleResolution": "Node",
-    "allowSyntheticDefaultImports": true,
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "verbatimModuleSyntax": true,
 
     "noImplicitThis": true,
     "noUnusedLocals": true,

@@ -42,6 +42,28 @@ const visitWithFlash = () => {
   )
 }
 
+const visitWithErrorsAndFlash = () => {
+  router.on('flash', (event) => {
+    internalAlert('Inertia.on(flash)')
+    internalAlert(event.detail.flash)
+  })
+
+  router.post(
+    '/flash/events/with-errors',
+    {},
+    {
+      onFlash: (flash) => {
+        internalAlert('onFlash')
+        internalAlert(flash)
+      },
+      onError: (errors) => {
+        internalAlert('onError')
+        internalAlert(errors)
+      },
+    },
+  )
+}
+
 const visitWithoutFlash = () => {
   router.on('flash', () => {
     internalAlert('Inertia.on(flash)')
@@ -75,6 +97,7 @@ const navigateAway = () => {
     <span id="flash">{{ JSON.stringify(page.flash) }}</span>
 
     <a href="#" @click.prevent="visitWithFlash" class="with-flash">Visit with flash</a>
+    <a href="#" @click.prevent="visitWithErrorsAndFlash" class="with-errors-and-flash">Visit with errors and flash</a>
     <a href="#" @click.prevent="visitWithoutFlash" class="without-flash">Visit without flash</a>
     <a href="#" @click.prevent="navigateAway" class="navigate-away">Navigate away</a>
   </div>

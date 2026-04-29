@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -53,7 +53,7 @@
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "axios": "^1.13.5",
+    "axios": "^1.15.2",
     "es-check": "^9.6.1",
     "esbuild": "^0.27.3",
     "esbuild-node-externals": "^1.20.1",

@@ -892,6 +892,9 @@ app.get('/layout-props/callback', (req, res) => inertia.render(req, res, { props
 app.get('/layout-props/callback-default', (req, res) => inertia.render(req, res, { props: { userName: 'Jane' } }))
 app.get('/layout-props/callback-static', (req, res) => inertia.render(req, res))
 app.get('/layout-props/static-object', (req, res) => inertia.render(req, res))
+app.get('/layout-props/callback-function-prop', (req, res) => inertia.render(req, res))
+app.get('/layout-props/callback-all-function-props', (req, res) => inertia.render(req, res))
+app.get('/layout-props/callback-component-prop', (req, res) => inertia.render(req, res))
 
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
@@ -2420,12 +2423,20 @@ app.post('/flash/events/with-data', (req, res) =>
   }),
 )
 app.post('/flash/events/without-data', (req, res) => inertia.render(req, res, { component: 'Flash/Events' }))
+app.post('/flash/events/with-errors', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Flash/Events',
+    props: { errors: { name: 'The name field is required.' } },
+    flash: { foo: 'bar' },
+  }),
+)
 app.get('/flash/initial', (req, res) =>
   inertia.render(req, res, {
     component: 'Flash/InitialFlash',
     flash: { message: 'Hello from server' },
   }),
 )
+app.get('/flash/location-visit', (req, res) => inertia.location(res, '/flash/initial'))
 app.get('/flash/with-infinite-scroll', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']

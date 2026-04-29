@@ -99,18 +99,41 @@ function hasComponentKey(value: unknown): value is { component: unknown; props?:
   return isPlainObject(value) && 'component' in value
 }
 
+function hasComponentEntry<T>(value: Record<string, unknown>, isComponent: ComponentCheck<T>): boolean {
+  return 'component' in value && isComponent(value.component)
+}
+
 function isNamedLayouts<T>(value: unknown, isComponent: ComponentCheck<T>): value is Record<string, unknown> {
-  if (!isPlainObject(value) || isComponent(value) || 'component' in value) {
+  if (!isPlainObject(value) || isComponent(value) || hasComponentEntry(value, isComponent)) {
     return false
   }
-  return Object.values(value).some(
+  return Object.values(value).every(
     (v) =>
       isComponent(v) || (Array.isArray(v) && isComponent(v[0])) || (hasComponentKey(v) && isComponent(v.component)),
   )
 }
 
 export function isPropsObject<T>(value: unknown, isComponent: ComponentCheck<T>): boolean {
-  return isPlainObject(value) && !isComponent(value) && !('component' in value) && !isNamedLayouts(value, isComponent)
+  return (
+    isPlainObject(value) &&
+    !isComponent(value) &&
+    !hasComponentEntry(value, isComponent) &&
+    !isNamedLayouts(value, isComponent)
+  )
+}
+
+export function isPropsObjectOrCallback<T>(value: unknown, isComponent: ComponentCheck<T>): boolean {
+  if (isPropsObject(value, isComponent)) {
+    return true
+  }
+
+  if (!isPlainObject(value) || isComponent(value) || hasComponentEntry(value, isComponent)) {
+    return false
+  }
+
+  const values = Object.values(value)
+
+  return values.length > 0 && values.every((v) => typeof v === 'function')
 }
 
 function isTuple<T>(value: unknown, isComponent: ComponentCheck<T>): value is [T, Record<string, unknown>?] {

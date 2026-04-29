@@ -16,6 +16,7 @@ export { default as useInfiniteScroll } from './infiniteScroll'
 export {
   createLayoutPropsStore,
   isPropsObject,
+  isPropsObjectOrCallback,
   normalizeLayouts,
   type LayoutCallbackReturn,
   type LayoutDefinition,

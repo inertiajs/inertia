@@ -47,7 +47,9 @@
   },
   "pnpm": {
     "overrides": {
-      "cookie": ">=0.7.0"
+      "cookie": ">=0.7.0",
+      "follow-redirects": ">=1.16.0",
+      "postcss": ">=8.5.10"
     }
   }
 }
