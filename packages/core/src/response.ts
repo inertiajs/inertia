@@ -396,7 +396,6 @@ export class Response {
         .filter((prop) => prop.includes('.'))
         .map((prop) => prop.split('.')[0]),
     )
-
     for (const key of nestedTopKeys) {
       const currentValue = currentPage.get().props[key]
 
@@ -439,7 +438,13 @@ export class Response {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
 
-    pageResponse.rescuedProps = this.mergeRescuedProps(pageResponse)
+    const rescuedProps = this.mergeRescuedProps(pageResponse)
+
+    if (rescuedProps !== undefined) {
+      pageResponse.rescuedProps = rescuedProps
+    } else {
+      delete pageResponse.rescuedProps
+    }
   }
 
   protected mergeRescuedProps(pageResponse: Page): string[] | undefined {
