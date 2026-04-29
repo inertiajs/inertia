@@ -29,7 +29,7 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
   const page = usePage()
   const pageProps = page.props
   const keys = useMemo(() => (Array.isArray(data) ? data : [data]), [data])
-  const rescuedKeys = useMemo(() => new Set(page.rescuedProps || []), [page.rescuedProps])
+  const rescuedKeys = useMemo(() => new Set(page.rescuedProps), [page.rescuedProps])
 
   useEffect(() => {
     const removeStartListener = router.on('start', (e) => {

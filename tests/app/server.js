@@ -3411,12 +3411,13 @@ app.get('/nested-props/rescued-deferred', (req, res) => {
     return inertia.render(req, res, {
       component: 'NestedProps/RescuedDeferred',
       props: {
-        auth: partialData.includes('auth') || partialData.includes('auth.notifications')
-          ? {
-              user: 'John Doe',
-              notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
-            }
-          : undefined,
+        auth:
+          partialData.includes('auth') || partialData.includes('auth.notifications')
+            ? {
+                user: 'John Doe',
+                notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
+              }
+            : undefined,
       },
     })
   }, 300)

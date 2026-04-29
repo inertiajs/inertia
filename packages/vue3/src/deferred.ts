@@ -21,7 +21,7 @@ export default defineComponent({
     const activeReloads = new Set<object>()
     const page = usePage()
     const keys = computed(() => (Array.isArray(props.data) ? props.data : [props.data]) as string[])
-    const rescuedKeys = computed(() => new Set(page.rescuedProps || []))
+    const rescuedKeys = computed(() => new Set(page.rescuedProps))
 
     let removeStartListener: (() => void) | null = null
     let removeFinishListener: (() => void) | null = null
@@ -62,7 +62,9 @@ export default defineComponent({
       }
 
       const propsAreDefined = keys.value.every((key) => get(page.props, key) !== undefined)
-      const propsAreSettled = keys.value.every((key) => get(page.props, key) !== undefined || rescuedKeys.value.has(key))
+      const propsAreSettled = keys.value.every(
+        (key) => get(page.props, key) !== undefined || rescuedKeys.value.has(key),
+      )
       const hasRescuedProps = keys.value.some((key) => rescuedKeys.value.has(key))
 
       return propsAreDefined && !hasRescuedProps

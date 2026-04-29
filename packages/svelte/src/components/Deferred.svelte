@@ -13,7 +13,7 @@
   let { data, error, fallback, children }: Props = $props()
 
   const keys = $derived(Array.isArray(data) ? data : [data])
-  const rescuedKeys = $derived(new Set(page.rescuedProps || []))
+  const rescuedKeys = $derived(new Set(page.rescuedProps))
   const loaded = $derived(keys.every((key) => typeof get(page.props, key) !== 'undefined'))
   const settled = $derived(keys.every((key) => typeof get(page.props, key) !== 'undefined' || rescuedKeys.has(key)))
   const failed = $derived(settled && keys.some((key) => rescuedKeys.has(key)))

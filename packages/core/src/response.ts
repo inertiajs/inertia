@@ -12,12 +12,12 @@ import {
 } from './events'
 import { history } from './history'
 import { page as currentPage } from './page'
+import { visitReloadsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
-import { visitReloadsProp } from './partialReload'
 
 const queue = new Queue<Promise<boolean | void>>()
 
@@ -129,7 +129,7 @@ export class Response {
 
     // Only spread if data is an object (not a string like HTML error pages)
     if (typeof data === 'object') {
-      return (this.response.data = { ...data, flash: data.flash ?? {} })
+      return (this.response.data = { ...data, flash: data.flash ?? {}, rescuedProps: data.rescuedProps ?? [] })
     }
 
     return (this.response.data = data)
@@ -438,28 +438,18 @@ export class Response {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
 
-    const rescuedProps = this.mergeRescuedProps(pageResponse)
-
-    if (rescuedProps !== undefined) {
-      pageResponse.rescuedProps = rescuedProps
-    } else {
-      delete pageResponse.rescuedProps
-    }
+    pageResponse.rescuedProps = this.mergeRescuedProps(pageResponse)
   }
 
-  protected mergeRescuedProps(pageResponse: Page): string[] | undefined {
-    const currentRescued = currentPage.get().rescuedProps || []
-    const incomingRescued = pageResponse.rescuedProps || []
-
-    if (currentRescued.length === 0 && incomingRescued.length === 0) {
-      return undefined
-    }
+  protected mergeRescuedProps(pageResponse: Page): string[] {
+    const currentRescued = currentPage.get().rescuedProps ?? []
+    const incomingRescued = pageResponse.rescuedProps ?? []
 
     const merged = new Set(currentRescued.filter((prop) => !this.wasPropReloaded(prop)))
 
     incomingRescued.forEach((prop) => merged.add(prop))
 
-    return merged.size > 0 ? Array.from(merged) : undefined
+    return Array.from(merged)
   }
 
   protected wasPropReloaded(prop: string): boolean {

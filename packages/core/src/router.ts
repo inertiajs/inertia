@@ -591,6 +591,7 @@ export class Router {
         errors: {},
       },
       flash: {},
+      rescuedProps: [],
       clearHistory: false,
       encryptHistory: current.encryptHistory,
       sharedProps: current.sharedProps,
