@@ -1,19 +1,7 @@
-import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
+import { anyPathIsReloaded, isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 import { usePage } from './app'
-
-const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-  if (only.length === 0 && except.length === 0) {
-    return true
-  }
-
-  if (only.length > 0) {
-    return keys.some((key) => only.includes(key))
-  }
-
-  return keys.some((key) => !except.includes(key))
-}
 
 export default defineComponent({
   name: 'Deferred',
@@ -26,6 +14,7 @@ export default defineComponent({
   slots: Object as SlotsType<{
     default: { reloading: boolean }
     fallback: {}
+    error: {}
   }>,
   setup(props, { slots }) {
     const reloading = ref(false)
@@ -44,7 +33,7 @@ export default defineComponent({
         if (
           visit.preserveState === true &&
           isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-          keysAreBeingReloaded(visit.only, visit.except, keys)
+          anyPathIsReloaded(keys, visit.only, visit.except)
         ) {
           activeReloads.add(visit)
           reloading.value = true
@@ -69,13 +58,20 @@ export default defineComponent({
 
     return () => {
       const keys = (Array.isArray(props.data) ? props.data : [props.data]) as string[]
+      const rescuedKeys = new Set(page.rescuedProps || [])
 
       if (!slots.fallback) {
         throw new Error('`<Deferred>` requires a `<template #fallback>` slot')
       }
 
-      return keys.every((key) => get(page.props, key) !== undefined)
+      const propsAreDefined = keys.every((key) => get(page.props, key) !== undefined)
+      const propsAreSettled = keys.every((key) => get(page.props, key) !== undefined || rescuedKeys.has(key))
+      const hasRescuedProps = keys.some((key) => rescuedKeys.has(key))
+
+      return propsAreDefined && !hasRescuedProps
         ? slots.default?.({ reloading: reloading.value })
+        : propsAreSettled && hasRescuedProps && slots.error
+          ? slots.error({})
         : slots.fallback({})
     }
   },

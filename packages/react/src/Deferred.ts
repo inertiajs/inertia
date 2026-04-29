@@ -1,20 +1,8 @@
-import { isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
+import { anyPathIsReloaded, isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
-
-const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-  if (only.length === 0 && except.length === 0) {
-    return true
-  }
-
-  if (only.length > 0) {
-    return keys.some((key) => only.includes(key))
-  }
-
-  return keys.some((key) => !except.includes(key))
-}
 
 interface DeferredSlotProps {
   reloading: boolean
@@ -22,11 +10,12 @@ interface DeferredSlotProps {
 
 interface DeferredProps {
   children: ReactNode | ((props: DeferredSlotProps) => ReactNode)
+  error?: ReactNode | (() => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
 
-const Deferred = ({ children, data, fallback }: DeferredProps) => {
+const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
   if (!data) {
     throw new Error('`<Deferred>` requires a `data` prop to be a string or array of strings')
   }
@@ -34,8 +23,10 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   const [loaded, setLoaded] = useState(false)
   const [reloading, setReloading] = useState(false)
   const activeReloads = useRef(new Set<object>())
-  const pageProps = usePage().props
+  const page = usePage()
+  const pageProps = page.props
   const keys = useMemo(() => (Array.isArray(data) ? data : [data]), [data])
+  const rescuedKeys = useMemo(() => new Set(page.rescuedProps || []), [page.rescuedProps])
 
   useEffect(() => {
     const removeStartListener = router.on('start', (e) => {
@@ -44,7 +35,7 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
       if (
         visit.preserveState === true &&
         isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-        keysAreBeingReloaded(visit.only, visit.except, keys)
+        anyPathIsReloaded(keys, visit.only, visit.except)
       ) {
         activeReloads.current.add(visit)
         setReloading(true)
@@ -68,17 +59,26 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
   }, [keys])
 
   useEffect(() => {
-    setLoaded(keys.every((key) => get(pageProps, key) !== undefined))
-  }, [pageProps, keys])
+    setLoaded(keys.every((key) => get(pageProps, key) !== undefined || rescuedKeys.has(key)))
+  }, [pageProps, keys, rescuedKeys])
 
   const propsAreDefined = useMemo(() => keys.every((key) => get(pageProps, key) !== undefined), [keys, pageProps])
+  const propsAreSettled = useMemo(
+    () => keys.every((key) => get(pageProps, key) !== undefined || rescuedKeys.has(key)),
+    [keys, pageProps, rescuedKeys],
+  )
+  const hasRescuedProps = useMemo(() => keys.some((key) => rescuedKeys.has(key)), [keys, rescuedKeys])
 
-  if (loaded && propsAreDefined) {
+  if (loaded && propsAreDefined && !hasRescuedProps) {
     if (typeof children === 'function') {
       return children({ reloading })
     }
 
     return children
+  }
+
+  if (propsAreSettled && hasRescuedProps && error) {
+    return typeof error === 'function' ? error() : error
   }
 
   return typeof fallback === 'function' ? fallback() : fallback

@@ -43,6 +43,30 @@ test('can load deferred props', async ({ page }) => {
   await expect(page.getByText('both baz value and qux value')).toBeVisible()
 })
 
+test('can render rescued deferred props with error UI and recover on retry', async ({ page }) => {
+  await gotoPageAndWaitForContent(page, '/deferred-props/with-rescued-errors')
+
+  await expect(page.getByText('Loading foo...')).toBeVisible()
+
+  await page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+
+  await expect(page.getByText('Loading foo...')).not.toBeVisible()
+  await expect(page.locator('#foo-error')).toContainText('Unable to load foo.')
+  await expect(page.locator('#foo')).toHaveCount(0)
+
+  const retryResponse = page.waitForResponse(
+    (response) => response.request().headers()['x-inertia-partial-data'] === 'foo' && response.status() === 200,
+  )
+
+  await page.getByRole('button', { exact: true, name: 'Retry' }).click()
+  await retryResponse
+
+  await expect(page.locator('#foo-error')).not.toBeVisible()
+  await expect(page.locator('#foo')).toContainText('foo value')
+})
+
 test('we are not caching deferred props after reload', async ({ page }) => {
   await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
 

@@ -17,6 +17,7 @@ import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
+import { pathIsReloaded } from './partialReload'
 
 const queue = new Queue<Promise<boolean | void>>()
 
@@ -437,6 +438,28 @@ export class Response {
     if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
+
+    pageResponse.rescuedProps = this.mergeRescuedProps(pageResponse)
+  }
+
+  protected mergeRescuedProps(pageResponse: Page): string[] | undefined {
+    const currentRescued = currentPage.get().rescuedProps || []
+    const incomingRescued = pageResponse.rescuedProps || []
+
+    if (currentRescued.length === 0 && incomingRescued.length === 0) {
+      return undefined
+    }
+
+    const merged = new Set(currentRescued.filter((prop) => !this.wasPropReloaded(prop)))
+
+    incomingRescued.forEach((prop) => merged.add(prop))
+
+    return merged.size > 0 ? Array.from(merged) : undefined
+  }
+
+  protected wasPropReloaded(prop: string): boolean {
+    const { only, except } = this.requestParams.all()
+    return pathIsReloaded(prop, only, except)
   }
 
   /**
