@@ -1,4 +1,4 @@
-import { anyPathIsReloaded, isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
+import { isSameUrlWithoutQueryOrHash, visitReloadsProps } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
@@ -20,7 +20,10 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
     throw new Error('`<Deferred>` requires a `data` prop to be a string or array of strings')
   }
 
-  const [loaded, setLoaded] = useState(false)
+  if (!fallback) {
+    throw new Error('`<Deferred>` requires a `fallback` prop')
+  }
+
   const [reloading, setReloading] = useState(false)
   const activeReloads = useRef(new Set<object>())
   const page = usePage()
@@ -35,7 +38,7 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
       if (
         visit.preserveState === true &&
         isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-        anyPathIsReloaded(keys, visit.only, visit.except)
+        visitReloadsProps(visit, keys)
       ) {
         activeReloads.current.add(visit)
         setReloading(true)
@@ -58,10 +61,6 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
     }
   }, [keys])
 
-  useEffect(() => {
-    setLoaded(keys.every((key) => get(pageProps, key) !== undefined || rescuedKeys.has(key)))
-  }, [pageProps, keys, rescuedKeys])
-
   const propsAreDefined = useMemo(() => keys.every((key) => get(pageProps, key) !== undefined), [keys, pageProps])
   const propsAreSettled = useMemo(
     () => keys.every((key) => get(pageProps, key) !== undefined || rescuedKeys.has(key)),
@@ -69,7 +68,7 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
   )
   const hasRescuedProps = useMemo(() => keys.some((key) => rescuedKeys.has(key)), [keys, rescuedKeys])
 
-  if (loaded && propsAreDefined && !hasRescuedProps) {
+  if (propsAreDefined && !hasRescuedProps) {
     if (typeof children === 'function') {
       return children({ reloading })
     }

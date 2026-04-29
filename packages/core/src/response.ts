@@ -17,7 +17,7 @@ import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
 import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
-import { pathIsReloaded } from './partialReload'
+import { visitReloadsProp } from './partialReload'
 
 const queue = new Queue<Promise<boolean | void>>()
 
@@ -458,8 +458,7 @@ export class Response {
   }
 
   protected wasPropReloaded(prop: string): boolean {
-    const { only, except } = this.requestParams.all()
-    return pathIsReloaded(prop, only, except)
+    return visitReloadsProp(this.requestParams.all(), prop)
   }
 
   /**

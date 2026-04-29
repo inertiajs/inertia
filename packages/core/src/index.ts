@@ -23,7 +23,7 @@ export {
   type LayoutPropsStore,
 } from './layout'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
-export { anyPathIsReloaded, isSameOrSubPath, pathIsReloaded } from './partialReload'
+export { isPathOrSubPath, visitReloadsProp, visitReloadsProps } from './partialReload'
 export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
 export { buildSSRBody } from './ssrUtils'

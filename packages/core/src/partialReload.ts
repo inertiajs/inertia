@@ -1,23 +1,35 @@
-export const isSameOrSubPath = (path: string, candidate: string): boolean => {
+import { ActiveVisit } from './types'
+
+type VisitFilter = Pick<ActiveVisit, 'only' | 'except'>
+
+export const isPathOrSubPath = (path: string, candidate: string): boolean => {
   return path === candidate || path.startsWith(`${candidate}.`)
 }
 
-export const pathIsReloaded = (path: string, only: string[], except: string[]): boolean => {
-  if (only.length > 0) {
-    return only.some((candidate) => isSameOrSubPath(path, candidate))
+export const visitReloadsProp = (visit: VisitFilter, prop: string): boolean => {
+  const { only, except } = visit
+
+  if (only.length === 0 && except.length === 0) {
+    return false
   }
 
-  if (except.length > 0) {
-    return !except.some((candidate) => isSameOrSubPath(path, candidate))
+  if (only.length > 0 && !only.some((candidate) => isPathOrSubPath(prop, candidate))) {
+    return false
   }
 
-  return false
+  if (except.length > 0 && except.some((candidate) => isPathOrSubPath(prop, candidate))) {
+    return false
+  }
+
+  return true
 }
 
-export const anyPathIsReloaded = (paths: string[], only: string[], except: string[]): boolean => {
+export const visitReloadsProps = (visit: VisitFilter, props: string[]): boolean => {
+  const { only, except } = visit
+
   if (only.length === 0 && except.length === 0) {
     return true
   }
 
-  return paths.some((path) => pathIsReloaded(path, only, except))
+  return props.some((prop) => visitReloadsProp(visit, prop))
 }

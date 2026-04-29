@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { anyPathIsReloaded, isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
+  import { isSameUrlWithoutQueryOrHash, router, visitReloadsProps } from '@inertiajs/core'
   import { get } from 'es-toolkit/compat'
   import { page } from '../index'
 
@@ -28,7 +28,7 @@
       if (
         visit.preserveState === true &&
         isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-        anyPathIsReloaded(keys, visit.only, visit.except)
+        visitReloadsProps(visit, keys)
       ) {
         activeReloads.add(visit)
         reloading = true
