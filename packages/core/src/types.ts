@@ -545,7 +545,7 @@ export type ProgressOptions = {
   delay?: number
   color?: string
   includeCSS?: boolean
-  nonce?: string
+  nonce?: string | boolean
   showSpinner?: boolean
   popover?: boolean | null
 }
