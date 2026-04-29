@@ -32,6 +32,72 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test.describe('SetData then post', () => {
+    test('submits latest data when setData and post are called synchronously', async ({ page }) => {
+      await page.goto('/form-helper/set-data-then-post')
+      await page.getByRole('button', { name: 'Set and POST', exact: true }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.code).toEqual('123456')
+    })
+
+    test('submits reset data when reset and post are called synchronously', async ({ page }) => {
+      await page.goto('/form-helper/set-data-then-post')
+
+      await page.getByRole('button', { name: 'Dirty' }).click()
+      await expect(page.locator('#current-code')).toHaveText('dirty')
+
+      await page.getByRole('button', { name: 'Reset and POST', exact: true }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.code).toEqual('initial')
+    })
+
+    test('submits merged data when partial reset and post are called synchronously', async ({ page }) => {
+      await page.goto('/form-helper/set-data-then-post')
+      await page.getByRole('button', { name: 'Partial reset and POST', exact: true }).click()
+
+      const dump = await shouldBeDumpPage(page, 'post')
+
+      await expect(dump.form.code).toEqual('initial')
+      await expect(dump.form.name).toEqual('changed-name')
+    })
+
+    test.describe('React', () => {
+      test.skip(process.env.PACKAGE !== 'react', 'Only for React')
+
+      test('submits latest data when functional setData and post are called synchronously', async ({ page }) => {
+        await page.goto('/form-helper/set-data-then-post')
+        await page.getByRole('button', { name: 'Functional set and POST', exact: true }).click()
+
+        const dump = await shouldBeDumpPage(page, 'post')
+
+        await expect(dump.form.code).toEqual('functional-code')
+      })
+
+      test('submits latest data when two synchronous setData calls precede post', async ({ page }) => {
+        await page.goto('/form-helper/set-data-then-post')
+        await page.getByRole('button', { name: 'Two set and POST', exact: true }).click()
+
+        const dump = await shouldBeDumpPage(page, 'post')
+
+        await expect(dump.form.code).toEqual('first-code')
+        await expect(dump.form.name).toEqual('second-name')
+      })
+
+      test('submits latest data when setData and post are called synchronously with rememberKey', async ({ page }) => {
+        await page.goto('/form-helper/set-data-then-post-remember')
+        await page.getByRole('button', { name: 'Set and POST', exact: true }).click()
+
+        const dump = await shouldBeDumpPage(page, 'post')
+
+        await expect(dump.form.code).toEqual('remembered-code')
+      })
+    })
+  })
+
   test.describe('Transform', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)

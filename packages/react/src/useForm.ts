@@ -31,7 +31,6 @@ import {
 import { cloneDeep, get, has, isEqual, set } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { config } from '.'
-import { useIsomorphicLayoutEffect } from './react'
 import useRemember from './useRemember'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
@@ -171,6 +170,20 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // overriding user's custom defaults with automatic behavior.
   const setDefaultsCalledInOnSuccess = useRef(false)
 
+  const dataRef = useRef(data)
+
+  useEffect(() => {
+    dataRef.current = data
+  })
+
+  const commitData = useCallback(
+    (next: TForm) => {
+      dataRef.current = next
+      setData(next)
+    },
+    [setData],
+  )
+
   const submit = useCallback(
     (...args: UseFormSubmitArguments) => {
       const { method, url, options } = UseFormUtils.parseSubmitArguments(args, precognitionEndpoint.current)
@@ -272,7 +285,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         },
       }
 
-      const transformedData = transform.current(data) as RequestPayload
+      const transformedData = transform.current(dataRef.current) as RequestPayload
 
       if (method === 'delete') {
         router.delete(url, { ..._options, data: transformedData })
@@ -280,29 +293,21 @@ export default function useForm<TForm extends FormDataType<TForm>>(
         router[method](url, transformedData, _options)
       }
     },
-    [data, setErrors, transform],
+    [setErrors, transform],
   )
 
   const setDataFunction = useCallback(
     (keyOrData: FormDataKeys<TForm> | Function | Partial<TForm>, maybeValue?: any) => {
       if (typeof keyOrData === 'string') {
-        setData((data) => set(cloneDeep(data), keyOrData, maybeValue))
+        commitData(set(cloneDeep(dataRef.current), keyOrData, maybeValue))
       } else if (typeof keyOrData === 'function') {
-        setData((data) => keyOrData(data))
+        commitData(keyOrData(dataRef.current))
       } else {
-        setData(keyOrData as TForm)
+        commitData(keyOrData as TForm)
       }
     },
-    [setData],
+    [commitData],
   )
-
-  const [dataAsDefaults, setDataAsDefaults] = useState(false)
-
-  const dataRef = useRef(data)
-
-  useEffect(() => {
-    dataRef.current = data
-  })
 
   const setDefaultsFunction = useCallback(
     (fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) => {
@@ -312,10 +317,6 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       if (typeof fieldOrFields === 'undefined') {
         newDefaults = { ...dataRef.current }
         setDefaults(dataRef.current)
-        // If setData was called right before setDefaults, data was not
-        // updated in that render yet, so we set a flag to update
-        // defaults right after the next render.
-        setDataAsDefaults(true)
       } else {
         setDefaults((defaults) => {
           newDefaults =
@@ -332,40 +333,25 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     [setDefaults],
   )
 
-  useIsomorphicLayoutEffect(() => {
-    if (!dataAsDefaults) {
-      return
-    }
-
-    if (isDirty) {
-      // Data has been updated in this next render and is different from
-      // the defaults, so now we can set defaults to the current data.
-      setDefaults(data)
-    }
-
-    setDataAsDefaults(false)
-  }, [dataAsDefaults])
-
   const reset = useCallback(
     (...fields: string[]) => {
       if (fields.length === 0) {
-        setData(defaults)
+        commitData(defaults)
       } else {
-        setData((data) =>
-          (fields as Array<FormDataKeys<TForm>>)
-            .filter((key) => has(defaults, key))
-            .reduce(
-              (carry, key) => {
-                return set(carry, key, get(defaults, key))
-              },
-              { ...data } as TForm,
-            ),
-        )
+        const next = (fields as Array<FormDataKeys<TForm>>)
+          .filter((key) => has(defaults, key))
+          .reduce(
+            (carry, key) => {
+              return set(carry, key, get(defaults, key))
+            },
+            { ...dataRef.current } as TForm,
+          )
+        commitData(next)
       }
 
       validatorRef.current?.reset(...fields)
     },
-    [setData, defaults],
+    [commitData, defaults],
   )
 
   const setError = useCallback(
