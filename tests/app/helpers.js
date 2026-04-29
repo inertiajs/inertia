@@ -52,6 +52,14 @@ const processPartialProps = (req, data) => {
   return data
 }
 
+const applyDefaultNonce = (req, html) => {
+  if (req.query.nonce !== 'default') {
+    return html
+  }
+
+  return html.replace('<script>', '<script nonce="test-default-nonce">')
+}
+
 module.exports = {
   package,
   render: (req, res, data) => {
@@ -78,13 +86,13 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    return res.status(200).send(
-      fs
-        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
-        .toString()
-        .replace('{{ headAttribute }}', 'data-inertia')
-        .replace("'{{ placeholder }}'", JSON.stringify(data)),
-    )
+    const html = fs
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
+      .toString()
+      .replace('{{ headAttribute }}', 'data-inertia')
+      .replace("'{{ placeholder }}'", JSON.stringify(data))
+
+    return res.status(200).send(applyDefaultNonce(req, html))
   },
   renderWithPlainTitle: (req, res, data) => {
     data = buildPageData(req, data)
@@ -96,13 +104,13 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    return res.status(200).send(
-      fs
-        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
-        .toString()
-        .replace(' {{ headAttribute }}', '')
-        .replace("'{{ placeholder }}'", JSON.stringify(data)),
-    )
+    const html = fs
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
+      .toString()
+      .replace(' {{ headAttribute }}', '')
+      .replace("'{{ placeholder }}'", JSON.stringify(data))
+
+    return res.status(200).send(applyDefaultNonce(req, html))
   },
   renderUnified: (req, res, data) => {
     data = buildPageData(req, data)
@@ -116,13 +124,13 @@ module.exports = {
 
     const jsonData = JSON.stringify(data).replace(/\//g, '\\/')
 
-    return res.status(200).send(
-      fs
-        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-unified.html'))
-        .toString()
-        .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
-        .replace('{{ placeholder }}', jsonData),
-    )
+    const html = fs
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-unified.html'))
+      .toString()
+      .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
+      .replace('{{ placeholder }}', jsonData)
+
+    return res.status(200).send(applyDefaultNonce(req, html))
   },
   renderSSR: async (req, res, data) => {
     data = buildPageData(req, data)
@@ -182,13 +190,13 @@ module.exports = {
 
     const jsonData = JSON.stringify(data).replace(/\//g, '\\/')
 
-    return res.status(200).send(
-      fs
-        .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-auto.html'))
-        .toString()
-        .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
-        .replace('{{ placeholder }}', jsonData),
-    )
+    const html = fs
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-auto.html'))
+      .toString()
+      .replace('{{ headAttribute }}', data.component === 'Head/Dataset' ? 'data-inertia' : 'inertia')
+      .replace('{{ placeholder }}', jsonData)
+
+    return res.status(200).send(applyDefaultNonce(req, html))
   },
   location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
   redirect: (res, href) => res.status(409).header('X-Inertia-Redirect', href).send(''),

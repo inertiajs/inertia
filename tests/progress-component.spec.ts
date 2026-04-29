@@ -162,6 +162,43 @@ test.describe('Progress Component', () => {
     await expect(bar).toBeVisible()
   })
 
+  test('applies the configured nonce to the injected progress style tag', async ({ page }) => {
+    await page.goto('/progress-component?nonce')
+
+    const nonce = await page.evaluate(() => {
+      const style = Array.from(document.head.querySelectorAll('style')).find((el) =>
+        el.textContent?.includes('#nprogress'),
+      )
+      return style?.nonce ?? null
+    })
+
+    await expect(nonce).toBe('test-nonce')
+  })
+
+  test('inherits the nonce from the existing script tag when configured with nonce=true', async ({ page }) => {
+    await page.goto('/progress-component?nonce=default')
+
+    const nonce = await page.evaluate(() => {
+      const style = Array.from(document.head.querySelectorAll('style')).find((el) =>
+        el.textContent?.includes('#nprogress'),
+      )
+      return style?.nonce ?? null
+    })
+
+    await expect(nonce).toBe('test-default-nonce')
+  })
+
+  test('does not set a nonce on the progress style tag by default', async ({ page }) => {
+    const nonce = await page.evaluate(() => {
+      const style = Array.from(document.head.querySelectorAll('style')).find((el) =>
+        el.textContent?.includes('#nprogress'),
+      )
+      return style?.nonce ?? null
+    })
+
+    await expect(nonce).toBe('')
+  })
+
   test('isStarted() reflects actual DOM state', async ({ page }) => {
     await page.getByRole('button', { name: 'Is Started' }).click()
     let tests = await page.evaluate(() => (window as any).progressTests)

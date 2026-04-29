@@ -20,6 +20,7 @@ const settings: ProgressSettings = {
   parent: 'body',
   color: '#29d',
   includeCSS: true,
+  nonce: undefined,
   popover: null,
   template: [
     '<div class="bar" role="bar">',
@@ -40,7 +41,7 @@ const configure = (options: Partial<ProgressSettings>) => {
   usePopover = settings.popover ?? 'popover' in HTMLElement.prototype
 
   if (settings.includeCSS) {
-    injectCSS(settings.color)
+    injectCSS(settings.color, settings.nonce)
   }
 
   progress = document.createElement('div')
@@ -283,8 +284,12 @@ const queue = (() => {
   }
 })()
 
-const injectCSS = (color: string): void => {
+const injectCSS = (color: string, nonce?: string): void => {
   const element = document.createElement('style')
+
+  if (nonce) {
+    element.nonce = nonce
+  }
 
   element.textContent = `
     #${baseComponentSelector} {
