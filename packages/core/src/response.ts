@@ -445,15 +445,11 @@ export class Response {
     const currentRescued = currentPage.get().rescuedProps ?? []
     const incomingRescued = pageResponse.rescuedProps ?? []
 
-    const merged = new Set(currentRescued.filter((prop) => !this.wasPropReloaded(prop)))
+    const newRescued = new Set(currentRescued.filter((prop) => !visitReloadsProp(this.requestParams.all(), prop)))
 
-    incomingRescued.forEach((prop) => merged.add(prop))
+    incomingRescued.forEach((prop) => newRescued.add(prop))
 
-    return Array.from(merged)
-  }
-
-  protected wasPropReloaded(prop: string): boolean {
-    return visitReloadsProp(this.requestParams.all(), prop)
+    return Array.from(newRescued)
   }
 
   /**
