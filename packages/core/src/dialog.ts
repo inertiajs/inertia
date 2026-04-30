@@ -51,12 +51,6 @@ export default {
     // Focus the dialog so the 'Escape' key works immediately
     dialog.focus()
 
-    if (!iframe.contentWindow) {
-      throw new Error('iframe not yet ready.')
-    }
-
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(page.outerHTML)
-    iframe.contentWindow.document.close()
+    iframe.srcdoc = page.outerHTML
   },
 }
