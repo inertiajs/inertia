@@ -38,6 +38,11 @@ export interface InertiaSSROptions {
   port?: number
 
   /**
+   * Host to bind the SSR server to (used in production builds).
+   */
+  host?: string
+
+  /**
    * Enable cluster mode for the SSR server (used in production builds).
    */
   cluster?: boolean

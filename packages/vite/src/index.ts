@@ -144,7 +144,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
         result =
           wrapWithServerBootstrap(
             result,
-            { port: ssr.port, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
+            { port: ssr.port, host: ssr.host, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
             frameworks,
           ) ?? result
       }
