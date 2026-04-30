@@ -8,6 +8,10 @@
   const invalidVisitJson = () => {
     router.post('/json')
   }
+
+  const invalidVisitXss = () => {
+    router.post('/non-inertia/xss')
+  }
 </script>
 
 <div>
@@ -24,5 +28,12 @@
     role="button"
     tabindex="0"
     class="invalid-visit-json">Invalid Visit (JSON response)</span
+  >
+  <span
+    onclick={invalidVisitXss}
+    onkeydown={(e) => e.key === 'Enter' && invalidVisitXss()}
+    role="button"
+    tabindex="0"
+    class="invalid-visit-xss">Invalid Visit (XSS)</span
   >
 </div>

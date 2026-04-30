@@ -47,4 +47,11 @@ test.describe('error modal', () => {
     await page.mouse.click(25, 25)
     await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeHidden()
   })
+
+  test('it does not execute scripts in the error dialog iframe', async ({ page }) => {
+    await page.getByText('Invalid Visit (XSS)', { exact: true }).click()
+    await expect(page.locator('dialog#inertia-error-dialog > iframe')).toBeVisible()
+    const xssExecuted = await page.evaluate(() => (window as any).xssExecuted)
+    expect(xssExecuted).toBeUndefined()
+  })
 })

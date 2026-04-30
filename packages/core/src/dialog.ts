@@ -15,6 +15,7 @@ export default {
     iframe.style.borderRadius = '5px'
     iframe.style.width = '100%'
     iframe.style.height = '100%'
+    iframe.setAttribute('sandbox', 'allow-scripts')
 
     return { iframe, page }
   },
@@ -66,12 +67,6 @@ export default {
 
     dialog.focus()
 
-    if (!iframe.contentWindow) {
-      throw new Error('iframe not yet ready.')
-    }
-
-    iframe.contentWindow.document.open()
-    iframe.contentWindow.document.write(page.outerHTML)
-    iframe.contentWindow.document.close()
+    iframe.srcdoc = page.outerHTML
   },
 }
