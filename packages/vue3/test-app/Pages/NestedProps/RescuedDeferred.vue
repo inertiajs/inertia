@@ -18,7 +18,9 @@ defineProps<{
     </template>
 
     <template #rescue>
-      <button id="retry" @click="router.reload({ only: ['auth'], headers: { 'X-Test-Retry': 'true' } })">Retry auth</button>
+      <button id="retry" @click="router.reload({ only: ['auth'], headers: { 'X-Test-Retry': 'true' } })">
+        Retry auth
+      </button>
     </template>
 
     <p id="notifications">Notifications: {{ auth.notifications?.join(', ') }}</p>

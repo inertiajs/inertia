@@ -16,7 +16,10 @@ export default () => {
         data="auth.notifications"
         fallback={<div id="loading">Loading notifications...</div>}
         rescue={
-          <button id="reload-except" onClick={() => router.reload({ except: ['auth.notifications'], headers: { 'X-Test-Retry': 'true' } })}>
+          <button
+            id="reload-except"
+            onClick={() => router.reload({ except: ['auth.notifications'], headers: { 'X-Test-Retry': 'true' } })}
+          >
             Reload without notifications
           </button>
         }

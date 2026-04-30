@@ -19,7 +19,9 @@
   {/snippet}
 
   {#snippet rescue()}
-    <button id="retry" onclick={() => router.reload({ only: ['auth'], headers: { 'X-Test-Retry': 'true' } })}>Retry auth</button>
+    <button id="retry" onclick={() => router.reload({ only: ['auth'], headers: { 'X-Test-Retry': 'true' } })}
+      >Retry auth</button
+    >
   {/snippet}
 
   <p id="notifications">Notifications: {auth.notifications?.join(', ')}</p>
