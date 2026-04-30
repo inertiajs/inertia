@@ -11,6 +11,10 @@
     router.post('/json')
   }
 
+  const invalidVisitXss = () => {
+    router.post('/non-inertia/xss')
+  }
+
   if (dialog) {
     config.set('future.useDialogForErrorModal', true)
   }
@@ -30,5 +34,12 @@
     role="button"
     tabindex="0"
     class="invalid-visit-json">Invalid Visit (JSON response)</span
+  >
+  <span
+    on:click={invalidVisitXss}
+    on:keydown={(e) => e.key === 'Enter' && invalidVisitXss()}
+    role="button"
+    tabindex="0"
+    class="invalid-visit-xss">Invalid Visit (XSS)</span
   >
 </div>

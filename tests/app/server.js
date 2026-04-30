@@ -34,6 +34,19 @@ app.all('/non-inertia', (req, res) =>
   `),
 )
 
+app.post('/non-inertia/xss', (req, res) =>
+  res.status(200).send(`
+    <!DOCTYPE html>
+    <html>
+      <head><title>XSS Test Page</title></head>
+      <body>
+        <script>window.parent.xssExecuted = true;<\/script>
+        <p>XSS test page</p>
+      </body>
+    </html>
+  `),
+)
+
 app.get('/non-inertia/download', (req, res) => {
   const query = new URLSearchParams(req.query).toString()
   res.setHeader('Content-Type', 'text/plain')

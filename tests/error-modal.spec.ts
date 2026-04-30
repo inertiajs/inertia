@@ -56,3 +56,12 @@ elements.forEach((element) => {
     })
   })
 })
+
+test('it does not execute scripts in the error dialog iframe', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/error-modal?dialog=1')
+  await page.getByText('Invalid Visit (XSS)', { exact: true }).click()
+  await expect(page.locator('dialog#inertia-error-dialog > iframe')).toBeVisible()
+  const xssExecuted = await page.evaluate(() => (window as any).xssExecuted)
+  expect(xssExecuted).toBeUndefined()
+})
