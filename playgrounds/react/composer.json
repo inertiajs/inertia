@@ -12,7 +12,7 @@
         "inertiajs/inertia-laravel": "^3.0.0",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "prism-php/prism": "^0.89.0"
+        "prism-php/prism": "^0.100.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
