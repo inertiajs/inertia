@@ -17,7 +17,7 @@ export default () => {
         data="auth.notifications"
         fallback={<div id="loading">Loading notifications...</div>}
         rescue={
-          <button id="retry" onClick={() => router.reload({ only: ['auth'] })}>
+          <button id="retry" onClick={() => router.reload({ only: ['auth'], headers: { 'X-Test-Retry': 'true' } })}>
             Retry auth
           </button>
         }

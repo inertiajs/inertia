@@ -22,7 +22,7 @@ defineProps<{
     </template>
 
     <template #rescue>
-      <button id="reload-except" @click="router.reload({ except: ['auth.notifications'] })">
+      <button id="reload-except" @click="router.reload({ except: ['auth.notifications'], headers: { 'X-Test-Retry': 'true' } })">
         Reload without notifications
       </button>
     </template>

@@ -54,6 +54,7 @@ test('can render rescued deferred props with error UI and recover on retry', asy
 
   await expect(page.getByText('Loading foo...')).not.toBeVisible()
   await expect(page.locator('#foo-error')).toContainText('Unable to load foo.')
+  await expect(page.locator('#reloading')).toContainText('false')
   await expect(page.locator('#foo')).toHaveCount(0)
 
   const retryResponse = page.waitForResponse(
@@ -61,6 +62,9 @@ test('can render rescued deferred props with error UI and recover on retry', asy
   )
 
   await page.getByRole('button', { exact: true, name: 'Retry' }).click()
+
+  await expect(page.locator('#reloading')).toContainText('true')
+
   await retryResponse
 
   await expect(page.locator('#foo-error')).not.toBeVisible()

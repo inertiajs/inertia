@@ -8,12 +8,21 @@ const Foo = () => {
 
 export default () => {
   const retry = () => {
-    router.reload({ only: ['foo'] })
+    router.reload({ only: ['foo'], headers: { 'X-Test-Retry': 'true' } })
   }
 
   return (
     <>
-      <Deferred data="foo" fallback={<div>Loading foo...</div>} rescue={<div id="foo-error">Unable to load foo.</div>}>
+      <Deferred
+        data="foo"
+        fallback={<div>Loading foo...</div>}
+        rescue={({ reloading }) => (
+          <>
+            <div id="foo-error">Unable to load foo.</div>
+            <span id="reloading">{String(reloading)}</span>
+          </>
+        )}
+      >
         <Foo />
       </Deferred>
 

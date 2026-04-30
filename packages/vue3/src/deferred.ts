@@ -14,7 +14,7 @@ export default defineComponent({
   slots: Object as SlotsType<{
     default: { reloading: boolean }
     fallback: {}
-    rescue: {}
+    rescue: { reloading: boolean }
   }>,
   setup(props, { slots }) {
     const reloading = ref(false)
@@ -67,7 +67,7 @@ export default defineComponent({
       return propsAreDefined && !hasRescuedProps
         ? slots.default?.({ reloading: reloading.value })
         : hasRescuedProps && slots.rescue
-          ? slots.rescue({})
+          ? slots.rescue({ reloading: reloading.value })
           : slots.fallback({})
     }
   },

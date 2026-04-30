@@ -8,7 +8,7 @@
   let { foo }: Props = $props()
 
   const retry = () => {
-    router.reload({ only: ['foo'] })
+    router.reload({ only: ['foo'], headers: { 'X-Test-Retry': 'true' } })
   }
 </script>
 
@@ -17,8 +17,9 @@
     <div>Loading foo...</div>
   {/snippet}
 
-  {#snippet rescue()}
+  {#snippet rescue({ reloading })}
     <div id="foo-error">Unable to load foo.</div>
+    <span id="reloading">{reloading}</span>
   {/snippet}
 
   <div id="foo">{foo?.text}</div>

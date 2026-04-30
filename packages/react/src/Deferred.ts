@@ -10,7 +10,7 @@ interface DeferredSlotProps {
 
 interface DeferredProps {
   children: ReactNode | ((props: DeferredSlotProps) => ReactNode)
-  rescue?: ReactNode | (() => ReactNode)
+  rescue?: ReactNode | ((props: DeferredSlotProps) => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
@@ -73,7 +73,7 @@ const Deferred = ({ children, data, rescue, fallback }: DeferredProps) => {
   }
 
   if (hasRescuedProps && rescue) {
-    return typeof rescue === 'function' ? rescue() : rescue
+    return typeof rescue === 'function' ? rescue({ reloading }) : rescue
   }
 
   return typeof fallback === 'function' ? fallback() : fallback

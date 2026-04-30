@@ -1666,7 +1666,6 @@ app.get('/deferred-props/partial-reloads', (req, res) => {
 })
 
 let deferredPropsWithErrorsState = {}
-let rescuedPropsState = { failNext: true }
 
 app.get('/deferred-props/with-errors', (req, res) => {
   const errors = { ...deferredPropsWithErrorsState }
@@ -1706,8 +1705,6 @@ app.post('/deferred-props/with-errors', (req, res) => {
 
 app.get('/deferred-props/with-rescued-errors', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
-    rescuedPropsState = { failNext: true }
-
     return inertia.render(req, res, {
       component: 'DeferredProps/WithRescuedErrors',
       deferredProps: {
@@ -1718,22 +1715,20 @@ app.get('/deferred-props/with-rescued-errors', (req, res) => {
   }
 
   setTimeout(() => {
-    if (rescuedPropsState.failNext) {
-      rescuedPropsState.failNext = false
-
+    if (req.headers['x-test-retry']) {
       return inertia.render(req, res, {
         component: 'DeferredProps/WithRescuedErrors',
-        rescuedProps: ['foo'],
         props: {
-          foo: null,
+          foo: { text: 'foo value' },
         },
       })
     }
 
     return inertia.render(req, res, {
       component: 'DeferredProps/WithRescuedErrors',
+      rescuedProps: ['foo'],
       props: {
-        foo: { text: 'foo value' },
+        foo: null,
       },
     })
   }, 250)
@@ -3374,14 +3369,10 @@ app.get('/nested-props/deferred', (req, res) => {
   )
 })
 
-let nestedRescuedDeferredFailedOnce = false
-
 app.get('/nested-props/rescued-deferred', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
 
   if (!req.headers['x-inertia-partial-data']) {
-    nestedRescuedDeferredFailedOnce = false
-
     return inertia.render(req, res, {
       component: 'NestedProps/RescuedDeferred',
       deferredProps: {
@@ -3396,42 +3387,36 @@ app.get('/nested-props/rescued-deferred', (req, res) => {
   }
 
   setTimeout(() => {
-    if (!nestedRescuedDeferredFailedOnce && partialData.includes('auth.notifications')) {
-      nestedRescuedDeferredFailedOnce = true
-
+    if (req.headers['x-test-retry']) {
       return inertia.render(req, res, {
         component: 'NestedProps/RescuedDeferred',
-        rescuedProps: ['auth.notifications'],
         props: {
-          auth: {},
+          auth:
+            partialData.includes('auth') || partialData.includes('auth.notifications')
+              ? {
+                  user: 'John Doe',
+                  notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
+                }
+              : undefined,
         },
       })
     }
 
     return inertia.render(req, res, {
       component: 'NestedProps/RescuedDeferred',
+      rescuedProps: ['auth.notifications'],
       props: {
-        auth:
-          partialData.includes('auth') || partialData.includes('auth.notifications')
-            ? {
-                user: 'John Doe',
-                notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
-              }
-            : undefined,
+        auth: {},
       },
     })
   }, 300)
 })
-
-let nestedExceptRescuedDeferredFailedOnce = false
 
 app.get('/nested-props/rescued-deferred-except', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
   const partialExcept = req.headers['x-inertia-partial-except']?.split(',') ?? []
 
   if (!req.headers['x-inertia-partial-data'] && !req.headers['x-inertia-partial-except']) {
-    nestedExceptRescuedDeferredFailedOnce = false
-
     return inertia.render(req, res, {
       component: 'NestedProps/RescuedDeferredExcept',
       deferredProps: {
@@ -3448,36 +3433,34 @@ app.get('/nested-props/rescued-deferred-except', (req, res) => {
   }
 
   setTimeout(() => {
-    if (!nestedExceptRescuedDeferredFailedOnce && partialData.includes('auth.notifications')) {
-      nestedExceptRescuedDeferredFailedOnce = true
-
+    if (req.headers['x-test-retry']) {
       return inertia.render(req, res, {
         component: 'NestedProps/RescuedDeferredExcept',
-        rescuedProps: ['auth.notifications'],
         props: {
-          auth: {
-            user: 'John Doe',
-            token: 'secret-token-123',
-          },
-          status: 'pending',
+          auth: partialExcept.includes('auth.notifications')
+            ? {
+                user: 'John Doe',
+                token: 'rotated-token-456',
+              }
+            : {
+                user: 'John Doe',
+                token: 'rotated-token-456',
+                notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
+              },
+          status: 'refreshed',
         },
       })
     }
 
     return inertia.render(req, res, {
       component: 'NestedProps/RescuedDeferredExcept',
+      rescuedProps: ['auth.notifications'],
       props: {
-        auth: partialExcept.includes('auth.notifications')
-          ? {
-              user: 'John Doe',
-              token: 'rotated-token-456',
-            }
-          : {
-              user: 'John Doe',
-              token: 'rotated-token-456',
-              notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
-            },
-        status: 'refreshed',
+        auth: {
+          user: 'John Doe',
+          token: 'secret-token-123',
+        },
+        status: 'pending',
       },
     })
   }, 300)

@@ -5,7 +5,7 @@
 
   interface Props {
     data: string | string[]
-    rescue?: import('svelte').Snippet
+    rescue?: import('svelte').Snippet<[{ reloading: boolean }]>
     fallback?: import('svelte').Snippet
     children?: import('svelte').Snippet<[{ reloading: boolean }]>
   }
@@ -60,7 +60,7 @@
 {#if loaded && !failed}
   {@render children?.({ reloading })}
 {:else if failed && rescue}
-  {@render rescue?.()}
+  {@render rescue?.({ reloading })}
 {:else}
   {@render fallback?.()}
 {/if}

@@ -6,7 +6,7 @@ defineProps<{
 }>()
 
 const retry = () => {
-  router.reload({ only: ['foo'] })
+  router.reload({ only: ['foo'], headers: { 'X-Test-Retry': 'true' } })
 }
 </script>
 
@@ -16,8 +16,9 @@ const retry = () => {
       <div>Loading foo...</div>
     </template>
 
-    <template #rescue>
+    <template #rescue="{ reloading }">
       <div id="foo-error">Unable to load foo.</div>
+      <span id="reloading">{{ reloading }}</span>
     </template>
 
     <div id="foo">{{ foo?.text }}</div>

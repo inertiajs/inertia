@@ -23,7 +23,7 @@
   {/snippet}
 
   {#snippet rescue()}
-    <button id="reload-except" onclick={() => router.reload({ except: ['auth.notifications'] })}>
+    <button id="reload-except" onclick={() => router.reload({ except: ['auth.notifications'], headers: { 'X-Test-Retry': 'true' } })}>
       Reload without notifications
     </button>
   {/snippet}
