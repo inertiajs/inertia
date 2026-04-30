@@ -107,7 +107,7 @@ function renderTag(node: VNode): string {
 
 function addTitleElement(elements: string[], title?: string): string[] {
   if (title && !elements.find((tag) => tag.startsWith('<title'))) {
-    elements.push(`<title data-inertia="">${title}</title>`)
+    elements.push(`<title data-inertia="">${escape(title)}</title>`)
   }
 
   return elements

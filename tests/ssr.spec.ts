@@ -89,6 +89,20 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('Head title escaping', () => {
+  test.beforeEach(() => {
+    test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
+  })
+
+  test('it escapes HTML in the title prop to prevent XSS in SSR output', async ({ page }) => {
+    const response = await page.request.get('/ssr/head-with-xss-title')
+    const html = await response.text()
+
+    expect(html).not.toContain('</title><script>alert(')
+    expect(html).toContain('&lt;/title&gt;&lt;script&gt;')
+  })
+})
+
 test.describe('layout props', () => {
   test('it does not leak layout props between SSR requests', async ({ page, browserName }) => {
     const responseA = await page.request.get('/ssr/layout-props-a')
