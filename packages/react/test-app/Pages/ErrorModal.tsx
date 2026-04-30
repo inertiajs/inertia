@@ -9,6 +9,10 @@ export default () => {
     router.post('/json')
   }
 
+  const invalidVisitXss = () => {
+    router.post('/non-inertia/xss')
+  }
+
   return (
     <div>
       <span onClick={invalidVisit} className="invalid-visit">
@@ -16,6 +20,9 @@ export default () => {
       </span>
       <span onClick={invalidVisitJson} className="invalid-visit-json">
         Invalid Visit (JSON response)
+      </span>
+      <span onClick={invalidVisitXss} className="invalid-visit-xss">
+        Invalid Visit (XSS)
       </span>
     </div>
   )
