@@ -10,12 +10,12 @@ interface DeferredSlotProps {
 
 interface DeferredProps {
   children: ReactNode | ((props: DeferredSlotProps) => ReactNode)
-  error?: ReactNode | (() => ReactNode)
+  rescue?: ReactNode | (() => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
 
-const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
+const Deferred = ({ children, data, rescue, fallback }: DeferredProps) => {
   if (!data) {
     throw new Error('`<Deferred>` requires a `data` prop to be a string or array of strings')
   }
@@ -62,10 +62,6 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
   }, [keys])
 
   const propsAreDefined = useMemo(() => keys.every((key) => get(pageProps, key) !== undefined), [keys, pageProps])
-  const propsAreSettled = useMemo(
-    () => keys.every((key) => get(pageProps, key) !== undefined || rescuedKeys.has(key)),
-    [keys, pageProps, rescuedKeys],
-  )
   const hasRescuedProps = useMemo(() => keys.some((key) => rescuedKeys.has(key)), [keys, rescuedKeys])
 
   if (propsAreDefined && !hasRescuedProps) {
@@ -76,8 +72,8 @@ const Deferred = ({ children, data, error, fallback }: DeferredProps) => {
     return children
   }
 
-  if (propsAreSettled && hasRescuedProps && error) {
-    return typeof error === 'function' ? error() : error
+  if (hasRescuedProps && rescue) {
+    return typeof rescue === 'function' ? rescue() : rescue
   }
 
   return typeof fallback === 'function' ? fallback() : fallback

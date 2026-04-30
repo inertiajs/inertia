@@ -16,7 +16,7 @@ export default () => {
       <Deferred
         data="auth.notifications"
         fallback={<div id="loading">Loading notifications...</div>}
-        error={
+        rescue={
           <button id="retry" onClick={() => router.reload({ only: ['auth'] })}>
             Retry auth
           </button>

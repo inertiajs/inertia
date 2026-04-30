@@ -22,7 +22,7 @@
     <div id="loading">Loading notifications...</div>
   {/snippet}
 
-  {#snippet error()}
+  {#snippet rescue()}
     <button id="reload-except" onclick={() => router.reload({ except: ['auth.notifications'] })}>
       Reload without notifications
     </button>

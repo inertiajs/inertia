@@ -17,7 +17,7 @@ defineProps<{
       <div id="loading">Loading notifications...</div>
     </template>
 
-    <template #error>
+    <template #rescue>
       <button id="retry" @click="router.reload({ only: ['auth'] })">Retry auth</button>
     </template>
 

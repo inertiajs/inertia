@@ -17,7 +17,7 @@
     <div>Loading foo...</div>
   {/snippet}
 
-  {#snippet error()}
+  {#snippet rescue()}
     <div id="foo-error">Unable to load foo.</div>
   {/snippet}
 

@@ -18,7 +18,7 @@
     <div id="loading">Loading notifications...</div>
   {/snippet}
 
-  {#snippet error()}
+  {#snippet rescue()}
     <button id="retry" onclick={() => router.reload({ only: ['auth'] })}>Retry auth</button>
   {/snippet}
 

@@ -14,7 +14,7 @@ export default defineComponent({
   slots: Object as SlotsType<{
     default: { reloading: boolean }
     fallback: {}
-    error: {}
+    rescue: {}
   }>,
   setup(props, { slots }) {
     const reloading = ref(false)
@@ -62,15 +62,12 @@ export default defineComponent({
       }
 
       const propsAreDefined = keys.value.every((key) => get(page.props, key) !== undefined)
-      const propsAreSettled = keys.value.every(
-        (key) => get(page.props, key) !== undefined || rescuedKeys.value.has(key),
-      )
       const hasRescuedProps = keys.value.some((key) => rescuedKeys.value.has(key))
 
       return propsAreDefined && !hasRescuedProps
         ? slots.default?.({ reloading: reloading.value })
-        : propsAreSettled && hasRescuedProps && slots.error
-          ? slots.error({})
+        : hasRescuedProps && slots.rescue
+          ? slots.rescue({})
           : slots.fallback({})
     }
   },

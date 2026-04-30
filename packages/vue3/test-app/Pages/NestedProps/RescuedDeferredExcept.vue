@@ -21,7 +21,7 @@ defineProps<{
       <div id="loading">Loading notifications...</div>
     </template>
 
-    <template #error>
+    <template #rescue>
       <button id="reload-except" @click="router.reload({ except: ['auth.notifications'] })">
         Reload without notifications
       </button>

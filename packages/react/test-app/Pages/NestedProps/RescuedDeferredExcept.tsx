@@ -15,7 +15,7 @@ export default () => {
       <Deferred
         data="auth.notifications"
         fallback={<div id="loading">Loading notifications...</div>}
-        error={
+        rescue={
           <button id="reload-except" onClick={() => router.reload({ except: ['auth.notifications'] })}>
             Reload without notifications
           </button>

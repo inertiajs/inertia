@@ -16,7 +16,7 @@ const retry = () => {
       <div>Loading foo...</div>
     </template>
 
-    <template #error>
+    <template #rescue>
       <div id="foo-error">Unable to load foo.</div>
     </template>
 

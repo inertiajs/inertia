@@ -13,7 +13,7 @@ export default () => {
 
   return (
     <>
-      <Deferred data="foo" fallback={<div>Loading foo...</div>} error={<div id="foo-error">Unable to load foo.</div>}>
+      <Deferred data="foo" fallback={<div>Loading foo...</div>} rescue={<div id="foo-error">Unable to load foo.</div>}>
         <Foo />
       </Deferred>
 
