@@ -19,6 +19,5 @@ describe('createHeadManager', () => {
 
       expect(head).not.toContain('<script>alert(')
     })
-
   })
 })
