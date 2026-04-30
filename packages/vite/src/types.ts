@@ -101,6 +101,12 @@ export interface SSROptions {
   port?: number
 
   /**
+   * Host to bind the SSR server to.
+   * Used in production when running the SSR server as a separate process.
+   */
+  host?: string
+
+  /**
    * Whether to enable cluster mode for the SSR server.
    * Cluster mode spawns multiple worker processes for better performance.
    */
