@@ -12,6 +12,7 @@ import {
 } from './events'
 import { history } from './history'
 import { page as currentPage } from './page'
+import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
@@ -128,7 +129,7 @@ export class Response {
 
     // Only spread if data is an object (not a string like HTML error pages)
     if (typeof data === 'object') {
-      return (this.response.data = { ...data, flash: data.flash ?? {} })
+      return (this.response.data = { ...data, flash: data.flash ?? {}, rescuedProps: data.rescuedProps ?? [] })
     }
 
     return (this.response.data = data)
@@ -395,7 +396,6 @@ export class Response {
         .filter((prop) => prop.includes('.'))
         .map((prop) => prop.split('.')[0]),
     )
-
     for (const key of nestedTopKeys) {
       const currentValue = currentPage.get().props[key]
 
@@ -437,6 +437,21 @@ export class Response {
     if (currentOriginalDeferred && Object.keys(currentOriginalDeferred).length > 0) {
       pageResponse.initialDeferredProps = currentOriginalDeferred
     }
+
+    pageResponse.rescuedProps = this.mergeRescuedProps(pageResponse)
+  }
+
+  protected mergeRescuedProps(pageResponse: Page): string[] {
+    const currentRescued = currentPage.get().rescuedProps ?? []
+    const incomingRescued = pageResponse.rescuedProps ?? []
+
+    const newRescued = new Set(
+      currentRescued.filter((prop) => !partialReloadRequestsProp(this.requestParams.all(), prop)),
+    )
+
+    incomingRescued.forEach((prop) => newRescued.add(prop))
+
+    return Array.from(newRescued)
   }
 
   /**

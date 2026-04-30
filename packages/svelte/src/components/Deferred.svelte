@@ -1,33 +1,24 @@
 <script lang="ts">
-  import { isSameUrlWithoutQueryOrHash, router } from '@inertiajs/core'
+  import { isSameUrlWithoutQueryOrHash, router, partialReloadRequestsSomeProps } from '@inertiajs/core'
   import { get } from 'es-toolkit/compat'
   import { page } from '../index'
 
   interface Props {
     data: string | string[]
+    rescue?: import('svelte').Snippet<[{ reloading: boolean }]>
     fallback?: import('svelte').Snippet
     children?: import('svelte').Snippet<[{ reloading: boolean }]>
   }
 
-  let { data, fallback, children }: Props = $props()
+  let { data, rescue, fallback, children }: Props = $props()
 
   const keys = $derived(Array.isArray(data) ? data : [data])
+  const rescuedKeys = $derived(new Set(page.rescuedProps))
   const loaded = $derived(keys.every((key) => typeof get(page.props, key) !== 'undefined'))
+  const failed = $derived(keys.some((key) => rescuedKeys.has(key)))
 
   let reloading = $state(false)
   const activeReloads = new Set<object>()
-
-  const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-    if (only.length === 0 && except.length === 0) {
-      return true
-    }
-
-    if (only.length > 0) {
-      return keys.some((key) => only.includes(key))
-    }
-
-    return keys.some((key) => !except.includes(key))
-  }
 
   $effect(() => {
     const removeStartListener = router.on('start', (e) => {
@@ -36,7 +27,7 @@
       if (
         visit.preserveState === true &&
         isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-        keysAreBeingReloaded(visit.only, visit.except, keys)
+        partialReloadRequestsSomeProps(visit, keys)
       ) {
         activeReloads.add(visit)
         reloading = true
@@ -66,8 +57,10 @@
   })
 </script>
 
-{#if loaded}
+{#if loaded && !failed}
   {@render children?.({ reloading })}
+{:else if failed && rescue}
+  {@render rescue?.({ reloading })}
 {:else}
   {@render fallback?.()}
 {/if}

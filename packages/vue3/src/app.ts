@@ -250,6 +250,7 @@ export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageP
       version: computed(() => page.value?.version),
       clearHistory: computed(() => page.value?.clearHistory),
       deferredProps: computed(() => page.value?.deferredProps),
+      rescuedProps: computed(() => page.value?.rescuedProps),
       mergeProps: computed(() => page.value?.mergeProps),
       prependProps: computed(() => page.value?.prependProps),
       deepMergeProps: computed(() => page.value?.deepMergeProps),

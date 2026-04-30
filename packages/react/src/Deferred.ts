@@ -1,20 +1,8 @@
-import { isSameUrlWithoutQueryOrHash } from '@inertiajs/core'
+import { isSameUrlWithoutQueryOrHash, partialReloadRequestsSomeProps } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { router } from '.'
 import usePage from './usePage'
-
-const keysAreBeingReloaded = (only: string[], except: string[], keys: string[]): boolean => {
-  if (only.length === 0 && except.length === 0) {
-    return true
-  }
-
-  if (only.length > 0) {
-    return keys.some((key) => only.includes(key))
-  }
-
-  return keys.some((key) => !except.includes(key))
-}
 
 interface DeferredSlotProps {
   reloading: boolean
@@ -22,20 +10,26 @@ interface DeferredSlotProps {
 
 interface DeferredProps {
   children: ReactNode | ((props: DeferredSlotProps) => ReactNode)
+  rescue?: ReactNode | ((props: DeferredSlotProps) => ReactNode)
   fallback: ReactNode | (() => ReactNode)
   data: string | string[]
 }
 
-const Deferred = ({ children, data, fallback }: DeferredProps) => {
+const Deferred = ({ children, data, rescue, fallback }: DeferredProps) => {
   if (!data) {
     throw new Error('`<Deferred>` requires a `data` prop to be a string or array of strings')
   }
 
-  const [loaded, setLoaded] = useState(false)
+  if (!fallback) {
+    throw new Error('`<Deferred>` requires a `fallback` prop')
+  }
+
   const [reloading, setReloading] = useState(false)
   const activeReloads = useRef(new Set<object>())
-  const pageProps = usePage().props
+  const page = usePage()
+  const pageProps = page.props
   const keys = useMemo(() => (Array.isArray(data) ? data : [data]), [data])
+  const rescuedKeys = useMemo(() => new Set(page.rescuedProps), [page.rescuedProps])
 
   useEffect(() => {
     const removeStartListener = router.on('start', (e) => {
@@ -44,7 +38,7 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
       if (
         visit.preserveState === true &&
         isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-        keysAreBeingReloaded(visit.only, visit.except, keys)
+        partialReloadRequestsSomeProps(visit, keys)
       ) {
         activeReloads.current.add(visit)
         setReloading(true)
@@ -67,18 +61,19 @@ const Deferred = ({ children, data, fallback }: DeferredProps) => {
     }
   }, [keys])
 
-  useEffect(() => {
-    setLoaded(keys.every((key) => get(pageProps, key) !== undefined))
-  }, [pageProps, keys])
-
   const propsAreDefined = useMemo(() => keys.every((key) => get(pageProps, key) !== undefined), [keys, pageProps])
+  const hasRescuedProps = useMemo(() => keys.some((key) => rescuedKeys.has(key)), [keys, rescuedKeys])
 
-  if (loaded && propsAreDefined) {
+  if (propsAreDefined && !hasRescuedProps) {
     if (typeof children === 'function') {
       return children({ reloading })
     }
 
     return children
+  }
+
+  if (hasRescuedProps && rescue) {
+    return typeof rescue === 'function' ? rescue({ reloading }) : rescue
   }
 
   return typeof fallback === 'function' ? fallback() : fallback

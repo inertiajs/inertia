@@ -14,6 +14,34 @@ test('it can load nested deferred props without clobbering siblings', async ({ p
   await expect(page.locator('#user')).toContainText('User: John Doe')
 })
 
+test('it clears rescued child props when a parent path is reloaded', async ({ page }) => {
+  await page.goto('/nested-props/rescued-deferred')
+
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+  await expect(page.locator('#retry')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Retry auth', '/nested-props/rescued-deferred', 'button')
+
+  await expect(page.locator('#retry')).toHaveCount(0)
+  await expect(page.locator('#notifications')).toContainText(
+    'Notifications: Notification 1, Notification 2, Notification 3',
+  )
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+})
+
+test('it preserves rescued child props when that child path is excluded from reload', async ({ page }) => {
+  await page.goto('/nested-props/rescued-deferred-except')
+
+  await expect(page.locator('#reload-except')).toBeVisible()
+
+  await clickAndWaitForResponse(page, 'Reload without notifications', '/nested-props/rescued-deferred-except', 'button')
+
+  await expect(page.locator('#reload-except')).toBeVisible()
+  await expect(page.locator('#notifications')).toHaveCount(0)
+  await expect(page.locator('#token')).toContainText('Token: secret-token-123')
+  await expect(page.locator('#status')).toContainText('Status: refreshed')
+})
+
 test('it can append to nested merge props', async ({ page }) => {
   await page.goto('/nested-props/merge')
 

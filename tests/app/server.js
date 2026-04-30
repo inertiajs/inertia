@@ -1725,6 +1725,37 @@ app.post('/deferred-props/with-errors', (req, res) => {
   res.redirect(303, '/deferred-props/with-errors')
 })
 
+app.get('/deferred-props/with-rescued-errors', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithRescuedErrors',
+      deferredProps: {
+        default: ['foo'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(() => {
+    if (req.headers['x-test-retry']) {
+      return inertia.render(req, res, {
+        component: 'DeferredProps/WithRescuedErrors',
+        props: {
+          foo: { text: 'foo value' },
+        },
+      })
+    }
+
+    return inertia.render(req, res, {
+      component: 'DeferredProps/WithRescuedErrors',
+      rescuedProps: ['foo'],
+      props: {
+        foo: null,
+      },
+    })
+  }, 250)
+})
+
 app.get('/deferred-props/with-reload', (req, res) => {
   const page = parseInt(req.query.page) || 1
 
@@ -3358,6 +3389,103 @@ app.get('/nested-props/deferred', (req, res) => {
       }),
     300,
   )
+})
+
+app.get('/nested-props/rescued-deferred', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/RescuedDeferred',
+      deferredProps: {
+        default: ['auth.notifications'],
+      },
+      props: {
+        auth: {
+          user: 'John Doe',
+        },
+      },
+    })
+  }
+
+  setTimeout(() => {
+    if (req.headers['x-test-retry']) {
+      return inertia.render(req, res, {
+        component: 'NestedProps/RescuedDeferred',
+        props: {
+          auth:
+            partialData.includes('auth') || partialData.includes('auth.notifications')
+              ? {
+                  user: 'John Doe',
+                  notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
+                }
+              : undefined,
+        },
+      })
+    }
+
+    return inertia.render(req, res, {
+      component: 'NestedProps/RescuedDeferred',
+      rescuedProps: ['auth.notifications'],
+      props: {
+        auth: {},
+      },
+    })
+  }, 300)
+})
+
+app.get('/nested-props/rescued-deferred-except', (req, res) => {
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+  const partialExcept = req.headers['x-inertia-partial-except']?.split(',') ?? []
+
+  if (!req.headers['x-inertia-partial-data'] && !req.headers['x-inertia-partial-except']) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/RescuedDeferredExcept',
+      deferredProps: {
+        default: ['auth.notifications'],
+      },
+      props: {
+        auth: {
+          user: 'John Doe',
+          token: 'secret-token-123',
+        },
+        status: 'pending',
+      },
+    })
+  }
+
+  setTimeout(() => {
+    if (req.headers['x-test-retry']) {
+      return inertia.render(req, res, {
+        component: 'NestedProps/RescuedDeferredExcept',
+        props: {
+          auth: partialExcept.includes('auth.notifications')
+            ? {
+                user: 'John Doe',
+                token: 'rotated-token-456',
+              }
+            : {
+                user: 'John Doe',
+                token: 'rotated-token-456',
+                notifications: ['Notification 1', 'Notification 2', 'Notification 3'],
+              },
+          status: 'refreshed',
+        },
+      })
+    }
+
+    return inertia.render(req, res, {
+      component: 'NestedProps/RescuedDeferredExcept',
+      rescuedProps: ['auth.notifications'],
+      props: {
+        auth: {
+          user: 'John Doe',
+          token: 'secret-token-123',
+        },
+        status: 'pending',
+      },
+    })
+  }, 300)
 })
 
 let nestedMergeRequestCount = 0
