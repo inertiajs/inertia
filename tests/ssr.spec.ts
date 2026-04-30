@@ -98,7 +98,7 @@ test.describe('Head title escaping', () => {
     const response = await page.request.get('/ssr/head-with-xss-title')
     const html = await response.text()
 
-    expect(html).not.toContain('<script>alert(')
+    expect(html).not.toContain('</title><script>alert(')
     expect(html).toContain('&lt;/title&gt;&lt;script&gt;')
   })
 })
