@@ -111,7 +111,7 @@ const Head: InertiaHead = function ({ children, title }) {
       .map((node) => renderNode(node as ReactElement<any>))
 
     if (title && !elements.find((tag) => tag.startsWith('<title'))) {
-      elements.push(`<title data-inertia="">${title}</title>`)
+      elements.push(`<title data-inertia="">${escape(title)}</title>`)
     }
 
     return elements
