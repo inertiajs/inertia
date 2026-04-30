@@ -12,7 +12,7 @@ import {
 } from './events'
 import { history } from './history'
 import { page as currentPage } from './page'
-import { visitReloadsProp } from './partialReload'
+import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
@@ -445,7 +445,9 @@ export class Response {
     const currentRescued = currentPage.get().rescuedProps ?? []
     const incomingRescued = pageResponse.rescuedProps ?? []
 
-    const newRescued = new Set(currentRescued.filter((prop) => !visitReloadsProp(this.requestParams.all(), prop)))
+    const newRescued = new Set(
+      currentRescued.filter((prop) => !partialReloadRequestsProp(this.requestParams.all(), prop)),
+    )
 
     incomingRescued.forEach((prop) => newRescued.add(prop))
 

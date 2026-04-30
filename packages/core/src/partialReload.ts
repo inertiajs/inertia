@@ -6,7 +6,7 @@ export const isPathOrSubPath = (path: string, candidate: string): boolean => {
   return path === candidate || path.startsWith(`${candidate}.`)
 }
 
-export const visitReloadsProp = (visit: VisitFilter, prop: string): boolean => {
+export const partialReloadRequestsProp = (visit: VisitFilter, prop: string): boolean => {
   const { only, except } = visit
 
   if (only.length === 0 && except.length === 0) {
@@ -24,12 +24,6 @@ export const visitReloadsProp = (visit: VisitFilter, prop: string): boolean => {
   return true
 }
 
-export const visitReloadsProps = (visit: VisitFilter, props: string[]): boolean => {
-  const { only, except } = visit
-
-  if (only.length === 0 && except.length === 0) {
-    return true
-  }
-
-  return props.some((prop) => visitReloadsProp(visit, prop))
+export const partialReloadRequestsSomeProps = (visit: VisitFilter, props: string[]): boolean => {
+  return props.some((prop) => partialReloadRequestsProp(visit, prop))
 }
