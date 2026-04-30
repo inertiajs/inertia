@@ -395,6 +395,45 @@ test.describe('url.ts', () => {
       })
     })
 
+    test.describe('prototype pollution prevention', () => {
+      test.afterEach(() => {
+        delete (Object.prototype as any).polluted
+      })
+
+      test('does not pollute Object.prototype via __proto__ key in URL', () => {
+        mergeDataIntoQueryString('get', '/page?__proto__[polluted]=true', {})
+
+        expect((Object.prototype as any).polluted).toBeUndefined()
+        expect(({} as any).polluted).toBeUndefined()
+      })
+
+      test('does not pollute Object.prototype via nested __proto__ key in URL', () => {
+        mergeDataIntoQueryString('get', '/page?a[__proto__][polluted]=true', {})
+
+        expect((Object.prototype as any).polluted).toBeUndefined()
+        expect(({} as any).polluted).toBeUndefined()
+      })
+
+      test('does not pollute Object.prototype via URL-encoded __proto__ key', () => {
+        mergeDataIntoQueryString('get', '/page?%5F%5Fproto%5F%5F[polluted]=true', {})
+
+        expect((Object.prototype as any).polluted).toBeUndefined()
+        expect(({} as any).polluted).toBeUndefined()
+      })
+
+      test('parses constructor key as a regular query param', () => {
+        const [href] = mergeDataIntoQueryString('get', '/page?constructor[x]=y', {})
+
+        expect(href).toBe('/page?constructor[x]=y')
+      })
+
+      test('parses prototype key as a regular query param', () => {
+        const [href] = mergeDataIntoQueryString('get', '/page?foo[prototype][x]=y', {})
+
+        expect(href).toBe('/page?foo[prototype][x]=y')
+      })
+    })
+
     test.describe('non-GET request', () => {
       test('leaves the href unchanged when data is present', () => {
         const [href, data] = mergeDataIntoQueryString('post', '/submit', { name: 'foo' })

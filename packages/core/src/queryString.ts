@@ -65,6 +65,10 @@ function set(target: Record<string, unknown>, key: string, value: string): void 
   // "user[profile][name]" -> ["user", "profile", "name"]
   const keys = parseKey(key)
 
+  if (keys.some((k) => k === '__proto__')) {
+    return
+  }
+
   let current = target
 
   while (keys.length > 1) {
