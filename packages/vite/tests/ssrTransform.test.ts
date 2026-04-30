@@ -97,11 +97,11 @@ createInertiaApp({})`
       `)
     })
 
-    it('includes port and cluster config', () => {
+    it('includes port, host and cluster config', () => {
       const code = `import { createInertiaApp } from '@inertiajs/svelte'
 createInertiaApp({})`
 
-      expect(wrap(code, { port: 13715, cluster: true })).toMatchInlineSnapshot(`
+      expect(wrap(code, { port: 13715, host: '127.0.0.1', cluster: true })).toMatchInlineSnapshot(`
         "import { createInertiaApp } from '@inertiajs/svelte'
         import createServer from '@inertiajs/svelte/server'
         import { render } from 'svelte/server'
@@ -111,7 +111,7 @@ createInertiaApp({})`
         const renderPage = (page) => ssr(page, render)
 
         if (import.meta.env.PROD) {
-          createServer(renderPage, {"port":13715,"cluster":true})
+          createServer(renderPage, {"port":13715,"host":"127.0.0.1","cluster":true})
         }
 
         export default renderPage"
