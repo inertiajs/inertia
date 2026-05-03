@@ -60,8 +60,10 @@
   },
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
+    "@unhead/ssr": "^3.1.0",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.0.0"
+    "laravel-precognition": "^2.0.0",
+    "unhead": "^3.1.0"
   },
   "peerDependencies": {
     "axios": "^1.15.2"

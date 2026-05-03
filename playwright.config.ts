@@ -57,7 +57,10 @@ const projects = [
 const buildCommand = `pnpm -r --filter './packages/${adapter}/test-app' build`
 const buildSSRCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr`
 const buildSSRAutoCommand = `pnpm -r --filter './packages/${adapter}/test-app' build:ssr-auto`
-const serveCommand = `cd tests/app && PACKAGE=${adapter} pnpm serve`
+const isWindows = process.platform === 'win32'
+const serveCommand = isWindows
+  ? `cd tests/app && set PACKAGE=${adapter}&& pnpm serve`
+  : `cd tests/app && PACKAGE=${adapter} pnpm serve`
 
 // Web server configuration based on SSR mode
 const webServerConfig = ssrEnabled

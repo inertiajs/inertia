@@ -1,5 +1,6 @@
 import {
   createHeadManager,
+  HeadManager,
   HeadManagerOnUpdateCallback,
   HeadManagerTitleCallback,
   isPropsObject,
@@ -70,6 +71,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
+  headManager?: HeadManager
 }
 
 export type InertiaApp = FunctionComponent<InertiaAppProps>
@@ -87,6 +89,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
   titleCallback,
   onHeadUpdate,
   defaultLayout,
+  headManager: providedHeadManager,
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
@@ -95,12 +98,11 @@ export default function App<SharedProps extends PageProps = PageProps>({
   })
 
   const headManager = useMemo(() => {
-    return createHeadManager(
-      typeof window === 'undefined',
-      titleCallback || ((title) => title),
-      onHeadUpdate || (() => {}),
+    return (
+      providedHeadManager ||
+      createHeadManager(typeof window === 'undefined', titleCallback || ((title) => title), onHeadUpdate || (() => {}))
     )
-  }, [])
+  }, [providedHeadManager, titleCallback, onHeadUpdate])
 
   const dynamicLayoutProps = useSyncExternalStore(store.subscribe, store.get, () => emptySnapshot)
 

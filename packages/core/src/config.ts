@@ -80,4 +80,7 @@ export const config = new Config<InertiaAppConfig>({
     cacheFor: 30_000,
     hoverDelay: 75,
   },
+  unhead: {
+    disableDefaults: true,
+  },
 })

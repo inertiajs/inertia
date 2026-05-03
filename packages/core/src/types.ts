@@ -605,9 +605,10 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
 }
-export type HeadManagerOnUpdateCallback = (elements: string[]) => void
+export type HeadManagerOnUpdateCallback = (elements: any) => void
 export type HeadManager = {
   forceUpdate: () => void
+  renderSSR?: () => Promise<string[]>
   createProvider: () => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
@@ -634,6 +635,10 @@ export type InertiaAppConfig = {
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
     hoverDelay: number
+  }
+  unhead: {
+    disableDefaults?: boolean
+    [key: string]: any
   }
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }

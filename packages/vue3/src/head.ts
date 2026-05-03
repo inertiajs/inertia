@@ -1,67 +1,9 @@
-import { escape } from 'es-toolkit/compat'
 import { defineComponent, DefineComponent, onBeforeUnmount, VNode } from 'vue'
 import { headManager } from './app'
 
 export type InertiaHead = DefineComponent<{
   title?: string
 }>
-
-function isUnaryTag(node: VNode): boolean {
-  return (
-    typeof node.type === 'string' &&
-    [
-      'area',
-      'base',
-      'br',
-      'col',
-      'embed',
-      'hr',
-      'img',
-      'input',
-      'keygen',
-      'link',
-      'meta',
-      'param',
-      'source',
-      'track',
-      'wbr',
-    ].indexOf(node.type) > -1
-  )
-}
-
-function renderTagStart(node: VNode): string {
-  node.props = node.props || {}
-  node.props['data-inertia'] = node.props['head-key'] !== undefined ? node.props['head-key'] : ''
-
-  const attrs = Object.keys(node.props).reduce((carry, name) => {
-    const value = String(node.props![name])
-    if (['key', 'head-key'].includes(name)) {
-      return carry
-    } else if (value === '') {
-      return carry + ` ${name}`
-    } else {
-      return carry + ` ${name}="${escape(value)}"`
-    }
-  }, '')
-
-  return `<${String(node.type)}${attrs}>`
-}
-
-function renderTagChildren(node: VNode): string {
-  const { children } = node
-
-  if (typeof children === 'string') {
-    return children
-  }
-
-  if (Array.isArray(children)) {
-    return children.reduce<string>((html, child) => {
-      return html + renderTag(child as VNode)
-    }, '')
-  }
-
-  return ''
-}
 
 function isFunctionNode(node: VNode): node is VNode & { type: () => VNode } {
   return typeof node.type === 'function'
@@ -83,45 +25,6 @@ function isTextNode(node: VNode): boolean {
   return /(text|txt)/i.test(node.type.toString())
 }
 
-function renderTag(node: VNode): string {
-  if (isTextNode(node)) {
-    return String(node.children)
-  } else if (isFragmentNode(node)) {
-    return ''
-  } else if (isCommentNode(node)) {
-    return ''
-  }
-
-  let html = renderTagStart(node)
-
-  if (node.children) {
-    html += renderTagChildren(node)
-  }
-
-  if (!isUnaryTag(node)) {
-    html += `</${String(node.type)}>`
-  }
-
-  return html
-}
-
-function addTitleElement(elements: string[], title?: string): string[] {
-  if (title && !elements.find((tag) => tag.startsWith('<title'))) {
-    elements.push(`<title data-inertia="">${escape(title)}</title>`)
-  }
-
-  return elements
-}
-
-function renderNodes(nodes: VNode[], title?: string): string[] {
-  const elements = nodes
-    .flatMap((node) => resolveNode(node))
-    .map((node) => renderTag(node))
-    .filter((node) => node)
-
-  return addTitleElement(elements, title)
-}
-
 function resolveNode(node: VNode): VNode | VNode[] {
   if (isFunctionNode(node)) {
     return resolveNode(node.type())
@@ -139,6 +42,93 @@ function resolveNode(node: VNode): VNode | VNode[] {
   }
 }
 
+function renderTagChildren(node: VNode): string {
+  const { children } = node
+
+  if (typeof children === 'string') {
+    return children
+  }
+
+  if (typeof children === 'number') {
+    return String(children)
+  }
+
+  if (Array.isArray(children)) {
+    return children.reduce<string>((text, child) => {
+      const resolved = resolveNode(child as VNode)
+      if (Array.isArray(resolved)) {
+        return text + resolved.map((c) => (isTextNode(c) ? String(c.children) : '')).join('')
+      } else if (isTextNode(resolved)) {
+        return text + String(resolved.children)
+      } else if (typeof child === 'string' || typeof child === 'number') {
+        return text + String(child)
+      }
+      return text
+    }, '')
+  }
+
+  return ''
+}
+
+function mapNodesToUnhead(nodes: VNode[], title?: string): Record<string, any> {
+  const elements = nodes.flatMap((node) => resolveNode(node))
+  const unheadObj: Record<string, any> = {
+    meta: [],
+    link: [],
+    style: [],
+    script: [],
+    noscript: [],
+  }
+
+  if (title) {
+    unheadObj.title = title
+    unheadObj.titleAttr = { 'data-inertia': '' }
+  }
+
+  elements.forEach((node) => {
+    if (isTextNode(node) || isFragmentNode(node) || isCommentNode(node)) return
+
+    const tag = String(node.type).toLowerCase()
+    const props = { ...(node.props || {}) }
+
+    if (props['head-key'] !== undefined) {
+      props.key = props['head-key']
+      delete props['head-key']
+    }
+
+    props['data-inertia'] = props.key !== undefined ? props.key : ''
+
+    const children = node.children ? renderTagChildren(node) : undefined
+    if (children !== undefined && children !== '') {
+      if (tag === 'title') {
+        unheadObj.title = children
+        unheadObj.titleAttr = { 'data-inertia': props['data-inertia'] }
+        return
+      } else {
+        props.innerHTML = children
+      }
+    }
+
+    if (tag === 'title') {
+      if (!unheadObj.title && props.innerHTML) {
+        unheadObj.title = props.innerHTML
+        unheadObj.titleAttr = { 'data-inertia': props['data-inertia'] }
+      }
+      return
+    }
+
+    if (tag === 'base') {
+      unheadObj.base = props
+    } else if (['meta', 'link', 'style', 'script', 'noscript', 'htmlattrs', 'bodyattrs'].includes(tag)) {
+      const key = tag === 'htmlattrs' ? 'htmlAttrs' : tag === 'bodyattrs' ? 'bodyAttrs' : tag
+      if (!unheadObj[key]) unheadObj[key] = []
+      unheadObj[key].push(props)
+    }
+  })
+
+  return unheadObj
+}
+
 const Head: InertiaHead = defineComponent({
   props: {
     title: {
@@ -154,7 +144,7 @@ const Head: InertiaHead = defineComponent({
     })
 
     return () => {
-      provider.update(renderNodes(slots.default ? slots.default() : [], props.title))
+      provider.update(mapNodesToUnhead(slots.default ? slots.default() : [], props.title))
     }
   },
 })

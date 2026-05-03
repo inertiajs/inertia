@@ -3,6 +3,7 @@ import {
   CreateInertiaAppOptions,
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  createHeadManager,
   getInitialPageFromDOM,
   http as httpModule,
   InertiaAppSSRResponse,
@@ -132,6 +133,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
       const initialComponent = await resolveComponent(page.component, page)
 
+      const headManager = createHeadManager(isServer, title || ((title) => title), (elements: string[]) => (head = elements))
+
       const props: InertiaAppProps<SharedProps> = {
         initialPage: page,
         initialComponent,
@@ -139,6 +142,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
+        headManager,
       }
 
       let reactApp: ReactElement
@@ -158,6 +162,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       }
 
       const html = renderToString(reactApp)
+
+      if (headManager && headManager.renderSSR) {
+        head = await headManager.renderSSR()
+      }
+
       const body = buildSSRBody(id, page, html)
 
       return { head, body }
@@ -167,11 +176,16 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
 
   let head: string[] = []
+  let ssrHeadManager: ReturnType<typeof createHeadManager> | undefined
 
   const reactApp = await Promise.all([
     resolveComponent(initialPage.component, initialPage),
     router.decryptHistory().catch(() => {}),
   ]).then(([initialComponent]) => {
+    if (isServer) {
+      ssrHeadManager = createHeadManager(isServer, title || ((title) => title), (elements: string[]) => (head = elements))
+    }
+
     const props: InertiaAppProps<SharedProps> = {
       initialPage,
       initialComponent,
@@ -179,6 +193,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
+      headManager: ssrHeadManager,
     }
 
     if (isServer) {
@@ -218,6 +233,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && reactApp) {
     const html = render(reactApp)
+
+    if (ssrHeadManager && ssrHeadManager.renderSSR) {
+      head = await ssrHeadManager.renderSSR()
+    }
+
     const body = buildSSRBody(id, initialPage, html)
 
     return { head, body }

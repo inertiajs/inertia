@@ -22,6 +22,7 @@ export {
   default as useForm,
 } from './useForm'
 export { default as useHttp } from './useHttp'
+export { default as useHead } from './useHead'
 export { default as usePage } from './usePage'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'

@@ -1,4 +1,3 @@
-import { escape } from 'es-toolkit/compat'
 import React, { FunctionComponent, ReactElement, ReactNode, use, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
 
@@ -14,113 +13,104 @@ const Head: InertiaHead = function ({ children, title }) {
   const provider = useMemo(() => headManager!.createProvider(), [headManager])
   const isServer = typeof window === 'undefined'
 
-  useEffect(() => {
-    provider.reconnect()
-    provider.update(renderNodes(children))
-    return () => {
-      provider.disconnect()
-    }
-  }, [provider, children, title])
-
-  function isUnaryTag(node: ReactElement<any>) {
-    return (
-      typeof node.type === 'string' &&
-      [
-        'area',
-        'base',
-        'br',
-        'col',
-        'embed',
-        'hr',
-        'img',
-        'input',
-        'keygen',
-        'link',
-        'meta',
-        'param',
-        'source',
-        'track',
-        'wbr',
-      ].indexOf(node.type) > -1
-    )
-  }
-
-  function renderTagStart(node: ReactElement<any>): string {
-    const attrs = Object.keys(node.props).reduce((carry, name) => {
-      if (['head-key', 'children', 'dangerouslySetInnerHTML'].includes(name)) {
-        return carry
-      }
-
-      const value = String(node.props[name])
-
-      if (value === '') {
-        return carry + ` ${name}`
-      }
-
-      return carry + ` ${name}="${escape(value)}"`
-    }, '')
-
-    return `<${String(node.type)}${attrs}>`
-  }
-
   function renderTagChildren(node: ReactElement<any>): string {
     const { children } = node.props
 
-    if (typeof children === 'string') {
-      return children
-    }
+    if (typeof children === 'string') return children
+    if (typeof children === 'number') return String(children)
 
     if (Array.isArray(children)) {
-      return children.reduce((html, child) => html + renderTag(child), '')
+      return children.reduce<string>((text, child) => {
+        if (typeof child === 'string' || typeof child === 'number') {
+          return text + String(child)
+        }
+        return text
+      }, '')
     }
 
     return ''
   }
 
-  function renderTag(node: ReactElement<any>): string {
-    let html = renderTagStart(node)
-
-    if (node.props.children) {
-      html += renderTagChildren(node)
+  function mapNodesToUnhead(nodes: ReactNode, title?: string): Record<string, any> {
+    const elements = React.Children.toArray(nodes).filter((node) => node) as ReactElement<any>[]
+    const unheadObj: Record<string, any> = {
+      meta: [],
+      link: [],
+      style: [],
+      script: [],
+      noscript: [],
     }
 
-    if (node.props.dangerouslySetInnerHTML) {
-      html += node.props.dangerouslySetInnerHTML.__html
+    if (title) {
+      unheadObj.title = title
+      unheadObj.titleAttr = { 'data-inertia': '' }
     }
 
-    if (!isUnaryTag(node)) {
-      html += `</${String(node.type)}>`
-    }
+    elements.forEach((node) => {
+      const tag = typeof node.type === 'string' ? node.type.toLowerCase() : ''
+      if (!tag) return
 
-    return html
-  }
+      const props = { ...(node.props || {}) }
+      delete props.children
 
-  function ensureNodeHasInertiaProp(node: ReactElement<any>) {
-    return React.cloneElement(node, {
-      'data-inertia': node.props['head-key'] !== undefined ? node.props['head-key'] : '',
+      if (props['head-key'] !== undefined) {
+        props.key = props['head-key']
+        delete props['head-key']
+      }
+
+      props['data-inertia'] = props.key !== undefined ? props.key : ''
+
+      let innerHTML = ''
+      if (node.props.dangerouslySetInnerHTML) {
+        innerHTML = node.props.dangerouslySetInnerHTML.__html
+        delete props.dangerouslySetInnerHTML
+      } else if (node.props.children) {
+        innerHTML = renderTagChildren(node)
+      }
+
+      if (innerHTML !== '') {
+        if (tag === 'title') {
+          unheadObj.title = innerHTML
+          unheadObj.titleAttr = { 'data-inertia': props['data-inertia'] }
+          return
+        } else {
+          props.innerHTML = innerHTML
+        }
+      }
+
+      if (tag === 'title') {
+        if (!unheadObj.title && props.innerHTML) {
+          unheadObj.title = props.innerHTML
+          unheadObj.titleAttr = { 'data-inertia': props['data-inertia'] }
+        }
+        return
+      }
+
+      if (tag === 'base') {
+        unheadObj.base = props
+      } else if (['meta', 'link', 'style', 'script', 'noscript', 'htmlattrs', 'bodyattrs'].includes(tag)) {
+        const key = tag === 'htmlattrs' ? 'htmlAttrs' : tag === 'bodyattrs' ? 'bodyAttrs' : tag
+        if (!unheadObj[key]) unheadObj[key] = []
+        unheadObj[key].push(props)
+      }
     })
+
+    return unheadObj
   }
 
-  function renderNode(node: ReactElement<any>) {
-    return renderTag(ensureNodeHasInertiaProp(node))
-  }
-
-  function renderNodes(nodes: ReactNode) {
-    const elements = React.Children.toArray(nodes)
-      .filter((node) => node)
-      .map((node) => renderNode(node as ReactElement<any>))
-
-    if (title && !elements.find((tag) => tag.startsWith('<title'))) {
-      elements.push(`<title data-inertia="">${escape(title)}</title>`)
+  useEffect(() => {
+    provider.reconnect()
+    provider.update(mapNodesToUnhead(children, title))
+    return () => {
+      provider.disconnect()
     }
-
-    return elements
-  }
+  }, [provider, children, title])
 
   if (isServer) {
-    provider.update(renderNodes(children))
+    provider.update(mapNodesToUnhead(children, title))
   }
 
   return null
 }
+
 export default Head

@@ -4,7 +4,15 @@ async function getInertiaHeadHTML(page: Page) {
   return await page.evaluate(() => {
     const inertiaElements = Array.from(document.querySelector('head').querySelectorAll('[data-inertia]'))
 
-    return inertiaElements.map((el) => el.outerHTML).join('')
+    return inertiaElements
+      .sort((a, b) => {
+        if (a.tagName !== b.tagName) {
+          return a.tagName === 'TITLE' ? 1 : -1
+        }
+        return a.outerHTML.localeCompare(b.outerHTML)
+      })
+      .map((el) => el.outerHTML)
+      .join('')
   })
 }
 

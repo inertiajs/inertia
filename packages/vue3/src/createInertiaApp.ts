@@ -13,7 +13,7 @@ import {
   SharedPageProps,
 } from '@inertiajs/core'
 import { createApp, createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
-import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+import App, { InertiaApp, InertiaAppProps, plugin, headManager } from './app'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
 
@@ -149,6 +149,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       }
 
       const html = await renderToString(vueApp)
+      if (headManager && headManager.renderSSR) {
+        head = await headManager.renderSSR()
+      }
       const body = buildSSRBody(id, page, html)
 
       return { head, body }
@@ -220,6 +223,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && vueApp) {
     const html = await render(vueApp)
+    if (headManager && headManager.renderSSR) {
+      head = await headManager.renderSSR()
+    }
     const body = buildSSRBody(id, initialPage, html)
 
     return { head, body }
