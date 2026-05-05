@@ -546,7 +546,6 @@ export type ProgressOptions = {
   delay?: number
   color?: string
   includeCSS?: boolean
-  nonce?: string | boolean
   showSpinner?: boolean
   popover?: boolean | null
 }
@@ -635,6 +634,7 @@ export type InertiaAppConfig = {
     cacheFor: CacheForOption | CacheForOption[]
     hoverDelay: number
   }
+  nonce?: string
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
@@ -709,7 +709,6 @@ export type ProgressSettings = {
   parent: string
   template: string
   includeCSS: boolean
-  nonce?: string
   color: string
   popover: boolean | null
 }
