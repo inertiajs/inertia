@@ -13,6 +13,7 @@ use Prism\Prism\Enums\Provider;
 use Prism\Prism\Prism;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
+use RuntimeException;
 
 /*
 |--------------------------------------------------------------------------
@@ -374,6 +375,18 @@ Route::get('/defer', function () {
     info('defer route');
 
     return inertia('Defer', [
+        'stats' => Inertia::defer(function () {
+            sleep(1);
+
+            if (! request()->hasHeader('X-Rescue-Prop-Success')) {
+                throw new RuntimeException('Failed to load stats.');
+            }
+
+            return [
+                'visitors' => 1287,
+                'revenue' => 4920,
+            ];
+        }, rescue: true),
         'users' => Inertia::defer(function () {
             sleep(1);
 
