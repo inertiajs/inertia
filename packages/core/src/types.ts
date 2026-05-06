@@ -546,7 +546,6 @@ export type ProgressOptions = {
   delay?: number
   color?: string
   includeCSS?: boolean
-  nonce?: string | boolean
   showSpinner?: boolean
   popover?: boolean | null
 }
@@ -557,6 +556,7 @@ interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupR
   layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
@@ -601,6 +601,7 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   progress?: ProgressOptions | false
+  nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
@@ -635,6 +636,7 @@ export type InertiaAppConfig = {
     cacheFor: CacheForOption | CacheForOption[]
     hoverDelay: number
   }
+  nonce?: string
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
 }
 
@@ -709,7 +711,6 @@ export type ProgressSettings = {
   parent: string
   template: string
   includeCSS: boolean
-  nonce?: string
   color: string
   popover: boolean | null
 }

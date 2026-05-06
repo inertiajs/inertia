@@ -1,6 +1,7 @@
 /* NProgress, (c) 2013, 2014 Rico Sta. Cruz - http://ricostacruz.com/nprogress
  * @license MIT */
 
+import { config } from './config'
 import { ProgressSettings } from './types'
 
 const baseComponentSelector = 'nprogress'
@@ -20,7 +21,6 @@ const settings: ProgressSettings = {
   parent: 'body',
   color: '#29d',
   includeCSS: true,
-  nonce: undefined,
   popover: null,
   template: [
     '<div class="bar" role="bar">',
@@ -41,7 +41,7 @@ const configure = (options: Partial<ProgressSettings>) => {
   usePopover = settings.popover ?? 'popover' in HTMLElement.prototype
 
   if (settings.includeCSS) {
-    injectCSS(settings.color, settings.nonce)
+    injectCSS(settings.color)
   }
 
   progress = document.createElement('div')
@@ -284,8 +284,9 @@ const queue = (() => {
   }
 })()
 
-const injectCSS = (color: string, nonce?: string): void => {
+const injectCSS = (color: string): void => {
   const element = document.createElement('style')
+  const nonce = config.get('nonce')
 
   if (nonce) {
     element.nonce = nonce

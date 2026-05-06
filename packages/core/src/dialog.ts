@@ -1,3 +1,5 @@
+import { config } from './config'
+
 export default {
   createIframeAndPage(html: Record<string, unknown> | string): { iframe: HTMLIFrameElement; page: HTMLElement } {
     if (typeof html === 'object') {
@@ -48,6 +50,13 @@ export default {
         outline: none;
       }
     `
+
+    const nonce = config.get('nonce')
+
+    if (nonce) {
+      dialogStyleElement.nonce = nonce
+    }
+
     document.head.appendChild(dialogStyleElement)
 
     dialog.addEventListener('click', (event: MouseEvent) => {

@@ -98,6 +98,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     page,
     render,
     defaults = {},
+    nonce,
     http,
     layout,
     strictMode = false,
@@ -108,6 +109,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
 ): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
   config.replace(defaults)
+
+  if (nonce) {
+    config.set('nonce', nonce)
+  }
 
   if (http) {
     httpModule.setClient(http)

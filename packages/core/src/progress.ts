@@ -86,21 +86,10 @@ function finish(event: GlobalEvent<'finish'>, timeout: NodeJS.Timeout): void {
   }
 }
 
-const defaultNonce = (): string => {
-  for (const script of document.querySelectorAll('script')) {
-    if (script.nonce) {
-      return script.nonce
-    }
-  }
-
-  return ''
-}
-
 export default function setupProgress({
   delay = 250,
   color = '#29d',
   includeCSS = true,
-  nonce = false,
   showSpinner = false,
   popover = null,
 }: ProgressOptions = {}): void {
@@ -108,7 +97,6 @@ export default function setupProgress({
   ProgressComponent.configure({
     showSpinner,
     includeCSS,
-    nonce: nonce === true ? defaultNonce() : nonce ? nonce : undefined,
     color,
     popover,
   })
