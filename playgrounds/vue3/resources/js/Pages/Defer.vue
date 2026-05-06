@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Deferred, Head, WhenVisible } from '@inertiajs/vue3'
+import { Deferred, Head, router, WhenVisible } from '@inertiajs/vue3'
 import Spinner from '../Components/Spinner.vue'
 import TestGrid from '../Components/TestGrid.vue'
 import TestGridItem from '../Components/TestGridItem.vue'
@@ -31,7 +31,18 @@ defineProps<{
     id: number
     name: string
   }[]
+  stats?: {
+    visitors: number
+    revenue: number
+  } | null
 }>()
+
+const retryStats = () => {
+  router.reload({
+    only: ['stats'],
+    headers: { 'X-Rescue-Prop-Success': 'true' },
+  })
+}
 </script>
 
 <template>
@@ -74,6 +85,39 @@ defineProps<{
         <div v-for="org in organizations">
           <p>#{{ org.id }}: {{ org.name }} ({{ org.url }})</p>
         </div>
+      </Deferred>
+    </TestGridItem>
+
+    <TestGridItem>
+      <Deferred data="stats">
+        <template #fallback>
+          <p>Loading Stats...</p>
+        </template>
+
+        <template #rescue="{ reloading }">
+          <div class="rounded-md border border-red-300 bg-red-50 p-3 text-red-800">
+            <p class="font-semibold">Unable to load stats.</p>
+            <button
+              type="button"
+              @click="retryStats"
+              :disabled="reloading"
+              class="mt-2 rounded bg-red-600 px-3 py-1 text-sm text-white disabled:opacity-50"
+            >
+              {{ reloading ? 'Retrying...' : 'Retry' }}
+            </button>
+          </div>
+        </template>
+
+        <dl v-if="stats" class="grid grid-cols-2 gap-4">
+          <div>
+            <dt class="text-sm text-gray-500">Visitors</dt>
+            <dd class="text-2xl font-semibold">{{ stats.visitors }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">Revenue</dt>
+            <dd class="text-2xl font-semibold">${{ stats.revenue }}</dd>
+          </div>
+        </dl>
       </Deferred>
     </TestGridItem>
   </TestGrid>
