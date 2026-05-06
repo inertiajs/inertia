@@ -1,55 +1,5 @@
 import { config } from './config'
 
-const DIALOG_ID = 'inertia-error-dialog'
-
-const STYLE_CONTENT = `
-  #${DIALOG_ID} {
-    width: calc(100vw - 100px);
-    height: calc(100vh - 100px);
-    padding: 0;
-    margin: auto;
-    border: none;
-    background-color: transparent;
-  }
-
-  #${DIALOG_ID} > iframe {
-    background-color: white;
-    border-radius: 5px;
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    display: block;
-  }
-
-  #${DIALOG_ID}::backdrop {
-    background-color: rgba(0, 0, 0, 0.6);
-  }
-
-  #${DIALOG_ID}:focus {
-    outline: none;
-  }
-`
-
-let styleInstalled = false
-
-const installStyle = (): void => {
-  if (styleInstalled) {
-    return
-  }
-
-  const style = document.createElement('style')
-  const nonce = config.get('nonce')
-
-  if (nonce) {
-    style.nonce = nonce
-  }
-
-  style.textContent = STYLE_CONTENT
-  document.head.appendChild(style)
-
-  styleInstalled = true
-}
-
 export default {
   createIframeAndPage(html: Record<string, unknown> | string): { iframe: HTMLIFrameElement; page: HTMLElement } {
     if (typeof html === 'object') {
@@ -63,6 +13,10 @@ export default {
     page.querySelectorAll('a').forEach((a) => a.setAttribute('target', '_top'))
 
     const iframe = document.createElement('iframe')
+    iframe.style.backgroundColor = 'white'
+    iframe.style.borderRadius = '5px'
+    iframe.style.width = '100%'
+    iframe.style.height = '100%'
     iframe.setAttribute('sandbox', 'allow-scripts')
 
     return { iframe, page }
@@ -71,10 +25,39 @@ export default {
   show(html: Record<string, unknown> | string): void {
     const { iframe, page } = this.createIframeAndPage(html)
 
-    installStyle()
+    iframe.style.boxSizing = 'border-box'
+    iframe.style.display = 'block'
 
     const dialog = document.createElement('dialog')
-    dialog.id = DIALOG_ID
+    dialog.id = 'inertia-error-dialog'
+
+    Object.assign(dialog.style, {
+      width: 'calc(100vw - 100px)',
+      height: 'calc(100vh - 100px)',
+      padding: '0',
+      margin: 'auto',
+      border: 'none',
+      backgroundColor: 'transparent',
+    })
+
+    const dialogStyleElement = document.createElement('style')
+    dialogStyleElement.textContent = `
+      dialog#inertia-error-dialog::backdrop {
+        background-color: rgba(0, 0, 0, 0.6);
+      }
+
+      dialog#inertia-error-dialog:focus {
+        outline: none;
+      }
+    `
+
+    const nonce = config.get('nonce')
+
+    if (nonce) {
+      dialogStyleElement.nonce = nonce
+    }
+
+    document.head.appendChild(dialogStyleElement)
 
     dialog.addEventListener('click', (event: MouseEvent) => {
       if (event.target === dialog) {
@@ -83,6 +66,7 @@ export default {
     })
 
     dialog.addEventListener('close', () => {
+      dialogStyleElement.remove()
       dialog.remove()
     })
 
