@@ -114,7 +114,7 @@ export default function createHeadManager(
         }
 
         if (element.indexOf('<title ') === 0) {
-          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/)
+          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/s)
           carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
           return carry
         }
