@@ -9,6 +9,10 @@ export default ({ dialog }: { dialog: boolean }) => {
     router.post('/json')
   }
 
+  const invalidVisitXss = () => {
+    router.post('/non-inertia/xss')
+  }
+
   if (dialog) {
     config.set('future.useDialogForErrorModal', true)
   }
@@ -20,6 +24,9 @@ export default ({ dialog }: { dialog: boolean }) => {
       </span>
       <span onClick={invalidVisitJson} className="invalid-visit-json">
         Invalid Visit (JSON response)
+      </span>
+      <span onClick={invalidVisitXss} className="invalid-visit-xss">
+        Invalid Visit (XSS)
       </span>
     </div>
   )
