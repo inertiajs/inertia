@@ -333,6 +333,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
+  cached: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -377,9 +378,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, boolean?]
     details: {
       page: Page<SharedPageProps>
+      cached: boolean
     }
     result: void
   }
@@ -421,6 +423,13 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   prefetching: {
+    parameters: [ActiveVisit<T>]
+    details: {
+      visit: ActiveVisit<T>
+    }
+    result: void
+  }
+  cacheHit: {
     parameters: [ActiveVisit<T>]
     details: {
       visit: ActiveVisit<T>
@@ -936,6 +945,7 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:cacheHit': GlobalEvent<'cacheHit'>
     'inertia:flash': GlobalEvent<'flash'>
   }
 }

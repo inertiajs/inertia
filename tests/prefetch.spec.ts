@@ -120,6 +120,59 @@ test('can prefetch using link props', async ({ page }) => {
   await expect(requests.requests.length).toBe(0)
 })
 
+test('it fires inertia:cacheHit and inertia:navigate with cached flag when consuming a prefetch', async ({ page }) => {
+  await page.goto('prefetch/2')
+
+  await page.evaluate(() => {
+    ;(window as any)._startEvents = []
+    ;(window as any)._cacheHitEvents = []
+    ;(window as any)._navigateEvents = []
+    document.addEventListener('inertia:start', (e: any) => {
+      ;(window as any)._startEvents.push({
+        url: e.detail.visit.url.pathname,
+        prefetch: e.detail.visit.prefetch,
+        cached: e.detail.visit.cached,
+      })
+    })
+    document.addEventListener('inertia:cacheHit', (e: any) => {
+      ;(window as any)._cacheHitEvents.push({
+        url: e.detail.visit.url.pathname,
+        cached: e.detail.visit.cached,
+      })
+    })
+    document.addEventListener('inertia:navigate', (e: any) => {
+      ;(window as any)._navigateEvents.push({
+        url: e.detail.page.url,
+        cached: e.detail.cached,
+      })
+    })
+  })
+
+  const prefetch1 = page.waitForResponse('prefetch/1')
+  await page.getByRole('link', { name: 'On Hover (Default)' }).hover()
+  await prefetch1
+
+  await page.getByRole('link', { name: 'On Hover (Default)' }).click()
+  await isPrefetchPage(page, 1)
+
+  const startEvents = await page.evaluate(() => (window as any)._startEvents)
+  const cacheHitEvents = await page.evaluate(() => (window as any)._cacheHitEvents)
+  const navigateEvents = await page.evaluate(() => (window as any)._navigateEvents)
+
+  const startsForUrl = startEvents.filter((e: any) => e.url === '/prefetch/1')
+  expect(startsForUrl).toHaveLength(1)
+  expect(startsForUrl[0].prefetch).toBe(true)
+  expect(startsForUrl[0].cached).toBe(false)
+
+  const cacheHit = cacheHitEvents.find((e: any) => e.url === '/prefetch/1')
+  expect(cacheHit).toBeDefined()
+  expect(cacheHit.cached).toBe(true)
+
+  const navigate = navigateEvents.find((e: any) => e.url === '/prefetch/1')
+  expect(navigate).toBeDefined()
+  expect(navigate.cached).toBe(true)
+})
+
 test('can prefetch using link props with keyboard events', async ({ page }) => {
   // These two prefetch requests should be made on mount
   const prefetch2 = page.waitForResponse('prefetch/2')
