@@ -556,6 +556,7 @@ interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupR
   layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
@@ -600,6 +601,7 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
   progress?: ProgressOptions | false
+  nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
