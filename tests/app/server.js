@@ -70,6 +70,15 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   }),
 )
 
+app.get('/ssr/head-with-xss-title', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/HeadWithXssTitle',
+    props: {
+      title: "Safe Title\n</title><script>alert('xss')</script>",
+    },
+  }),
+)
+
 app.get('/ssr/infinite-scroll', (req, res) => {
   const { paginated, scrollProp } = paginateUsers(1, 15, 40)
 
