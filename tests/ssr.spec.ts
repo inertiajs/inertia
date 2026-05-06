@@ -100,7 +100,6 @@ test.describe('Head title escaping', () => {
   })
 })
 
-
 test.describe('SSR InfiniteScroll', () => {
   test('it renders correct slot props during SSR', async ({ page }) => {
     const response = await page.request.get('/ssr/infinite-scroll')

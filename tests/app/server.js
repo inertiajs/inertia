@@ -79,7 +79,6 @@ app.get('/ssr/head-with-xss-title', (req, res) =>
   }),
 )
 
-
 app.get('/ssr/infinite-scroll', (req, res) => {
   const { paginated, scrollProp } = paginateUsers(1, 15, 40)
 
