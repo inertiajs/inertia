@@ -1,6 +1,6 @@
 import { isSameUrlWithoutQueryOrHash, partialReloadRequestsSomeProps, router } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
-import { computed, defineComponent, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
+import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 import { usePage } from './app'
 
 export default defineComponent({
@@ -63,12 +63,17 @@ export default defineComponent({
 
       const propsAreDefined = keys.value.every((key) => get(page.props, key) !== undefined)
       const hasRescuedProps = keys.value.some((key) => rescuedKeys.value.has(key))
+      const slotProps = { reloading: reloading.value }
 
-      return propsAreDefined && !hasRescuedProps
-        ? slots.default?.({ reloading: reloading.value })
-        : hasRescuedProps && slots.rescue
-          ? slots.rescue({ reloading: reloading.value })
-          : slots.fallback({})
+      if (propsAreDefined && !hasRescuedProps) {
+        return h(Fragment, { key: 'default' }, slots.default?.(slotProps) ?? [])
+      }
+
+      if (hasRescuedProps && slots.rescue) {
+        return h(Fragment, { key: 'rescue' }, slots.rescue(slotProps))
+      }
+
+      return h(Fragment, { key: 'fallback' }, slots.fallback({}))
     }
   },
 })
