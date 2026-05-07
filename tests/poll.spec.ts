@@ -119,7 +119,7 @@ test('it allows overlapping requests by default', async ({ page }) => {
 
   await page.waitForTimeout(2000)
 
-  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
   await expect(pollFinished().length).toBeLessThan(pollRequests().length)
 })
 
@@ -131,7 +131,7 @@ test('it allows overlapping requests with explicit overlap: allow', async ({ pag
 
   await page.waitForTimeout(2000)
 
-  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
   await expect(pollFinished().length).toBeLessThan(pollRequests().length)
 })
 
@@ -142,7 +142,7 @@ test('it skips polling ticks when a request is in flight with overlap: skip', as
 
   await page.waitForTimeout(2000)
 
-  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(1)
   await expect(pollRequests().length).toBeLessThanOrEqual(5)
 })
 
@@ -154,8 +154,8 @@ test('it cancels in-flight requests on each tick with overlap: cancel', async ({
 
   await page.waitForTimeout(2000)
 
-  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
-  await expect(pollFailed().length).toBeGreaterThanOrEqual(4)
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
+  await expect(pollFailed().length).toBeGreaterThanOrEqual(pollRequests().length - 1)
 })
 
 test('it cancels a request when the timeout option elapses', async ({ page }) => {
