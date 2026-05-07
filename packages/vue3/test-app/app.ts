@@ -59,6 +59,11 @@ createInertiaApp({
       },
     },
   }),
+  ...(params.has('withTimeoutDefault') && {
+    defaults: {
+      visitOptions: () => ({ timeout: 50 }),
+    },
+  }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
   }),

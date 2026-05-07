@@ -1,4 +1,4 @@
-import { CacheForOption, TimeUnit } from './types'
+import { DurationOption, TimeUnit } from './types'
 
 const conversionMap: Record<TimeUnit, number> = {
   ms: 1,
@@ -8,7 +8,7 @@ const conversionMap: Record<TimeUnit, number> = {
   d: 1000 * 60 * 60 * 24,
 }
 
-export const timeToMs = (time: CacheForOption): number => {
+export const timeToMs = (time: DurationOption): number => {
   if (typeof time === 'number') {
     return time
   }

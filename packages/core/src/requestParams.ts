@@ -28,6 +28,7 @@ export class RequestParams {
         onProgress: this.wrapCallback(params, 'onProgress'),
         onFinish: this.wrapCallback(params, 'onFinish'),
         onCancel: this.wrapCallback(params, 'onCancel'),
+        onTimeout: this.wrapCallback(params, 'onTimeout'),
         onSuccess: this.wrapCallback(params, 'onSuccess'),
         onError: this.wrapCallback(params, 'onError'),
         onHttpException: this.wrapCallback(params, 'onHttpException'),
@@ -81,18 +82,32 @@ export class RequestParams {
     this.params.completed = true
     this.params.cancelled = false
     this.params.interrupted = false
+    this.params.timedOut = false
   }
 
-  public markAsCancelled({ cancelled = true, interrupted = false }) {
+  public markAsCancelled({
+    cancelled = true,
+    interrupted = false,
+    timedOut = false,
+  }: {
+    cancelled?: boolean
+    interrupted?: boolean
+    timedOut?: boolean
+  }) {
     this.params.onCancel()
 
+    if (timedOut) {
+      this.params.onTimeout()
+    }
+
     this.params.completed = false
-    this.params.cancelled = cancelled
+    this.params.cancelled = cancelled || timedOut
     this.params.interrupted = interrupted
+    this.params.timedOut = timedOut
   }
 
   public wasCancelledAtAll() {
-    return this.params.cancelled || this.params.interrupted
+    return this.params.cancelled || this.params.interrupted || this.params.timedOut
   }
 
   public onFinish() {

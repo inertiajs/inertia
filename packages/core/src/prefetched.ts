@@ -260,6 +260,7 @@ class PrefetchedRequests {
         'onProgress',
         'onFinish',
         'onCancel',
+        'onTimeout',
         'onSuccess',
         'onError',
         'onFlash',

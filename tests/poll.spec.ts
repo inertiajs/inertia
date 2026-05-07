@@ -107,6 +107,70 @@ Object.entries({
   })
 })
 
+const pollRequests = () => requests.requests.filter((r) => r.url().includes('/poll/overlap/'))
+const pollFinished = () => requests.finished.filter((r) => r.url().includes('/poll/overlap/'))
+const pollFailed = () => requests.failed.filter((r) => r.url().includes('/poll/overlap/'))
+
+test('it allows overlapping requests by default', async ({ page }) => {
+  await page.goto('/poll/overlap/none?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFinished(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
+  await expect(pollFinished().length).toBeLessThan(pollRequests().length)
+})
+
+test('it allows overlapping requests with explicit overlap: allow', async ({ page }) => {
+  await page.goto('/poll/overlap/allow?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFinished(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
+  await expect(pollFinished().length).toBeLessThan(pollRequests().length)
+})
+
+test('it skips polling ticks when a request is in flight with overlap: skip', async ({ page }) => {
+  await page.goto('/poll/overlap/skip?interval=200&delay=600')
+
+  requests.listen(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollRequests().length).toBeLessThanOrEqual(5)
+})
+
+test('it cancels in-flight requests on each tick with overlap: cancel', async ({ page }) => {
+  await page.goto('/poll/overlap/cancel?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFailed(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(6)
+  await expect(pollFailed().length).toBeGreaterThanOrEqual(4)
+})
+
+test('it cancels a request when the timeout option elapses', async ({ page }) => {
+  test.setTimeout(10000)
+
+  await page.goto('/poll/overlap/none?interval=2000&delay=2000&timeout=300')
+
+  requests.listen(page)
+  requests.listenForFailed(page)
+
+  await page.waitForTimeout(3000)
+
+  await expect(pollFailed().length).toBeGreaterThanOrEqual(1)
+})
+
 test('it preserves validation errors when poll reloads data', async ({ page }) => {
   await page.goto('/poll/preserve-errors')
 

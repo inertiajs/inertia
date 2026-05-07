@@ -201,10 +201,28 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload({ preserveErrors: true, ...requestOptions }), {
-      autoStart: options.autoStart ?? true,
-      keepAlive: options.keepAlive ?? false,
-    })
+    return polls.add(
+      interval,
+      ({ onStart, onFinish }) => {
+        this.reload({
+          preserveErrors: true,
+          ...requestOptions,
+          onCancelToken: (token) => {
+            onStart(token.cancel)
+            requestOptions.onCancelToken?.(token)
+          },
+          onFinish: (visit) => {
+            onFinish()
+            requestOptions.onFinish?.(visit)
+          },
+        })
+      },
+      {
+        autoStart: options.autoStart ?? true,
+        keepAlive: options.keepAlive ?? false,
+        overlap: options.overlap,
+      },
+    )
   }
 
   public visit<T extends RequestPayload = RequestPayload>(
@@ -655,8 +673,13 @@ export class Router {
       viewTransition: false,
       component: null,
       pageProps: null,
+      timeout: null,
       ...options,
       ...configuredOptions,
+    }
+
+    if (mergedOptions.prefetch) {
+      mergedOptions.timeout = null
     }
 
     const [url, _data] = transformUrlAndData(
@@ -671,6 +694,7 @@ export class Router {
       cancelled: false,
       completed: false,
       interrupted: false,
+      timedOut: false,
       ...mergedOptions,
       url,
       data: _data,
@@ -692,6 +716,7 @@ export class Router {
       onProgress: options.onProgress || noop,
       onFinish: options.onFinish || noop,
       onCancel: options.onCancel || noop,
+      onTimeout: options.onTimeout || noop,
       onSuccess: options.onSuccess || noop,
       onError: options.onError || noop,
       onHttpException: options.onHttpException || noop,

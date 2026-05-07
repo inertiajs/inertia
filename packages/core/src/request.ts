@@ -11,6 +11,7 @@ import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
+import { timeToMs } from './time'
 import type { ActiveVisit, Page } from './types'
 import { HttpProgressEvent, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
@@ -21,6 +22,7 @@ export class Request {
   protected requestParams: RequestParams
   protected requestHasFinished = false
   protected optimistic: boolean
+  protected timeoutId: number | null = null
 
   constructor(
     params: ActiveVisit,
@@ -50,6 +52,13 @@ export class Request {
 
   public async send() {
     this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
+
+    const timeoutOption = this.requestParams.all().timeout
+    const timeoutMs = timeoutOption === null || timeoutOption === undefined ? 0 : timeToMs(timeoutOption)
+
+    if (timeoutMs > 0) {
+      this.timeoutId = window.setTimeout(() => this.cancel({ timedOut: true }), timeoutMs)
+    }
 
     fireStartEvent(this.requestParams.all())
     this.requestParams.onStart()
@@ -133,11 +142,24 @@ export class Request {
 
     this.requestHasFinished = true
 
+    if (this.timeoutId !== null) {
+      window.clearTimeout(this.timeoutId)
+      this.timeoutId = null
+    }
+
     fireFinishEvent(this.requestParams.all())
     this.requestParams.onFinish()
   }
 
-  public cancel({ cancelled = false, interrupted = false }: { cancelled?: boolean; interrupted?: boolean }): void {
+  public cancel({
+    cancelled = false,
+    interrupted = false,
+    timedOut = false,
+  }: {
+    cancelled?: boolean
+    interrupted?: boolean
+    timedOut?: boolean
+  }): void {
     if (this.requestHasFinished) {
       // If the request has already finished, there's no need to cancel it
       return
@@ -145,7 +167,7 @@ export class Request {
 
     this.cancelToken.abort()
 
-    this.requestParams.markAsCancelled({ cancelled, interrupted })
+    this.requestParams.markAsCancelled({ cancelled, interrupted, timedOut })
 
     this.fireFinishEvents()
   }
