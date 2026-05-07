@@ -6,6 +6,7 @@ import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
+import { stripTopLevelUndefined } from './objectUtils'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
@@ -655,8 +656,8 @@ export class Router {
       viewTransition: false,
       component: null,
       pageProps: null,
-      ...options,
-      ...configuredOptions,
+      ...stripTopLevelUndefined(options),
+      ...stripTopLevelUndefined(configuredOptions),
     }
 
     const [url, _data] = transformUrlAndData(
