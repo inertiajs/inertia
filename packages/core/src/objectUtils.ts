@@ -1,3 +1,15 @@
+export const stripTopLevelUndefined = <T extends Record<string, unknown>>(obj: T): T => {
+  const result = {} as T
+
+  for (const key of Object.keys(obj) as (keyof T)[]) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key]
+    }
+  }
+
+  return result
+}
+
 export const objectsAreEqual = <T extends Record<string, any>>(
   obj1: T,
   obj2: T,
