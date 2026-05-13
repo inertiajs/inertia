@@ -1,19 +1,19 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     groups:
       github-actions:
         patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/"
+          - '*'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-    target-branch: "2.x"
+      interval: 'weekly'
+    target-branch: '2.x'
     groups:
       github-actions:
         patterns:
-          - "*"
+          - '*'
