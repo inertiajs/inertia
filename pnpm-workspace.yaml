@@ -4,6 +4,16 @@ packages:
   - playgrounds/*
   - tests/app
 
+allowBuilds:
+  esbuild: true
+
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
+
+overrides:
+  cookie: '>=0.7.0'
+  esbuild: '>=0.25.0'
+  svelte@<=5.51.4: ^5.51.5
+  svelte@<=5.53.4: ^5.53.5
+  vite@<=6.4.1: ^6.4.2
