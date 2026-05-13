@@ -144,10 +144,16 @@ test('it cleans up the poll on unmount and does not leak across rerenders', asyn
       response.url().includes('/poll/dynamic-data') && new URL(response.url()).searchParams.get('counter_seen') === '0',
   )
 
+  const pollsAfterMount = await page.evaluate(() => window.testing.Inertia.activePolls)
+  await expect(pollsAfterMount).toBe(1)
+
   for (let i = 1; i <= 5; i++) {
     await page.getByRole('button', { name: 'Increment' }).click()
     await expect(page.locator('#counter')).toHaveText(`counter: ${i}`)
   }
+
+  const pollsAfterRerenders = await page.evaluate(() => window.testing.Inertia.activePolls)
+  await expect(pollsAfterRerenders).toBe(1)
 
   await page.getByRole('link', { name: 'Home' }).click()
   await page.waitForURL('/')
@@ -157,6 +163,9 @@ test('it cleans up the poll on unmount and does not leak across rerenders', asyn
 
   const leftover = requests.requests.filter((r) => r.url().includes('/poll/dynamic-data'))
   await expect(leftover).toHaveLength(0)
+
+  const pollsAfterUnmount = await page.evaluate(() => window.testing.Inertia.activePolls)
+  await expect(pollsAfterUnmount).toBe(0)
 })
 
 const pollRequests = () => requests.requests.filter((r) => r.url().includes('/poll/overlap/'))

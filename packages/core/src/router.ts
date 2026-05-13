@@ -191,6 +191,10 @@ export class Router {
     return this.asyncRequestStream.hasPendingOptimistic()
   }
 
+  public get activePolls(): number {
+    return polls.count
+  }
+
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })

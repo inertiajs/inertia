@@ -8,6 +8,10 @@ class Polls {
     this.setupVisibilityListener()
   }
 
+  public get count(): number {
+    return this.polls.length
+  }
+
   public add(
     interval: number,
     cb: PollCallback,
