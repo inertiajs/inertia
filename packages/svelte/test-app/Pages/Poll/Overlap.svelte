@@ -6,10 +6,12 @@
   const params = new URLSearchParams(window.location.search)
   const interval = parseInt(params.get('interval') || '200')
 
+  // svelte-ignore state_referenced_locally
+  const initialMode = mode
   const options: { mode?: 'overlap' | 'cancel' | 'rest' } = {}
 
-  if (mode === 'overlap' || mode === 'cancel' || mode === 'rest') {
-    options.mode = mode as 'overlap' | 'cancel' | 'rest'
+  if (initialMode === 'overlap' || initialMode === 'cancel' || initialMode === 'rest') {
+    options.mode = initialMode
   }
 
   usePoll(interval, {}, options)
