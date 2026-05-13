@@ -922,6 +922,16 @@ app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
 
+app.get('/poll/overlap/:mode', (req, res) => {
+  const mode = req.params.mode
+  const delay = parseInt(req.query.delay) || 600
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Poll/Overlap',
+      props: { mode, time: Date.now() },
+    })
+  }, delay)
+})
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 app.get('/poll/unchanged-data', (req, res) =>
