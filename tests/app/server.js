@@ -922,12 +922,6 @@ app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
 
-app.get('/visit/timeout', (req, res) => inertia.render(req, res, { component: 'Visit/Timeout' }))
-app.get('/visit/timeout/slow', (req, res) => {
-  const delay = parseInt(req.query.delay) || 2000
-  setTimeout(() => inertia.render(req, res, { component: 'Visit/Timeout' }), delay)
-})
-
 app.get('/poll/overlap/:mode', (req, res) => {
   const mode = req.params.mode
   const delay = parseInt(req.query.delay) || 600

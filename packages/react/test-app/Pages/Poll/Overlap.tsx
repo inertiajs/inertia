@@ -3,32 +3,16 @@ import { usePoll } from '@inertiajs/react'
 export default ({ mode, time }: { mode: string; time: number }) => {
   const params = new URLSearchParams(window.location.search)
   const interval = parseInt(params.get('interval') || '200')
-  const timeoutParam = params.get('timeout')
-  const timeout = timeoutParam ? parseInt(timeoutParam) : undefined
 
   const pathMode = window.location.pathname.split('/').pop()
 
-  const options: { overlap?: 'allow' | 'skip' | 'cancel' } = {}
+  const options: { mode?: 'allow' | 'cancel' | 'rest' } = {}
 
-  if (pathMode === 'skip') {
-    options.overlap = 'skip'
+  if (pathMode === 'allow' || pathMode === 'cancel' || pathMode === 'rest') {
+    options.mode = pathMode
   }
 
-  if (pathMode === 'cancel') {
-    options.overlap = 'cancel'
-  }
-
-  if (pathMode === 'allow') {
-    options.overlap = 'allow'
-  }
-
-  const requestOptions: { timeout?: number } = {}
-
-  if (timeout !== undefined) {
-    requestOptions.timeout = timeout
-  }
-
-  usePoll(interval, requestOptions, options)
+  usePoll(interval, {}, options)
 
   return (
     <div>

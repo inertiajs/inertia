@@ -106,14 +106,6 @@ const Link: InertiaLink = defineComponent({
       type: Function as PropType<InertiaLinkProps['onCancel']>,
       default: noop,
     },
-    onTimeout: {
-      type: Function as PropType<InertiaLinkProps['onTimeout']>,
-      default: noop,
-    },
-    timeout: {
-      type: [Number, String] as PropType<InertiaLinkProps['timeout']>,
-      default: null,
-    },
     onSuccess: {
       type: Function as PropType<InertiaLinkProps['onSuccess']>,
       default: noop,
@@ -277,8 +269,6 @@ const Link: InertiaLink = defineComponent({
         props.onFinish?.(visit)
       },
       onCancel: props.onCancel,
-      onTimeout: props.onTimeout,
-      timeout: props.timeout,
       onSuccess: props.onSuccess,
       onError: props.onError,
     }))

@@ -8,19 +8,21 @@ export type PollHooks = {
 export type PollCallback = (hooks: PollHooks) => void
 
 export class Poll {
-  protected id: number | null = null
+  protected intervalId: number | null = null
+  protected timeoutId: number | null = null
   protected throttle = false
   protected keepAlive = false
   protected cb: PollCallback
   protected interval: number
   protected cbCount = 0
-  protected overlap?: 'allow' | 'skip' | 'cancel'
+  protected mode: 'allow' | 'cancel' | 'rest'
   protected inFlight = false
   protected currentCancel: VoidFunction | null = null
+  protected stopped = true
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.keepAlive = options.keepAlive ?? false
-    this.overlap = options.overlap
+    this.mode = options.mode ?? 'allow'
 
     this.cb = cb
     this.interval = interval
@@ -31,8 +33,16 @@ export class Poll {
   }
 
   public stop() {
-    if (this.id) {
-      clearInterval(this.id)
+    this.stopped = true
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    }
+
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId)
+      this.timeoutId = null
     }
   }
 
@@ -42,8 +52,14 @@ export class Poll {
     }
 
     this.stop()
+    this.stopped = false
 
-    this.id = window.setInterval(() => {
+    if (this.mode === 'rest') {
+      this.scheduleNext()
+      return
+    }
+
+    this.intervalId = window.setInterval(() => {
       if (!this.throttle || this.cbCount % 10 === 0) {
         this.fire()
       }
@@ -62,15 +78,22 @@ export class Poll {
     }
   }
 
-  protected fire() {
-    if (this.inFlight) {
-      if (this.overlap === 'skip') {
-        return
-      }
+  protected scheduleNext() {
+    if (this.stopped) {
+      return
+    }
 
-      if (this.overlap === 'cancel') {
-        this.currentCancel?.()
-      }
+    const delay = this.throttle ? this.interval * 10 : this.interval
+
+    this.timeoutId = window.setTimeout(() => {
+      this.timeoutId = null
+      this.fire()
+    }, delay)
+  }
+
+  protected fire() {
+    if (this.inFlight && this.mode === 'cancel') {
+      this.currentCancel?.()
     }
 
     this.cb({
@@ -81,6 +104,10 @@ export class Poll {
       onFinish: () => {
         this.inFlight = false
         this.currentCancel = null
+
+        if (this.mode === 'rest') {
+          this.scheduleNext()
+        }
       },
     })
   }

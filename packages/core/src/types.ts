@@ -333,7 +333,6 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
-  timeout: DurationOption | null
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -366,11 +365,6 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   cancel: {
-    parameters: []
-    details: {}
-    result: void
-  }
-  timeout: {
     parameters: []
     details: {}
     result: void
@@ -484,7 +478,6 @@ export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onProgress: GlobalEventCallback<'progress', T>
   onFinish: GlobalEventCallback<'finish', T>
   onCancel: GlobalEventCallback<'cancel', T>
-  onTimeout: GlobalEventCallback<'timeout', T>
   onSuccess: GlobalEventCallback<'success', T>
   onError: GlobalEventCallback<'error', T>
   onHttpException: GlobalEventCallback<'httpException', T>
@@ -504,7 +497,7 @@ export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
 export type PollOptions = {
   keepAlive?: boolean
   autoStart?: boolean
-  overlap?: 'allow' | 'skip' | 'cancel'
+  mode?: 'allow' | 'cancel' | 'rest'
 }
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
@@ -521,7 +514,6 @@ export type PendingVisitOptions = {
   completed: boolean
   cancelled: boolean
   interrupted: boolean
-  timedOut: boolean
 }
 
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
@@ -628,9 +620,7 @@ export type HeadManager = {
 export type LinkPrefetchOption = 'mount' | 'hover' | 'click'
 
 export type TimeUnit = 'ms' | 's' | 'm' | 'h' | 'd'
-export type DurationOption = number | `${number}${TimeUnit}` | string
-
-export type CacheForOption = DurationOption
+export type CacheForOption = number | `${number}${TimeUnit}` | string
 
 export type PrefetchOptions = {
   cacheFor: CacheForOption | CacheForOption[]
@@ -667,7 +657,6 @@ export interface LinkComponentBaseProps extends Partial<
     | 'queryStringArrayFormat'
     | 'async'
     | 'viewTransition'
-    | 'timeout'
   > &
     VisitCallbacks & {
       href: string | UrlMethodPair

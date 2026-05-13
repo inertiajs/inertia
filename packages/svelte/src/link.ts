@@ -32,7 +32,6 @@ type SelectedEventKeys =
   | 'finish'
   | 'before'
   | 'cancel'
-  | 'timeout'
   | 'success'
   | 'error'
   | 'prefetching'
@@ -184,7 +183,6 @@ function link(
       async: params.async || false,
       component: resolvedComponent,
       pageProps: pagePropsProp,
-      timeout: params.timeout ?? null,
     }
 
     visitParams = {
@@ -203,7 +201,6 @@ function link(
       },
       onBefore: (visit) => dispatchEvent('before', { cancelable: true, detail: { visit } }),
       onCancel: () => dispatchEvent('cancel'),
-      onTimeout: () => dispatchEvent('timeout'),
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
       onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),

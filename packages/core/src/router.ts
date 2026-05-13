@@ -221,7 +221,7 @@ export class Router {
       {
         autoStart: options.autoStart ?? true,
         keepAlive: options.keepAlive ?? false,
-        overlap: options.overlap,
+        mode: options.mode,
       },
     )
   }
@@ -674,13 +674,8 @@ export class Router {
       viewTransition: false,
       component: null,
       pageProps: null,
-      timeout: null,
       ...stripTopLevelUndefined(options),
       ...stripTopLevelUndefined(configuredOptions),
-    }
-
-    if (mergedOptions.prefetch) {
-      mergedOptions.timeout = null
     }
 
     const [url, _data] = transformUrlAndData(
@@ -695,7 +690,6 @@ export class Router {
       cancelled: false,
       completed: false,
       interrupted: false,
-      timedOut: false,
       ...mergedOptions,
       url,
       data: _data,
@@ -717,7 +711,6 @@ export class Router {
       onProgress: options.onProgress || noop,
       onFinish: options.onFinish || noop,
       onCancel: options.onCancel || noop,
-      onTimeout: options.onTimeout || noop,
       onSuccess: options.onSuccess || noop,
       onError: options.onError || noop,
       onHttpException: options.onHttpException || noop,
