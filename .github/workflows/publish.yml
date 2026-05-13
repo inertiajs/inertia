@@ -29,10 +29,6 @@ jobs:
         with:
           node-version: 24
           registry-url: 'https://registry.npmjs.org'
-          cache: pnpm
-
-      - name: Pin npm (OIDC trusted publishing requires >=11.5.1)
-        run: npm install -g npm@11.14.1
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
