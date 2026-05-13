@@ -14,12 +14,3 @@ onlyBuiltDependencies:
 overrides:
   cookie: '>=0.7.0'
   esbuild: '>=0.25.0'
-  svelte@>=5.0.0 <=5.53.4: ^5.53.5
-  vite@<=6.4.1: ^6.4.2
-
-auditConfig:
-  ignoreGhsas:
-    - GHSA-crpf-4hrx-3jrp
-    - GHSA-m56q-vw4c-c2cp
-    - GHSA-f7gr-6p89-r883
-    - GHSA-phwv-c562-gvmh
