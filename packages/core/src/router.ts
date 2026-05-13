@@ -30,6 +30,7 @@ import {
   PageFlashData,
   PendingVisit,
   PollOptions,
+  PollRequestOptionsResolver,
   PrefetchedResponse,
   PrefetchOptions,
   ReloadOptions,
@@ -201,11 +202,24 @@ export class Router {
     }
   }
 
-  public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
-    return polls.add(interval, () => this.reload({ preserveErrors: true, ...requestOptions }), {
-      autoStart: options.autoStart ?? true,
-      keepAlive: options.keepAlive ?? false,
-    })
+  public poll(interval: number, requestOptions: PollRequestOptionsResolver = {}, options: PollOptions = {}) {
+    return polls.add(
+      interval,
+      () => {
+        const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
+        const { data, ...rest } = resolved
+
+        return this.reload({
+          preserveErrors: true,
+          ...rest,
+          data: typeof data === 'function' ? data() : data,
+        })
+      },
+      {
+        autoStart: options.autoStart ?? true,
+        keepAlive: options.keepAlive ?? false,
+      },
+    )
   }
 
   public visit<T extends RequestPayload = RequestPayload>(

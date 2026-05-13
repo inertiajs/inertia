@@ -107,6 +107,63 @@ Object.entries({
   })
 })
 
+const dynamicDataScenarios = [
+  { name: 'requestOptions is a function', url: '/poll/dynamic-data' },
+  { name: 'data option is a function', url: '/poll/dynamic-data-inner' },
+]
+
+dynamicDataScenarios.forEach(({ name, url }) => {
+  test(`it re-evaluates poll data on each tick when ${name}`, async ({ page }) => {
+    await page.goto(url)
+    await expect(page.locator('#counter')).toHaveText('counter: 0')
+
+    await page.waitForResponse(
+      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '0',
+    )
+    await expect(page.locator('#last_received')).toHaveText('received: 0')
+
+    await page.getByRole('button', { name: 'Increment' }).click()
+    await expect(page.locator('#counter')).toHaveText('counter: 1')
+
+    await page.waitForResponse(
+      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '1',
+    )
+    await expect(page.locator('#last_received')).toHaveText('received: 1')
+
+    await page.getByRole('button', { name: 'Increment' }).click()
+    await expect(page.locator('#counter')).toHaveText('counter: 2')
+
+    await page.waitForResponse(
+      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '2',
+    )
+    await expect(page.locator('#last_received')).toHaveText('received: 2')
+  })
+})
+
+test('it auto-tracks poll data when requestOptions is a plain object (React)', async ({ page }) => {
+  test.skip(process.env.PACKAGE !== 'react', 'React-only: hook re-runs on every render so vanilla objects stay fresh')
+
+  await page.goto('/poll/dynamic-data-object')
+  await expect(page.locator('#counter')).toHaveText('counter: 0')
+
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes('/poll/dynamic-data-object') &&
+      new URL(response.url()).searchParams.get('counter_seen') === '0',
+  )
+  await expect(page.locator('#last_received')).toHaveText('received: 0')
+
+  await page.getByRole('button', { name: 'Increment' }).click()
+  await expect(page.locator('#counter')).toHaveText('counter: 1')
+
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes('/poll/dynamic-data-object') &&
+      new URL(response.url()).searchParams.get('counter_seen') === '1',
+  )
+  await expect(page.locator('#last_received')).toHaveText('received: 1')
+})
+
 test('it preserves validation errors when poll reloads data', async ({ page }) => {
   await page.goto('/poll/preserve-errors')
 

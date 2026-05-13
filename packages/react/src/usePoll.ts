@@ -1,19 +1,29 @@
-import { PollOptions, ReloadOptions, router } from '@inertiajs/core'
+import { PollOptions, PollRequestOptionsResolver, router } from '@inertiajs/core'
 import { useEffect, useRef } from 'react'
 
 export default function usePoll(
   interval: number,
-  requestOptions: ReloadOptions = {},
+  requestOptions: PollRequestOptionsResolver = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,
   },
 ) {
+  const requestOptionsRef = useRef(requestOptions)
+  requestOptionsRef.current = requestOptions
+
   const pollRef = useRef(
-    router.poll(interval, requestOptions, {
-      ...options,
-      autoStart: false,
-    }),
+    router.poll(
+      interval,
+      () => {
+        const current = requestOptionsRef.current
+        return typeof current === 'function' ? current() : current
+      },
+      {
+        ...options,
+        autoStart: false,
+      },
+    ),
   )
 
   useEffect(() => {

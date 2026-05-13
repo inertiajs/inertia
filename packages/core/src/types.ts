@@ -499,6 +499,14 @@ export type PollOptions = {
   autoStart?: boolean
 }
 
+export type PollRequestOptions<T extends RequestPayload = RequestPayload> = Omit<ReloadOptions<T>, 'data'> & {
+  data?: ReloadOptions<T>['data'] | (() => ReloadOptions<T>['data'])
+}
+
+export type PollRequestOptionsResolver<T extends RequestPayload = RequestPayload> =
+  | PollRequestOptions<T>
+  | (() => PollRequestOptions<T>)
+
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
 export type RouterInitParams<ComponentType = Component> = {

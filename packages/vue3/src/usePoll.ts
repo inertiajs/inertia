@@ -1,9 +1,9 @@
-import { PollOptions, ReloadOptions, router } from '@inertiajs/core'
+import { PollOptions, PollRequestOptionsResolver, router } from '@inertiajs/core'
 import { onMounted, onUnmounted } from 'vue'
 
 export default function usePoll(
   interval: number,
-  requestOptions: ReloadOptions = {},
+  requestOptions: PollRequestOptionsResolver = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,
