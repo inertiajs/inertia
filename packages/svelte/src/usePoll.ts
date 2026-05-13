@@ -3,13 +3,13 @@ import { onDestroy, onMount } from 'svelte'
 
 export default function usePoll(
   interval: number,
-  requestOptions: ReloadOptions = {},
+  requestOptions: ReloadOptions | (() => ReloadOptions) = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,
   },
 ) {
-  const { stop, start } = router.poll(interval, requestOptions, {
+  const { stop, start, destroy } = router.poll(interval, requestOptions, {
     ...options,
     autoStart: false,
   })
@@ -21,7 +21,7 @@ export default function usePoll(
   })
 
   onDestroy(() => {
-    stop()
+    destroy()
   })
 
   return { stop, start }
