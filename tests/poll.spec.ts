@@ -135,6 +135,30 @@ test('it re-evaluates poll request options on each tick when passed as a functio
   await expect(page.locator('#last_received')).toHaveText('received: 2')
 })
 
+test('it cleans up the poll on unmount and does not leak across rerenders', async ({ page }) => {
+  await page.goto('/poll/dynamic-data')
+  await expect(page.locator('#counter')).toHaveText('counter: 0')
+
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes('/poll/dynamic-data') && new URL(response.url()).searchParams.get('counter_seen') === '0',
+  )
+
+  for (let i = 1; i <= 5; i++) {
+    await page.getByRole('button', { name: 'Increment' }).click()
+    await expect(page.locator('#counter')).toHaveText(`counter: ${i}`)
+  }
+
+  await page.getByRole('link', { name: 'Home' }).click()
+  await page.waitForURL('/')
+
+  requests.listen(page)
+  await page.waitForTimeout(1000)
+
+  const leftover = requests.requests.filter((r) => r.url().includes('/poll/dynamic-data'))
+  await expect(leftover).toHaveLength(0)
+})
+
 const pollRequests = () => requests.requests.filter((r) => r.url().includes('/poll/overlap/'))
 const pollFinished = () => requests.finished.filter((r) => r.url().includes('/poll/overlap/'))
 const pollFailed = () => requests.failed.filter((r) => r.url().includes('/poll/overlap/'))

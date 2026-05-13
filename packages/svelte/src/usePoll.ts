@@ -9,7 +9,7 @@ export default function usePoll(
     autoStart: true,
   },
 ) {
-  const { stop, start } = router.poll(interval, requestOptions, {
+  const { stop, start, destroy } = router.poll(interval, requestOptions, {
     ...options,
     autoStart: false,
   })
@@ -21,7 +21,7 @@ export default function usePoll(
   })
 
   onDestroy(() => {
-    stop()
+    destroy()
   })
 
   return { stop, start }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { router, usePoll } from '@inertiajs/vue3'
+import { Link, router, usePoll } from '@inertiajs/vue3'
 
 const props = defineProps<{
   counter: number
@@ -16,4 +16,5 @@ usePoll(300, () => ({
   <div id="counter">counter: {{ counter }}</div>
   <div id="last_received">received: {{ last_received ?? 'null' }}</div>
   <button @click="router.reload({ only: ['counter'], data: { bump: counter + 1 } })">Increment</button>
+  <Link href="/">Home</Link>
 </template>

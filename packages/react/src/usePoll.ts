@@ -1,5 +1,5 @@
 import { PollOptions, ReloadOptions, router } from '@inertiajs/core'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 export default function usePoll(
   interval: number,
@@ -9,32 +9,30 @@ export default function usePoll(
     autoStart: true,
   },
 ) {
-  const isFunctionForm = typeof requestOptions === 'function'
+  const latest = useRef(requestOptions)
+  latest.current = requestOptions
 
-  const latestFn = useRef<(() => ReloadOptions) | null>(null)
-  latestFn.current = isFunctionForm ? requestOptions : null
-
-  const pollRef = useRef<ReturnType<typeof router.poll> | null>(null)
-
-  if (pollRef.current === null) {
-    const resolved: ReloadOptions | (() => ReloadOptions) = isFunctionForm ? () => latestFn.current!() : requestOptions
-
-    pollRef.current = router.poll(interval, resolved, {
-      ...options,
-      autoStart: false,
-    })
-  }
+  const handleRef = useRef<ReturnType<typeof router.poll> | null>(null)
 
   useEffect(() => {
-    if (options.autoStart ?? true) {
-      pollRef.current!.start()
-    }
+    const resolved: ReloadOptions | (() => ReloadOptions) =
+      typeof requestOptions === 'function' ? () => (latest.current as () => ReloadOptions)() : requestOptions
 
-    return () => pollRef.current!.stop()
+    const handle = router.poll(interval, resolved, {
+      ...options,
+      autoStart: options.autoStart ?? true,
+    })
+
+    handleRef.current = handle
+
+    return () => {
+      handle.destroy()
+      handleRef.current = null
+    }
   }, [])
 
-  return {
-    stop: pollRef.current.stop,
-    start: pollRef.current.start,
-  }
+  const stop = useCallback(() => handleRef.current?.stop(), [])
+  const start = useCallback(() => handleRef.current?.start(), [])
+
+  return { stop, start }
 }
