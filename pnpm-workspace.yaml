@@ -4,6 +4,13 @@ packages:
   - playgrounds/*
   - tests/app
 
+allowBuilds:
+  esbuild: true
+
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - esbuild
+
+overrides:
+  cookie: '>=0.7.0'
+  esbuild: '>=0.25.0'
