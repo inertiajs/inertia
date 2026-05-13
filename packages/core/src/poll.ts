@@ -15,14 +15,14 @@ export class Poll {
   protected cb: PollCallback
   protected interval: number
   protected cbCount = 0
-  protected mode: 'allow' | 'cancel' | 'rest'
+  protected mode: 'overlap' | 'cancel' | 'rest'
   protected inFlight = false
   protected currentCancel: VoidFunction | null = null
   protected stopped = true
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.keepAlive = options.keepAlive ?? false
-    this.mode = options.mode ?? 'allow'
+    this.mode = options.mode ?? 'overlap'
 
     this.cb = cb
     this.interval = interval

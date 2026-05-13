@@ -8,10 +8,10 @@
 
   const pathMode = window.location.pathname.split('/').pop()
 
-  const options: { mode?: 'allow' | 'cancel' | 'rest' } = {}
+  const options: { mode?: 'overlap' | 'cancel' | 'rest' } = {}
 
-  if (pathMode === 'allow' || pathMode === 'cancel' || pathMode === 'rest') {
-    options.mode = pathMode as 'allow' | 'cancel' | 'rest'
+  if (pathMode === 'overlap' || pathMode === 'cancel' || pathMode === 'rest') {
+    options.mode = pathMode as 'overlap' | 'cancel' | 'rest'
   }
 
   usePoll(interval, {}, options)

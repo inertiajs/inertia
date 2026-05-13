@@ -6,9 +6,9 @@ export default ({ mode, time }: { mode: string; time: number }) => {
 
   const pathMode = window.location.pathname.split('/').pop()
 
-  const options: { mode?: 'allow' | 'cancel' | 'rest' } = {}
+  const options: { mode?: 'overlap' | 'cancel' | 'rest' } = {}
 
-  if (pathMode === 'allow' || pathMode === 'cancel' || pathMode === 'rest') {
+  if (pathMode === 'overlap' || pathMode === 'cancel' || pathMode === 'rest') {
     options.mode = pathMode
   }
 

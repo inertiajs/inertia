@@ -123,8 +123,8 @@ test('it allows overlapping requests by default', async ({ page }) => {
   await expect(pollFinished().length).toBeLessThan(pollRequests().length)
 })
 
-test('it allows overlapping requests with explicit mode: allow', async ({ page }) => {
-  await page.goto('/poll/overlap/allow?interval=200&delay=600')
+test('it allows overlapping requests with explicit mode: overlap', async ({ page }) => {
+  await page.goto('/poll/overlap/overlap?interval=200&delay=600')
 
   requests.listen(page)
   requests.listenForFinished(page)
