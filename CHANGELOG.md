@@ -7,9 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.1.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.1.1...3.x)
 
 - Nothing yet
+
+## [v3.1.1](https://github.com/inertiajs/inertia/compare/v3.1.0...v3.1.1) - 2026-05-07
+
+### What's Changed
+
+* fix: prevent explicit undefined values from overwriting visit defaults (#3018) by [@Vitalcheffe](https://github.com/Vitalcheffe) in https://github.com/inertiajs/inertia/pull/3019
+* [3.x] Fix Vue `<Deferred>` SSR crash on sibling slot transitions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3092
+
+### New Contributors
+
+* [@Vitalcheffe](https://github.com/Vitalcheffe) made their first contribution in https://github.com/inertiajs/inertia/pull/3019
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.1.0...v3.1.1
 
 ## [v3.1.0](https://github.com/inertiajs/inertia/compare/v3.0.3...v3.1.0) - 2026-05-06
 
