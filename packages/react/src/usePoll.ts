@@ -1,4 +1,4 @@
-import { PollOptions, PollRequestOptionsResolver, router } from '@inertiajs/core'
+import { PollOptions, PollRequestOptions, PollRequestOptionsResolver, ReloadOptions, router } from '@inertiajs/core'
 import { useEffect, useRef } from 'react'
 
 export default function usePoll(
@@ -9,21 +9,28 @@ export default function usePoll(
     autoStart: true,
   },
 ) {
-  const requestOptionsRef = useRef(requestOptions)
-  requestOptionsRef.current = requestOptions
+  const isFunctionForm = typeof requestOptions === 'function'
+  const hasInnerDataFn = !isFunctionForm && typeof (requestOptions as PollRequestOptions).data === 'function'
+
+  const dynamicRef = useRef<(() => unknown) | null>(null)
+
+  if (isFunctionForm) {
+    dynamicRef.current = requestOptions as () => PollRequestOptions
+  } else if (hasInnerDataFn) {
+    dynamicRef.current = (requestOptions as PollRequestOptions).data as () => ReloadOptions['data']
+  }
+
+  const initialOptions: PollRequestOptionsResolver = isFunctionForm
+    ? () => (dynamicRef.current as () => PollRequestOptions)()
+    : hasInnerDataFn
+      ? { ...(requestOptions as PollRequestOptions), data: () => (dynamicRef.current as () => ReloadOptions['data'])() }
+      : requestOptions
 
   const pollRef = useRef(
-    router.poll(
-      interval,
-      () => {
-        const current = requestOptionsRef.current
-        return typeof current === 'function' ? current() : current
-      },
-      {
-        ...options,
-        autoStart: false,
-      },
-    ),
+    router.poll(interval, initialOptions, {
+      ...options,
+      autoStart: false,
+    }),
   )
 
   useEffect(() => {

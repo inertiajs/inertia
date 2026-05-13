@@ -967,7 +967,6 @@ const renderPollDynamicData = (component) => (req, res) =>
   })
 
 app.get('/poll/dynamic-data', renderPollDynamicData('Poll/DynamicData'))
-app.get('/poll/dynamic-data-object', renderPollDynamicData('Poll/DynamicDataObject'))
 app.get('/poll/dynamic-data-inner', renderPollDynamicData('Poll/DynamicDataInner'))
 
 app.get('/prefetch/form', (req, res) =>
