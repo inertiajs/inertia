@@ -967,17 +967,15 @@ app.post('/poll/preserve-errors', (req, res) => {
   res.redirect(303, '/poll/preserve-errors')
 })
 
-const renderPollDynamicData = (component) => (req, res) =>
+app.get('/poll/dynamic-data', (req, res) =>
   inertia.render(req, res, {
-    component,
+    component: 'Poll/DynamicData',
     props: {
       counter: req.query.bump !== undefined ? Number(req.query.bump) : 0,
       last_received: req.query.counter_seen !== undefined ? Number(req.query.counter_seen) : null,
     },
-  })
-
-app.get('/poll/dynamic-data', renderPollDynamicData('Poll/DynamicData'))
-app.get('/poll/dynamic-data-inner', renderPollDynamicData('Poll/DynamicDataInner'))
+  }),
+)
 
 app.get('/prefetch/form', (req, res) =>
   inertia.render(req, res, {

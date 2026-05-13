@@ -30,7 +30,6 @@ import {
   PageFlashData,
   PendingVisit,
   PollOptions,
-  PollRequestOptionsResolver,
   PrefetchedResponse,
   PrefetchOptions,
   ReloadOptions,
@@ -202,24 +201,22 @@ export class Router {
     }
   }
 
-  public poll(interval: number, requestOptions: PollRequestOptionsResolver = {}, options: PollOptions = {}) {
+  public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
     return polls.add(
       interval,
       ({ onStart, onFinish }) => {
         const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
-        const { data, ...rest } = resolved
 
         this.reload({
           preserveErrors: true,
-          ...rest,
-          data: typeof data === 'function' ? data() : data,
+          ...resolved,
           onCancelToken: (token) => {
             onStart(token.cancel)
-            rest.onCancelToken?.(token)
+            resolved.onCancelToken?.(token)
           },
           onFinish: (visit) => {
             onFinish()
-            rest.onFinish?.(visit)
+            resolved.onFinish?.(visit)
           },
         })
       },

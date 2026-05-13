@@ -1,44 +1,36 @@
-import { PollOptions, PollRequestOptions, PollRequestOptionsResolver, ReloadOptions, router } from '@inertiajs/core'
+import { PollOptions, ReloadOptions, router } from '@inertiajs/core'
 import { useEffect, useRef } from 'react'
 
 export default function usePoll(
   interval: number,
-  requestOptions: PollRequestOptionsResolver = {},
+  requestOptions: ReloadOptions | (() => ReloadOptions) = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,
   },
 ) {
   const isFunctionForm = typeof requestOptions === 'function'
-  const hasInnerDataFn = !isFunctionForm && typeof (requestOptions as PollRequestOptions).data === 'function'
 
-  const dynamicRef = useRef<(() => unknown) | null>(null)
+  const latestFn = useRef<(() => ReloadOptions) | null>(null)
+  latestFn.current = isFunctionForm ? requestOptions : null
 
-  if (isFunctionForm) {
-    dynamicRef.current = requestOptions as () => PollRequestOptions
-  } else if (hasInnerDataFn) {
-    dynamicRef.current = (requestOptions as PollRequestOptions).data as () => ReloadOptions['data']
-  }
+  const pollRef = useRef<ReturnType<typeof router.poll> | null>(null)
 
-  const initialOptions: PollRequestOptionsResolver = isFunctionForm
-    ? () => (dynamicRef.current as () => PollRequestOptions)()
-    : hasInnerDataFn
-      ? { ...(requestOptions as PollRequestOptions), data: () => (dynamicRef.current as () => ReloadOptions['data'])() }
-      : requestOptions
+  if (pollRef.current === null) {
+    const resolved: ReloadOptions | (() => ReloadOptions) = isFunctionForm ? () => latestFn.current!() : requestOptions
 
-  const pollRef = useRef(
-    router.poll(interval, initialOptions, {
+    pollRef.current = router.poll(interval, resolved, {
       ...options,
       autoStart: false,
-    }),
-  )
+    })
+  }
 
   useEffect(() => {
     if (options.autoStart ?? true) {
-      pollRef.current.start()
+      pollRef.current!.start()
     }
 
-    return () => pollRef.current.stop()
+    return () => pollRef.current!.stop()
   }, [])
 
   return {

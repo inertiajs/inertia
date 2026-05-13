@@ -1,9 +1,9 @@
-import { router, type PollOptions, type PollRequestOptionsResolver } from '@inertiajs/core'
+import { router, type PollOptions, type ReloadOptions } from '@inertiajs/core'
 import { onDestroy, onMount } from 'svelte'
 
 export default function usePoll(
   interval: number,
-  requestOptions: PollRequestOptionsResolver = {},
+  requestOptions: ReloadOptions | (() => ReloadOptions) = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,

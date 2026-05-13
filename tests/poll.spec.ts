@@ -107,37 +107,32 @@ Object.entries({
   })
 })
 
-const dynamicDataScenarios = [
-  { name: 'requestOptions is a function', url: '/poll/dynamic-data' },
-  { name: 'data option is a function', url: '/poll/dynamic-data-inner' },
-]
+test('it re-evaluates poll request options on each tick when passed as a function', async ({ page }) => {
+  const url = '/poll/dynamic-data'
 
-dynamicDataScenarios.forEach(({ name, url }) => {
-  test(`it re-evaluates poll data on each tick when ${name}`, async ({ page }) => {
-    await page.goto(url)
-    await expect(page.locator('#counter')).toHaveText('counter: 0')
+  await page.goto(url)
+  await expect(page.locator('#counter')).toHaveText('counter: 0')
 
-    await page.waitForResponse(
-      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '0',
-    )
-    await expect(page.locator('#last_received')).toHaveText('received: 0')
+  await page.waitForResponse(
+    (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '0',
+  )
+  await expect(page.locator('#last_received')).toHaveText('received: 0')
 
-    await page.getByRole('button', { name: 'Increment' }).click()
-    await expect(page.locator('#counter')).toHaveText('counter: 1')
+  await page.getByRole('button', { name: 'Increment' }).click()
+  await expect(page.locator('#counter')).toHaveText('counter: 1')
 
-    await page.waitForResponse(
-      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '1',
-    )
-    await expect(page.locator('#last_received')).toHaveText('received: 1')
+  await page.waitForResponse(
+    (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '1',
+  )
+  await expect(page.locator('#last_received')).toHaveText('received: 1')
 
-    await page.getByRole('button', { name: 'Increment' }).click()
-    await expect(page.locator('#counter')).toHaveText('counter: 2')
+  await page.getByRole('button', { name: 'Increment' }).click()
+  await expect(page.locator('#counter')).toHaveText('counter: 2')
 
-    await page.waitForResponse(
-      (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '2',
-    )
-    await expect(page.locator('#last_received')).toHaveText('received: 2')
-  })
+  await page.waitForResponse(
+    (response) => response.url().includes(url) && new URL(response.url()).searchParams.get('counter_seen') === '2',
+  )
+  await expect(page.locator('#last_received')).toHaveText('received: 2')
 })
 
 const pollRequests = () => requests.requests.filter((r) => r.url().includes('/poll/overlap/'))
