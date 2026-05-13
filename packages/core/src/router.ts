@@ -183,6 +183,10 @@ export class Router {
     this.syncRequestStream.cancelInFlight()
   }
 
+  public get activePolls(): number {
+    return polls.count
+  }
+
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
@@ -193,19 +197,21 @@ export class Router {
     }
   }
 
-  public poll(interval: number, requestOptions: ReloadOptions = {}, options: PollOptions = {}) {
+  public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
     return polls.add(
       interval,
       ({ onStart, onFinish }) => {
+        const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
+
         this.reload({
-          ...requestOptions,
+          ...resolved,
           onCancelToken: (token) => {
             onStart(token.cancel)
-            requestOptions.onCancelToken?.(token)
+            resolved.onCancelToken?.(token)
           },
           onFinish: (visit) => {
             onFinish()
-            requestOptions.onFinish?.(visit)
+            resolved.onFinish?.(visit)
           },
         })
       },

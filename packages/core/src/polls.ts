@@ -8,6 +8,10 @@ class Polls {
     this.setupVisibilityListener()
   }
 
+  public get count(): number {
+    return this.polls.length
+  }
+
   public add(
     interval: number,
     cb: PollCallback,
@@ -15,6 +19,7 @@ class Polls {
   ): {
     stop: VoidFunction
     start: VoidFunction
+    destroy: VoidFunction
   } {
     const poll = new Poll(interval, cb, options)
 
@@ -23,6 +28,10 @@ class Polls {
     return {
       stop: () => poll.stop(),
       start: () => poll.start(),
+      destroy: () => {
+        poll.stop()
+        this.polls = this.polls.filter((p) => p !== poll)
+      },
     }
   }
 
