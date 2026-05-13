@@ -106,3 +106,57 @@ Object.entries({
     await expect(page.locator('.replaceStateCalls')).toHaveText('1')
   })
 })
+
+const pollRequests = () => requests.requests.filter((r) => r.url().includes('/poll/overlap/'))
+const pollFinished = () => requests.finished.filter((r) => r.url().includes('/poll/overlap/'))
+const pollFailed = () => requests.failed.filter((r) => r.url().includes('/poll/overlap/'))
+
+test('it allows overlapping requests by default', async ({ page }) => {
+  await page.goto('/poll/overlap/none?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFinished(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
+  await expect(pollFinished().length).toBeLessThan(pollRequests().length)
+})
+
+test('it allows overlapping requests with explicit mode: overlap', async ({ page }) => {
+  await page.goto('/poll/overlap/overlap?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFinished(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
+  await expect(pollFinished().length).toBeLessThan(pollRequests().length)
+})
+
+test('it waits for the interval between requests with mode: rest', async ({ page }) => {
+  await page.goto('/poll/overlap/rest?interval=200&delay=400')
+
+  requests.listen(page)
+  requests.listenForFinished(page)
+  requests.listenForFailed(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollFinished().length).toBe(pollRequests().length)
+  await expect(pollFailed().length).toBe(0)
+})
+
+test('it cancels in-flight requests on each tick with mode: cancel', async ({ page }) => {
+  await page.goto('/poll/overlap/cancel?interval=200&delay=600')
+
+  requests.listen(page)
+  requests.listenForFailed(page)
+
+  await page.waitForTimeout(2000)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(3)
+  await expect(pollFailed().length).toBeGreaterThanOrEqual(pollRequests().length - 1)
+})
