@@ -497,6 +497,7 @@ export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
 export type PollOptions = {
   keepAlive?: boolean
   autoStart?: boolean
+  mode?: 'overlap' | 'cancel' | 'rest'
 }
 
 export type PollRequestOptions<T extends RequestPayload = RequestPayload> = Omit<ReloadOptions<T>, 'data'> & {

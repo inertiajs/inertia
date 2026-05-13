@@ -1,15 +1,28 @@
 import { PollOptions } from './types'
 
+type PollHooks = {
+  onStart: (cancel: VoidFunction) => void
+  onFinish: VoidFunction
+}
+
+export type PollCallback = (hooks: PollHooks) => void
+
 export class Poll {
-  protected id: number | null = null
+  protected intervalId: number | null = null
+  protected timeoutId: number | null = null
   protected throttle = false
   protected keepAlive = false
-  protected cb: VoidFunction
+  protected cb: PollCallback
   protected interval: number
   protected cbCount = 0
+  protected mode: 'overlap' | 'cancel' | 'rest'
+  protected inFlight = false
+  protected currentCancel: VoidFunction | null = null
+  protected stopped = true
 
-  constructor(interval: number, cb: VoidFunction, options: PollOptions) {
+  constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.keepAlive = options.keepAlive ?? false
+    this.mode = options.mode ?? 'overlap'
 
     this.cb = cb
     this.interval = interval
@@ -20,10 +33,16 @@ export class Poll {
   }
 
   public stop() {
-    // console.log('stopping...', this.id)
-    if (this.id) {
-      //   console.log('clearing interval...')
-      clearInterval(this.id)
+    this.stopped = true
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    }
+
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId)
+      this.timeoutId = null
     }
   }
 
@@ -33,10 +52,16 @@ export class Poll {
     }
 
     this.stop()
+    this.stopped = false
 
-    this.id = window.setInterval(() => {
+    if (this.mode === 'rest') {
+      this.scheduleNext()
+      return
+    }
+
+    this.intervalId = window.setInterval(() => {
       if (!this.throttle || this.cbCount % 10 === 0) {
-        this.cb()
+        this.fire()
       }
 
       if (this.throttle) {
@@ -51,5 +76,39 @@ export class Poll {
     if (this.throttle) {
       this.cbCount = 0
     }
+  }
+
+  protected scheduleNext() {
+    if (this.stopped) {
+      return
+    }
+
+    const delay = this.throttle ? this.interval * 10 : this.interval
+
+    this.timeoutId = window.setTimeout(() => {
+      this.timeoutId = null
+      this.fire()
+    }, delay)
+  }
+
+  protected fire() {
+    if (this.inFlight && this.mode === 'cancel') {
+      this.currentCancel?.()
+    }
+
+    this.cb({
+      onStart: (cancel) => {
+        this.inFlight = true
+        this.currentCancel = cancel
+      },
+      onFinish: () => {
+        this.inFlight = false
+        this.currentCancel = null
+
+        if (this.mode === 'rest') {
+          this.scheduleNext()
+        }
+      },
+    })
   }
 }

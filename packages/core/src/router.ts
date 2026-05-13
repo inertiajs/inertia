@@ -205,19 +205,28 @@ export class Router {
   public poll(interval: number, requestOptions: PollRequestOptionsResolver = {}, options: PollOptions = {}) {
     return polls.add(
       interval,
-      () => {
+      ({ onStart, onFinish }) => {
         const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
         const { data, ...rest } = resolved
 
-        return this.reload({
+        this.reload({
           preserveErrors: true,
           ...rest,
           data: typeof data === 'function' ? data() : data,
+          onCancelToken: (token) => {
+            onStart(token.cancel)
+            rest.onCancelToken?.(token)
+          },
+          onFinish: (visit) => {
+            onFinish()
+            rest.onFinish?.(visit)
+          },
         })
       },
       {
         autoStart: options.autoStart ?? true,
         keepAlive: options.keepAlive ?? false,
+        mode: options.mode,
       },
     )
   }

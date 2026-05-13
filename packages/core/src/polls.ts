@@ -1,4 +1,4 @@
-import { Poll } from './poll'
+import { Poll, PollCallback } from './poll'
 import { PollOptions } from './types'
 
 class Polls {
@@ -10,7 +10,7 @@ class Polls {
 
   public add(
     interval: number,
-    cb: VoidFunction,
+    cb: PollCallback,
     options: PollOptions,
   ): {
     stop: VoidFunction
