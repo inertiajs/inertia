@@ -1,6 +1,6 @@
 import { PollOptions } from './types'
 
-export type PollHooks = {
+type PollHooks = {
   onStart: (cancel: VoidFunction) => void
   onFinish: VoidFunction
 }

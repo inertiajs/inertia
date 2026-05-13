@@ -6,12 +6,10 @@
   const params = new URLSearchParams(window.location.search)
   const interval = parseInt(params.get('interval') || '200')
 
-  const pathMode = window.location.pathname.split('/').pop()
-
   const options: { mode?: 'overlap' | 'cancel' | 'rest' } = {}
 
-  if (pathMode === 'overlap' || pathMode === 'cancel' || pathMode === 'rest') {
-    options.mode = pathMode as 'overlap' | 'cancel' | 'rest'
+  if (mode === 'overlap' || mode === 'cancel' || mode === 'rest') {
+    options.mode = mode as 'overlap' | 'cancel' | 'rest'
   }
 
   usePoll(interval, {}, options)
