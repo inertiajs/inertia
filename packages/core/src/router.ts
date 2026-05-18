@@ -187,6 +187,22 @@ export class Router {
     return eventHandler.onGlobalEvent(type, callback)
   }
 
+  public once<TEventName extends GlobalEventNames>(
+    type: TEventName,
+    callback: (event: GlobalEvent<TEventName>) => GlobalEventResult<TEventName>,
+  ): VoidFunction {
+    if (typeof window === 'undefined') {
+      return () => {}
+    }
+
+    const remove = this.on(type, (event) => {
+      remove()
+      return callback(event)
+    })
+
+    return remove
+  }
+
   public hasPendingOptimistic(): boolean {
     return this.asyncRequestStream.hasPendingOptimistic()
   }

@@ -41,6 +41,24 @@ export default () => {
     )
   }
 
+  const onceInertiaListener = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.once('before', () => internalAlert('Inertia.once(before)'))
+
+    router.post(page.url, {}, { onBefore: () => internalAlert('onBefore-1') })
+    router.post(page.url, {}, { onBefore: () => internalAlert('onBefore-2') })
+  }
+
+  const removeOnceInertiaListener = (e: React.MouseEvent) => {
+    e.preventDefault()
+    const removeEventListener = router.once('before', () => internalAlert('Inertia.once(before)'))
+
+    internalAlert('Removing Inertia.once Listener')
+    removeEventListener()
+
+    router.post(page.url, {}, { onBefore: () => internalAlert('onBefore') })
+  }
+
   const beforeVisit = (e: React.MouseEvent) => {
     e.preventDefault()
     router.on('before', (event) => {
@@ -593,6 +611,12 @@ export default () => {
       </a>
       <a href="#" onClick={removeInertiaListener} className="remove-inertia-listener">
         Remove Inertia Listener
+      </a>
+      <a href="#" onClick={onceInertiaListener} className="register-inertia-once-listener">
+        Register Inertia Once Listener
+      </a>
+      <a href="#" onClick={removeOnceInertiaListener} className="remove-inertia-once-listener">
+        Remove Inertia Once Listener
       </a>
 
       {/* Events: Before */}
