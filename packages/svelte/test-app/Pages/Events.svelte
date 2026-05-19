@@ -653,11 +653,8 @@
   <!-- Listeners -->
   <a href={'#'} onclick={withoutEventListeners} class="without-listeners">Basic Visit</a>
   <a href={'#'} onclick={removeInertiaListener} class="remove-inertia-listener">Remove Inertia Listener</a>
-  <a href={'#'} onclick={onceInertiaListener} class="register-inertia-once-listener"
-    >Register Inertia Once Listener</a
-  >
-  <a href={'#'} onclick={removeOnceInertiaListener} class="remove-inertia-once-listener"
-    >Remove Inertia Once Listener</a
+  <a href={'#'} onclick={onceInertiaListener} class="register-inertia-once-listener">Register Inertia Once Listener</a>
+  <a href={'#'} onclick={removeOnceInertiaListener} class="remove-inertia-once-listener">Remove Inertia Once Listener</a
   >
 
   <!-- Events: Before -->
