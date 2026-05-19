@@ -39,6 +39,22 @@ const removeInertiaListener = () => {
   )
 }
 
+const onceInertiaListener = () => {
+  router.once('before', () => internalAlert('Inertia.once(before)'))
+
+  router.post(page.url, {}, { onBefore: () => internalAlert('onBefore-1') })
+  router.post(page.url, {}, { onBefore: () => internalAlert('onBefore-2') })
+}
+
+const removeOnceInertiaListener = () => {
+  const removeEventListener = router.once('before', () => internalAlert('Inertia.once(before)'))
+
+  internalAlert('Removing Inertia.once Listener')
+  removeEventListener()
+
+  router.post(page.url, {}, { onBefore: () => internalAlert('onBefore') })
+}
+
 const beforeVisit = () => {
   router.on('before', (event) => {
     internalAlert('Inertia.on(before)')
@@ -564,6 +580,12 @@ const callbackSuccessErrorPromise = (eventName: string) => {
     <!-- Listeners -->
     <a href="#" @click.prevent="withoutEventListeners" class="without-listeners">Basic Visit</a>
     <a href="#" @click.prevent="removeInertiaListener" class="remove-inertia-listener">Remove Inertia Listener</a>
+    <a href="#" @click.prevent="onceInertiaListener" class="register-inertia-once-listener"
+      >Register Inertia Once Listener</a
+    >
+    <a href="#" @click.prevent="removeOnceInertiaListener" class="remove-inertia-once-listener"
+      >Remove Inertia Once Listener</a
+    >
 
     <!-- Events: Before -->
     <a href="#" @click.prevent="beforeVisit" class="before">Before Event</a>

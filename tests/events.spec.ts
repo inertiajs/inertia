@@ -132,6 +132,27 @@ test.describe('Events', () => {
         await expect(messages[2]).toBe('onStart')
       })
     })
+
+    test.describe('Inertia.once', () => {
+      test('fires the global listener once and then deregisters it', async ({ page }) => {
+        await page.getByRole('link', { name: 'Register Inertia Once Listener' }).click()
+
+        const messages = await waitForMessages(page, 3)
+
+        await expect(messages[0]).toBe('onBefore-1')
+        await expect(messages[1]).toBe('Inertia.once(before)')
+        await expect(messages[2]).toBe('onBefore-2')
+      })
+
+      test('returns a callback that can be used to remove the global listener before it fires', async ({ page }) => {
+        await page.getByRole('link', { name: 'Remove Inertia Once Listener' }).click()
+
+        const messages = await waitForMessages(page, 2)
+
+        await expect(messages[0]).toBe('Removing Inertia.once Listener')
+        await expect(messages[1]).toBe('onBefore')
+      })
+    })
   })
 
   test.describe('Hooks', () => {
