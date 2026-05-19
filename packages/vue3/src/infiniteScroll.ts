@@ -148,17 +148,17 @@ const InfiniteScroll = defineComponent({
       // Request callbacks
       onBeforePreviousRequest: () => (loadingPrevious.value = true),
       onBeforeNextRequest: () => (loadingNext.value = true),
-      onCompletePreviousRequest: ({ wasCancelled }) => {
+      onCompletePreviousRequest: ({ completed }) => {
         loadingPrevious.value = false
 
-        if (!wasCancelled) {
+        if (completed) {
           syncStateFromDataManager()
         }
       },
-      onCompleteNextRequest: ({ wasCancelled }) => {
+      onCompleteNextRequest: ({ completed }) => {
         loadingNext.value = false
 
-        if (!wasCancelled) {
+        if (completed) {
           syncStateFromDataManager()
         }
       },

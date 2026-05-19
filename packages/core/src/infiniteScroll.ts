@@ -40,14 +40,14 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     onCompletePreviousRequest: (_, details) => {
       options.onCompletePreviousRequest(details)
 
-      if (!details.wasCancelled) {
+      if (details.completed) {
         requestAnimationFrame(() => elementManager.processServerLoadedElements(details.page), 2)
       }
     },
     onCompleteNextRequest: (_, details) => {
       options.onCompleteNextRequest(details)
 
-      if (!details.wasCancelled) {
+      if (details.completed) {
         requestAnimationFrame(() => elementManager.processServerLoadedElements(details.page), 2)
       }
     },

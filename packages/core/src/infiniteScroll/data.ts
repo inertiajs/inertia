@@ -1,4 +1,4 @@
-import { router } from '../index'
+import { ActiveVisit, router } from '../index'
 import { page as currentPage } from '../page'
 import { Page, PendingVisit, ReloadOptions, ScrollProp, UseInfiniteScrollDataManager } from '../types'
 
@@ -15,7 +15,7 @@ type InfiniteScrollState = {
 }
 
 export type InfiniteScrollPageIdentifier = string | number | null
-export type InfiniteScrollOnCompleteDetails = { page: InfiniteScrollPageIdentifier; wasCancelled: boolean }
+export type InfiniteScrollOnCompleteDetails = { page: InfiniteScrollPageIdentifier; completed: boolean }
 
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
@@ -139,8 +139,6 @@ export const useInfiniteScrollData = (options: {
 
     state.loading = true
 
-    let wasCancelled = false
-
     router.reload({
       preserveErrors: true,
       ...reloadOptions,
@@ -150,9 +148,6 @@ export const useInfiniteScrollData = (options: {
       headers: {
         [MERGE_INTENT_HEADER]: side === 'previous' ? 'prepend' : 'append',
         ...reloadOptions.headers,
-      },
-      onCancel: () => {
-        wasCancelled = true
       },
       onBefore: (visit: PendingVisit) => {
         side === 'next' ? options.onBeforeNextRequest() : options.onBeforePreviousRequest()
@@ -166,14 +161,15 @@ export const useInfiniteScrollData = (options: {
         syncStateOnSuccess(side)
         reloadOptions.onSuccess?.(page)
       },
-      onFinish: (visit: any) => {
+      onFinish: (visit: ActiveVisit) => {
         state.loading = false
 
-        const page = state.lastLoadedPage
+        const completed = visit.completed
+        const page = completed ? state.lastLoadedPage : null
 
         side === 'next'
-          ? options.onCompleteNextRequest(page, { page, wasCancelled })
-          : options.onCompletePreviousRequest(page, { page, wasCancelled })
+          ? options.onCompleteNextRequest(page, { page, completed })
+          : options.onCompletePreviousRequest(page, { page, completed })
 
         reloadOptions.onFinish?.(visit)
       },

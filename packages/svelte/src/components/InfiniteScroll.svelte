@@ -152,17 +152,17 @@
       // Request callbacks
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
-      onCompletePreviousRequest: ({ wasCancelled }) => {
+      onCompletePreviousRequest: ({ completed }) => {
         loadingPrevious = false
 
-        if (!wasCancelled) {
+        if (completed) {
           syncStateFromDataManager()
         }
       },
-      onCompleteNextRequest: ({ wasCancelled }) => {
+      onCompleteNextRequest: ({ completed }) => {
         loadingNext = false
 
-        if (!wasCancelled) {
+        if (completed) {
           syncStateFromDataManager()
         }
       },
