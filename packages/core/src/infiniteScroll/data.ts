@@ -1,6 +1,6 @@
 import { ActiveVisit, router } from '../index'
 import { page as currentPage } from '../page'
-import { Page, PendingVisit, ReloadOptions, ScrollProp, UseInfiniteScrollDataManager } from '../types'
+import { Page, PendingVisit, ReloadOptions, RequestPayload, ScrollProp, UseInfiniteScrollDataManager } from '../types'
 
 const MERGE_INTENT_HEADER = 'X-Inertia-Infinite-Scroll-Merge-Intent'
 
@@ -139,7 +139,7 @@ export const useInfiniteScrollData = (options: {
 
     state.loading = true
 
-    router.reload({
+    router.reload<RequestPayload>({
       ...reloadOptions,
       data: { [getPageName()]: page },
       only: [options.getPropName()],
