@@ -2511,7 +2511,7 @@ test.describe('Optional scroll props via WhenVisible', () => {
 })
 
 test('it discards an in-flight infinite scroll request when navigating away', async ({ page }) => {
-  test.setTimeout(15000)
+  test.setTimeout(10_000)
   consoleMessages.listen(page)
 
   await page.goto('/infinite-scroll/navigate-away')
@@ -2529,7 +2529,7 @@ test('it discards an in-flight infinite scroll request when navigating away', as
 
   await page.waitForTimeout(500)
 
-  expect(consoleMessages.errors).toEqual([])
+  expect(consoleMessages.errors).toHaveLength(0)
 })
 
 test('it preserves validation errors when InfiniteScroll loads more data', async ({ page }) => {

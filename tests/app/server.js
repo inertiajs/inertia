@@ -2162,16 +2162,15 @@ app.get('/infinite-scroll/navigate-away', (req, res) => {
   const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
   const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
 
-  setTimeout(
-    () =>
-      inertia.render(req, res, {
-        component: 'InfiniteScroll/NavigateAway',
-        props: { users: paginated },
-        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
-        scrollProps: { users: scrollProp },
-      }),
-    partialReload ? 1000 : 0,
-  )
+  const render = () =>
+    inertia.render(req, res, {
+      component: 'InfiniteScroll/NavigateAway',
+      props: { users: paginated },
+      [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+      scrollProps: { users: scrollProp },
+    })
+
+  partialReload ? setTimeout(render, 1000) : render()
 })
 app.get('/infinite-scroll/invisible-first-child', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
