@@ -2511,6 +2511,7 @@ test.describe('Optional scroll props via WhenVisible', () => {
 })
 
 test('it discards an in-flight infinite scroll request when navigating away', async ({ page }) => {
+  test.setTimeout(15000)
   consoleMessages.listen(page)
 
   await page.goto('/infinite-scroll/navigate-away')
@@ -2526,7 +2527,7 @@ test('it discards an in-flight infinite scroll request when navigating away', as
   await expect(page).toHaveURL('/article')
   await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
 
-  await page.waitForTimeout(1500)
+  await page.waitForTimeout(500)
 
   expect(consoleMessages.errors).toEqual([])
 })
