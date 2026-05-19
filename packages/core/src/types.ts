@@ -1,5 +1,6 @@
 import { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
 import type { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
+import { InfiniteScrollOnCompleteDetails, InfiniteScrollPageIdentifier } from './infiniteScroll/data'
 import { Response } from './response'
 
 export type HttpRequestHeaders = Record<string, unknown>
@@ -216,9 +217,9 @@ export interface PageProps {
 
 export type ScrollProp = {
   pageName: string
-  previousPage: number | string | null
-  nextPage: number | string | null
-  currentPage: number | string | null
+  previousPage: InfiniteScrollPageIdentifier
+  nextPage: InfiniteScrollPageIdentifier
+  currentPage: InfiniteScrollPageIdentifier
   reset: boolean
 }
 
@@ -841,13 +842,13 @@ export interface UseInfiniteScrollOptions {
   // Callbacks
   onBeforePreviousRequest: () => void
   onBeforeNextRequest: () => void
-  onCompletePreviousRequest: () => void
-  onCompleteNextRequest: () => void
+  onCompletePreviousRequest: (details: InfiniteScrollOnCompleteDetails) => void
+  onCompleteNextRequest: (details: InfiniteScrollOnCompleteDetails) => void
   onDataReset?: () => void
 }
 
 export interface UseInfiniteScrollDataManager {
-  getLastLoadedPage: () => number | string | null
+  getLastLoadedPage: () => InfiniteScrollPageIdentifier
   getPageName: () => string
   getRequestCount: () => number
   hasPrevious: () => boolean
@@ -864,7 +865,7 @@ export interface UseInfiniteScrollElementManager {
   refreshTriggers: () => void
   flushAll: () => void
   processManuallyAddedElements: () => void
-  processServerLoadedElements: (loadedPage: string | number | null) => void
+  processServerLoadedElements: (loadedPage: InfiniteScrollPageIdentifier) => void
 }
 
 export interface UseInfiniteScrollProps {

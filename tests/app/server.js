@@ -2156,6 +2156,22 @@ app.get('/infinite-scroll/programmatic-ref', (req, res) =>
 app.get('/infinite-scroll/short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ShortContent', 100, false, 5),
 )
+app.get('/infinite-scroll/navigate-away', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const partialReload = !!req.headers['x-inertia-partial-data']
+  const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+
+  const render = () =>
+    inertia.render(req, res, {
+      component: 'InfiniteScroll/NavigateAway',
+      props: { users: paginated },
+      [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+      scrollProps: { users: scrollProp },
+    })
+
+  partialReload ? setTimeout(render, 1000) : render()
+})
 app.get('/infinite-scroll/invisible-first-child', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
 )

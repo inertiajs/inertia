@@ -152,13 +152,19 @@
       // Request callbacks
       onBeforePreviousRequest: () => (loadingPrevious = true),
       onBeforeNextRequest: () => (loadingNext = true),
-      onCompletePreviousRequest: () => {
+      onCompletePreviousRequest: ({ completed }) => {
         loadingPrevious = false
-        syncStateFromDataManager()
+
+        if (completed) {
+          syncStateFromDataManager()
+        }
       },
-      onCompleteNextRequest: () => {
+      onCompleteNextRequest: ({ completed }) => {
         loadingNext = false
-        syncStateFromDataManager()
+
+        if (completed) {
+          syncStateFromDataManager()
+        }
       },
       onDataReset: syncStateFromDataManager,
     })

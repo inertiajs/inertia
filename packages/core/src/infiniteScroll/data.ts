@@ -1,4 +1,4 @@
-import { router } from '../index'
+import { ActiveVisit, router } from '../index'
 import { page as currentPage } from '../page'
 import { Page, PendingVisit, ReloadOptions, ScrollProp, UseInfiniteScrollDataManager } from '../types'
 
@@ -14,13 +14,24 @@ type InfiniteScrollState = {
   requestCount: number
 }
 
+export type InfiniteScrollPageIdentifier = string | number | null
+export type InfiniteScrollOnCompleteDetails = { page: InfiniteScrollPageIdentifier; completed: boolean }
+
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
   onBeforeUpdate: () => void
   onBeforePreviousRequest: () => void
   onBeforeNextRequest: () => void
-  onCompletePreviousRequest: (loadedPage: string | number | null) => void
-  onCompleteNextRequest: (loadedPage: string | number | null) => void
+  onCompletePreviousRequest: (
+    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    loadedPage: InfiniteScrollPageIdentifier,
+    details: InfiniteScrollOnCompleteDetails,
+  ) => void
+  onCompleteNextRequest: (
+    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    loadedPage: InfiniteScrollPageIdentifier,
+    details: InfiniteScrollOnCompleteDetails,
+  ) => void
   onReset?: () => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
@@ -150,11 +161,16 @@ export const useInfiniteScrollData = (options: {
         syncStateOnSuccess(side)
         reloadOptions.onSuccess?.(page)
       },
-      onFinish: (visit: any) => {
+      onFinish: (visit: ActiveVisit) => {
         state.loading = false
+
+        const completed = visit.completed
+        const page = completed ? state.lastLoadedPage : null
+
         side === 'next'
-          ? options.onCompleteNextRequest(state.lastLoadedPage)
-          : options.onCompletePreviousRequest(state.lastLoadedPage)
+          ? options.onCompleteNextRequest(page, { page, completed })
+          : options.onCompletePreviousRequest(page, { page, completed })
+
         reloadOptions.onFinish?.(visit)
       },
     })
