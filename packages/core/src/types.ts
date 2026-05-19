@@ -29,6 +29,10 @@ export interface HttpResponse {
   headers: HttpResponseHeaders
 }
 
+export interface HttpExceptionResponse extends Omit<HttpResponse, 'data'> {
+  data: string | Record<string, unknown>
+}
+
 export interface HttpClient {
   request(config: HttpRequestConfig): Promise<HttpResponse>
 }
@@ -398,9 +402,9 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   httpException: {
-    parameters: [HttpResponse]
+    parameters: [HttpExceptionResponse]
     details: {
-      response: HttpResponse
+      response: HttpExceptionResponse
     }
     result: boolean | void
   }
