@@ -15,6 +15,7 @@
 
     "module": "ES2022",
     "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
 
