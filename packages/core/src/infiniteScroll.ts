@@ -37,13 +37,19 @@ export default function useInfiniteScroll(options: UseInfiniteScrollOptions): Us
     // so they don't get confused with server-loaded content
     onBeforeUpdate: elementManager.processManuallyAddedElements,
     // After successful request, tag new server content
-    onCompletePreviousRequest: (loadedPage) => {
-      options.onCompletePreviousRequest()
-      requestAnimationFrame(() => elementManager.processServerLoadedElements(loadedPage), 2)
+    onCompletePreviousRequest: (_, details) => {
+      options.onCompletePreviousRequest(details)
+
+      if (!details.wasCancelled) {
+        requestAnimationFrame(() => elementManager.processServerLoadedElements(details.page), 2)
+      }
     },
-    onCompleteNextRequest: (loadedPage) => {
-      options.onCompleteNextRequest()
-      requestAnimationFrame(() => elementManager.processServerLoadedElements(loadedPage), 2)
+    onCompleteNextRequest: (_, details) => {
+      options.onCompleteNextRequest(details)
+
+      if (!details.wasCancelled) {
+        requestAnimationFrame(() => elementManager.processServerLoadedElements(details.page), 2)
+      }
     },
     onReset: options.onDataReset,
   })

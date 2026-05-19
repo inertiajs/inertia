@@ -14,13 +14,24 @@ type InfiniteScrollState = {
   requestCount: number
 }
 
+export type InfiniteScrollPageIdentifier = string | number | null
+export type InfiniteScrollOnCompleteDetails = { page: InfiniteScrollPageIdentifier; wasCancelled: boolean }
+
 export const useInfiniteScrollData = (options: {
   getPropName: () => string
   onBeforeUpdate: () => void
   onBeforePreviousRequest: () => void
   onBeforeNextRequest: () => void
-  onCompletePreviousRequest: (loadedPage: string | number | null) => void
-  onCompleteNextRequest: (loadedPage: string | number | null) => void
+  onCompletePreviousRequest: (
+    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    loadedPage: InfiniteScrollPageIdentifier,
+    details: InfiniteScrollOnCompleteDetails,
+  ) => void
+  onCompleteNextRequest: (
+    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    loadedPage: InfiniteScrollPageIdentifier,
+    details: InfiniteScrollOnCompleteDetails,
+  ) => void
   onReset?: () => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
@@ -128,6 +139,8 @@ export const useInfiniteScrollData = (options: {
 
     state.loading = true
 
+    let wasCancelled = false
+
     router.reload({
       preserveErrors: true,
       ...reloadOptions,
@@ -137,6 +150,9 @@ export const useInfiniteScrollData = (options: {
       headers: {
         [MERGE_INTENT_HEADER]: side === 'previous' ? 'prepend' : 'append',
         ...reloadOptions.headers,
+      },
+      onCancel: () => {
+        wasCancelled = true
       },
       onBefore: (visit: PendingVisit) => {
         side === 'next' ? options.onBeforeNextRequest() : options.onBeforePreviousRequest()
@@ -152,9 +168,13 @@ export const useInfiniteScrollData = (options: {
       },
       onFinish: (visit: any) => {
         state.loading = false
+
+        const page = state.lastLoadedPage
+
         side === 'next'
-          ? options.onCompleteNextRequest(state.lastLoadedPage)
-          : options.onCompletePreviousRequest(state.lastLoadedPage)
+          ? options.onCompleteNextRequest(page, { page, wasCancelled })
+          : options.onCompletePreviousRequest(page, { page, wasCancelled })
+
         reloadOptions.onFinish?.(visit)
       },
     })

@@ -209,13 +209,19 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
         // Callbacks
         onBeforePreviousRequest: () => setLoadingPrevious(true),
         onBeforeNextRequest: () => setLoadingNext(true),
-        onCompletePreviousRequest: () => {
+        onCompletePreviousRequest: ({ wasCancelled }) => {
           setLoadingPrevious(false)
-          syncStateFromDataManager()
+
+          if (!wasCancelled) {
+            syncStateFromDataManager()
+          }
         },
-        onCompleteNextRequest: () => {
+        onCompleteNextRequest: ({ wasCancelled }) => {
           setLoadingNext(false)
-          syncStateFromDataManager()
+
+          if (!wasCancelled) {
+            syncStateFromDataManager()
+          }
         },
         onDataReset: syncStateFromDataManager,
       })
