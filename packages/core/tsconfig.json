@@ -14,8 +14,7 @@
     "emitDeclarationOnly": true,
 
     "module": "ES2022",
-    "moduleResolution": "Node",
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
 
