@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import PageLayout from '@/Layouts/PageLayout.vue'
 import { Link } from '@inertiajs/vue3'
+import PageLayout from '@/Layouts/PageLayout.vue'
 
 defineOptions({
   layout: PageLayout,

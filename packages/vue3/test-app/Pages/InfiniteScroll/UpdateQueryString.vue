@@ -9,7 +9,7 @@ defineProps<{
 const page = usePage()
 
 window.testing = {
-  ...(window.testing || {}),
+  ...window.testing,
   get pageUrl() {
     return page.url
   },

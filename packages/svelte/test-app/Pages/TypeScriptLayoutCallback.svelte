@@ -7,8 +7,8 @@
     }
   }
 
-  import AppLayout from '@/Layouts/AppLayout.svelte'
   import type { LayoutCallback } from '@inertiajs/svelte'
+  import AppLayout from '@/Layouts/AppLayout.svelte'
 
   export const layout: LayoutCallback = (props) => {
     const name: string | undefined = props.auth.user?.name

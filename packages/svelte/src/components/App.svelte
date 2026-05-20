@@ -1,6 +1,6 @@
 <script module lang="ts">
-  import type { ComponentResolver, ResolvedComponent } from '../types'
   import { type Page, type PageProps } from '@inertiajs/core'
+  import type { ComponentResolver, ResolvedComponent } from '../types'
 
   export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
     initialComponent: ResolvedComponent
@@ -11,13 +11,13 @@
 </script>
 
 <script lang="ts">
-  import type { Component } from 'svelte'
-  import type { LayoutType, LayoutResolver } from '../types'
   import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
-  import Render, { h, type RenderProps } from './Render.svelte'
-  import { setPage } from '../page.svelte'
+  import type { Component } from 'svelte'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
+  import { setPage } from '../page.svelte'
+  import type { LayoutType, LayoutResolver } from '../types'
+  import Render, { h, type RenderProps } from './Render.svelte'
 
   interface Props {
     initialComponent: InertiaAppProps['initialComponent']

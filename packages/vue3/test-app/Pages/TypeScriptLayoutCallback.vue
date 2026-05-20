@@ -1,7 +1,7 @@
 <script lang="ts">
+import type { LayoutCallback } from '@inertiajs/vue3'
 // This component is used for checking the TypeScript implementation; there is no Playwright test depending on it.
 import AppLayout from '@/Layouts/AppLayout.vue'
-import type { LayoutCallback } from '@inertiajs/vue3'
 
 declare module '@inertiajs/core' {
   export interface InertiaConfig {

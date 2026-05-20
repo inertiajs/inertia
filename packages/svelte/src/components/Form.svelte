@@ -15,12 +15,12 @@
     resolveUrlMethodPairComponent,
     UseFormUtils,
   } from '@inertiajs/core'
-  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { isEqual } from 'es-toolkit'
+  import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { onMount } from 'svelte'
-  import { setFormContext } from './formContext'
-  import useForm from '../useForm.svelte'
   import { config } from '..'
+  import useForm from '../useForm.svelte'
+  import { setFormContext } from './formContext'
 
   const noop = () => undefined
 

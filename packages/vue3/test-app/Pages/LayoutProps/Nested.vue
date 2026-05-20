@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import ContentLayout from '@/Layouts/ContentLayout.vue'
-import { Link } from '@inertiajs/vue3'
 
 defineOptions({
   layout: [

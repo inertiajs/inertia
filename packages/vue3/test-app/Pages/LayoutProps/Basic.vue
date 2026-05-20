@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link, setLayoutProps } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import AppLayout from '@/Layouts/AppLayout.vue'
 
 defineOptions({
   layout: [AppLayout, { title: 'Basic Layout Props', showSidebar: true }],

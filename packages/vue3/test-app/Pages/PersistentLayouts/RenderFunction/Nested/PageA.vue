@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import NestedLayout from '@/Layouts/NestedLayout.vue'
-import SiteLayout from '@/Layouts/SiteLayout.vue'
 import { Link } from '@inertiajs/vue3'
 import type { Component, VNode } from 'vue'
+import NestedLayout from '@/Layouts/NestedLayout.vue'
+import SiteLayout from '@/Layouts/SiteLayout.vue'
 
 type RenderFunction = (component: Component, children: Component[]) => VNode
 

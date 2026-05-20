@@ -1,6 +1,6 @@
+import { resolve } from 'path'
 import inertia from '@inertiajs/vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
-import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 const isSSR = process.argv.includes('--ssr')

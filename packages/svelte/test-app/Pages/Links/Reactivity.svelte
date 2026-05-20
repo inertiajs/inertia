@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Link } from '@inertiajs/svelte'
   import type { CacheForOption, LinkPrefetchOption, Method } from '@inertiajs/core'
+  import { Link } from '@inertiajs/svelte'
 
   let method: Method = $state('get')
   let href = $state('/dump/get')

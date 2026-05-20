@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { page } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
   interface Props {
     children?: import('svelte').Snippet
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Layout from '@/Layouts/SiteLayout.vue'
 import { Link } from '@inertiajs/vue3'
 import type { Component, VNode } from 'vue'
+import Layout from '@/Layouts/SiteLayout.vue'
 
 type RenderFunction = (component: Component, children: Component[]) => VNode
 

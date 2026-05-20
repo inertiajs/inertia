@@ -1,6 +1,6 @@
+import { resolve } from 'path'
 import inertia from '@inertiajs/vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 const isSSR = process.argv.includes('--ssr')
