@@ -32,3 +32,6 @@ jobs:
 
       - name: Build Inertia
         run: pnpm build:all
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
