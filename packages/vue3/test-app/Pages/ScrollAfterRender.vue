@@ -1,4 +1,5 @@
 <script lang="ts">
+// oxlint-disable-next-line prefer-const
 let originalScrollTo: typeof window.scrollTo | null = null
 </script>
 

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
-
   import { InfiniteScroll, Link, router } from '@inertiajs/svelte'
+  import { preventDefault } from 'svelte/legacy'
   import UserCard, { type User } from './UserCard.svelte'
 
   interface Props {

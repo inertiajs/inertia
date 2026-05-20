@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { setLayoutProps } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import ContentLayout from '@/Layouts/ContentLayout.vue'
-import { setLayoutProps } from '@inertiajs/vue3'
 
 defineOptions({
   layout: {

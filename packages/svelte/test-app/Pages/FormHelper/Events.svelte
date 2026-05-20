@@ -8,10 +8,9 @@
 </script>
 
 <script lang="ts">
-  import { preventDefault } from 'svelte/legacy'
-
-  import { page, useForm } from '@inertiajs/svelte'
   import type { ActiveVisit, CancelToken, Page, Progress, Errors } from '@inertiajs/core'
+  import { page, useForm } from '@inertiajs/svelte'
+  import { preventDefault } from 'svelte/legacy'
 
   window.events = []
   window.data = []

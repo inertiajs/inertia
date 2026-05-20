@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { isEqual } from 'es-toolkit'
   import { Form } from '@inertiajs/svelte'
+  import { isEqual } from 'es-toolkit'
 
   const handleBeforeValidation = (
     newRequest: { data: Record<string, unknown> | null; touched: string[] },

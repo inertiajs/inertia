@@ -5,7 +5,7 @@ export default ({ users }: { users: { data: User[] } }) => {
   const page = usePage()
 
   window.testing = {
-    ...(window.testing || {}),
+    ...window.testing,
     get pageUrl() {
       return page.url
     },

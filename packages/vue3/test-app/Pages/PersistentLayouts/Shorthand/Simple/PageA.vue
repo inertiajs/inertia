@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Layout from '@/Layouts/SiteLayout.vue'
 import { Link, usePage } from '@inertiajs/vue3'
+import Layout from '@/Layouts/SiteLayout.vue'
 
 defineOptions({
   layout: Layout,

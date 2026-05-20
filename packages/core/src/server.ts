@@ -1,10 +1,10 @@
-import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import cluster from 'node:cluster'
 import { existsSync, readFileSync } from 'node:fs'
 import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
+import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 

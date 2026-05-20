@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { Link, usePage } from '@inertiajs/vue3'
 import NestedLayout from '@/Layouts/NestedLayout.vue'
 import SiteLayout from '@/Layouts/SiteLayout.vue'
-import { Link, usePage } from '@inertiajs/vue3'
 
 defineOptions({
   layout: [SiteLayout, NestedLayout],

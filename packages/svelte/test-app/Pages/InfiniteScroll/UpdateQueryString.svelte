@@ -9,7 +9,7 @@
   let { users }: Props = $props()
 
   window.testing = {
-    ...(window.testing || {}),
+    ...window.testing,
     get pageUrl() {
       return page.url
     },

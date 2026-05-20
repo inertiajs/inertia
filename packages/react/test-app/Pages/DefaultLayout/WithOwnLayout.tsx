@@ -1,5 +1,5 @@
-import PageLayout from '@/Layouts/PageLayout'
 import { Link } from '@inertiajs/react'
+import PageLayout from '@/Layouts/PageLayout'
 
 const WithOwnLayout = () => {
   return (

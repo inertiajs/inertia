@@ -1,5 +1,5 @@
-import FnSiteLayout from '@/Layouts/FnSiteLayout'
 import { Link, usePage } from '@inertiajs/react'
+import FnSiteLayout from '@/Layouts/FnSiteLayout'
 
 const PageB = () => {
   window._inertia_page_props = usePage().props

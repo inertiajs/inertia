@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { page } from '@inertiajs/svelte'
   import type { Method } from '@inertiajs/core'
+  import { page } from '@inertiajs/svelte'
   import type { MulterFile } from '../types'
 
   interface Props {
