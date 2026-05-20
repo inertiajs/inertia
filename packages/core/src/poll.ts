@@ -59,15 +59,7 @@ export class Poll {
       return
     }
 
-    this.intervalId = window.setInterval(() => {
-      if (!this.throttle || this.cbCount % 10 === 0) {
-        this.fire()
-      }
-
-      if (this.throttle) {
-        this.cbCount++
-      }
-    }, this.interval)
+    this.intervalId = window.setInterval(() => this.tick(), this.interval)
   }
 
   public isInBackground(hidden: boolean) {
@@ -83,12 +75,22 @@ export class Poll {
       return
     }
 
-    const delay = this.throttle ? this.interval * 10 : this.interval
-
     this.timeoutId = window.setTimeout(() => {
       this.timeoutId = null
+      this.tick()
+    }, this.interval)
+  }
+
+  protected tick() {
+    if (!this.throttle || this.cbCount % 10 === 0) {
       this.fire()
-    }, delay)
+    } else if (this.mode === 'rest') {
+      this.scheduleNext()
+    }
+
+    if (this.throttle) {
+      this.cbCount++
+    }
   }
 
   protected fire() {

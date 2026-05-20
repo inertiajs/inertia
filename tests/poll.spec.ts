@@ -86,7 +86,54 @@ manualData.forEach(({ method, url }) => {
   })
 })
 
-test.skip('it will throttle polling when in the background', async ({ page }) => {})
+const setHidden = (page, hidden: boolean) =>
+  page.evaluate((hidden) => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden })
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => (hidden ? 'hidden' : 'visible'),
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+  }, hidden)
+;['overlap', 'rest'].forEach((mode) => {
+  test(`it throttles polling when in the background and resumes when visible (${mode})`, async ({ page }) => {
+    await page.goto(`/poll/overlap/${mode}?interval=200&delay=10`)
+
+    await page.waitForResponse(page.url())
+
+    await setHidden(page, true)
+
+    requests.listen(page)
+    await page.waitForTimeout(1400)
+
+    const hiddenCount = pollRequests().length
+    await expect(hiddenCount).toBeGreaterThanOrEqual(1)
+    await expect(hiddenCount).toBeLessThanOrEqual(2)
+
+    await setHidden(page, false)
+
+    await page.waitForTimeout(1000)
+
+    const visibleCount = pollRequests().length - hiddenCount
+    await expect(visibleCount).toBeGreaterThanOrEqual(3)
+  })
+})
+
+test('it keeps the throttled cadence when staying in the background past one cycle', async ({ page }) => {
+  await page.goto('/poll/overlap/rest?interval=100&delay=10')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  // Two full 10x cycles (~2s) — expect ~2 fires (first tick, then 10th).
+  await page.waitForTimeout(2200)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollRequests().length).toBeLessThanOrEqual(3)
+})
+
 test.skip('it is able to keep alive when in the background', async ({ page }) => {})
 
 Object.entries({
