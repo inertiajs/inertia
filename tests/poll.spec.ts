@@ -300,9 +300,8 @@ test('it waits for the interval between requests with mode: rest', async ({ page
   await page.waitForTimeout(2000)
 
   await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollFinished().length).toBe(pollRequests().length)
   await expect(pollFailed().length).toBe(0)
-  // At most one in-flight; rest mode never overlaps so all but the last must be finished.
-  await expect(pollFinished().length).toBeGreaterThanOrEqual(pollRequests().length - 1)
 })
 
 test('it cancels in-flight requests on each tick with mode: cancel', async ({ page }) => {
