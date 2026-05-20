@@ -7,9 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.1.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.2.0...3.x)
 
 - Nothing yet
+
+## [v3.2.0](https://github.com/inertiajs/inertia/compare/v3.1.1...v3.2.0) - 2026-05-20
+
+### What's Changed
+
+* [3.x] Bump pnpm by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3099
+* [3.x] Pin GitHub Actions to commit SHAs and harden CI workflows by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3097
+* Bump actions/upload-artifact from 6.0.0 to 7.0.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3100
+* [3.x] Add `mode` option to `router.poll` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3093
+* [3.x] Support dynamic data in `usePoll` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3098
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3107
+* [3.x] Add Inertia.once for events that fire once by [@sebastiandedeyne](https://github.com/sebastiandedeyne) in https://github.com/inertiajs/inertia/pull/3105
+* [3.x] Fix `httpException` event response data type by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3109
+* [3.x] Skip DOM updates when `<InfiniteScroll>` request is cancelled by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3110
+* [3.x] Upgrade to TypeScript 6 by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3108
+* [3.x] Improve `router.poll` throttle semantics and stop+start handling by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3114
+* [3.x] Migrate from Prettier and ESLint to Oxfmt and Oxlint by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3115
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.1.1...v3.2.0
 
 ## [v3.1.1](https://github.com/inertiajs/inertia/compare/v3.1.0...v3.1.1) - 2026-05-07
 
