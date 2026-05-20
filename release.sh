@@ -49,11 +49,11 @@ for pkg_json in packages/*/package.json; do
   echo "Bumping $pkg_dir to $RELEASE_TYPE..."
   cd "$pkg_dir"
   echo "Current directory: $(pwd)"
-  OUT=$(pnpm version "$RELEASE_TYPE" --no-git-tag-version)
+  OUT=$(pnpm version "$RELEASE_TYPE" --no-git-tag-version --no-git-checks)
   if [ -z "$NEW_VERSION" ]; then
     # Capture the first reported version; strip leading 'v' if present
     OUT_LAST=$(echo "$OUT" | tail -n1 | tr -d '\r')
-    NEW_VERSION=${OUT_LAST#v}
+    NEW_VERSION=$(echo "$OUT_LAST" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -n1)
   fi
   cd ..
   cd ..
