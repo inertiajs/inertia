@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { isEqual } from 'lodash-es'
   import { Form } from '@inertiajs/svelte'
+  import { isEqual } from 'lodash-es'
 
   const handleBeforeValidation = (
     newRequest: { data: Record<string, unknown> | null; touched: string[] },

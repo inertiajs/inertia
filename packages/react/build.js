@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+import { readFileSync } from 'fs'
 import esbuild from 'esbuild'
 import { nodeExternalsPlugin } from 'esbuild-node-externals'
-import { readFileSync } from 'fs'
 
 const watch = process.argv.slice(1).includes('--watch')
 const withDeps = process.argv.slice(1).includes('--with-deps')

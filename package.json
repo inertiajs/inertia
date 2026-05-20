@@ -32,14 +32,12 @@
     "playground:svelte4": "cd playgrounds/svelte4 && ./init.sh && composer run dev",
     "playground:svelte5": "cd playgrounds/svelte5 && ./init.sh && composer run dev",
     "playground:vue": "cd playgrounds/vue3 && ./init.sh && composer run dev",
-    "format": "prettier --write ."
+    "format": "oxfmt"
   },
-  "dependencies": {
+  "devDependencies": {
     "@playwright/test": "1.58.2",
-    "prettier": "^3.8.1",
-    "prettier-plugin-organize-imports": "^4.3.0",
-    "prettier-plugin-svelte": "^3.5.0",
-    "prettier-plugin-tailwindcss": "^0.7.2"
+    "oxfmt": "^0.51.0",
+    "oxlint": "^1.66.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.59.0"

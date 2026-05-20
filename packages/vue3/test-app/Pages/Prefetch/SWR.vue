@@ -1,6 +1,6 @@
 <script lang="ts">
-import Layout from '@/Layouts/SWR.vue'
 import type { Component, VNode } from 'vue'
+import Layout from '@/Layouts/SWR.vue'
 
 type RenderFunction = (component: Component, children: Component[]) => VNode
 

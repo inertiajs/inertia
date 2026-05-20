@@ -1,8 +1,8 @@
 <script lang="ts">
+  import type { InfiniteScrollRef } from '@inertiajs/core'
   import { InfiniteScroll } from '@inertiajs/svelte'
   import { onMount } from 'svelte'
   import UserCard, { type User } from './UserCard.svelte'
-  import type { InfiniteScrollRef } from '@inertiajs/core'
   export let users: { data: User[] }
 
   // Use the actual component type like Form component does

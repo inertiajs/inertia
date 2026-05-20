@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn"],
+  "env": { "builtin": true, "browser": true, "es2024": true },
+  "ignorePatterns": ["node_modules", "dist/**/*", "*.config.js", "**/*.d.ts", "*.timestamp-*"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/no-unescaped-entities": "off",
+    "react/no-children-prop": "off"
+  }
+}

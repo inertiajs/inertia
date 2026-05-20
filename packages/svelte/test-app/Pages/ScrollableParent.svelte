@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { getScrollableParent } from '@inertiajs/core'
+  import { onMount } from 'svelte'
 
   let overflowXHidden: HTMLDivElement
   let overflowXScroll: HTMLDivElement

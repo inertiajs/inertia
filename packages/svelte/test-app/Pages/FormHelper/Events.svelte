@@ -8,8 +8,8 @@
 </script>
 
 <script lang="ts">
-  import { page, useForm } from '@inertiajs/svelte'
   import type { ActiveVisit, Page, Progress, Errors } from '@inertiajs/core'
+  import { page, useForm } from '@inertiajs/svelte'
   import type { CancelTokenSource } from 'axios'
 
   window.events = []

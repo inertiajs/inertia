@@ -18,8 +18,8 @@
   import { isEqual } from 'lodash-es'
   import { onMount, setContext } from 'svelte'
   import { writable } from 'svelte/store'
-  import { FormContextKey } from './formContext'
   import useForm from '../useForm'
+  import { FormContextKey } from './formContext'
 
   const noop = () => undefined
 

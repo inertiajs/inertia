@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
   import type { Page } from '@inertiajs/core'
+  import { inertia } from '@inertiajs/svelte'
 
   export let foo: string = 'default'
 

@@ -1,5 +1,5 @@
-import SiteLayout from '@/Layouts/SiteLayout.jsx'
 import { Link, usePage } from '@inertiajs/react'
+import SiteLayout from '@/Layouts/SiteLayout.jsx'
 
 const PageB = () => {
   window._inertia_page_props = usePage().props

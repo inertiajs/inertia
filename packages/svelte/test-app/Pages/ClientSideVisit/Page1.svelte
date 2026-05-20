@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
   import type { Page } from '@inertiajs/core'
+  import { router } from '@inertiajs/svelte'
 
   interface PageProps {
     foo: string

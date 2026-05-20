@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import WithScrollRegion from '@/Layouts/WithScrollRegion.vue'
 import { VisitHelperOptions } from '@inertiajs/core'
 import { router } from '@inertiajs/vue3'
+import WithScrollRegion from '@/Layouts/WithScrollRegion.vue'
 
 defineProps({
   user_id: Number,
