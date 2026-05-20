@@ -3,7 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 
 export default function usePoll(
   interval: number,
-  requestOptions: ReloadOptions = {},
+  requestOptions: ReloadOptions | (() => ReloadOptions) = {},
   options: PollOptions = {
     keepAlive: false,
     autoStart: true,
@@ -12,7 +12,7 @@ export default function usePoll(
   stop: VoidFunction
   start: VoidFunction
 } {
-  const { stop, start } = router.poll(interval, requestOptions, {
+  const { stop, start, destroy } = router.poll(interval, requestOptions, {
     ...options,
     autoStart: false,
   })
@@ -24,7 +24,7 @@ export default function usePoll(
   })
 
   onUnmounted(() => {
-    stop()
+    destroy()
   })
 
   return {

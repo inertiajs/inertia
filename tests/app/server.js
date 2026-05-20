@@ -753,6 +753,16 @@ app.post('/events/errors', (req, res) =>
 )
 
 app.get('/poll/hook', (req, res) => inertia.render(req, res, { component: 'Poll/Hook', props: {} }))
+app.get('/poll/overlap/:mode', (req, res) => {
+  const mode = req.params.mode
+  const delay = parseInt(req.query.delay) || 600
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Poll/Overlap',
+      props: { mode, time: Date.now() },
+    })
+  }, delay)
+})
 app.get('/poll/hook/manual', (req, res) => inertia.render(req, res, { component: 'Poll/HookManual', props: {} }))
 app.get('/poll/router/manual', (req, res) => inertia.render(req, res, { component: 'Poll/RouterManual', props: {} }))
 app.get('/poll/unchanged-data', (req, res) =>
@@ -773,6 +783,16 @@ app.get('/prefetch/after-error', (req, res) => {
 app.get('/prefetch/test-page', (req, res) =>
   inertia.render(req, res, {
     component: 'Prefetch/TestPage',
+  }),
+)
+
+app.get('/poll/dynamic-data', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Poll/DynamicData',
+    props: {
+      counter: req.query.bump !== undefined ? Number(req.query.bump) : 0,
+      last_received: req.query.counter_seen !== undefined ? Number(req.query.counter_seen) : null,
+    },
   }),
 )
 
