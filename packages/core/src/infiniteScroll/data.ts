@@ -23,12 +23,12 @@ export const useInfiniteScrollData = (options: {
   onBeforePreviousRequest: () => void
   onBeforeNextRequest: () => void
   onCompletePreviousRequest: (
-    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    /** @deprecated Use `details.page` instead. */
     loadedPage: InfiniteScrollPageIdentifier,
     details: InfiniteScrollOnCompleteDetails,
   ) => void
   onCompleteNextRequest: (
-    /** @deprecated Use `details.page` instead. The positional `loadedPage` argument will be removed in the next major version. */
+    /** @deprecated Use `details.page` instead. */
     loadedPage: InfiniteScrollPageIdentifier,
     details: InfiniteScrollOnCompleteDetails,
   ) => void
