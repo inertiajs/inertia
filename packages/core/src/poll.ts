@@ -19,6 +19,7 @@ export class Poll {
   protected inFlight = false
   protected currentCancel: VoidFunction | null = null
   protected stopped = true
+  protected instanceId = 0
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.keepAlive = options.keepAlive ?? false
@@ -34,6 +35,9 @@ export class Poll {
 
   public stop() {
     this.stopped = true
+    this.instanceId++
+    this.inFlight = false
+    this.currentCancel = null
 
     if (this.intervalId) {
       clearInterval(this.intervalId)
@@ -59,15 +63,7 @@ export class Poll {
       return
     }
 
-    this.intervalId = window.setInterval(() => {
-      if (!this.throttle || this.cbCount % 10 === 0) {
-        this.fire()
-      }
-
-      if (this.throttle) {
-        this.cbCount++
-      }
-    }, this.interval)
+    this.intervalId = window.setInterval(() => this.tick(), this.interval)
   }
 
   public isInBackground(hidden: boolean) {
@@ -83,12 +79,22 @@ export class Poll {
       return
     }
 
-    const delay = this.throttle ? this.interval * 10 : this.interval
-
     this.timeoutId = window.setTimeout(() => {
       this.timeoutId = null
+      this.tick()
+    }, this.interval)
+  }
+
+  protected tick() {
+    if (!this.throttle || this.cbCount % 10 === 0) {
       this.fire()
-    }, delay)
+    } else if (this.mode === 'rest') {
+      this.scheduleNext()
+    }
+
+    if (this.throttle) {
+      this.cbCount++
+    }
   }
 
   protected fire() {
@@ -96,12 +102,22 @@ export class Poll {
       this.currentCancel?.()
     }
 
+    const instance = this.instanceId
+
     this.cb({
       onStart: (cancel) => {
+        if (instance !== this.instanceId) {
+          return
+        }
+
         this.inFlight = true
         this.currentCancel = cancel
       },
       onFinish: () => {
+        if (instance !== this.instanceId) {
+          return
+        }
+
         this.inFlight = false
         this.currentCancel = null
 

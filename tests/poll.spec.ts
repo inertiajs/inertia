@@ -86,8 +86,102 @@ manualData.forEach(({ method, url }) => {
   })
 })
 
-test.skip('it will throttle polling when in the background', async ({ page }) => {})
-test.skip('it is able to keep alive when in the background', async ({ page }) => {})
+const setHidden = (page, hidden: boolean) =>
+  page.evaluate((hidden) => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden })
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => (hidden ? 'hidden' : 'visible'),
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+  }, hidden)
+;['overlap', 'rest'].forEach((mode) => {
+  test(`it throttles polling when in the background and resumes when visible (${mode})`, async ({ page }) => {
+    await page.goto(`/poll/overlap/${mode}?interval=200&delay=10`)
+
+    await page.waitForResponse(page.url())
+
+    await setHidden(page, true)
+
+    requests.listen(page)
+    await page.waitForTimeout(1400)
+
+    const hiddenCount = pollRequests().length
+    await expect(hiddenCount).toBeGreaterThanOrEqual(1)
+    await expect(hiddenCount).toBeLessThanOrEqual(2)
+
+    await setHidden(page, false)
+
+    await page.waitForTimeout(1000)
+
+    const visibleCount = pollRequests().length - hiddenCount
+    await expect(visibleCount).toBeGreaterThanOrEqual(3)
+  })
+})
+
+test('it keeps the throttled cadence when staying in the background past one cycle', async ({ page }) => {
+  await page.goto('/poll/overlap/rest?interval=100&delay=10')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  // Two full 10x cycles (~2s) — expect ~2 fires (first tick, then 10th).
+  await page.waitForTimeout(2200)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollRequests().length).toBeLessThanOrEqual(3)
+})
+
+test('it does not throttle when keepAlive is set, even when hidden', async ({ page }) => {
+  await page.goto('/poll/overlap/overlap?interval=200&delay=10&keepAlive=1')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  await page.waitForTimeout(1400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(4)
+})
+
+test('it does not double-schedule when stopped and restarted mid-flight (rest)', async ({ page }) => {
+  await page.goto('/poll/overlap/rest?interval=200&delay=800')
+
+  await page.waitForRequest(page.url())
+
+  // First request is now in flight (won't finish for ~800ms).
+  // Stop+start immediately so the stale onFinish would, without the session guard,
+  // call scheduleNext and create a second concurrent chain.
+  await page.getByRole('button', { name: 'Stop' }).click()
+  await page.getByRole('button', { name: 'Start' }).click()
+
+  requests.listen(page)
+
+  // Two full cycles of the restarted chain (~2 requests). A double chain would yield ~4.
+  await page.waitForTimeout(2400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(1)
+  await expect(pollRequests().length).toBeLessThanOrEqual(3)
+})
+
+test('it does not cancel skipped throttled ticks in cancel mode', async ({ page }) => {
+  await page.goto('/poll/overlap/cancel?interval=200&delay=10')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  requests.listenForFailed(page)
+  await page.waitForTimeout(1400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(1)
+  await expect(pollRequests().length).toBeLessThanOrEqual(2)
+  await expect(pollFailed().length).toBe(0)
+})
 
 Object.entries({
   unencrypted: '/poll/unchanged-data',
