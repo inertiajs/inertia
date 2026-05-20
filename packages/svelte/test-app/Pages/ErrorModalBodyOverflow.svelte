@@ -17,7 +17,7 @@
       styleTag.textContent = 'body { overflow-y: scroll; }'
       document.head.appendChild(styleTag)
     } else {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = 'scroll'
     }
   })
 
