@@ -1,6 +1,6 @@
 <script lang="ts">
-import Layout from '@/Layouts/Prefetch.vue'
 import type { Component, VNode } from 'vue'
+import Layout from '@/Layouts/Prefetch.vue'
 
 type RenderFunction = (component: Component, children: Component[]) => VNode
 

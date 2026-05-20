@@ -1,6 +1,6 @@
+import { Link } from '@inertiajs/react'
 import NestedLayout from '@/Layouts/NestedLayout.jsx'
 import SiteLayout from '@/Layouts/SiteLayout.jsx'
-import { Link } from '@inertiajs/react'
 
 const PageB = () => {
   return (

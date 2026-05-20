@@ -1,5 +1,5 @@
-import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.jsx'
 import { router } from '@inertiajs/react'
+import WithoutScrollRegion from '@/Layouts/WithoutScrollRegion.jsx'
 
 const PreserveScrollFalse = ({ foo = 'default' }) => {
   const preserve = (e: React.MouseEvent) => {

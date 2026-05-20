@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
-  import SiteLayout from '@/Layouts/SiteLayout.svelte'
   import type { ComponentType } from 'svelte'
+  import SiteLayout from '@/Layouts/SiteLayout.svelte'
 
   export const layout = (
     h: (component: ComponentType, children: ComponentType[]) => ComponentType,

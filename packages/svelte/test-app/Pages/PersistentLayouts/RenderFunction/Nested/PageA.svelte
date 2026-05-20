@@ -1,7 +1,7 @@
 <script context="module" lang="ts">
+  import type { ComponentType } from 'svelte'
   import NestedLayout from '@/Layouts/NestedLayout.svelte'
   import SiteLayout from '@/Layouts/SiteLayout.svelte'
-  import type { ComponentType } from 'svelte'
 
   export const layout = (
     h: (component: ComponentType, children: ComponentType[]) => ComponentType,

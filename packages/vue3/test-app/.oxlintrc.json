@@ -1,0 +1,6 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["vue", "typescript", "unicorn"],
+  "env": { "builtin": true, "browser": true, "es2024": true },
+  "ignorePatterns": ["node_modules", "dist/**/*", "*.config.js", "**/*.d.ts", "*.timestamp-*"]
+}

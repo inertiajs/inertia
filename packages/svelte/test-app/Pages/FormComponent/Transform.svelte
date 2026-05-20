@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Form } from '@inertiajs/svelte'
   import type { FormDataConvertible } from '@inertiajs/core'
+  import { Form } from '@inertiajs/svelte'
 
   let transformType = 'none'
 

@@ -3,8 +3,8 @@
 </script>
 
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
   import type { VisitHelperOptions } from '@inertiajs/core'
+  import { router } from '@inertiajs/svelte'
 
   export let user_id: number | undefined = undefined
 

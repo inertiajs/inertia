@@ -1,5 +1,5 @@
-import WithScrollRegion from '@/Layouts/WithScrollRegion.jsx'
 import { router } from '@inertiajs/react'
+import WithScrollRegion from '@/Layouts/WithScrollRegion.jsx'
 
 const PreserveScroll = ({ foo = 'default' }) => {
   const preserve = (e: React.MouseEvent) => {

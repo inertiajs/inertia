@@ -3,8 +3,8 @@
 </script>
 
 <script>
-  import { onMount } from 'svelte'
   import { router, usePoll } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
   import TestGrid from '../Components/TestGrid.svelte'
   import TestGridItem from '../Components/TestGridItem.svelte'
 

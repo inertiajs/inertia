@@ -4,21 +4,17 @@
     "build": "vite build .",
     "build:ssr": "vite build --ssr ssr.ts --outDir dist",
     "dev": "nodemon --watch . --watch ../../core/dist --watch ../../svelte/dist --ext js,ts,svelte,html,json --ignore dist/ --exec 'vite build .'",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "type-check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.3",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
     "@tsconfig/svelte": "^5.0.8",
-    "eslint": "^9.39.3",
-    "eslint-plugin-svelte": "^3.15.0",
-    "globals": "^17.3.0",
+    "eslint-plugin-svelte": "^3.17.1",
     "nodemon": "^3.1.14",
     "svelte": "^4.2.20",
     "svelte-check": "^4.4.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1",
     "vite": "^5.4.21"
   },
   "dependencies": {

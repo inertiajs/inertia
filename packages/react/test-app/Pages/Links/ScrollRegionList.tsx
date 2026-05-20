@@ -1,6 +1,6 @@
-import WithScrollRegion from '@/Layouts/WithScrollRegion.jsx'
 import { VisitHelperOptions } from '@inertiajs/core'
 import { router } from '@inertiajs/react'
+import WithScrollRegion from '@/Layouts/WithScrollRegion.jsx'
 
 const ScrollRegionList = ({ user_id }: { user_id?: number }) => {
   const navigate = (id: number, options: VisitHelperOptions = {}) => {

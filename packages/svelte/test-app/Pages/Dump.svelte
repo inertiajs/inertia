@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { beforeUpdate } from 'svelte'
-  import { page } from '@inertiajs/svelte'
   import type { Method } from '@inertiajs/core'
+  import { page } from '@inertiajs/svelte'
+  import { beforeUpdate } from 'svelte'
   import type { MulterFile } from '../types'
 
   export let headers: Record<string, string>
