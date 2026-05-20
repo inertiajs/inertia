@@ -19,6 +19,7 @@ export class Poll {
   protected inFlight = false
   protected currentCancel: VoidFunction | null = null
   protected stopped = true
+  protected sessionId = 0
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.keepAlive = options.keepAlive ?? false
@@ -34,6 +35,9 @@ export class Poll {
 
   public stop() {
     this.stopped = true
+    this.sessionId++
+    this.inFlight = false
+    this.currentCancel = null
 
     if (this.intervalId) {
       clearInterval(this.intervalId)
@@ -98,12 +102,22 @@ export class Poll {
       this.currentCancel?.()
     }
 
+    const session = this.sessionId
+
     this.cb({
       onStart: (cancel) => {
+        if (session !== this.sessionId) {
+          return
+        }
+
         this.inFlight = true
         this.currentCancel = cancel
       },
       onFinish: () => {
+        if (session !== this.sessionId) {
+          return
+        }
+
         this.inFlight = false
         this.currentCancel = null
 

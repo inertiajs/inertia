@@ -134,7 +134,54 @@ test('it keeps the throttled cadence when staying in the background past one cyc
   await expect(pollRequests().length).toBeLessThanOrEqual(3)
 })
 
-test.skip('it is able to keep alive when in the background', async ({ page }) => {})
+test('it does not throttle when keepAlive is set, even when hidden', async ({ page }) => {
+  await page.goto('/poll/overlap/overlap?interval=200&delay=10&keepAlive=1')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  await page.waitForTimeout(1400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(4)
+})
+
+test('it does not double-schedule when stopped and restarted mid-flight (rest)', async ({ page }) => {
+  await page.goto('/poll/overlap/rest?interval=200&delay=800')
+
+  await page.waitForRequest(page.url())
+
+  // First request is now in flight (won't finish for ~800ms).
+  // Stop+start immediately so the stale onFinish would, without the session guard,
+  // call scheduleNext and create a second concurrent chain.
+  await page.getByRole('button', { name: 'Stop' }).click()
+  await page.getByRole('button', { name: 'Start' }).click()
+
+  requests.listen(page)
+
+  // Two full cycles of the restarted chain (~2 requests). A double chain would yield ~4.
+  await page.waitForTimeout(2400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(1)
+  await expect(pollRequests().length).toBeLessThanOrEqual(3)
+})
+
+test('it does not cancel skipped throttled ticks in cancel mode', async ({ page }) => {
+  await page.goto('/poll/overlap/cancel?interval=200&delay=10')
+
+  await page.waitForResponse(page.url())
+
+  await setHidden(page, true)
+
+  requests.listen(page)
+  requests.listenForFailed(page)
+  await page.waitForTimeout(1400)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(1)
+  await expect(pollRequests().length).toBeLessThanOrEqual(2)
+  await expect(pollFailed().length).toBe(0)
+})
 
 Object.entries({
   unencrypted: '/poll/unchanged-data',
@@ -253,8 +300,9 @@ test('it waits for the interval between requests with mode: rest', async ({ page
   await page.waitForTimeout(2000)
 
   await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
-  await expect(pollFinished().length).toBe(pollRequests().length)
   await expect(pollFailed().length).toBe(0)
+  // At most one in-flight; rest mode never overlaps so all but the last must be finished.
+  await expect(pollFinished().length).toBeGreaterThanOrEqual(pollRequests().length - 1)
 })
 
 test('it cancels in-flight requests on each tick with mode: cancel', async ({ page }) => {
