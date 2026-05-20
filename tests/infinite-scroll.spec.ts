@@ -2476,3 +2476,25 @@ test.describe('Deferred scroll props', () => {
     expect(pageRequests.length).toBe(2)
   })
 })
+
+test('it discards an in-flight infinite scroll request when navigating away', async ({ page }) => {
+  test.setTimeout(10_000)
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/navigate-away')
+
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('User 15')).toBeVisible()
+
+  await scrollToBottom(page)
+  await expect(page.getByText('Loading...')).toBeVisible()
+
+  await page.locator('#leave').click()
+
+  await expect(page).toHaveURL('/article')
+  await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
+
+  await page.waitForTimeout(500)
+
+  expect(consoleMessages.errors).toHaveLength(0)
+})
