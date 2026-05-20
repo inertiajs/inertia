@@ -1,6 +1,7 @@
 export default {
   modal: null,
   listener: null,
+  previousBodyOverflow: null,
 
   createIframeAndPage(html: Record<string, unknown> | string): { iframe: HTMLIFrameElement; page: HTMLElement } {
     if (typeof html === 'object') {
@@ -38,6 +39,7 @@ export default {
     this.modal.appendChild(iframe)
 
     document.body.prepend(this.modal)
+    this.previousBodyOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
 
     iframe.srcdoc = page.outerHTML
@@ -49,7 +51,8 @@ export default {
   hide(): void {
     this.modal.outerHTML = ''
     this.modal = null
-    document.body.style.overflow = 'visible'
+    document.body.style.overflow = this.previousBodyOverflow ?? ''
+    this.previousBodyOverflow = null
     document.removeEventListener('keydown', this.listener)
   },
 

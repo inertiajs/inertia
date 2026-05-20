@@ -173,6 +173,12 @@ app.get('/links/partial-reloads', (req, res) =>
 app.all('/error-modal', (req, res) =>
   inertia.render(req, res, { component: 'ErrorModal', props: { dialog: !!req.query.dialog } }),
 )
+app.all('/error-modal/body-overflow-stylesheet', (req, res) =>
+  inertia.render(req, res, { component: 'ErrorModalBodyOverflow', props: { mode: 'stylesheet' } }),
+)
+app.all('/error-modal/body-overflow-inline', (req, res) =>
+  inertia.render(req, res, { component: 'ErrorModalBodyOverflow', props: { mode: 'inline' } }),
+)
 app.all('/links/preserve-state-page-two', (req, res) =>
   inertia.render(req, res, { component: 'Links/PreserveState', props: { foo: req.query.foo } }),
 )

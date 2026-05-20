@@ -57,6 +57,44 @@ elements.forEach((element) => {
   })
 })
 
+test('it preserves a stylesheet-defined body overflow when closing the div modal', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/error-modal/body-overflow-stylesheet')
+  await page.waitForFunction(() => !!document.getElementById('body-overflow-style'))
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('')
+  expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).toBe('scroll')
+
+  await page.getByText('Invalid Visit', { exact: true }).click()
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeVisible()
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('hidden')
+
+  await page.mouse.click(25, 25)
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeHidden()
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('')
+  expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).toBe('scroll')
+})
+
+test('it restores a caller-set inline body overflow when closing the div modal', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/error-modal/body-overflow-inline')
+  await page.waitForFunction(() => document.body.style.overflow === 'scroll')
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('scroll')
+
+  await page.getByText('Invalid Visit', { exact: true }).click()
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeVisible()
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('hidden')
+
+  await page.mouse.click(25, 25)
+  await expect(page.frameLocator('iframe').getByText('This is a page that does not')).toBeHidden()
+
+  expect(await page.evaluate(() => document.body.style.overflow)).toBe('scroll')
+})
+
 test('it does not execute scripts in the error dialog iframe', async ({ page }) => {
   pageLoads.watch(page)
   await page.goto('/error-modal?dialog=1')
