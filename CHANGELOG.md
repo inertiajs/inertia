@@ -7,9 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.18...master)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.24...2.x)
 
 - Nothing yet
+
+## [v2.3.24](https://github.com/inertiajs/inertia/compare/v2.3.23...v2.3.24) - 2026-05-20
+
+### What's Changed
+
+* [2.x] Bump pnpm + Pin GitHub Actions to commit SHAs and harden CI workflows by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3102
+* Bump actions/upload-artifact from 6.0.0 to 7.0.1 in the github-actions group across 1 directory by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3103
+* [2.x] Skip DOM updates when `<InfiniteScroll>` request is cancelled by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3112
+* [2.x] Add `mode` option to `router.poll` and support dynamic `usePoll` data by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3111
+* [2.x] Restore previous body overflow when closing the error modal by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3113
+* [2.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3116
+* [2.x] Migrate to Oxfmt + Oxlint by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3118
+* [2.x] Backport CI hardening from 3.x by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3117
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.23...v2.3.24
+
+## [v2.3.23](https://github.com/inertiajs/inertia/compare/v2.3.22...v2.3.23) - 2026-05-07
+
+### What's Changed
+
+* [2.x] fix: prevent explicit undefined values from overwriting visit defaults by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3091
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.22...v2.3.23
+
+## [v2.3.22](https://github.com/inertiajs/inertia/compare/v2.3.21...v2.3.22) - 2026-05-06
+
+### What's Changed
+
+* [2.x] Bump CI actions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3072
+* [2.x] Fix React `useForm` submitting stale data after synchronous `setData` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3074
+* [2.x] Escape title content in SSR head output by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3087
+* [2.x] Prevent accessing `window.parent` from error iframe by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3088
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.21...v2.3.22
+
+## [v2.3.21](https://github.com/inertiajs/inertia/compare/v2.3.20...v2.3.21) - 2026-04-07
+
+### What's Changed
+
+* [2.x] Bump lodash-es from 4.17.3 to 4.18.1 by [@danielperez9430](https://github.com/danielperez9430) in https://github.com/inertiajs/inertia/pull/3042
+* [2.x] Bump Vite by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3045
+* [2.x] Improve Playwright CI cache by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3052
+
+### New Contributors
+
+* [@danielperez9430](https://github.com/danielperez9430) made their first contribution in https://github.com/inertiajs/inertia/pull/3042
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.20...v2.3.21
+
+## [v2.3.20](https://github.com/inertiajs/inertia/compare/v2.3.19...v2.3.20) - 2026-03-31
+
+### What's Changed
+
+* [2.x] Fix `WhenVisible` crash during SSR by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3025
+* [2.x] Fix flash data re-firing on partial reloads by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3026
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.19...v2.3.20
+
+## [v2.3.19](https://github.com/inertiajs/inertia/compare/v2.3.18...v2.3.19) - 2026-03-26
+
+### What's Changed
+
+* [2.x] Update Boost skills by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/2989
+* [2.x] Fix Svelte Form ignoring global `withAllErrors` config by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3010
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.18...v2.3.19
 
 ## [v2.3.18](https://github.com/inertiajs/inertia/compare/v2.3.17...v2.3.18) - 2026-03-12
 

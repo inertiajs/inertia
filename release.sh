@@ -71,7 +71,7 @@ git tag -a "$TAG" -m "$TAG"
 git push
 git push --tags
 
-gh release create "$TAG" --generate-notes --latest=false
+gh release create "$TAG" --target "$CURRENT_BRANCH" --generate-notes --latest=false
 
 echo ""
 echo "✅ Release $TAG completed successfully, publishing kicked off in CI."
