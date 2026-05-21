@@ -236,8 +236,8 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         onProgress,
         onFinish,
         onCancel,
-        onSuccess: (...args) => {
-          onSuccess(...args)
+        onSuccess: async (...args) => {
+          const result = await onSuccess(...args)
           onSubmitComplete({
             reset,
             defaults,
@@ -247,6 +247,8 @@ const Form = forwardRef<FormComponentRef, FormProps>(
           if (setDefaultsOnSuccess === true) {
             defaults()
           }
+
+          return result
         },
         onError(...args) {
           onError(...args)

@@ -174,10 +174,8 @@
       onProgress,
       onFinish,
       onCancel,
-      onSuccess: (...args) => {
-        if (onSuccess) {
-          onSuccess(...args)
-        }
+      onSuccess: async (...args) => {
+        const result = onSuccess ? await onSuccess(...args) : undefined
 
         if (onSubmitComplete) {
           onSubmitComplete({
@@ -191,6 +189,8 @@
         if (setDefaultsOnSuccess === true) {
           defaults()
         }
+
+        return result
       },
       onError: (...args) => {
         if (onError) {

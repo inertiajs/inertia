@@ -1978,6 +1978,12 @@ app.post('/form-component/disable-while-processing/:disable/submit', upload.any(
     500,
   ),
 )
+app.get('/form-component/async-on-success', upload.any(), async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/AsyncOnSuccess' }),
+)
+app.post('/form-component/async-on-success/submit', upload.any(), async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/AsyncOnSuccess' }),
+)
 app.post('/form-component/events/success', async (req, res) =>
   inertia.render(req, res, { component: 'FormComponent/Events' }),
 )

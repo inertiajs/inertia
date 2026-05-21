@@ -286,14 +286,16 @@ const Form = defineComponent({
         onProgress: props.onProgress,
         onFinish: props.onFinish,
         onCancel: props.onCancel,
-        onSuccess: (...args) => {
-          props.onSuccess?.(...args)
+        onSuccess: async (...args) => {
+          const result = await props.onSuccess?.(...args)
           props.onSubmitComplete?.(exposed)
           maybeReset(props.resetOnSuccess)
 
           if (props.setDefaultsOnSuccess === true) {
             defaults()
           }
+
+          return result
         },
         onError: (...args) => {
           props.onError?.(...args)
