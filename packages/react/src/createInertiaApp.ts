@@ -30,7 +30,7 @@ type ComponentResolver = (
   page?: Page<SharedPageProps>,
 ) => ReactComponent | Promise<ReactComponent> | { default: ReactComponent }
 
-type ReactWithApp = (app: ReactElement, options: { ssr: boolean }) => ReactElement
+type ReactWithApp = (app: ReactElement, options: { ssr: boolean, props: InertiaAppProps<SharedProps> }) => ReactElement
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
@@ -158,7 +158,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         reactApp = wrapWithStrictMode(createElement(App, props))
 
         if (withApp) {
-          reactApp = withApp(reactApp, { ssr: true })
+          reactApp = withApp(reactApp, { ssr: true, props: props })
         }
       }
 
@@ -207,7 +207,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     let appElement = wrapWithStrictMode(createElement(App, props))
 
     if (withApp) {
-      appElement = withApp(appElement, { ssr: false })
+      appElement = withApp(appElement, { ssr: false, props: props })
     }
 
     if (el.hasAttribute('data-server-rendered')) {

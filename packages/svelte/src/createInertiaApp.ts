@@ -24,7 +24,7 @@ type SetupOptions<SharedProps extends PageProps> = {
   props: InertiaAppProps<SharedProps>
 }
 
-type SvelteWithApp = (context: Map<any, any>, options: { ssr: boolean }) => void
+type SvelteWithApp = (context: Map<any, any>, options: { ssr: boolean, props: InertiaAppProps<SharedProps> }) => void
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
@@ -122,7 +122,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         const context = new Map()
 
         if (withApp) {
-          withApp(context, { ssr: true })
+          withApp(context, { ssr: true, props: props })
         }
 
         svelteApp = render(App, { props, context })
@@ -175,7 +175,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const context = new Map()
 
     if (withApp) {
-      withApp(context, { ssr: false })
+      withApp(context, { ssr: false, props: props })
     }
 
     if (target.hasAttribute('data-server-rendered')) {
