@@ -2,17 +2,19 @@
 
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\ChatMessage;
+use App\Models\Todo;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
-use Illuminate\Foundation\Precognition;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
-use App\Models\Todo;
 use Inertia\Inertia;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Messages\Message;
 use Laravel\Ai\Messages\MessageRole;
+use Laravel\Ai\Streaming\Events\TextDelta;
+
 use function Laravel\Ai\agent;
 
 /*
@@ -177,7 +179,7 @@ Route::get('/defer', function () {
             sleep(1);
 
             if (! request()->hasHeader('X-Rescue-Prop-Success')) {
-                throw new \RuntimeException('Failed to load stats.');
+                throw new RuntimeException('Failed to load stats.');
             }
 
             return [
@@ -305,7 +307,7 @@ Route::post('/messages', function (Request $request) {
         'content' => $data['message'],
     ]);
 
-    /** @var \Illuminate\Support\Collection<int, Message> $messages */
+    /** @var Collection<int, Message> $messages */
     $messages = ChatMessage::latest('id')
         ->limit(10)
         ->get()
@@ -338,7 +340,7 @@ Route::post('/messages', function (Request $request) {
 
     return response()->stream(function () use ($stream) {
         foreach ($stream as $event) {
-            if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
+            if ($event instanceof TextDelta) {
                 yield $event->delta;
             }
         }
@@ -428,7 +430,7 @@ Route::get('/once/{page}', function (int $page) {
     return inertia($component, [
         'foo' => Inertia::once(fn () => 'foo value: '.now()->getTimestampMs())->fresh($page === 3),
         'bar' => Inertia::once(fn () => 'bar value: '.now()->getTimestampMs())->until(10),
-        'baz' . $page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
+        'baz'.$page => Inertia::once(fn () => 'baz value: '.now()->getTimestampMs())->as('baz'),
         'qux' => Inertia::defer(fn () => 'qux value: '.now()->getTimestampMs())->once(),
     ]);
 });
