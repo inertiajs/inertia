@@ -246,13 +246,13 @@ Route::post('/messages', function (Request $request) {
             }
         });
 
-    return response()->stream(fn () => $stream->each(function ($event) {
-        if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
-            echo $event->delta;
-            ob_flush();
-            flush();
+    return response()->stream(function () use ($stream) {
+        foreach ($stream as $event) {
+            if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
+                yield $event->delta;
+            }
         }
-    }));
+    });
 });
 
 Route::get('/chat', function () {
