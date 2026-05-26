@@ -8,12 +8,18 @@ import { WithAppContext } from './Pages/SSR/WithApp'
 // 2. Import and use the React server renderer
 // 3. Export a default render function
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   resolve: (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.tsx', { eager: true })
     return pages[`./Pages/${name}.tsx`]
   },
-  withApp(app) {
-    return createElement(WithAppContext.Provider, { value: 'injected-via-withApp' }, app)
+  withApp(app, { page }) {
+    const value = {
+      injected: 'injected-via-withApp',
+      locale: page.props.locale ?? 'unknown',
+      component: page.component,
+    }
+
+    return createElement(WithAppContext.Provider, { value }, app)
   },
 })

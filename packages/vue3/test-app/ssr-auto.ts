@@ -7,12 +7,14 @@ import type { DefineComponent } from 'vue'
 // 2. Import and use the Vue server renderer
 // 3. Export a default render function
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   resolve: (name) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/SSR/**/*.vue', { eager: true })
     return pages[`./Pages/${name}.vue`]
   },
-  withApp(app) {
+  withApp(app, { page }) {
     app.provide('withAppValue', 'injected-via-withApp')
+    app.provide('withAppLocale', page.props.locale ?? 'unknown')
+    app.provide('withAppComponent', page.component)
   },
 })
