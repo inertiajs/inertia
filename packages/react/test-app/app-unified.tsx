@@ -1,11 +1,13 @@
 import type { VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/react'
+import { createElement } from 'react'
+import { WithAppContext } from './Pages/SSR/WithApp'
 
 window.testing = { Inertia: router }
 
 const params = new URLSearchParams(window.location.search)
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   strictMode: params.has('strictMode'),
   resolve: async (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.tsx', { eager: true })
@@ -27,4 +29,13 @@ createInertiaApp({
       },
     },
   }),
+  withApp(app, { page }) {
+    const value = {
+      injected: 'injected-via-withApp',
+      locale: page.props.locale ?? 'unknown',
+      component: page.component,
+    }
+
+    return createElement(WithAppContext.Provider, { value }, app)
+  },
 })

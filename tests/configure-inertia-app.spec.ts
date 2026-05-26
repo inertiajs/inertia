@@ -71,4 +71,12 @@ test.describe('createInertiaApp', () => {
     await expect(page.locator('#strict-mode-status')).toContainText('Rendered')
     expect(await hasStrictMode(page)).toBe(false)
   })
+
+  test('it passes the page object to the withApp callback', async ({ page }) => {
+    await page.goto('/unified/with-app')
+
+    await expect(page.getByTestId('with-app-value')).toHaveText('Value: injected-via-withApp')
+    await expect(page.getByTestId('with-app-locale')).toHaveText('Locale: en-CA')
+    await expect(page.getByTestId('with-app-component')).toHaveText('Component: SSR/WithApp')
+  })
 })

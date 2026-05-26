@@ -6,12 +6,14 @@ import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
 // 2. Import and use the Svelte server renderer
 // 3. Export a default render function
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   resolve: (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.svelte', { eager: true })
     return pages[`./Pages/${name}.svelte`]
   },
-  withApp(context) {
+  withApp(context, { page }) {
     context.set('withAppValue', 'injected-via-withApp')
+    context.set('withAppLocale', page.props.locale ?? 'unknown')
+    context.set('withAppComponent', page.component)
   },
 })

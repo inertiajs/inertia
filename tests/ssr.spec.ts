@@ -252,5 +252,13 @@ test.describe('SSR Auto Transform', () => {
       expect(html).toContain('SSR WithApp')
       expect(html).toMatch(/Value:.*injected-via-withApp/)
     })
+
+    test('it passes page object to withApp callback during SSR rendering', async ({ page }) => {
+      const response = await page.request.get('/ssr-auto/with-app')
+      const html = await response.text()
+
+      expect(html).toMatch(/Locale:.*en-CA/)
+      expect(html).toMatch(/Component:.*SSR\/WithApp/)
+    })
   })
 })

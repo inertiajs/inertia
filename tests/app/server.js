@@ -137,7 +137,7 @@ app.get('/ssr-auto/page2', (req, res) =>
 app.get('/ssr-auto/with-app', (req, res) =>
   inertia.renderSSRAuto(req, res, {
     component: 'SSR/WithApp',
-    props: {},
+    props: { locale: 'en-CA' },
   }),
 )
 
@@ -185,6 +185,13 @@ app.get('/unified/strict-mode', (req, res) =>
   inertia.renderUnified(req, res, {
     component: 'Unified/StrictMode',
     props: {},
+  }),
+)
+
+app.get('/unified/with-app', (req, res) =>
+  inertia.renderUnified(req, res, {
+    component: 'SSR/WithApp',
+    props: { locale: 'en-CA' },
   }),
 )
 
