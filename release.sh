@@ -15,6 +15,10 @@ fi
 # fi
 
 echo
+echo "Auditing dependencies..."
+pnpm audit
+
+echo
 echo "Current version: $(node -p "require('./package.json').version")"
 echo
 

@@ -14,6 +14,10 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+echo
+echo "Auditing dependencies..."
+pnpm audit
+
 # Read version from first package (root package.json has no version)
 CURRENT_VERSION=$(node -p "require('./packages/core/package.json').version")
 
