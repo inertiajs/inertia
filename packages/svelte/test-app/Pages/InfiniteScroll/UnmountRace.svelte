@@ -11,7 +11,7 @@
   let show = $state(false)
   let cycleCount = $state(0)
 
-  function lifecycleMarker() {
+  function lifecycleMarker(_node: HTMLElement) {
     console.log('marker mounted')
     return {
       destroy() {
