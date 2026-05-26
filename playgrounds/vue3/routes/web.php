@@ -9,11 +9,10 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use App\Models\Todo;
 use Inertia\Inertia;
-use Prism\Prism\Enums\Provider;
-use Prism\Prism\Prism;
-use Prism\Prism\ValueObjects\Messages\AssistantMessage;
-use Prism\Prism\ValueObjects\Messages\UserMessage;
-use RuntimeException;
+use Laravel\Ai\Enums\Lab;
+use Laravel\Ai\Messages\Message;
+use Laravel\Ai\Messages\MessageRole;
+use function Laravel\Ai\agent;
 
 /*
 |--------------------------------------------------------------------------
@@ -216,10 +215,12 @@ Route::post('/messages', function (Request $request) {
         'content' => $data['message'],
     ]);
 
+    /** @var \Illuminate\Support\Collection<int, Message> $messages */
     $messages = ChatMessage::latest('id')
         ->limit(10)
         ->get()
         ->reverse()
+        ->values()
         ->map(function (ChatMessage $message) use ($prompt) {
             $content = $message->content;
 
@@ -228,35 +229,30 @@ Route::post('/messages', function (Request $request) {
                 $content = "Answer in max. 10 sentences, may be shorter. Code examples allowed when needed. Don't hallucinate, just answer based on the provided context.\n\n".$content;
             }
 
-            return $message->type === 'prompt'
-                ? new UserMessage($content)
-                : new AssistantMessage($content);
-        })
-        ->all();
+            return new Message(
+                $message->type === 'prompt' ? MessageRole::User : MessageRole::Assistant,
+                $content,
+            );
+        });
 
-    // Create a streaming response from the LLM
-    $stream = Prism::text()
-        ->using(Provider::Ollama, 'gemma3:4b')
-        ->withMessages($messages)
-        ->asStream();
+    $stream = agent(messages: $messages->slice(0, -1))
+        ->stream($messages->last()->content, provider: Lab::Ollama, model: 'gemma3:4b')
+        ->then(function ($response) {
+            if (! blank($response->text)) {
+                ChatMessage::create([
+                    'type' => 'response',
+                    'content' => $response->text,
+                ]);
+            }
+        });
 
-    return response()->stream(function () use ($stream) {
-        $response = '';
-
-        foreach ($stream as $chunk) {
-            $response .= $chunk->text;
-            echo $chunk->text;
+    return response()->stream(fn () => $stream->each(function ($event) {
+        if ($event instanceof \Laravel\Ai\Streaming\Events\TextDelta) {
+            echo $event->delta;
             ob_flush();
             flush();
         }
-
-        if (! blank($response)) {
-            ChatMessage::create([
-                'type' => 'response',
-                'content' => $response,
-            ]);
-        }
-    }, 200, ['X-Accel-Buffering' => 'no']);
+    }));
 });
 
 Route::get('/chat', function () {
