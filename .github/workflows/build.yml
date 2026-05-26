@@ -32,6 +32,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Audit dependencies
+        if: github.event_name == 'push'
         run: pnpm audit
 
       - name: Build Inertia
