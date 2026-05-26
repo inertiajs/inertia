@@ -118,8 +118,10 @@
     return infiniteScrollInstance?.dataManager.hasNext() || false
   }
 
+  let setupTimer: ReturnType<typeof setTimeout> | undefined
+
   onMount(() => {
-    setTimeout(setupInfiniteScrollInstance)
+    setupTimer = setTimeout(setupInfiniteScrollInstance)
   })
 
   function syncStateFromDataManager() {
@@ -184,7 +186,10 @@
     }
   }
 
-  onDestroy(() => infiniteScrollInstance?.flush())
+  onDestroy(() => {
+    clearTimeout(setupTimer)
+    infiniteScrollInstance?.flush()
+  })
   let resolvedItemsElement = $derived(resolveHTMLElement(itemsElement, itemsElementRef))
   let scrollableParent = $derived(resolvedItemsElement ? getScrollableParent(resolvedItemsElement) : null)
   let sharedExposed = $derived({
