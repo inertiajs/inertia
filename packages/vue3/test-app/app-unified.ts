@@ -6,7 +6,7 @@ window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   resolve: async (name) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
 
@@ -26,4 +26,9 @@ createInertiaApp({
       },
     },
   }),
+  withApp(app, { page }) {
+    app.provide('withAppValue', 'injected-via-withApp')
+    app.provide('withAppLocale', page.props.locale ?? 'unknown')
+    app.provide('withAppComponent', page.component)
+  },
 })

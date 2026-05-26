@@ -29,7 +29,10 @@ type SetupOptions<ElementType, SharedProps extends PageProps> = {
   plugin: Plugin
 }
 
-type VueWithApp = (app: VueApp, options: { ssr: boolean, props: InertiaAppProps<SharedProps> }) => void
+type VueWithApp<SharedProps extends PageProps> = (
+  app: VueApp,
+  options: { ssr: boolean; page: Page<SharedProps> },
+) => void
 
 type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForCSR<
   SharedProps,
@@ -64,7 +67,7 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
   page?: Page<SharedProps>
   render?: undefined
 } & (
-    | { setup?: undefined; withApp?: VueWithApp }
+    | { setup?: undefined; withApp?: VueWithApp<SharedProps> }
     | { setup: (options: SetupOptions<HTMLElement | null, SharedProps>) => VueApp | void; withApp?: never }
   )
 
@@ -149,7 +152,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         vueApp.use(plugin)
 
         if (withApp) {
-          withApp(vueApp, { ssr: true, props: props })
+          withApp(vueApp, { ssr: true, page })
         }
       }
 
@@ -203,7 +206,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       app.use(plugin)
 
       if (withApp) {
-        withApp(app, { ssr: false, props: props })
+        withApp(app, { ssr: false, page: initialPage })
       }
 
       app.mount(el)
@@ -212,7 +215,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       app.use(plugin)
 
       if (withApp) {
-        withApp(app, { ssr: false, props: props })
+        withApp(app, { ssr: false, page: initialPage })
       }
 
       app.mount(el)

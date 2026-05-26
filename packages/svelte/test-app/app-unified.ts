@@ -5,7 +5,7 @@ window.testing = { Inertia: router }
 
 const withAppDefaults = new URLSearchParams(window.location.search).get('withAppDefaults')
 
-createInertiaApp({
+createInertiaApp<{ locale?: string }>({
   resolve: async (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
 
@@ -25,4 +25,9 @@ createInertiaApp({
       },
     },
   }),
+  withApp(context, { page }) {
+    context.set('withAppValue', 'injected-via-withApp')
+    context.set('withAppLocale', page.props.locale ?? 'unknown')
+    context.set('withAppComponent', page.component)
+  },
 })
