@@ -579,12 +579,7 @@ test.describe('Form Component', () => {
     await page.getByRole('button', { name: 'Submit' }).click()
     await responsePromise
 
-    // The server has responded, but the user-supplied onSuccess returns
-    // a Promise that resolves after 1500ms. The Form awaits it, so the
-    // form stays inert (disableWhileProcessing) for the full duration.
     await expect(page.locator('form[inert]')).toBeVisible()
-
-    // Once the Promise resolves, the form is no longer inert.
     await expect(page.locator('form[inert]')).not.toBeVisible({ timeout: 3000 })
   })
 

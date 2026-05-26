@@ -175,7 +175,7 @@
       onFinish,
       onCancel,
       onSuccess: async (...args) => {
-        const result = onSuccess ? await onSuccess(...args) : undefined
+        const result = await onSuccess?.(...args)
 
         if (onSubmitComplete) {
           onSubmitComplete({
