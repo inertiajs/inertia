@@ -572,6 +572,17 @@ test.describe('Form Component', () => {
     await expect(page.locator('form[inert]')).not.toBeVisible()
   })
 
+  test('keeps the form processing until an async onSuccess resolves', async ({ page }) => {
+    await page.goto('/form-component/async-on-success')
+
+    const responsePromise = page.waitForResponse('**/form-component/async-on-success/submit')
+    await page.getByRole('button', { name: 'Submit' }).click()
+    await responsePromise
+
+    await expect(page.locator('form[inert]')).toBeVisible()
+    await expect(page.locator('form[inert]')).not.toBeVisible({ timeout: 3000 })
+  })
+
   test('submit without an action attribute uses the current URL', async ({ page }) => {
     await page.goto('/form-component/url/with/segements')
     await expect(page.locator('#error_name')).not.toBeVisible()
