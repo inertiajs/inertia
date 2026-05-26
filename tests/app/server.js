@@ -2121,6 +2121,7 @@ app.get('/infinite-scroll/remember-state', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/RememberState', 60),
 )
 app.get('/infinite-scroll/toggles', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Toggles'))
+app.get('/infinite-scroll/unmount-race', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/UnmountRace'))
 app.get('/infinite-scroll/trigger-both', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerBoth'))
 app.get('/infinite-scroll/trigger-end-buffer', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerEndBuffer'),
