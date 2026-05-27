@@ -25,6 +25,12 @@ const triggerAsyncRedirect = () => {
   )
 }
 
+import { router } from "@inertiajs/vue3";
+
+router.once("start", () => {
+    console.log(`Starting a visit `)
+});
+
 const { start: startHookPolling, stop } = usePoll(
   2000,
   {
@@ -34,6 +40,7 @@ const { start: startHookPolling, stop } = usePoll(
     },
   },
   {
+    mode:
     keepAlive: true,
     autoStart: false,
   },
@@ -73,7 +80,9 @@ onMounted(() => {
       </div>
     </TestGridItem>
     <TestGridItem>
-      <template #title> Companies Poll Request Count: {{ companyPollCount }} </template>
+      <template #title>
+        Companies Poll Request Count: {{ companyPollCount }}
+      </template>
       <div v-for="company in companies">
         <div>{{ company }}</div>
       </div>
