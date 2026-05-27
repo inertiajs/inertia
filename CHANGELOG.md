@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.2.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.3.0...3.x)
 
 - Nothing yet
+
+## [v3.3.0](https://github.com/inertiajs/inertia/compare/v3.2.0...v3.3.0) - 2026-05-27
+
+### What's Changed
+
+* [3.x] Await user-provided Form onSuccess callback before completing submission by [@mattwigham](https://github.com/mattwigham) in https://github.com/inertiajs/inertia/pull/3122
+* [3.x] Migrate playgrounds from Prism to Laravel AI SDK by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3128
+* [3.x] Support network URLs for loading CSS assets in SSR dev server by [@simonellensohn](https://github.com/simonellensohn) in https://github.com/inertiajs/inertia/pull/3121
+* [3.x] Pass props to withApp callback by [@CL0Pinette](https://github.com/CL0Pinette) in https://github.com/inertiajs/inertia/pull/3125
+* [3.x] Run pnpm audit on push and releases, not on PRs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3129
+* [3.x] Fix Svelte infinite scroll unmount race by [@hschne](https://github.com/hschne) in https://github.com/inertiajs/inertia/pull/3127
+
+### New Contributors
+
+* [@mattwigham](https://github.com/mattwigham) made their first contribution in https://github.com/inertiajs/inertia/pull/3122
+* [@simonellensohn](https://github.com/simonellensohn) made their first contribution in https://github.com/inertiajs/inertia/pull/3121
+* [@CL0Pinette](https://github.com/CL0Pinette) made their first contribution in https://github.com/inertiajs/inertia/pull/3125
+* [@hschne](https://github.com/hschne) made their first contribution in https://github.com/inertiajs/inertia/pull/3127
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.2.0...v3.3.0
 
 ## [v3.2.0](https://github.com/inertiajs/inertia/compare/v3.1.1...v3.2.0) - 2026-05-20
 
