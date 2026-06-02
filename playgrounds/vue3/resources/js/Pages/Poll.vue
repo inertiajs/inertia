@@ -40,7 +40,6 @@ const { start: startHookPolling, stop } = usePoll(
     },
   },
   {
-    mode:
     keepAlive: true,
     autoStart: false,
   },
