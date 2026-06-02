@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Sleep;
 use Inertia\Inertia;
 use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Messages\Message;
@@ -27,6 +28,16 @@ use function Laravel\Ai\agent;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::get('/instant-scroll/1', function () {
+    return inertia('InstantScroll1');
+});
+
+Route::get('/instant-scroll/2', function () {
+    Sleep::for(3)->seconds();
+
+    return inertia('InstantScroll2');
+});
 
 Route::get('/', function () {
     return inertia('Home');
