@@ -25,8 +25,6 @@ const triggerAsyncRedirect = () => {
   )
 }
 
-import { router } from "@inertiajs/vue3";
-
 router.once("start", () => {
     console.log(`Starting a visit `)
 });
