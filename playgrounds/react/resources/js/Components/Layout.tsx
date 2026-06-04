@@ -5,7 +5,7 @@ export default function Layout({ children, padding = true }: { children: React.R
 
   return (
     <>
-      <nav className="flex items-center space-x-6 bg-slate-800 px-10 py-6 text-white overflow-scroll">
+      <nav className="flex items-center space-x-6 overflow-scroll bg-slate-800 px-10 py-6 text-white">
         <div className="rounded-lg bg-slate-700 px-4 py-1">{appName}</div>
         <Link href="/" className="hover:underline" prefetch>
           Home
