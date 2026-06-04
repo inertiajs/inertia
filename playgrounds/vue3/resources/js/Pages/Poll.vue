@@ -25,8 +25,6 @@ const triggerAsyncRedirect = () => {
   )
 }
 
-import { router } from "@inertiajs/vue3";
-
 router.once("start", () => {
     console.log(`Starting a visit `)
 });
@@ -40,7 +38,6 @@ const { start: startHookPolling, stop } = usePoll(
     },
   },
   {
-    mode:
     keepAlive: true,
     autoStart: false,
   },
