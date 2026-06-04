@@ -80,9 +80,7 @@ onMounted(() => {
       </div>
     </TestGridItem>
     <TestGridItem>
-      <template #title>
-        Companies Poll Request Count: {{ companyPollCount }}
-      </template>
+      <template #title> Companies Poll Request Count: {{ companyPollCount }} </template>
       <div v-for="company in companies">
         <div>{{ company }}</div>
       </div>
