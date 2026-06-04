@@ -34,4 +34,5 @@ jobs:
         run: pnpm build:all
 
       - name: Audit dependencies
+        if: github.event_name == 'push'
         run: pnpm audit --audit-level=high
