@@ -16,7 +16,7 @@ fi
 
 echo
 echo "Auditing dependencies..."
-pnpm audit
+pnpm audit --audit-level=high
 
 echo
 echo "Current version: $(node -p "require('./package.json').version")"
