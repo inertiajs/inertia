@@ -264,3 +264,102 @@ test('it logs a console error and falls back to a regular visit when the UrlMeth
   expect(consoleMessages.messages.some((msg) => msg.includes('only a single component string is supported'))).toBe(true)
   expect(consoleMessages.messages.some((msg) => msg.includes('withComponent()'))).toBe(true)
 })
+
+test.describe('scroll behavior', () => {
+  // Using dispatchEvent('click') instead of click() so focusing the button doesn't scroll it into view and change the scroll position
+
+  test('it scrolls to the top by default', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/instant-visit')
+    await expect(page.locator('#page1')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 100))
+
+    await page.getByRole('button', { exact: true, name: 'Visit with component' }).dispatchEvent('click')
+
+    await expect(page.locator('#target')).toBeVisible()
+
+    const scrollPositionAfterInstantSwap = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterInstantSwap).toBe(0)
+
+    await page.waitForResponse('**/instant-visit/target**')
+    await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+
+    const scrollPositionAfterServerResponse = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterServerResponse).toBe(0)
+  })
+
+  test('it scrolls to the top by default and preserves subsequent scrolls after server response', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/instant-visit')
+    await expect(page.locator('#page1')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 100))
+
+    const initialScrollPosition = await page.evaluate(() => window.scrollY)
+    expect(initialScrollPosition).toBe(100)
+
+    await page.getByRole('button', { exact: true, name: 'Visit with component' }).dispatchEvent('click')
+
+    await expect(page.locator('#target')).toBeVisible()
+
+    const scrollPositionAfterInstantSwap = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterInstantSwap).toBe(0)
+
+    await page.evaluate(() => window.scrollTo(0, 200))
+
+    await page.waitForResponse('**/instant-visit/target**')
+    await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+
+    const scrollPositionAfterServerResponse = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterServerResponse).toBe(200)
+  })
+
+  test('it preserves scroll when preserveScroll is true', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/instant-visit')
+    await expect(page.locator('#page1')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 100))
+
+    await page
+      .getByRole('button', { exact: true, name: 'Visit with component and preserve scroll' })
+      .dispatchEvent('click')
+
+    await expect(page.locator('#target')).toBeVisible()
+
+    const scrollPositionAfterInstantSwap = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterInstantSwap).toBe(100)
+
+    await page.waitForResponse('**/instant-visit/target**')
+    await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+
+    const scrollPositionAfterServerResponse = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterServerResponse).toBe(100)
+  })
+
+  test('it preserves scroll when preserveScroll is true, even after server response', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/instant-visit')
+    await expect(page.locator('#page1')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 100))
+
+    await page
+      .getByRole('button', { exact: true, name: 'Visit with component and preserve scroll' })
+      .dispatchEvent('click')
+
+    await expect(page.locator('#target')).toBeVisible()
+
+    const scrollPositionAfterInstantSwap = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterInstantSwap).toBe(100)
+
+    await page.evaluate(() => window.scrollTo(0, 200))
+
+    await page.waitForResponse('**/instant-visit/target**')
+    await expect(page.locator('#greeting')).toContainText('Greeting: Hello from server')
+
+    const scrollPositionAfterServerResponse = await page.evaluate(() => window.scrollY)
+    expect(scrollPositionAfterServerResponse).toBe(200)
+  })
+})
