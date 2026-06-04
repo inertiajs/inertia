@@ -121,9 +121,7 @@
     return infiniteScrollInstance?.dataManager.hasNext() || false
   }
 
-  onMount(() => {
-    setTimeout(setupInfiniteScrollInstance)
-  })
+  onMount(setupInfiniteScrollInstance)
 
   function syncStateFromDataManager() {
     requestCount = infiniteScrollInstance!.dataManager.getRequestCount()

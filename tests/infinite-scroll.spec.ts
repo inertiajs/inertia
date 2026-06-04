@@ -2498,3 +2498,18 @@ test('it discards an in-flight infinite scroll request when navigating away', as
 
   expect(consoleMessages.errors).toHaveLength(0)
 })
+
+test('it does not crash when InfiniteScroll unmounts before deferred setup runs', async ({ page }) => {
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/unmount-race')
+
+  await page.getByRole('button', { name: 'Cycle Mount' }).click()
+  await expect(page.locator('#cycle-count')).toHaveText('Cycles: 1')
+
+  await page.waitForTimeout(100)
+
+  expect(consoleMessages.messages).toContain('marker mounted')
+  expect(consoleMessages.messages).toContain('marker destroyed')
+  expect(consoleMessages.errors).toEqual([])
+})
