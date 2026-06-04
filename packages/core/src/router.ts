@@ -328,6 +328,7 @@ export class Router {
     if (visit.component) {
       history.processQueue().then(() => {
         this.performInstantSwap(visit).then(() => {
+          requestParams.preserveScroll = true
           requestParams.preserveState = true
           requestParams.replace = true
           requestParams.viewTransition = false
