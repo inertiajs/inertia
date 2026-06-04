@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.3.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.3.1...3.x)
 
 - Nothing yet
+
+## [v3.3.1](https://github.com/inertiajs/inertia/compare/v3.3.0...v3.3.1) - 2026-06-04
+
+### What's Changed
+
+* [3.x] Vue 3 Playground: Fixes scroll + code issues by [@yoeriboven](https://github.com/yoeriboven) in https://github.com/inertiajs/inertia/pull/3133
+* [3.x] Instant visit: only preserve scroll behavior on instant visit by [@yoeriboven](https://github.com/yoeriboven) in https://github.com/inertiajs/inertia/pull/3134
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3137
+* Dependabot cooldown + auto-merge by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3138
+
+### New Contributors
+
+* [@yoeriboven](https://github.com/yoeriboven) made their first contribution in https://github.com/inertiajs/inertia/pull/3133
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.3.0...v3.3.1
 
 ## [v3.3.0](https://github.com/inertiajs/inertia/compare/v3.2.0...v3.3.0) - 2026-05-27
 
