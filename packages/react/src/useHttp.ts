@@ -282,9 +282,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
             }
 
             options.onError?.(processedErrors as Errors)
-          } else {
-            options.onHttpException?.(error.response)
+
+            return undefined as TResponse
           }
+
+          options.onHttpException?.(error.response)
 
           throw error
         }
