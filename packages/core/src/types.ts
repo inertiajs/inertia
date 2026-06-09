@@ -338,6 +338,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
+  cached: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -382,9 +383,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, boolean?]
     details: {
       page: Page<SharedPageProps>
+      cached?: boolean
     }
     result: void
   }

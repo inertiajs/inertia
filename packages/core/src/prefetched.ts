@@ -193,6 +193,11 @@ class PrefetchedRequests {
 
     this.currentUseId = id
 
+    const consumedParams: ActiveVisit = {
+      ...params,
+      cached: true,
+    }
+
     return prefetched.response.then((response) => {
       if (this.currentUseId !== id) {
         // They've since gone on to `use` a different request,
@@ -200,7 +205,7 @@ class PrefetchedRequests {
         return
       }
 
-      response.mergeParams({ ...params, onPrefetched: () => {} })
+      response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
       // If this was a one-time cache, remove it
       // (generally a prefetch="click" request with no specified cache value)
@@ -271,6 +276,7 @@ class PrefetchedRequests {
         'optimistic',
         'component',
         'pageProps',
+        'cached',
       ],
     )
   }

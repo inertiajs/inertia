@@ -653,6 +653,22 @@ test.describe('tags', () => {
   })
 })
 
+test('fires the navigate event with cached set to true when a prefetched response is used', async ({ page }) => {
+  const prefetchResponse = page.waitForResponse('/prefetch/navigate-event/cached')
+  await page.goto('/prefetch/navigate-event')
+  await prefetchResponse
+
+  await page.getByRole('link', { name: 'Prefetched Link' }).click()
+  await expect(page.getByText('This is the cached target')).toBeVisible()
+  await expect(page.locator('#last-navigate-cached')).toHaveText('true')
+
+  await page.goto('/prefetch/navigate-event')
+
+  await page.getByRole('link', { name: 'Regular Link' }).click()
+  await expect(page.getByText('This is the fresh target')).toBeVisible()
+  await expect(page.locator('#last-navigate-cached')).toHaveText('false')
+})
+
 test('can use prefetched requests with preserveState', async ({ page }) => {
   await page.goto('/prefetch/preserve-state')
 

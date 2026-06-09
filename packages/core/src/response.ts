@@ -245,6 +245,7 @@ export class Response {
       preserveScroll: this.requestParams.all().preserveScroll as boolean,
       preserveState: this.requestParams.all().preserveState as boolean,
       viewTransition: this.requestParams.all().viewTransition,
+      cached: this.requestParams.all().cached,
     })
   }
 
