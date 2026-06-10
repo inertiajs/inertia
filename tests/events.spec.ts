@@ -30,7 +30,7 @@ const assertVisitObject = async (visit) => {
   await expect(visit.data).toBeDefined()
   await expect(visit.headers).toBeDefined()
   await expect(visit.preserveState).toBeDefined()
-  await expect(typeof visit.id).toBe('number')
+  await expect(typeof visit.id).toBe('string')
 }
 
 const assertPageObject = async (page) => {
@@ -139,7 +139,7 @@ test.describe('Events', () => {
       await expect(navigateMessages[0].detail.visitId).toBe(visitId)
     })
 
-    test('it assigns distinct increasing ids to distinct server visits', async ({ page }) => {
+    test('it assigns distinct ids to distinct server visits', async ({ page }) => {
       await listenForGlobalMessages(page, 'inertia:before')
 
       await page.locator('.navigate').dispatchEvent('click')
@@ -149,7 +149,7 @@ test.describe('Events', () => {
 
       const beforeMessages = await waitForGlobalMessages(page, 'inertia:before', 2)
 
-      await expect(beforeMessages[1].detail.visit.id).toBeGreaterThan(beforeMessages[0].detail.visit.id)
+      await expect(beforeMessages[1].detail.visit.id).not.toBe(beforeMessages[0].detail.visit.id)
     })
 
     test('it leaves navigate events without a visit id for popstate navigations', async ({ page }) => {
@@ -161,7 +161,7 @@ test.describe('Events', () => {
 
       const navigateMessages = await waitForGlobalMessages(page, 'inertia:navigate', 2)
 
-      await expect(typeof navigateMessages[0].detail.visitId).toBe('number')
+      await expect(typeof navigateMessages[0].detail.visitId).toBe('string')
       await expect(navigateMessages[1].detail.visitId).toBeUndefined()
     })
   })

@@ -41,6 +41,7 @@ import {
   VisitHelperOptions,
   VisitOptions,
 } from './types'
+import { uid } from './uid'
 import {
   hrefToUrl,
   isSameUrlWithoutHash,
@@ -667,10 +668,8 @@ export class Router {
     }
   }
 
-  protected visitIdCounter = 0
-
-  protected createVisitId(): number {
-    return ++this.visitIdCounter
+  protected createVisitId(): string {
+    return uid()
   }
 
   protected getPendingVisit(href: string | URL | UrlMethodPair, options: VisitOptions): PendingVisit {
