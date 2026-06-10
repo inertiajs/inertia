@@ -1,4 +1,4 @@
-import process from 'node:process'
+import process from 'process'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from '../src/ssrErrors'
 
