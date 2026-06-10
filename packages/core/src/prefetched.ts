@@ -254,6 +254,7 @@ class PrefetchedRequests {
       this.withoutPurposePrefetchHeader(params1),
       this.withoutPurposePrefetchHeader(params2),
       [
+        'id',
         'showProgress',
         'replace',
         'prefetch',

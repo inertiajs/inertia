@@ -30,6 +30,7 @@ const assertVisitObject = async (visit) => {
   await expect(visit.data).toBeDefined()
   await expect(visit.headers).toBeDefined()
   await expect(visit.preserveState).toBeDefined()
+  await expect(typeof visit.id).toBe('number')
 }
 
 const assertPageObject = async (page) => {
@@ -113,6 +114,56 @@ test.describe('Events', () => {
   test.beforeEach(async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/events')
+  })
+
+  test.describe('visitId', () => {
+    test('it uses one id across the server visit lifecycle', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:before')
+      await listenForGlobalMessages(page, 'inertia:start')
+      await listenForGlobalMessages(page, 'inertia:success')
+      await listenForGlobalMessages(page, 'inertia:navigate')
+      await listenForGlobalMessages(page, 'inertia:finish')
+
+      await page.getByRole('link', { exact: true, name: 'Navigate Event' }).click()
+
+      const beforeMessages = await waitForGlobalMessages(page, 'inertia:before', 1)
+      const startMessages = await waitForGlobalMessages(page, 'inertia:start', 1)
+      const successMessages = await waitForGlobalMessages(page, 'inertia:success', 1)
+      const navigateMessages = await waitForGlobalMessages(page, 'inertia:navigate', 1)
+      const finishMessages = await waitForGlobalMessages(page, 'inertia:finish', 1)
+      const visitId = beforeMessages[0].detail.visit.id
+
+      await expect(startMessages[0].detail.visit.id).toBe(visitId)
+      await expect(finishMessages[0].detail.visit.id).toBe(visitId)
+      await expect(successMessages[0].detail.visitId).toBe(visitId)
+      await expect(navigateMessages[0].detail.visitId).toBe(visitId)
+    })
+
+    test('it assigns distinct increasing ids to distinct server visits', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:before')
+
+      await page.locator('.navigate').dispatchEvent('click')
+      await waitForGlobalMessages(page, 'inertia:before', 1)
+      await page.goBack()
+      await page.locator('.navigate').dispatchEvent('click')
+
+      const beforeMessages = await waitForGlobalMessages(page, 'inertia:before', 2)
+
+      await expect(beforeMessages[1].detail.visit.id).toBeGreaterThan(beforeMessages[0].detail.visit.id)
+    })
+
+    test('it leaves navigate events without a visit id for popstate navigations', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:navigate')
+
+      await page.getByRole('link', { exact: true, name: 'Navigate Event' }).click()
+      await waitForGlobalMessages(page, 'inertia:navigate', 1)
+      await page.goBack()
+
+      const navigateMessages = await waitForGlobalMessages(page, 'inertia:navigate', 2)
+
+      await expect(typeof navigateMessages[0].detail.visitId).toBe('number')
+      await expect(navigateMessages[1].detail.visitId).toBeUndefined()
+    })
   })
 
   test.describe('Listeners', () => {

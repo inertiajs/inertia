@@ -52,12 +52,14 @@ class CurrentPage {
       preserveState = false,
       viewTransition = false,
       cached = false,
+      visitId,
     }: {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
       viewTransition?: Visit['viewTransition']
       cached?: boolean
+      visitId?: number
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -157,7 +159,7 @@ class CurrentPage {
           this.pendingDeferredProps = null
 
           if (!replace) {
-            fireNavigateEvent(page, cached)
+            fireNavigateEvent(page, { cached, visitId })
           }
         })
       })
