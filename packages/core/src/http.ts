@@ -3,4 +3,4 @@
  * Exported as `undefined` here so libraries supporting both majors can
  * feature-detect it with a truthy check: `if (http) http.getClient()`.
  */
-export const http = undefined;
+export const http = undefined
