@@ -527,6 +527,7 @@ export type RouterInitParams<ComponentType = Component> = {
 }
 
 export type PendingVisitOptions = {
+  /** @internal */
   id: number
   url: URL
   completed: boolean
