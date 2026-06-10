@@ -193,7 +193,7 @@ class PrefetchedRequests {
 
     this.currentUseId = id
 
-    const consumedParams: ActiveVisit = {
+    const consumedParams: InternalActiveVisit = {
       ...params,
       cached: true,
     }
@@ -276,7 +276,6 @@ class PrefetchedRequests {
         'optimistic',
         'component',
         'pageProps',
-        'cached',
       ],
     )
   }

@@ -338,7 +338,6 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
-  cached: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -532,6 +531,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
+  cached?: boolean
 }
 
 export type VisitId = unknown
