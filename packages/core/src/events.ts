@@ -31,8 +31,12 @@ export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) 
   return fireEvent('beforeUpdate', { detail: { page } })
 }
 
-export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, cached = false) => {
-  return fireEvent('navigate', { detail: { page, cached } })
+export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, { cached = false, visitId } = {}) => {
+  return fireEvent('navigate', { detail: { page, cached, visitId } })
+}
+
+export const fireClientVisitEvent: GlobalEventTrigger<'clientVisit'> = (page, { replace, visitId }) => {
+  return fireEvent('clientVisit', { detail: { page, replace, visitId } })
 }
 
 export const fireProgressEvent: GlobalEventTrigger<'progress'> = (progress) => {
@@ -43,8 +47,8 @@ export const fireStartEvent: GlobalEventTrigger<'start'> = (visit) => {
   return fireEvent('start', { detail: { visit } })
 }
 
-export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page) => {
-  return fireEvent('success', { detail: { page } })
+export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page, { visitId } = {}) => {
+  return fireEvent('success', { detail: { page, visitId } })
 }
 
 export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, visit) => {

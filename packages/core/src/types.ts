@@ -382,17 +382,28 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>, boolean?]
+    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: number }?]
     details: {
       page: Page<SharedPageProps>
       cached?: boolean
+      visitId?: number
+    }
+    result: void
+  }
+  clientVisit: {
+    parameters: [Page<SharedPageProps>, { replace: boolean; visitId: number }]
+    details: {
+      page: Page<SharedPageProps>
+      replace: boolean
+      visitId: number
     }
     result: void
   }
   success: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, { visitId?: number }?]
     details: {
       page: Page<SharedPageProps>
+      visitId?: number
     }
     result: void
   }
@@ -516,6 +527,7 @@ export type RouterInitParams<ComponentType = Component> = {
 }
 
 export type PendingVisitOptions = {
+  id: number
   url: URL
   completed: boolean
   cancelled: boolean
@@ -944,6 +956,7 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:clientVisit': GlobalEvent<'clientVisit'>
     'inertia:flash': GlobalEvent<'flash'>
   }
 }
