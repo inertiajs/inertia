@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { requests } from './support'
+import { consoleMessages, requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
   await page.waitForURL(`prefetch/${id}`)
@@ -658,15 +658,17 @@ test('fires the navigate event with cached set to true when a prefetched respons
   await page.goto('/prefetch/navigate-event')
   await prefetchResponse
 
+  consoleMessages.listen(page)
   await page.getByRole('link', { name: 'Prefetched Link' }).click()
   await expect(page.getByText('This is the cached target')).toBeVisible()
-  await expect(page.locator('#last-navigate-cached')).toHaveText('true')
+  expect(consoleMessages.messages).toContain('true')
 
   await page.goto('/prefetch/navigate-event')
 
+  consoleMessages.listen(page)
   await page.getByRole('link', { name: 'Regular Link' }).click()
   await expect(page.getByText('This is the fresh target')).toBeVisible()
-  await expect(page.locator('#last-navigate-cached')).toHaveText('false')
+  expect(consoleMessages.messages).toContain('false')
 })
 
 test('can use prefetched requests with preserveState', async ({ page }) => {

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
-import type { Component, VNode } from 'vue'
-import Layout from '@/Layouts/NavigateEventTest.vue'
+import { Link, router } from '@inertiajs/vue3'
+import { onMounted } from 'vue'
 
-type RenderFunction = (component: Component, children: Component[]) => VNode
-
-defineOptions({
-  layout: (h: RenderFunction, page: Component) => h(Layout, [page]),
+onMounted(() => {
+  router.on('navigate', (event) => {
+    console.log(String(event.detail.cached))
+  })
 })
 </script>
 

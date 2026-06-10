@@ -1,7 +1,13 @@
-import { Link } from '@inertiajs/react'
-import NavigateEventTest from '@/Layouts/NavigateEventTest'
+import { Link, router } from '@inertiajs/react'
+import { useEffect } from 'react'
 
-const NavigateEvent = () => {
+export default () => {
+  useEffect(() => {
+    router.on('navigate', (event) => {
+      console.log(String(event.detail.cached))
+    })
+  }, [])
+
   return (
     <>
       <Link href="/prefetch/navigate-event/cached" prefetch="mount">
@@ -11,7 +17,3 @@ const NavigateEvent = () => {
     </>
   )
 }
-
-NavigateEvent.layout = (page: React.ReactNode) => <NavigateEventTest children={page} />
-
-export default NavigateEvent

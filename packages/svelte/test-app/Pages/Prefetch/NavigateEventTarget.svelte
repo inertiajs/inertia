@@ -1,7 +1,3 @@
-<script module lang="ts">
-  export { default as layout } from '@/Layouts/NavigateEventTest.svelte'
-</script>
-
 <script lang="ts">
   interface Props {
     label: string

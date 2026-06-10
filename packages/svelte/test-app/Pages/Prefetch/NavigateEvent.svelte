@@ -1,9 +1,12 @@
-<script module lang="ts">
-  export { default as layout } from '@/Layouts/NavigateEventTest.svelte'
-</script>
-
 <script lang="ts">
-  import { inertia } from '@inertiajs/svelte'
+  import { inertia, router } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
+
+  onMount(() => {
+    router.on('navigate', (event) => {
+      console.log(String(event.detail.cached))
+    })
+  })
 </script>
 
 <a href="/prefetch/navigate-event/cached" use:inertia={{ prefetch: 'mount' }}>Prefetched Link</a>
