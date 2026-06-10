@@ -1,6 +1,7 @@
-import { config as coreConfig, progress as Progress, router as Router } from '@inertiajs/core'
+import { config as coreConfig, http as Http, progress as Progress, router as Router } from '@inertiajs/core'
 import { ReactInertiaAppConfig } from './types'
 
+export const http = Http
 export const progress = Progress
 export const router = Router
 export { default as App } from './App'
