@@ -1,4 +1,6 @@
-import process from 'process'
+declare const process: {
+  cwd: () => string
+}
 import { beforeEach, describe, expect, it } from 'vitest'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from '../src/ssrErrors'
 
