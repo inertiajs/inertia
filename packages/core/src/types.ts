@@ -382,28 +382,28 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: number }?]
+    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: string }?]
     details: {
       page: Page<SharedPageProps>
       cached?: boolean
-      visitId?: number
+      visitId?: string
     }
     result: void
   }
   clientVisit: {
-    parameters: [Page<SharedPageProps>, { replace: boolean; visitId: number }]
+    parameters: [Page<SharedPageProps>, { replace: boolean; visitId: string }]
     details: {
       page: Page<SharedPageProps>
       replace: boolean
-      visitId: number
+      visitId: string
     }
     result: void
   }
   success: {
-    parameters: [Page<SharedPageProps>, { visitId?: number }?]
+    parameters: [Page<SharedPageProps>, { visitId?: string }?]
     details: {
       page: Page<SharedPageProps>
-      visitId?: number
+      visitId?: string
     }
     result: void
   }
@@ -528,7 +528,7 @@ export type RouterInitParams<ComponentType = Component> = {
 
 export type PendingVisitOptions = {
   /** @internal */
-  id: number
+  id: string
   url: URL
   completed: boolean
   cancelled: boolean

@@ -59,7 +59,7 @@ class CurrentPage {
       preserveState?: boolean
       viewTransition?: Visit['viewTransition']
       cached?: boolean
-      visitId?: number
+      visitId?: string
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {

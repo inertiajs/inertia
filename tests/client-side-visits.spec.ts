@@ -152,7 +152,7 @@ test('it pairs client-side push visitId with navigate', async ({ page }) => {
   const visitId = clientVisitMessages[0].detail.visitId
 
   await expect(clientVisitMessages[0].detail.replace).toBe(false)
-  await expect(typeof visitId).toBe('number')
+  await expect(typeof visitId).toBe('string')
   await expect(navigateMessages[0].detail.visitId).toBe(visitId)
 })
 
@@ -169,7 +169,7 @@ test('it records client-side replace visitIds without navigate events', async ({
   const replaceNavigateMessages = await waitForGlobalMessages(page, 'inertia:navigate')
 
   await expect(replaceClientVisitMessages[0].detail.replace).toBe(true)
-  await expect(typeof replaceClientVisitMessages[0].detail.visitId).toBe('number')
+  await expect(typeof replaceClientVisitMessages[0].detail.visitId).toBe('string')
   await expect(replaceNavigateMessages).toHaveLength(0)
 
   await page.getByRole('button', { name: 'Push same URL' }).click()
@@ -178,6 +178,6 @@ test('it records client-side replace visitIds without navigate events', async ({
   const navigateMessages = await waitForGlobalMessages(page, 'inertia:navigate')
 
   await expect(clientVisitMessages[1].detail.replace).toBe(false)
-  await expect(typeof clientVisitMessages[1].detail.visitId).toBe('number')
+  await expect(typeof clientVisitMessages[1].detail.visitId).toBe('string')
   await expect(navigateMessages).toHaveLength(0)
 })
