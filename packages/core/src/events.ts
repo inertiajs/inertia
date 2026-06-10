@@ -31,8 +31,8 @@ export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) 
   return fireEvent('beforeUpdate', { detail: { page } })
 }
 
-export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page) => {
-  return fireEvent('navigate', { detail: { page } })
+export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, cached = false) => {
+  return fireEvent('navigate', { detail: { page, cached } })
 }
 
 export const fireProgressEvent: GlobalEventTrigger<'progress'> = (progress) => {

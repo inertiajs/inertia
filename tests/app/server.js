@@ -1010,6 +1010,13 @@ app.get('/prefetch/preserve-state', (req, res) => {
 app.get('/prefetch/after-error', (req, res) => inertia.render(req, res, { component: 'Prefetch/AfterError' }))
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
+app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))
+app.get('/prefetch/navigate-event/cached', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/NavigateEventTarget', props: { label: 'cached' } }),
+)
+app.get('/prefetch/navigate-event/fresh', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/NavigateEventTarget', props: { label: 'fresh' } }),
+)
 
 app.get('/prefetch/:pageNumber', (req, res) => {
   inertia.render(req, res, {

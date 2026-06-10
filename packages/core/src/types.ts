@@ -382,9 +382,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, boolean?]
     details: {
       page: Page<SharedPageProps>
+      cached?: boolean
     }
     result: void
   }
@@ -530,6 +531,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
+  cached?: boolean
 }
 
 export type VisitId = unknown
