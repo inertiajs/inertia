@@ -547,7 +547,7 @@ export type InternalActiveVisit = ActiveVisit & {
   cached?: boolean
 }
 
-export type VisitId = unknown
+export type VisitId = string
 export type Component = unknown
 
 type FirstLevelOptional<T> = {

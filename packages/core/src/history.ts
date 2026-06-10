@@ -301,7 +301,7 @@ class History {
   }
 
   public isValidState(state: any): boolean {
-    return !!state.page
+    return typeof state === 'object' && state !== null && 'page' in state
   }
 
   public getAllState(): Page {
