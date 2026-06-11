@@ -708,6 +708,7 @@ export class Router {
       viewTransition: false,
       component: null,
       pageProps: null,
+      cached: false,
       ...stripTopLevelUndefined(options),
       ...stripTopLevelUndefined(configuredOptions),
     }

@@ -277,6 +277,7 @@ class PrefetchedRequests {
         'optimistic',
         'component',
         'pageProps',
+        'cached',
       ],
     )
   }

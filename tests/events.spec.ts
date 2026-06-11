@@ -435,6 +435,18 @@ test.describe('Events', () => {
         await expect(messages[1]).toEqual({ foo: 'bar' })
         await assertGlobalErrorEvent(globalMessages[0])
       })
+
+      test('includes the page and visit id in the event detail', async ({ page }) => {
+        await listenForGlobalMessages(page, 'inertia:before')
+        await listenForGlobalMessages(page, 'inertia:error')
+        await clickAndWaitForResponse(page, 'Error Event', 'events/errors')
+
+        const beforeMessages = await waitForGlobalMessages(page, 'inertia:before', 1)
+        const globalMessages = await waitForGlobalMessages(page, 'inertia:error', 1)
+
+        await assertPageObject(globalMessages[0].detail.page)
+        await expect(globalMessages[0].detail.visitId).toBe(beforeMessages[0].detail.visit.id)
+      })
     })
 
     test.describe('Local Event Callbacks', () => {

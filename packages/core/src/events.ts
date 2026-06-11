@@ -11,8 +11,8 @@ export const fireBeforeEvent: GlobalEventTrigger<'before'> = (visit) => {
   return fireEvent('before', { cancelable: true, detail: { visit } })
 }
 
-export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors) => {
-  return fireEvent('error', { detail: { errors } })
+export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors, { page, visitId } = {}) => {
+  return fireEvent('error', { detail: { errors, page, visitId } })
 }
 
 export const fireNetworkErrorEvent: GlobalEventTrigger<'networkError'> = (error) => {

@@ -100,7 +100,7 @@ export class Response {
     if (Object.keys(errors).length > 0) {
       const scopedErrors = this.getScopedErrors(errors)
 
-      fireErrorEvent(scopedErrors)
+      fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
 
       return this.requestParams.all().onError(scopedErrors)
     }
