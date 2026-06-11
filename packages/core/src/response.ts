@@ -11,6 +11,7 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
+import { interceptors } from './interceptors'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -225,6 +226,8 @@ export class Response {
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
+
+    this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)

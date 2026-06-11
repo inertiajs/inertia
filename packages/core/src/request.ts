@@ -8,11 +8,12 @@ import {
 } from './events'
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
+import { interceptors } from './interceptors'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
 import type { ActiveVisit, Page } from './types'
-import { HttpProgressEvent, HttpRequestHeaders } from './types'
+import { HttpProgressEvent, HttpRequestConfig, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
@@ -64,16 +65,20 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
+    const config: HttpRequestConfig = {
+      method: this.requestParams.all().method,
+      url: urlWithoutHash(this.requestParams.all().url).href,
+      data: this.requestParams.data(),
+      signal: this.cancelToken.signal,
+      headers: this.getHeaders(),
+      onUploadProgress: this.onProgress.bind(this),
+    }
+
+    const processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
+
     return http
       .getClient()
-      .request({
-        method: this.requestParams.all().method,
-        url: urlWithoutHash(this.requestParams.all().url).href,
-        data: this.requestParams.data(),
-        signal: this.cancelToken.signal,
-        headers: this.getHeaders(),
-        onUploadProgress: this.onProgress.bind(this),
-      })
+      .request(processedConfig)
       .then((response) => {
         this.response = Response.create(this.requestParams, response, this.page)
 

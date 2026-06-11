@@ -13,6 +13,8 @@ export { default as createHeadManager } from './head'
 export { http } from './http'
 export { HttpCancelledError, HttpError, HttpNetworkError, HttpResponseError } from './httpErrors'
 export { default as useInfiniteScroll } from './infiniteScroll'
+/** @internal Not part of the public API. May change or be removed without notice. */
+export { exposeInterceptors, interceptors } from './interceptors'
 export {
   createLayoutPropsStore,
   isPropsObject,

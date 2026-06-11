@@ -584,6 +584,8 @@ interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupR
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
+  /** Enable development-only integrations. Defaults to `import.meta.env.DEV`. */
+  dev?: boolean
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -629,6 +631,8 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
+  /** Enable development-only integrations. Defaults to `import.meta.env.DEV`. */
+  dev?: boolean
 }
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
