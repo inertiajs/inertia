@@ -7,9 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.3.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.4.0...3.x)
 
 - Nothing yet
+
+## [v3.4.0](https://github.com/inertiajs/inertia/compare/v3.3.1...v3.4.0) - 2026-06-11
+
+### What's Changed
+
+* Bump actions/checkout from 6.0.2 to 6.0.3 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3145
+* [3.x] Add `cached` flag to the `inertia:navigate` event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3146
+* [3.x] Add `inertia:clientVisit` event and visit correlation id by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3147
+* [3.x] Refactor visit ID to be a string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3148
+* [3.x] Add page and visit id to error event detail by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3152
+* [3.x] Add internal request and response interceptors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3153
+* [3.x] Bump Playground dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3154
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.3.1...v3.4.0
 
 ## [v3.3.1](https://github.com/inertiajs/inertia/compare/v3.3.0...v3.3.1) - 2026-06-04
 
