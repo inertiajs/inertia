@@ -338,6 +338,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
+  cached: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -408,9 +409,11 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   error: {
-    parameters: [Errors]
+    parameters: [Errors, { page?: Page<SharedPageProps>; visitId?: string }?]
     details: {
       errors: Errors
+      page?: Page<SharedPageProps>
+      visitId?: string
     }
     result: void
   }

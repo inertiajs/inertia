@@ -6,6 +6,7 @@ import { router } from './index'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
+import { uid } from './uid'
 import { hrefToUrl } from './url'
 
 class EventHandler {
@@ -107,8 +108,10 @@ class EventHandler {
         router.cancelAll({ prefetch: false })
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
+          const visitId = uid()
+
           Scroll.restore(history.getScrollRegions())
-          fireNavigateEvent(currentPage.get())
+          fireNavigateEvent(currentPage.get(), { visitId })
 
           const pendingDeferred: Record<string, string[]> = {}
           const pageProps = currentPage.get().props
