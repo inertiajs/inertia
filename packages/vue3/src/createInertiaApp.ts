@@ -1,8 +1,10 @@
+/// <reference path="./env.d.ts" />
 import {
   buildSSRBody,
   CreateInertiaAppOptions,
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
   InertiaAppSSRResponse,
@@ -101,6 +103,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     http,
     layout,
     withApp,
+    dev = !!import.meta.env?.DEV,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -114,6 +117,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (dev) {
+    exposeInterceptors()
   }
 
   const isServer = typeof window === 'undefined'

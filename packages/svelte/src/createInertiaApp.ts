@@ -1,5 +1,6 @@
 import {
   buildSSRBody,
+  exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
   router,
@@ -82,6 +83,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     http,
     layout,
     withApp,
+    dev = !!import.meta.env?.DEV,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
@@ -94,6 +96,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (dev) {
+    exposeInterceptors()
   }
 
   const isServer = typeof window === 'undefined'

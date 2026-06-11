@@ -57,3 +57,18 @@ class VisitInterceptors {
  * @internal Not part of the public API. May change or be removed without notice.
  */
 export const interceptors = new VisitInterceptors()
+
+/**
+ * Expose the interceptor registry on the window so development tooling can hook
+ * into visit requests and responses from outside the bundle. Gated behind the
+ * `dev` option of `createInertiaApp`, so it is inert in production builds.
+ *
+ * @internal Not part of the public API. May change or be removed without notice.
+ */
+export function exposeInterceptors(): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  ;(window as Window & { __inertia_interceptors__?: VisitInterceptors }).__inertia_interceptors__ = interceptors
+}
