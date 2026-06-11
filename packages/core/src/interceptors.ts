@@ -10,10 +10,7 @@ type VisitRequestHandler = (
   config: HttpRequestConfig,
 ) => HttpRequestConfig | Promise<HttpRequestConfig>
 
-type VisitResponseHandler = (
-  visit: InternalActiveVisit,
-  response: HttpResponse,
-) => HttpResponse | Promise<HttpResponse>
+type VisitResponseHandler = (visit: InternalActiveVisit, response: HttpResponse) => HttpResponse | Promise<HttpResponse>
 
 class VisitInterceptors {
   protected requestHandlers: VisitRequestHandler[] = []
