@@ -24,10 +24,11 @@ export class RequestStream {
     this.cancel({ interrupted: true }, false)
   }
 
-  public cancelInFlight({ prefetch = true, optimistic = true } = {}): void {
+  public cancelInFlight({ prefetch = true, optimistic = true, async = true } = {}): void {
     this.requests
       .filter((request) => prefetch || !request.isPrefetch())
       .filter((request) => optimistic || !request.isOptimistic())
+      .filter((request) => async || !request.isAsync())
       .forEach((request) => request.cancel({ cancelled: true }))
   }
 

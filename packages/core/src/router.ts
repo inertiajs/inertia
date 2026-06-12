@@ -282,8 +282,9 @@ export class Router {
       : isSameUrlWithoutHash(visit.url, currentPageUrl)
 
     if (!isSamePage) {
-      // Only cancel non-prefetch requests (deferred props + partial reloads)
-      this.asyncRequestStream.cancelInFlight({ prefetch: false, optimistic: false })
+      // Cancel non-prefetch, non-optimistic, non-async in-flight requests
+      // when navigating to a different page. Preserves explicitly async requests.
+      this.asyncRequestStream.cancelInFlight({ prefetch: false, optimistic: false, async: false })
     }
 
     // Interrupt in-flight requests before taking the optimistic snapshot

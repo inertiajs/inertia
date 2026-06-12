@@ -45,6 +45,10 @@ export class Request {
     return this.optimistic
   }
 
+  public isAsync(): boolean {
+    return this.requestParams.isAsync()
+  }
+
   public isPendingOptimistic(): boolean {
     return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }

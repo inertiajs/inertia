@@ -71,6 +71,10 @@ export class RequestParams {
     return this.params.deferredProps === true
   }
 
+  public isAsync(): boolean {
+    return this.params.async === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,
