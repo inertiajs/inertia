@@ -70,12 +70,12 @@ export default {
       dialog.remove()
     })
 
+    iframe.srcdoc = page.outerHTML
+
     dialog.appendChild(iframe)
     document.body.prepend(dialog)
     dialog.showModal()
 
     dialog.focus()
-
-    iframe.srcdoc = page.outerHTML
   },
 }
