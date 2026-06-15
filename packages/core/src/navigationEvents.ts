@@ -11,11 +11,12 @@ function isContentEditableOrPrevented(event: KeyboardNavigationEvent | MouseNavi
 
 /**
  * Determine if this mouse event should be intercepted for navigation purposes.
- * Links with modifier keys or non-left clicks should not be intercepted.
+ * Links with modifier keys or non-left clicks or same browsing context targets should not be intercepted.
  * Content editable elements and prevented events are ignored.
  */
 export function shouldIntercept(event: MouseNavigationEvent): boolean {
   const isLink = (event.currentTarget as HTMLElement).tagName.toLowerCase() === 'a'
+  const target = isLink ? (event.currentTarget as HTMLAnchorElement).target : ''
 
   return !(
     isContentEditableOrPrevented(event) ||
@@ -23,6 +24,7 @@ export function shouldIntercept(event: MouseNavigationEvent): boolean {
     (isLink && event.ctrlKey) ||
     (isLink && event.metaKey) ||
     (isLink && event.shiftKey) ||
+    (isLink && target !== '' && target !== '_self') ||
     (isLink && 'button' in event && event.button !== 0)
   )
 }
