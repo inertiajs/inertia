@@ -1334,3 +1334,29 @@ test.describe('path traversal', () => {
     await expect(page).toHaveURL('/')
   })
 })
+
+test.describe('link targets', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+  })
+
+  test('_self opens in same tab', async ({ page }) => {
+    await page.getByRole('link', { name: 'Target _self' }).click()
+
+    await expect(page).toHaveURL('/links/as-element')
+  })
+
+  test('_blank opens in new tab', async ({ page, context }) => {
+    const newTabPromise = context.waitForEvent('page');
+
+    await page.getByRole('link', { name: 'Target _blank' }).click()
+
+    const newTab = await newTabPromise;
+
+    await newTab.waitForLoadState();
+
+    await expect(page).toHaveURL('/');
+
+    await expect(newTab).toHaveURL('/links/as-element')
+  })
+})
