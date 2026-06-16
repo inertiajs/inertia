@@ -148,6 +148,30 @@ test.describe('Head component', () => {
     )
   })
 
+  test('passes page as second argument to titleCallback', async ({ page }) => {
+    await page.goto('/head?withTitleCallback')
+    await page.waitForSelector('title[data-inertia]', { state: 'attached' })
+
+    const title = await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)
+    expect(title).toBe('Test Head Component | /head?withTitleCallback')
+  })
+
+  test('titleCallback receives updated page on navigation', async ({ page }) => {
+    await page.goto('/head?withTitleCallback')
+    await page.waitForSelector('title[data-inertia]', { state: 'attached' })
+
+    expect(await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)).toBe(
+      'Test Head Component | /head?withTitleCallback',
+    )
+
+    await page.goto('/head/reactive?withTitleCallback')
+    await page.waitForSelector('title[data-inertia]', { state: 'attached' })
+
+    expect(await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)).toBe(
+      'Initial Title | /head/reactive?withTitleCallback',
+    )
+  })
+
   test('handles head without title prop', async ({ page }) => {
     await page.goto('/head/without-title')
     await page.waitForTimeout(100)
