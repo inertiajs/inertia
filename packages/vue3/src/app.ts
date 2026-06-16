@@ -125,7 +125,11 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
 
-    headManager = createHeadManager(isServer, (title: string) => titleCallback ? titleCallback(title, page.value) : title, onHeadUpdate || (() => {}))
+    headManager = createHeadManager(
+        isServer,
+        (title: string) => titleCallback ? titleCallback(title, page.value) : title,
+        onHeadUpdate || (() => {})
+    )
 
     if (!isServer) {
       router.init<DefineComponent>({
