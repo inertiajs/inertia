@@ -8,7 +8,9 @@ import {
   Page,
   PageHandler,
   PageProps,
+  resolveServerHead,
   router,
+  type ServerHeadOption,
 } from '@inertiajs/core'
 import {
   createElement,
@@ -70,6 +72,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
+  serverHead?: ServerHeadOption
 }
 
 export type InertiaApp = FunctionComponent<InertiaAppProps>
@@ -87,6 +90,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
   titleCallback,
   onHeadUpdate,
   defaultLayout,
+  serverHead,
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
@@ -99,6 +103,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
       typeof window === 'undefined',
       titleCallback || ((title) => title),
       onHeadUpdate || (() => {}),
+      resolveServerHead(initialPage, serverHead),
     )
   }, [])
 
@@ -142,7 +147,10 @@ export default function App<SharedProps extends PageProps = PageProps>({
       )
     }
 
-    router.on('navigate', () => headManager.forceUpdate())
+    // Keep server-provided head elements in sync across visits.
+    return router.on('navigate', (event) => {
+      headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+    })
   }, [])
 
   if (!current.component) {
