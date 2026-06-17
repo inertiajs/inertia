@@ -24,9 +24,9 @@ describe('createHeadManager', () => {
     })
 
     it('trims surrounding whitespace and drops empty entries', () => {
-      expect(
-        resolveServerHead(page(), () => ['  <meta name="description" content="Users">  ', '   ', '']),
-      ).toEqual(['<meta data-inertia="server-head-0" name="description" content="Users">'])
+      expect(resolveServerHead(page(), () => ['  <meta name="description" content="Users">  ', '   ', ''])).toEqual([
+        '<meta data-inertia="server-head-0" name="description" content="Users">',
+      ])
     })
 
     it('can resolve server head elements from a page prop', () => {

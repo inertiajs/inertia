@@ -158,28 +158,26 @@ export default function createHeadManager(
       ...(title ? { title: `<title data-inertia="">${title}</title>` } : {}),
     }
 
-    const elements = serverHead
-      .concat(providerHead)
-      .reduce((carry, element) => {
-        if (element.indexOf('<') === -1) {
-          return carry
-        }
-
-        if (element.indexOf('<title ') === 0) {
-          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/s)
-          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
-          return carry
-        }
-
-        const match = element.match(/ data-inertia=(["'])[^"']+\1/)
-        if (match) {
-          carry[match[0]] = element
-        } else {
-          carry[Object.keys(carry).length] = element
-        }
-
+    const elements = serverHead.concat(providerHead).reduce((carry, element) => {
+      if (element.indexOf('<') === -1) {
         return carry
-      }, defaults)
+      }
+
+      if (element.indexOf('<title ') === 0) {
+        const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/s)
+        carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
+        return carry
+      }
+
+      const match = element.match(/ data-inertia=(["'])[^"']+\1/)
+      if (match) {
+        carry[match[0]] = element
+      } else {
+        carry[Object.keys(carry).length] = element
+      }
+
+      return carry
+    }, defaults)
 
     return Object.values(elements)
   }
