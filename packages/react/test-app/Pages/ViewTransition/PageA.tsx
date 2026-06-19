@@ -17,6 +17,16 @@ export default () => {
     })
   }
 
+  const supersedeTransition = () => {
+    router.visit('/view-transition/page-b', {
+      viewTransition: () => {
+        // While the transition is still in flight, start another one. The browser
+        // aborts the first, rejecting its `ready` promise with an AbortError.
+        document.startViewTransition(() => {})
+      },
+    })
+  }
+
   const clientSideReplace = () => {
     router.replace({
       url: '/view-transition/page-b',
@@ -37,6 +47,7 @@ export default () => {
       <button onClick={transitionWithBoolean}>Transition with boolean</button>
       <button onClick={transitionWithCallback}>Transition with callback</button>
       <button onClick={clientSideReplace}>Client-side replace</button>
+      <button onClick={supersedeTransition}>Supersede transition</button>
       <Link
         href="/view-transition/page-b"
         viewTransition={(viewTransition) => {

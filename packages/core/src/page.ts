@@ -251,6 +251,13 @@ class CurrentPage {
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
 
+      // Starting a new view transition before this one finishes (e.g. rapid
+      // navigation or an interrupted visit) causes the browser to skip the active
+      // transition, rejecting its `ready` promise with an `AbortError`. That's
+      // expected, so swallow it to avoid an unhandled promise rejection.
+      // See https://www.w3.org/TR/css-view-transitions-1/#ViewTransition-prepare
+      transitionResult.ready.catch(() => {})
+
       viewTransitionCallback(transitionResult)
     })
   }

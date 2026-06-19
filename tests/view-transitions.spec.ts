@@ -90,4 +90,21 @@ test.describe('View Transitions', () => {
     await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
     await expect(consoleMessages.errors).toEqual([])
   })
+
+  test('does not throw when a view transition is superseded by a new one', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Supersede transition' }).click()
+
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+
+    // Superseding a transition rejects the old transition's `ready` promise with an
+    // AbortError. It must be handled internally so it never surfaces as an unhandled rejection.
+    await page.waitForTimeout(500)
+    await expect(consoleMessages.errors).toEqual([])
+  })
 })
