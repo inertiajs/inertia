@@ -17,12 +17,19 @@ const transitionWithCallback = () => {
   })
 }
 
-const supersedeTransition = () => {
-  router.visit('/view-transition/page-b', {
-    viewTransition: () => {
-      // Simulate a rapid second navigation that aborts this in-flight transition.
-      document.startViewTransition(() => {})
-    },
+const rapidNavigation = () => {
+  router.replace({
+    url: '/view-transition/page-b',
+    component: 'ViewTransition/PageB',
+    props: {},
+    viewTransition: true,
+  })
+
+  router.replace({
+    url: '/view-transition/page-a',
+    component: 'ViewTransition/PageA',
+    props: {},
+    viewTransition: true,
   })
 }
 
@@ -46,7 +53,7 @@ const clientSideReplace = () => {
   <button @click="transitionWithBoolean">Transition with boolean</button>
   <button @click="transitionWithCallback">Transition with callback</button>
   <button @click="clientSideReplace">Client-side replace</button>
-  <button @click="supersedeTransition">Supersede transition</button>
+  <button @click="rapidNavigation">Rapid navigation</button>
   <Link
     href="/view-transition/page-b"
     :view-transition="
