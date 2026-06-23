@@ -1,4 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
+import { pageLoads } from './support'
 
 async function getInertiaHeadHTML(page: Page) {
   return await page.evaluate(() => {
@@ -156,20 +157,30 @@ test.describe('Head component', () => {
     expect(title).toBe('Test Head Component | /head?withTitleCallback')
   })
 
-  test('titleCallback receives updated page on navigation', async ({ page }) => {
-    await page.goto('/head?withTitleCallback')
+  test('titleCallback receives the updated page after a client-side visit', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/head/title-callback?withTitleCallback')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })
 
-    expect(await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)).toBe(
-      'Test Head Component | /head?withTitleCallback',
-    )
+    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback')
 
-    await page.goto('/head/reactive?withTitleCallback')
+    await page.getByRole('link', { name: 'Go to reactive' }).click()
+
+    await expect(page).toHaveTitle('Initial Title | /head/reactive')
+  })
+
+  test('titleCallback re-runs when a prop is replaced client-side', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.goto('/head/title-callback?withTitleCallback')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })
 
-    expect(await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)).toBe(
-      'Initial Title | /head/reactive?withTitleCallback',
-    )
+    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback')
+
+    await page.getByRole('button', { name: 'Replace prop' }).click()
+
+    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback | replaced')
   })
 
   test('handles head without title prop', async ({ page }) => {

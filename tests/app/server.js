@@ -104,6 +104,13 @@ app.get('/ssr/layout-props-callback', (req, res) =>
   }),
 )
 
+app.get('/ssr/head-title', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/HeadTitle',
+    props: { titleSuffix: 'From Props' },
+  }),
+)
+
 app.get('/ssr/head-with-xss-title', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/HeadWithXssTitle',

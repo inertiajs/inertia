@@ -126,9 +126,9 @@ const App: InertiaApp = defineComponent({
     const isServer = typeof window === 'undefined'
 
     headManager = createHeadManager(
-        isServer,
-        (title: string) => titleCallback ? titleCallback(title, page.value) : title,
-        onHeadUpdate || (() => {})
+      isServer,
+      (title: string) => (titleCallback ? titleCallback(title, page.value!) : title),
+      onHeadUpdate || (() => {}),
     )
 
     if (!isServer) {
@@ -150,6 +150,7 @@ const App: InertiaApp = defineComponent({
       })
 
       router.on('navigate', () => headManager.forceUpdate())
+      router.on('clientVisit', () => headManager.forceUpdate())
     }
 
     return () => {
