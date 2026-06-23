@@ -3735,6 +3735,14 @@ app.get('/nested-props/deferred-with-siblings', (req, res) => {
 
 app.get('/head/plain-title', (req, res) => inertia.renderWithPlainTitle(req, res, { component: 'Head/Dataset' }))
 
+app.get('/head/title-callback', (req, res) =>
+  inertia.render(req, res, { component: 'Head/TitleCallback', props: { titleSuffix: 'Account' } }),
+)
+
+app.get('/head/reactive', (req, res) =>
+  inertia.render(req, res, { component: 'Head/Reactive', props: { titleSuffix: 'Dashboard' } }),
+)
+
 app.all('*page', (req, res) => inertia.render(req, res))
 
 // Send errors to the console (instead of crashing the server)

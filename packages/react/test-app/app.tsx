@@ -87,6 +87,6 @@ createInertiaApp({
     nonce: params.get('nonce') === 'default' ? 'test-default-nonce' : 'test-nonce',
   }),
   ...(params.has('withTitleCallback') && {
-    title: (title, page) => [title, page.url, page.props.titleSuffix].filter(Boolean).join(' | '),
+    title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
   }),
 })

@@ -150,11 +150,11 @@ test.describe('Head component', () => {
   })
 
   test('passes page as second argument to titleCallback', async ({ page }) => {
-    await page.goto('/head?withTitleCallback')
+    await page.goto('/head/title-callback?withTitleCallback')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })
 
     const title = await page.evaluate(() => document.querySelector('title[data-inertia]')?.textContent)
-    expect(title).toBe('Test Head Component | /head?withTitleCallback')
+    expect(title).toBe('Callback Page | Account')
   })
 
   test('titleCallback receives the updated page after a client-side visit', async ({ page }) => {
@@ -163,11 +163,11 @@ test.describe('Head component', () => {
     await page.goto('/head/title-callback?withTitleCallback')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })
 
-    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback')
+    await expect(page).toHaveTitle('Callback Page | Account')
 
     await page.getByRole('link', { name: 'Go to reactive' }).click()
 
-    await expect(page).toHaveTitle('Initial Title | /head/reactive')
+    await expect(page).toHaveTitle('Initial Title | Dashboard')
   })
 
   test('titleCallback re-runs when a prop is replaced client-side', async ({ page }) => {
@@ -176,11 +176,11 @@ test.describe('Head component', () => {
     await page.goto('/head/title-callback?withTitleCallback')
     await page.waitForSelector('title[data-inertia]', { state: 'attached' })
 
-    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback')
+    await expect(page).toHaveTitle('Callback Page | Account')
 
     await page.getByRole('button', { name: 'Replace prop' }).click()
 
-    await expect(page).toHaveTitle('Callback Page | /head/title-callback?withTitleCallback | replaced')
+    await expect(page).toHaveTitle('Callback Page | replaced')
   })
 
   test('handles head without title prop', async ({ page }) => {
