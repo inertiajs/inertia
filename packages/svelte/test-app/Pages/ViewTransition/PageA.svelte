@@ -20,8 +20,7 @@
   const supersedeTransition = () => {
     router.visit('/view-transition/page-b', {
       viewTransition: () => {
-        // While the transition is still in flight, start another one. The browser
-        // aborts the first, rejecting its `ready` promise with an AbortError.
+        // Simulate a rapid second navigation that aborts this in-flight transition.
         document.startViewTransition(() => {})
       },
     })

@@ -91,7 +91,7 @@ test.describe('View Transitions', () => {
     await expect(consoleMessages.errors).toEqual([])
   })
 
-  test('does not throw when a view transition is superseded by a new one', async ({ page }) => {
+  test('does not throw when a rapid navigation aborts an in-flight view transition', async ({ page }) => {
     consoleMessages.listen(page)
 
     await page.goto('/view-transition/page-a')
@@ -102,8 +102,8 @@ test.describe('View Transitions', () => {
     await expect(page).toHaveURL('/view-transition/page-b')
     await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
 
-    // Superseding a transition rejects the old transition's `ready` promise with an
-    // AbortError. It must be handled internally so it never surfaces as an unhandled rejection.
+    // The aborted transition rejects its `ready` promise, handled internally so it
+    // never surfaces as an unhandled rejection.
     await page.waitForTimeout(500)
     await expect(consoleMessages.errors).toEqual([])
   })
