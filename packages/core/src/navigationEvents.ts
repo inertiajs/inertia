@@ -11,7 +11,7 @@ function isContentEditableOrPrevented(event: KeyboardNavigationEvent | MouseNavi
 
 /**
  * Determine if this mouse event should be intercepted for navigation purposes.
- * Links with modifier keys or non-left clicks or same browsing context targets should not be intercepted.
+ * Links with modifier keys or non-left clicks or different browsing context targets should not be intercepted.
  * Content editable elements and prevented events are ignored.
  */
 export function shouldIntercept(event: MouseNavigationEvent): boolean {
