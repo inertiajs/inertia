@@ -59,11 +59,7 @@ window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProp
 
     <Link id="navigate-back" href="/head/mixed">Go to Mixed Head</Link>
 
-    <Link href="/links/as-element" className="link-targets-self" target="_self">
-      Target _self
-    </Link>
-    <Link href="/links/as-element" className="link-targets-blank" target="_blank">
-      Target _blank
-    </Link>
+    <Link href="/links/as-element" className="link-targets-self" target="_self">Target _self</Link>
+    <Link href="/links/as-element" className="link-targets-blank" target="_blank">Target _blank</Link>
   </div>
 </template>

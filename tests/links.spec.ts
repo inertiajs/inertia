@@ -1347,15 +1347,15 @@ test.describe('link targets', () => {
   })
 
   test('_blank opens in new tab', async ({ page, context }) => {
-    const newTabPromise = context.waitForEvent('page');
+    const newTabPromise = context.waitForEvent('page')
 
     await page.getByRole('link', { name: 'Target _blank' }).click()
 
-    const newTab = await newTabPromise;
+    const newTab = await newTabPromise
 
-    await newTab.waitForLoadState();
+    await newTab.waitForLoadState()
 
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/')
 
     await expect(newTab).toHaveURL('/links/as-element')
   })
