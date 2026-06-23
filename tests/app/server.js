@@ -104,6 +104,13 @@ app.get('/ssr/layout-props-callback', (req, res) =>
   }),
 )
 
+app.get('/ssr/head-title', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/HeadTitle',
+    props: { titleSuffix: 'From Props' },
+  }),
+)
+
 app.get('/ssr/head-with-xss-title', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/HeadWithXssTitle',
@@ -3727,6 +3734,14 @@ app.get('/nested-props/deferred-with-siblings', (req, res) => {
 })
 
 app.get('/head/plain-title', (req, res) => inertia.renderWithPlainTitle(req, res, { component: 'Head/Dataset' }))
+
+app.get('/head/title-callback', (req, res) =>
+  inertia.render(req, res, { component: 'Head/TitleCallback', props: { titleSuffix: 'Account' } }),
+)
+
+app.get('/head/reactive', (req, res) =>
+  inertia.render(req, res, { component: 'Head/Reactive', props: { titleSuffix: 'Dashboard' } }),
+)
 
 app.all('*page', (req, res) => inertia.render(req, res))
 

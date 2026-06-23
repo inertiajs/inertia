@@ -16,5 +16,8 @@ createServer((page) =>
         render: () => h(App, props),
       }).use(plugin)
     },
+    ...(page.url.includes('withTitleCallback') && {
+      title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
+    }),
   }),
 )

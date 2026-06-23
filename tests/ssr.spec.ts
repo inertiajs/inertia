@@ -101,6 +101,13 @@ test.describe('Head title escaping', () => {
     expect(html).not.toContain('</title><script>alert(')
     expect(html).toContain('&lt;/title&gt;&lt;script&gt;')
   })
+
+  test('it runs the titleCallback with the page during SSR', async ({ page }) => {
+    const response = await page.request.get('/ssr/head-title?withTitleCallback')
+    const html = await response.text()
+
+    expect(html).toContain('<title data-inertia="">SSR Head Title | From Props</title>')
+  })
 })
 
 test.describe('layout props', () => {

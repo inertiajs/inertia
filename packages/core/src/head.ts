@@ -1,4 +1,4 @@
-import { HeadManager, HeadManagerOnUpdateCallback, HeadManagerTitleCallback } from '.'
+import { HeadManager, HeadManagerOnUpdateCallback } from '.'
 import debounce from './debounce'
 
 const Renderer = {
@@ -64,7 +64,7 @@ const Renderer = {
 
 export default function createHeadManager(
   isServer: boolean,
-  titleCallback: HeadManagerTitleCallback,
+  titleCallback: (title: string) => string,
   onUpdate: HeadManagerOnUpdateCallback,
 ): HeadManager {
   const states: Record<string, Array<string>> = {}

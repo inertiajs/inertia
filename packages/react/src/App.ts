@@ -17,6 +17,7 @@ import {
   ReactNode,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
@@ -94,10 +95,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
     key: null,
   })
 
+  const pageRef = useRef(current.page)
+  pageRef.current = current.page
+
   const headManager = useMemo(() => {
     return createHeadManager(
       typeof window === 'undefined',
-      titleCallback || ((title) => title),
+      (title: string) => (titleCallback ? titleCallback(title, pageRef.current) : title),
       onHeadUpdate || (() => {}),
     )
   }, [])
@@ -143,6 +147,7 @@ export default function App<SharedProps extends PageProps = PageProps>({
     }
 
     router.on('navigate', () => headManager.forceUpdate())
+    router.on('clientVisit', () => headManager.forceUpdate())
   }, [])
 
   if (!current.component) {
