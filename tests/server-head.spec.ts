@@ -10,10 +10,6 @@ async function getInertiaHeadHTML(page: Page) {
 }
 
 test.describe('server head', () => {
-  test.beforeEach(async () => {
-    test.skip(process.env.PACKAGE === 'svelte', 'serverHead e2e coverage is for React and Vue only')
-  })
-
   test('it renders server-provided head elements on initial load', async ({ page }) => {
     await page.goto('/server-head?withServerHead')
     await page.waitForSelector('title[data-inertia="server-head-0"]', { state: 'attached' })
@@ -106,6 +102,8 @@ test.describe('server head', () => {
   })
 
   test('it lets page head elements override server head elements with the same key', async ({ page }) => {
+    test.skip(process.env.PACKAGE === 'svelte', 'Svelte has no Head component; it uses native <svelte:head>')
+
     await page.goto('/server-head?withServerHead&override')
     await page.waitForSelector('title[data-inertia="server-head-0"]', { state: 'attached' })
 
