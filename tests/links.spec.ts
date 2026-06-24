@@ -1346,9 +1346,7 @@ test.describe('link targets', () => {
     await expect(page).toHaveURL('/links/as-element')
   })
 
-  test('_blank opens in new tab', async ({ page, context, browserName }) => {
-    test.skip(browserName === 'webkit', 'WebKit on Linux crashes the context when opening a target="_blank" popup')
-
+  test('_blank opens in new tab', async ({ page, context }) => {
     const newTabPromise = context.waitForEvent('page')
 
     await page.getByRole('link', { name: 'Target _blank' }).click()
@@ -1360,7 +1358,5 @@ test.describe('link targets', () => {
     await expect(page).toHaveURL('/')
 
     await expect(newTab).toHaveURL('/links/as-element')
-
-    await newTab.close()
   })
 })
