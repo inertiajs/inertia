@@ -14,7 +14,7 @@
     "@types/node": "^24.10.13",
     "eslint-plugin-svelte": "^3.17.1",
     "nodemon": "^3.1.14",
-    "svelte": "^5.55.7",
+    "svelte": "^5.56.4",
     "svelte-check": "^4.4.8",
     "typescript": "^6.0.3",
     "vite": "^8.0.16"
