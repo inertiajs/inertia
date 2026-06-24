@@ -126,7 +126,9 @@
     return formDataToObject(getFormData(submitter))
   }
 
-  function getUrlAndData(submitter: FormSubmitter | undefined = undefined): [string, Record<string, FormDataConvertible>] {
+  function getUrlAndData(
+    submitter: FormSubmitter | undefined = undefined,
+  ): [string, Record<string, FormDataConvertible>] {
     return mergeDataIntoQueryString(_method, _action, getData(submitter), queryStringArrayFormat)
   }
 
@@ -246,7 +248,10 @@
     isDirty = false
   }
 
-  export function validate(field: string | NamedInputEvent | ValidationConfig | undefined = undefined, config: ValidationConfig | undefined = undefined) {
+  export function validate(
+    field: string | NamedInputEvent | ValidationConfig | undefined = undefined,
+    config: ValidationConfig | undefined = undefined,
+  ) {
     return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
   }
 
