@@ -1358,5 +1358,7 @@ test.describe('link targets', () => {
     await expect(page).toHaveURL('/')
 
     await expect(newTab).toHaveURL('/links/as-element')
+
+    await newTab.close()
   })
 })
