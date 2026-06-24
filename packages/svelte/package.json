@@ -46,17 +46,17 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/kit": "^2.60.1",
-    "@sveltejs/package": "^2.5.7",
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@sveltejs/kit": "^2.67.0",
+    "@sveltejs/package": "^2.5.8",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "axios": "^1.17.0",
     "es-check": "9.5.3",
     "publint": "^0.3.17",
-    "svelte": "^5.55.7",
-    "svelte-check": "^4.4.8",
+    "svelte": "^5.56.4",
+    "svelte-check": "^4.7.0",
     "tslib": "^2.8.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.16"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"

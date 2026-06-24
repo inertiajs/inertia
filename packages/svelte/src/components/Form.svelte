@@ -115,18 +115,18 @@
     component ? component : instant && isUrlMethodPair(action) ? resolveUrlMethodPairComponent(action) : null,
   )
 
-  export function getFormData(submitter?: FormSubmitter): FormData {
+  export function getFormData(submitter: FormSubmitter | undefined = undefined): FormData {
     return new FormData(formElement, submitter)
   }
 
   // Convert the FormData to an object because we can't compare two FormData
   // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
   // expects an object, and submitting a FormData instance directly causes problems with nested objects.
-  export function getData(submitter?: FormSubmitter): Record<string, FormDataConvertible> {
+  export function getData(submitter: FormSubmitter | undefined = undefined): Record<string, FormDataConvertible> {
     return formDataToObject(getFormData(submitter))
   }
 
-  function getUrlAndData(submitter?: FormSubmitter): [string, Record<string, FormDataConvertible>] {
+  function getUrlAndData(submitter: FormSubmitter | undefined = undefined): [string, Record<string, FormDataConvertible>] {
     return mergeDataIntoQueryString(_method, _action, getData(submitter), queryStringArrayFormat)
   }
 
@@ -139,7 +139,7 @@
     isDirty = event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData))
   }
 
-  export function submit(submitter?: FormSubmitter) {
+  export function submit(submitter: FormSubmitter | undefined = undefined) {
     const [url, data] = getUrlAndData(submitter)
     const formTarget = (submitter as HTMLButtonElement | HTMLInputElement | null)?.getAttribute('formtarget')
 
@@ -237,7 +237,7 @@
     reset(...fields)
   }
 
-  export function setError(fieldOrFields: string | Record<string, string>, maybeValue?: string) {
+  export function setError(fieldOrFields: string | Record<string, string>, maybeValue: string | undefined = undefined) {
     form.setError((typeof fieldOrFields === 'string' ? { [fieldOrFields]: maybeValue } : fieldOrFields) as Errors)
   }
 
@@ -246,7 +246,7 @@
     isDirty = false
   }
 
-  export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
+  export function validate(field: string | NamedInputEvent | ValidationConfig | undefined = undefined, config: ValidationConfig | undefined = undefined) {
     return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
   }
 
@@ -262,7 +262,7 @@
     return form.touch(field, ...fields)
   }
 
-  export function touched(field?: string) {
+  export function touched(field: string | undefined = undefined) {
     return form.touched(field)
   }
 

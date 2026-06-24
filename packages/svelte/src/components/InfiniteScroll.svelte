@@ -102,11 +102,11 @@
     }
   }
 
-  export function fetchPrevious(options?: any) {
+  export function fetchPrevious(options: any = undefined) {
     infiniteScrollInstance?.dataManager.fetchPrevious(options)
   }
 
-  export function fetchNext(options?: any) {
+  export function fetchNext(options: any = undefined) {
     infiniteScrollInstance?.dataManager.fetchNext(options)
   }
 
