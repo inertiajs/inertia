@@ -12,5 +12,8 @@ createServer((page) =>
       return pages[`./Pages/${name}.tsx`]
     },
     setup: ({ App, props }) => <App {...props} />,
+    ...(page.url.includes('withTitleCallback') && {
+      title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
+    }),
   }),
 )

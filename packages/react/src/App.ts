@@ -19,6 +19,7 @@ import {
   ReactNode,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from 'react'
@@ -98,10 +99,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
     key: null,
   })
 
+  const pageRef = useRef(current.page)
+  pageRef.current = current.page
+
   const headManager = useMemo(() => {
     return createHeadManager(
       typeof window === 'undefined',
-      titleCallback || ((title) => title),
+      (title: string) => (titleCallback ? titleCallback(title, pageRef.current) : title),
       onHeadUpdate || (() => {}),
       resolveServerHead(initialPage, serverHead),
     )
@@ -147,10 +151,15 @@ export default function App<SharedProps extends PageProps = PageProps>({
       )
     }
 
-    // Keep server-provided head elements in sync across visits.
-    return router.on('navigate', (event) => {
+    const removeNavigateListener = router.on('navigate', (event) => {
       headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
     })
+    const removeClientVisitListener = router.on('clientVisit', () => headManager.forceUpdate())
+
+    return () => {
+      removeNavigateListener()
+      removeClientVisitListener()
+    }
   }, [])
 
   if (!current.component) {

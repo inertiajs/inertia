@@ -135,7 +135,7 @@ const App: InertiaApp = defineComponent({
 
     headManager = createHeadManager(
       isServer,
-      titleCallback || ((title: string) => title),
+      (title: string) => (titleCallback ? titleCallback(title, page.value!) : title),
       onHeadUpdate || (() => {}),
       resolveServerHead(initialPage, serverHead),
     )
@@ -158,10 +158,10 @@ const App: InertiaApp = defineComponent({
         },
       })
 
-      // Keep server-provided head elements in sync across visits.
       router.on('navigate', (event) => {
         headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
       })
+      router.on('clientVisit', () => headManager.forceUpdate())
     }
 
     return () => {

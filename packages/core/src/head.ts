@@ -1,11 +1,5 @@
 import debounce from './debounce'
-import type {
-  HeadManager,
-  HeadManagerOnUpdateCallback,
-  HeadManagerTitleCallback,
-  Page,
-  ServerHeadOption,
-} from './types'
+import type { HeadManager, HeadManagerOnUpdateCallback, Page, ServerHeadOption } from './types'
 
 const serverHeadProviderId = 'server'
 
@@ -99,7 +93,7 @@ const Renderer = {
 
 export default function createHeadManager(
   isServer: boolean,
-  titleCallback: HeadManagerTitleCallback,
+  titleCallback: (title: string) => string,
   onUpdate: HeadManagerOnUpdateCallback,
   initialServerHead: Array<string> = [],
 ): HeadManager {

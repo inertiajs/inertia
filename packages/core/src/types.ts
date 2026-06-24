@@ -618,7 +618,7 @@ export interface CreateInertiaAppOptionsForSSR<
 export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
-export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerTitleCallback = (title: string, page: Page) => string
 export type ServerHead = string[]
 export type ServerHeadResolver = (page: Page) => ServerHead | null | undefined
 export type ServerHeadOption = boolean | string | ServerHeadResolver
