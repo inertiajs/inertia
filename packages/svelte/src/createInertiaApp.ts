@@ -207,9 +207,12 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (serverHeadManager) {
-    router.on('navigate', (event) => {
+    const syncServerHead = (event: { detail: { page: Page } }) => {
       serverHeadManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
-    })
+    }
+
+    router.on('navigate', syncServerHead)
+    router.on('clientVisit', syncServerHead)
   }
 
   if (progress) {

@@ -101,6 +101,20 @@ test.describe('server head', () => {
     expect(await getInertiaHeadHTML(page)).toBe(headHTML)
   })
 
+  test('it re-syncs server head elements after a client-side visit changes the head prop', async ({ page }) => {
+    await page.goto('/server-head?withServerHead')
+    await page.waitForSelector('title[data-inertia="server-head-0"]', { state: 'attached' })
+
+    await page.getByRole('button', { name: 'Replace head client-side' }).click()
+
+    await expect(page).toHaveTitle('Replaced Head')
+
+    const description = page.locator('meta[name="description"]')
+
+    await expect(description).toHaveCount(1)
+    await expect(description).toHaveAttribute('content', 'Replaced description')
+  })
+
   test('it lets page head elements override server head elements with the same key', async ({ page }) => {
     test.skip(process.env.PACKAGE === 'svelte', 'Svelte has no Head component; it uses native <svelte:head>')
 

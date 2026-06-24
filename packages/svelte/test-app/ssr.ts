@@ -5,7 +5,7 @@ import { render } from 'svelte/server'
 createServer((page) =>
   createInertiaApp({
     page,
-    serverHead: (page) => page.props.head,
+    serverHead: (page) => page.props.head as string[],
     resolve: (name) => {
       const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.svelte', { eager: true })
       return pages[`./Pages/${name}.svelte`]

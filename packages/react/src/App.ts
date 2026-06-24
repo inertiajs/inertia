@@ -151,10 +151,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       )
     }
 
-    const removeNavigateListener = router.on('navigate', (event) => {
+    const syncServerHead = (event: { detail: { page: Page } }) => {
       headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
-    })
-    const removeClientVisitListener = router.on('clientVisit', () => headManager.forceUpdate())
+    }
+
+    const removeNavigateListener = router.on('navigate', syncServerHead)
+    const removeClientVisitListener = router.on('clientVisit', syncServerHead)
 
     return () => {
       removeNavigateListener()

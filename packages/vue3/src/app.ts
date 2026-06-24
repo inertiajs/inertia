@@ -158,10 +158,12 @@ const App: InertiaApp = defineComponent({
         },
       })
 
-      router.on('navigate', (event) => {
+      const syncServerHead = (event: { detail: { page: Page } }) => {
         headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
-      })
-      router.on('clientVisit', () => headManager.forceUpdate())
+      }
+
+      router.on('navigate', syncServerHead)
+      router.on('clientVisit', syncServerHead)
     }
 
     return () => {

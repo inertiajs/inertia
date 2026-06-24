@@ -7,7 +7,7 @@ createServer((page) =>
   createInertiaApp({
     page,
     render: renderToString,
-    serverHead: (page) => page.props.head,
+    serverHead: (page) => page.props.head as string[],
     resolve: (name) => {
       const pages = import.meta.glob<DefineComponent>('./Pages/SSR/**/*.vue', { eager: true })
       return pages[`./Pages/${name}.vue`]

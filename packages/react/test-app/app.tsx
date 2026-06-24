@@ -84,7 +84,7 @@ createInertiaApp({
     serverHead: true,
   }),
   ...(params.has('withServerHeadCallback') && {
-    serverHead: (page) => page.props.head,
+    serverHead: (page) => page.props.head as string[],
   }),
   ...(params.has('withServerHeadProp') && {
     serverHead: 'metaTags',
