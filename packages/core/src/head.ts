@@ -1,5 +1,34 @@
-import { HeadManager, HeadManagerOnUpdateCallback } from '.'
 import debounce from './debounce'
+import type { HeadManager, HeadManagerOnUpdateCallback, Page, ServerHeadOption } from './types'
+
+const serverHeadProviderId = 'server'
+
+function ensureElementHasInertiaAttribute(element: string, index: number): string {
+  if (element.match(/\sdata-inertia(=|\s|>)/)) {
+    return element
+  }
+
+  // Use positional keys by default; callers can provide `data-inertia` for stable identity.
+  return element.replace(/^<([a-zA-Z][^\s/>]*)/, `<$1 data-inertia="server-head-${index}"`)
+}
+
+export function resolveServerHead(page: Page, serverHead?: ServerHeadOption): string[] {
+  if (!serverHead) {
+    return []
+  }
+
+  const elements =
+    typeof serverHead === 'function' ? serverHead(page) : page.props[serverHead === true ? 'head' : serverHead]
+
+  if (!Array.isArray(elements)) {
+    return []
+  }
+
+  return elements
+    .map((element) => (typeof element === 'string' ? element.trim() : element))
+    .filter((element): element is string => typeof element === 'string' && element.length > 0)
+    .map(ensureElementHasInertiaAttribute)
+}
 
 const Renderer = {
   buildDOMElement(tag: string): ChildNode {
@@ -66,8 +95,11 @@ export default function createHeadManager(
   isServer: boolean,
   titleCallback: (title: string) => string,
   onUpdate: HeadManagerOnUpdateCallback,
+  initialServerHead: Array<string> = [],
 ): HeadManager {
-  const states: Record<string, Array<string>> = {}
+  const states: Record<string, Array<string>> = initialServerHead.length
+    ? { [serverHeadProviderId]: initialServerHead }
+    : {}
   let lastProviderId = 0
 
   function connect(): string {
@@ -99,35 +131,47 @@ export default function createHeadManager(
     commit()
   }
 
+  function updateServerHead(elements: Array<string> = []): void {
+    if (elements.length) {
+      states[serverHeadProviderId] = elements
+    } else {
+      delete states[serverHeadProviderId]
+    }
+
+    commit()
+  }
+
   function collect(): Array<string> {
     const title = titleCallback('')
+    const serverHead = states[serverHeadProviderId] || []
+    const providerHead = Object.keys(states)
+      .filter((id) => id !== serverHeadProviderId)
+      .flatMap((id) => states[id])
 
     const defaults: Record<string, string> = {
       ...(title ? { title: `<title data-inertia="">${title}</title>` } : {}),
     }
 
-    const elements = Object.values(states)
-      .reduce((carry, elements) => carry.concat(elements), [])
-      .reduce((carry, element) => {
-        if (element.indexOf('<') === -1) {
-          return carry
-        }
-
-        if (element.indexOf('<title ') === 0) {
-          const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/s)
-          carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
-          return carry
-        }
-
-        const match = element.match(/ data-inertia="[^"]+"/)
-        if (match) {
-          carry[match[0]] = element
-        } else {
-          carry[Object.keys(carry).length] = element
-        }
-
+    const elements = serverHead.concat(providerHead).reduce((carry, element) => {
+      if (element.indexOf('<') === -1) {
         return carry
-      }, defaults)
+      }
+
+      if (element.indexOf('<title ') === 0) {
+        const title = element.match(/(<title [^>]+>)(.*?)(<\/title>)/s)
+        carry.title = title ? `${title[1]}${titleCallback(title[2])}${title[3]}` : element
+        return carry
+      }
+
+      const match = element.match(/ data-inertia=(["'])[^"']+\1/)
+      if (match) {
+        carry[match[0]] = element
+      } else {
+        carry[Object.keys(carry).length] = element
+      }
+
+      return carry
+    }, defaults)
 
     return Object.values(elements)
   }
@@ -142,6 +186,7 @@ export default function createHeadManager(
 
   return {
     forceUpdate: commit,
+    updateServerHead,
     createProvider: function () {
       const id = connect()
 

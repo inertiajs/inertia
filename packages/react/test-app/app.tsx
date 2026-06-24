@@ -80,6 +80,15 @@ createInertiaApp({
       return DefaultLayout
     },
   }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
   ...(params.get('popover') === 'false' && {
     progress: { popover: false },
   }),

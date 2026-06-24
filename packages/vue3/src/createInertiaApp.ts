@@ -102,6 +102,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    serverHead,
     withApp,
     dev = !!import.meta.env?.DEV,
   }:
@@ -143,6 +144,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
+        serverHead,
       }
 
       let vueApp: VueApp
@@ -185,6 +187,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
+      serverHead,
     }
 
     if (isServer) {

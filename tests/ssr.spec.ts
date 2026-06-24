@@ -110,6 +110,18 @@ test.describe('Head title escaping', () => {
   })
 })
 
+test.describe('server head', () => {
+  test('it renders server-provided head elements in the SSR output', async ({ page }) => {
+    const response = await page.request.get('/ssr/server-head')
+    const html = await response.text()
+
+    expect(html).toContain('<title data-inertia="title">Server Head SSR</title>')
+    expect(html).toContain('<meta data-inertia="description" name="description" content="Rendered on the server">')
+    expect(html).toContain('<link data-inertia="canonical" rel="canonical" href="https://example.com/ssr">')
+    expect(html).toContain('Server head rendered on the server')
+  })
+})
+
 test.describe('layout props', () => {
   test('it does not leak layout props between SSR requests', async ({ page, browserName }) => {
     const responseA = await page.request.get('/ssr/layout-props-a')
