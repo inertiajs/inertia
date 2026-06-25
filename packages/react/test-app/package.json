@@ -13,7 +13,7 @@
     "@types/react-dom": "^19.2.3",
     "nodemon": "^3.1.14",
     "typescript": "^5.9.3",
-    "vite": "^7.3.3"
+    "vite": "^7.3.5"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
