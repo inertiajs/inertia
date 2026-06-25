@@ -8,8 +8,10 @@ import {
   normalizeLayouts,
   Page,
   PageProps,
+  resolveServerHead,
   router,
   SharedPageProps,
+  type ServerHeadOption,
 } from '@inertiajs/core'
 import {
   Component,
@@ -70,6 +72,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
+  serverHead?: ServerHeadOption
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -110,6 +113,10 @@ const App: InertiaApp = defineComponent({
       type: Function as PropType<(name: string, page: Page) => unknown>,
       required: false,
     },
+    serverHead: {
+      type: [Boolean, String, Function] as PropType<ServerHeadOption>,
+      required: false,
+    },
   },
   setup({
     initialPage,
@@ -118,6 +125,7 @@ const App: InertiaApp = defineComponent({
     titleCallback,
     onHeadUpdate,
     defaultLayout,
+    serverHead,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -125,7 +133,12 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
 
-    headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
+    headManager = createHeadManager(
+      isServer,
+      (title: string) => (titleCallback ? titleCallback(title, page.value!) : title),
+      onHeadUpdate || (() => {}),
+      resolveServerHead(initialPage, serverHead),
+    )
 
     if (!isServer) {
       router.init<DefineComponent>({
@@ -145,7 +158,12 @@ const App: InertiaApp = defineComponent({
         },
       })
 
-      router.on('navigate', () => headManager.forceUpdate())
+      const syncServerHead = (event: { detail: { page: Page } }) => {
+        headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+      }
+
+      router.on('navigate', syncServerHead)
+      router.on('clientVisit', syncServerHead)
     }
 
     return () => {

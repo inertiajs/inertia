@@ -11,6 +11,7 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
+import { interceptors } from './interceptors'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -100,7 +101,7 @@ export class Response {
     if (Object.keys(errors).length > 0) {
       const scopedErrors = this.getScopedErrors(errors)
 
-      fireErrorEvent(scopedErrors)
+      fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
 
       return this.requestParams.all().onError(scopedErrors)
     }
@@ -225,6 +226,8 @@ export class Response {
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
+
+    this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)

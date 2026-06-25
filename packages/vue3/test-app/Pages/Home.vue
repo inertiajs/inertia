@@ -58,5 +58,8 @@ window._plugin_global_props = getCurrentInstance()?.appContext.config.globalProp
     <a href="#" @click.prevent="redirectHashPost" class="visits-redirect-hash-post">Manual Hash Redirect POST visit</a>
 
     <Link id="navigate-back" href="/head/mixed">Go to Mixed Head</Link>
+
+    <Link href="/links/as-element" className="link-targets-self" target="_self">Target _self</Link>
+    <Link href="/links/as-element" className="link-targets-blank" target="_blank">Target _blank</Link>
   </div>
 </template>
