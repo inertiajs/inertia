@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.26...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.27...2.x)
 
 - Nothing yet
+
+## [v2.3.27](https://github.com/inertiajs/inertia/compare/v2.3.26...v2.3.27) - 2026-06-25
+
+### What's Changed
+
+* [2.x] Support anchor target attribute by [@devhammed](https://github.com/devhammed) in https://github.com/inertiajs/inertia/pull/3170
+* [2.x] Add async option to FormComponentOptions by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3176
+* [2.x] Prevent unhandled rejection when a view transition is superseded by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3177
+* [2.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3178
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.26...v2.3.27
 
 ## [v2.3.26](https://github.com/inertiajs/inertia/compare/v2.3.25...v2.3.26) - 2026-06-10
 
