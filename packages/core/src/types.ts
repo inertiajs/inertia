@@ -649,7 +649,15 @@ export type UseFormSubmitArguments =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition' | 'async'
+  | 'preserveScroll'
+  | 'preserveState'
+  | 'preserveUrl'
+  | 'replace'
+  | 'only'
+  | 'except'
+  | 'reset'
+  | 'viewTransition'
+  | 'async'
 >
 
 export type FormComponentProps = Partial<
