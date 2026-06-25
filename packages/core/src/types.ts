@@ -550,7 +550,7 @@ export type InternalActiveVisit = ActiveVisit & {
   cached?: boolean
 }
 
-export type VisitId = unknown
+export type VisitId = string
 export type Component = unknown
 
 type FirstLevelOptional<T> = {
@@ -580,6 +580,7 @@ interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupR
   layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  serverHead?: ServerHeadOption
   nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
@@ -617,7 +618,10 @@ export interface CreateInertiaAppOptionsForSSR<
 export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
-export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerTitleCallback = (title: string, page: Page) => string
+export type ServerHead = string[]
+export type ServerHeadResolver = (page: Page) => ServerHead | null | undefined
+export type ServerHeadOption = boolean | string | ServerHeadResolver
 
 export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
@@ -626,6 +630,7 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   layout?: (name: string, page: Page) => unknown
   setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  serverHead?: ServerHeadOption
   progress?: ProgressOptions | false
   nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
@@ -637,6 +642,7 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
+  updateServerHead: (elements?: string[]) => void
   createProvider: () => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
@@ -772,7 +778,15 @@ export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
+  | 'preserveScroll'
+  | 'preserveState'
+  | 'preserveUrl'
+  | 'replace'
+  | 'only'
+  | 'except'
+  | 'reset'
+  | 'viewTransition'
+  | 'async'
 >
 
 export type FormComponentOptimisticCallback<

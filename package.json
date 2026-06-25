@@ -36,7 +36,7 @@
     "format": "oxfmt"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "1.58.2",
     "oxfmt": "^0.51.0",
     "oxlint": "^1.66.0"
   },

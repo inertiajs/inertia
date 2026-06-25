@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const { showServerStatus } = require('./server-status')
 const { getUserNames, paginateUsers } = require('./eloquent')
+const { randomUUID } = require('crypto')
 
 const app = express()
 
@@ -104,11 +105,31 @@ app.get('/ssr/layout-props-callback', (req, res) =>
   }),
 )
 
+app.get('/ssr/head-title', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/HeadTitle',
+    props: { titleSuffix: 'From Props' },
+  }),
+)
+
 app.get('/ssr/head-with-xss-title', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/HeadWithXssTitle',
     props: {
       title: "Safe Title\n</title><script>alert('xss')</script>",
+    },
+  }),
+)
+
+app.get('/ssr/server-head', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/ServerHead',
+    props: {
+      head: [
+        '<title data-inertia="title">Server Head SSR</title>',
+        '<meta data-inertia="description" name="description" content="Rendered on the server">',
+        '<link data-inertia="canonical" rel="canonical" href="https://example.com/ssr">',
+      ],
     },
   }),
 )
@@ -3727,6 +3748,83 @@ app.get('/nested-props/deferred-with-siblings', (req, res) => {
 })
 
 app.get('/head/plain-title', (req, res) => inertia.renderWithPlainTitle(req, res, { component: 'Head/Dataset' }))
+
+app.get('/server-head', (req, res) => {
+  const foo = `foo ${randomUUID()}`
+
+  if (req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'ServerHead',
+      props: {
+        foo,
+      },
+    })
+  }
+
+  const head =
+    req.query.override !== undefined
+      ? [
+          '<title>Server Head Initial</title>',
+          '<meta data-inertia="description" name="description" content="Server default">',
+        ]
+      : ['<title>Server Head Initial</title>', '<meta name="description" content="Initial server head description">']
+
+  return inertia.render(req, res, {
+    component: 'ServerHead',
+    props: {
+      foo,
+      next: '/server-head/keyed',
+      head,
+    },
+  })
+})
+
+app.get('/server-head/keyed', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ServerHead',
+    props: {
+      next: '/server-head/keyed/next',
+      head: [
+        '<title data-inertia="title">Keyed Head A</title>',
+        '<meta data-inertia="description" name="description" content="Keyed description A">',
+        '<link data-inertia="canonical" rel="canonical" href="https://example.com/a">',
+      ],
+    },
+  }),
+)
+
+app.get('/server-head/keyed/next', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ServerHead',
+    props: {
+      next: '/server-head/keyed',
+      head: [
+        '<title data-inertia="title">Keyed Head B</title>',
+        '<meta data-inertia="robots" name="robots" content="noindex">',
+        '<meta data-inertia="description" name="description" content="Keyed description B">',
+        '<link data-inertia="canonical" rel="canonical" href="https://example.com/b">',
+      ],
+    },
+  }),
+)
+
+app.get('/server-head/custom-prop', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ServerHead',
+    props: {
+      next: '/server-head',
+      metaTags: ['<title>Custom Prop Head</title>', '<meta name="description" content="Custom prop description">'],
+    },
+  }),
+)
+
+app.get('/head/title-callback', (req, res) =>
+  inertia.render(req, res, { component: 'Head/TitleCallback', props: { titleSuffix: 'Account' } }),
+)
+
+app.get('/head/reactive', (req, res) =>
+  inertia.render(req, res, { component: 'Head/Reactive', props: { titleSuffix: 'Dashboard' } }),
+)
 
 app.all('*page', (req, res) => inertia.render(req, res))
 
