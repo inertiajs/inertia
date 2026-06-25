@@ -57,6 +57,8 @@
   let httpExceptionStatus: number | null = $state(null)
   let httpExceptionBody = $state('')
   let networkErrorMessage = $state('')
+  let validationOnErrorMessage = $state('')
+  let validationExceptionMessage = $state('')
 
   const performSearch = async () => {
     try {
@@ -77,10 +79,17 @@
   }
 
   const performValidation = async () => {
+    validationOnErrorMessage = ''
+    validationExceptionMessage = ''
+
     try {
-      await validateUser.post('/api/validate')
-    } catch {
-      // Errors are stored in validateUser.errors
+      await validateUser.post('/api/validate', {
+        onError: () => {
+          validationOnErrorMessage = 'onError called'
+        },
+      })
+    } catch (error: unknown) {
+      validationExceptionMessage = error instanceof Error ? error.message : 'Unknown validation exception'
     }
   }
 
@@ -234,6 +243,12 @@
     <button onclick={performValidation} id="validate-button">Validate</button>
     {#if validateUser.hasErrors}
       <div id="validate-has-errors">Form has errors</div>
+    {/if}
+    {#if validationOnErrorMessage}
+      <div id="validate-on-error">{validationOnErrorMessage}</div>
+    {/if}
+    {#if validationExceptionMessage}
+      <div id="validate-exception">{validationExceptionMessage}</div>
     {/if}
     <button onclick={() => validateUser.clearErrors()} id="clear-errors-button">Clear Errors</button>
     <button onclick={() => validateUser.clearErrors('name')} id="clear-name-error-button">Clear Name Error</button>

@@ -50,6 +50,8 @@ test.describe('useHttp', () => {
     await expect(page.locator('#validate-email-error')).toBeVisible()
     await expect(page.locator('#validate-email-error')).toContainText('The email field must be a valid email address.')
     await expect(page.locator('#validate-has-errors')).toBeVisible()
+    await expect(page.locator('#validate-on-error')).toContainText('onError called')
+    await expect(page.locator('#validate-exception')).not.toBeVisible()
   })
 
   test('it clears validation errors', async ({ page }) => {
