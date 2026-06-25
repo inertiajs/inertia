@@ -14,3 +14,9 @@ onlyBuiltDependencies:
 overrides:
   cookie: '>=0.7.0'
   esbuild: '>=0.25.0 <0.26.0'
+
+auditConfig:
+  ignoreGhsas:
+    # vite server.fs.deny bypass (dev-only, Windows-only). Affects vite 5.x, which is
+    # pinned to the Svelte 4 toolchain (vite-plugin-svelte@3) we keep on the 2.x line.
+    - GHSA-fx2h-pf6j-xcff
