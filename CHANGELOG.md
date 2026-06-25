@@ -7,9 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.4.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.5.0...3.x)
 
 - Nothing yet
+
+## [v3.5.0](https://github.com/inertiajs/inertia/compare/v3.4.0...v3.5.0) - 2026-06-25
+
+### What's Changed
+
+* [3.x] Fix invalid ARIA roles on default progress bar by [@atymic](https://github.com/atymic) in https://github.com/inertiajs/inertia/pull/3163
+* [3.x] Support anchor target attribute by [@devhammed](https://github.com/devhammed) in https://github.com/inertiajs/inertia/pull/3159
+* [3.x] Prevent unhandled rejection when a view transition is superseded by [@mortenhauberg](https://github.com/mortenhauberg) in https://github.com/inertiajs/inertia/pull/3165
+* [3.x] feat: Add page to titleCallback by [@mrleblanc101](https://github.com/mrleblanc101) in https://github.com/inertiajs/inertia/pull/3160
+* [3.x] Fix Svelte build failure from optional TypeScript parameters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3173
+* Revert "[3.x] Fix Svelte build failure from optional TypeScript parameters" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3174
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3169
+* [3.x] Add server provided head elements by [@benbjurstrom](https://github.com/benbjurstrom) in https://github.com/inertiajs/inertia/pull/3161
+* [3.x] fix(core): add async option to FormComponentOptions by [@sawirricardo](https://github.com/sawirricardo) in https://github.com/inertiajs/inertia/pull/3157
+* [3.x] fix(core): ensure robust SSR error classification by [@hamdyelbatal122](https://github.com/hamdyelbatal122) in https://github.com/inertiajs/inertia/pull/3151
+* [3.x] Do not throw handled useHttp validation errors by [@cyphercodes](https://github.com/cyphercodes) in https://github.com/inertiajs/inertia/pull/3142
+
+### New Contributors
+
+* [@atymic](https://github.com/atymic) made their first contribution in https://github.com/inertiajs/inertia/pull/3163
+* [@mrleblanc101](https://github.com/mrleblanc101) made their first contribution in https://github.com/inertiajs/inertia/pull/3160
+* [@benbjurstrom](https://github.com/benbjurstrom) made their first contribution in https://github.com/inertiajs/inertia/pull/3161
+* [@sawirricardo](https://github.com/sawirricardo) made their first contribution in https://github.com/inertiajs/inertia/pull/3157
+* [@hamdyelbatal122](https://github.com/hamdyelbatal122) made their first contribution in https://github.com/inertiajs/inertia/pull/3151
+* [@cyphercodes](https://github.com/cyphercodes) made their first contribution in https://github.com/inertiajs/inertia/pull/3142
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.4.0...v3.5.0
 
 ## [v3.4.0](https://github.com/inertiajs/inertia/compare/v3.3.1...v3.4.0) - 2026-06-11
 
