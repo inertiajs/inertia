@@ -234,6 +234,10 @@ class CurrentPage {
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
 
+      // A newer transition aborts this one, rejecting `ready` with an AbortError.
+      // That's expected, so swallow it to avoid an unhandled rejection.
+      transitionResult.ready.catch(() => {})
+
       viewTransitionCallback(transitionResult)
     })
   }
