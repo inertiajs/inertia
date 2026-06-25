@@ -43,4 +43,7 @@
   <a href={'#'} on:click|preventDefault={redirectExternal} class="visits-redirect-external"
     >Manual External Redirect visit</a
   >
+
+  <a href="/links/as-element" use:inertia class="link-targets-self" target="_self">Target _self</a>
+  <a href="/links/as-element" use:inertia class="link-targets-blank" target="_blank">Target _blank</a>
 </div>
