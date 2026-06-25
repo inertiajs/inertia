@@ -1,8 +1,10 @@
+/// <reference path="./env.d.ts" />
 import {
   buildSSRBody,
   CreateInertiaAppOptions,
   CreateInertiaAppOptionsForCSR,
   CreateInertiaAppOptionsForSSR,
+  exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
   InertiaAppSSRResponse,
@@ -100,7 +102,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    serverHead,
     withApp,
+    dev = !!import.meta.env?.DEV,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsForSSR<SharedProps>
@@ -114,6 +118,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (dev) {
+    exposeInterceptors()
   }
 
   const isServer = typeof window === 'undefined'
@@ -136,6 +144,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
+        serverHead,
       }
 
       let vueApp: VueApp
@@ -178,6 +187,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
+      serverHead,
     }
 
     if (isServer) {

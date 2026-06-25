@@ -7,6 +7,7 @@ createServer((page) =>
   createInertiaApp({
     page,
     render: renderToString,
+    serverHead: (page) => page.props.head as string[],
     resolve: (name) => {
       const pages = import.meta.glob<DefineComponent>('./Pages/SSR/**/*.vue', { eager: true })
       return pages[`./Pages/${name}.vue`]
@@ -16,5 +17,8 @@ createServer((page) =>
         render: () => h(App, props),
       }).use(plugin)
     },
+    ...(page.url.includes('withTitleCallback') && {
+      title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
+    }),
   }),
 )

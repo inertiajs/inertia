@@ -338,6 +338,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | Record<string, unknown>
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
+  cached: boolean
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -382,23 +383,37 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: string }?]
     details: {
       page: Page<SharedPageProps>
+      cached?: boolean
+      visitId?: string
+    }
+    result: void
+  }
+  clientVisit: {
+    parameters: [Page<SharedPageProps>, { replace: boolean; visitId: string }]
+    details: {
+      page: Page<SharedPageProps>
+      replace: boolean
+      visitId: string
     }
     result: void
   }
   success: {
-    parameters: [Page<SharedPageProps>]
+    parameters: [Page<SharedPageProps>, { visitId?: string }?]
     details: {
       page: Page<SharedPageProps>
+      visitId?: string
     }
     result: void
   }
   error: {
-    parameters: [Errors]
+    parameters: [Errors, { page?: Page<SharedPageProps>; visitId?: string }?]
     details: {
       errors: Errors
+      page?: Page<SharedPageProps>
+      visitId?: string
     }
     result: void
   }
@@ -515,6 +530,8 @@ export type RouterInitParams<ComponentType = Component> = {
 }
 
 export type PendingVisitOptions = {
+  /** @internal */
+  id: string
   url: URL
   completed: boolean
   cancelled: boolean
@@ -530,9 +547,10 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
+  cached?: boolean
 }
 
-export type VisitId = unknown
+export type VisitId = string
 export type Component = unknown
 
 type FirstLevelOptional<T> = {
@@ -562,10 +580,13 @@ interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupR
   layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  serverHead?: ServerHeadOption
   nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
+  /** Enable development-only integrations. Defaults to `import.meta.env.DEV`. */
+  dev?: boolean
 }
 
 export interface CreateInertiaAppOptionsForCSR<
@@ -597,7 +618,10 @@ export interface CreateInertiaAppOptionsForSSR<
 export type InertiaAppSSRResponse = { head: string[]; body: string }
 export type InertiaAppResponse = Promise<InertiaAppSSRResponse | void>
 
-export type HeadManagerTitleCallback = (title: string) => string
+export type HeadManagerTitleCallback = (title: string, page: Page) => string
+export type ServerHead = string[]
+export type ServerHeadResolver = (page: Page) => ServerHead | null | undefined
+export type ServerHeadOption = boolean | string | ServerHeadResolver
 
 export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
@@ -606,15 +630,19 @@ export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSet
   layout?: (name: string, page: Page) => unknown
   setup?: (options: TSetupOptions) => TSetupReturn
   title?: HeadManagerTitleCallback
+  serverHead?: ServerHeadOption
   progress?: ProgressOptions | false
   nonce?: string
   defaults?: FirstLevelOptional<InertiaAppConfig & TAdditionalInertiaAppConfig>
   /** HTTP client or options to use for requests. Defaults to XhrHttpClient. */
   http?: HttpClient | HttpClientOptions
+  /** Enable development-only integrations. Defaults to `import.meta.env.DEV`. */
+  dev?: boolean
 }
 export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
+  updateServerHead: (elements?: string[]) => void
   createProvider: () => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
@@ -750,7 +778,15 @@ export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition'
+  | 'preserveScroll'
+  | 'preserveState'
+  | 'preserveUrl'
+  | 'replace'
+  | 'only'
+  | 'except'
+  | 'reset'
+  | 'viewTransition'
+  | 'async'
 >
 
 export type FormComponentOptimisticCallback<
@@ -942,6 +978,7 @@ declare global {
     'inertia:finish': GlobalEvent<'finish'>
     'inertia:beforeUpdate': GlobalEvent<'beforeUpdate'>
     'inertia:navigate': GlobalEvent<'navigate'>
+    'inertia:clientVisit': GlobalEvent<'clientVisit'>
     'inertia:flash': GlobalEvent<'flash'>
   }
 }

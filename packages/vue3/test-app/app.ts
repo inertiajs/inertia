@@ -73,10 +73,22 @@ createInertiaApp({
       return DefaultLayout
     },
   }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
   ...(params.get('popover') === 'false' && {
     progress: { popover: false },
   }),
   ...(params.has('nonce') && {
     nonce: params.get('nonce') === 'default' ? 'test-default-nonce' : 'test-nonce',
+  }),
+  ...(params.has('withTitleCallback') && {
+    title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
   }),
 })

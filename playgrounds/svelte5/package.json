@@ -16,10 +16,10 @@
     "@tailwindcss/vite": "^4.2.2",
     "@tsconfig/svelte": "^5.0.8",
     "laravel-vite-plugin": "^3.0.0",
-    "svelte": "^5.55.7",
+    "svelte": "^5.56.4",
     "svelte-check": "^4.4.3",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "vite": "^8.0.5"
+    "vite": "^8.0.16"
   }
 }

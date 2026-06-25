@@ -11,6 +11,7 @@ import {
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
+import { interceptors } from './interceptors'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -100,7 +101,7 @@ export class Response {
     if (Object.keys(errors).length > 0) {
       const scopedErrors = this.getScopedErrors(errors)
 
-      fireErrorEvent(scopedErrors)
+      fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
 
       return this.requestParams.all().onError(scopedErrors)
     }
@@ -113,7 +114,7 @@ export class Response {
       router.flush(currentPage.get().url)
     }
 
-    fireSuccessEvent(currentPage.get())
+    fireSuccessEvent(currentPage.get(), { visitId: this.requestParams.all().id })
 
     await this.requestParams.all().onSuccess(currentPage.get())
 
@@ -226,6 +227,8 @@ export class Response {
       return Promise.resolve()
     }
 
+    this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
+
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)
     this.preserveOptimisticProps(pageResponse)
@@ -245,6 +248,8 @@ export class Response {
       preserveScroll: this.requestParams.all().preserveScroll as boolean,
       preserveState: this.requestParams.all().preserveState as boolean,
       viewTransition: this.requestParams.all().viewTransition,
+      cached: this.requestParams.all().cached,
+      visitId: this.requestParams.all().id,
     })
   }
 

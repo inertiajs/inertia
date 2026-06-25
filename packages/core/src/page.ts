@@ -51,11 +51,15 @@ class CurrentPage {
       preserveScroll = false,
       preserveState = false,
       viewTransition = false,
+      cached = false,
+      visitId,
     }: {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
       viewTransition?: Visit['viewTransition']
+      cached?: boolean
+      visitId?: string
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -155,7 +159,7 @@ class CurrentPage {
           this.pendingDeferredProps = null
 
           if (!replace) {
-            fireNavigateEvent(page)
+            fireNavigateEvent(page, { cached, visitId })
           }
         })
       })
@@ -246,6 +250,10 @@ class CurrentPage {
 
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
+
+      // A newer transition aborts this one, rejecting `ready` with an AbortError.
+      // That's expected, so swallow it to avoid an unhandled rejection.
+      transitionResult.ready.catch(() => {})
 
       viewTransitionCallback(transitionResult)
     })
