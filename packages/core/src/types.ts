@@ -550,7 +550,7 @@ export type InternalActiveVisit = ActiveVisit & {
   cached?: boolean
 }
 
-export type VisitId = unknown
+export type VisitId = string
 export type Component = unknown
 
 type FirstLevelOptional<T> = {
@@ -778,7 +778,15 @@ export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition' | 'async'
+  | 'preserveScroll'
+  | 'preserveState'
+  | 'preserveUrl'
+  | 'replace'
+  | 'only'
+  | 'except'
+  | 'reset'
+  | 'viewTransition'
+  | 'async'
 >
 
 export type FormComponentOptimisticCallback<
