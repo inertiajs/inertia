@@ -778,7 +778,15 @@ export type UseHttpSubmitArguments<TResponse = unknown, TForm = unknown> =
 
 export type FormComponentOptions = Pick<
   VisitOptions,
-  'preserveScroll' | 'preserveState' | 'preserveUrl' | 'replace' | 'only' | 'except' | 'reset' | 'viewTransition' | 'async'
+  | 'preserveScroll'
+  | 'preserveState'
+  | 'preserveUrl'
+  | 'replace'
+  | 'only'
+  | 'except'
+  | 'reset'
+  | 'viewTransition'
+  | 'async'
 >
 
 export type FormComponentOptimisticCallback<
