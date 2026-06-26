@@ -202,13 +202,18 @@ export class Response {
    */
   protected locationVisit(url: URL): boolean | void {
     try {
-      SessionStorage.set(SessionStorage.locationVisitKey, {
-        preserveScroll: this.requestParams.all().preserveScroll === true,
-      })
-
       if (typeof window === 'undefined') {
         return
       }
+
+      // Skip background (async) requests so we don't force a full-page navigation the user never initiated
+      if (this.requestParams.all().async) {
+        return
+      }
+
+      SessionStorage.set(SessionStorage.locationVisitKey, {
+        preserveScroll: this.requestParams.all().preserveScroll === true,
+      })
 
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()

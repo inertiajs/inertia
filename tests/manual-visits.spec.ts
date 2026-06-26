@@ -29,6 +29,19 @@ test('can make a location visit', async ({ page }) => {
   await expect(dump.headers).not.toHaveProperty('x-inertia')
 })
 
+test('does not force a hard refresh when a location visit is triggered by a background request', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/visits/async-location-visit')
+
+  await page.fill('#draft', 'unsaved work')
+
+  const response = page.waitForResponse('**/visits/async-location-visit?**')
+  await page.getByRole('button', { name: 'Background reload' }).click()
+  await response
+
+  await expect(page.locator('#draft')).toHaveValue('unsaved work')
+})
+
 test.describe('Auto-cancellation', () => {
   test('will automatically cancel a pending visits when a new request is made', async ({ page }) => {
     pageLoads.watch(page)
