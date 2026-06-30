@@ -164,6 +164,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
 
     configureServer(server) {
       devServer = server
+      server.httpServer?.on('connection', (socket) => socket.setNoDelay(true))
 
       if (!entry) {
         return
