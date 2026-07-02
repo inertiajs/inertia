@@ -103,6 +103,14 @@ export class XhrHttpClient implements HttpClient {
         xhr.setRequestHeader(this.xsrfHeaderName, xsrfToken)
       }
 
+      const hasRequestedWithHeader = Object.keys(config.headers ?? {}).some(
+        (key) => key.toLowerCase() === 'x-requested-with',
+      )
+
+      if (!hasRequestedWithHeader) {
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest')
+      }
+
       let body: Document | XMLHttpRequestBodyInit | null = null
 
       if (config.data !== null && config.data !== undefined) {
