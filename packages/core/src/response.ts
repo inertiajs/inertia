@@ -7,6 +7,7 @@ import {
   fireErrorEvent,
   fireFlashEvent,
   fireHttpExceptionEvent,
+  fireLocationEvent,
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
@@ -206,8 +207,17 @@ export class Response {
         return
       }
 
-      // Skip background (async) requests so we don't force a full-page navigation the user never initiated
-      if (this.requestParams.all().async) {
+      const responseVersion = this.getHeader('x-inertia-version')
+      const versionChange = !!responseVersion && responseVersion !== currentPage.get().version
+
+      if (!fireLocationEvent(url, versionChange)) {
+        return
+      }
+
+      // A version change on a background request only needs to pick up new assets, so we don't
+      // force a full-page navigation the user never initiated. The next user-initiated visit
+      // hits the same location response and reloads then.
+      if (versionChange && this.requestParams.all().async) {
         return
       }
 

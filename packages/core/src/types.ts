@@ -454,6 +454,14 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: void
   }
+  location: {
+    parameters: [URL, boolean]
+    details: {
+      url: URL
+      versionChange: boolean
+    }
+    result: boolean | void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -980,5 +988,6 @@ declare global {
     'inertia:navigate': GlobalEvent<'navigate'>
     'inertia:clientVisit': GlobalEvent<'clientVisit'>
     'inertia:flash': GlobalEvent<'flash'>
+    'inertia:location': GlobalEvent<'location'>
   }
 }

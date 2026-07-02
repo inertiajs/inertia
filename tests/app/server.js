@@ -1925,7 +1925,11 @@ app.post('/redirect-hash', (req, res) => {
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
 app.get('/visits/async-location-visit', (req, res) => {
   if (req.headers['x-simulate-version-change']) {
-    return inertia.location(res, req.originalUrl)
+    return inertia.location(res, req.originalUrl, 'updated-version')
+  }
+
+  if (req.headers['x-simulate-manual-location']) {
+    return inertia.location(res, '/dump/get')
   }
 
   inertia.render(req, res, { component: 'Visits/AsyncLocationVisit' })
