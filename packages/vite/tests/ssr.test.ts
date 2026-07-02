@@ -118,6 +118,29 @@ describe('SSR', () => {
       expect(logger.info).toHaveBeenCalledWith('Inertia SSR dev endpoint: /__inertia_ssr')
     })
 
+    it('disables Nagle on accepted HTTP server sockets', () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+      const httpServer = { on: vi.fn(), once: vi.fn() }
+
+      ;(server as any).httpServer = httpServer
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      expect(httpServer.on).toHaveBeenCalledWith('connection', expect.any(Function))
+
+      const connectionHandler = httpServer.on.mock.calls[0][1]
+      const socket = { setNoDelay: vi.fn() }
+
+      connectionHandler(socket)
+
+      expect(socket.setNoDelay).toHaveBeenCalledWith(true)
+    })
+
     it('does not add middleware when no entry exists', () => {
       mockExistsSync.mockReturnValue(false)
 
