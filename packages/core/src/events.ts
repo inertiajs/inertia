@@ -62,3 +62,7 @@ export const firePrefetchingEvent: GlobalEventTrigger<'prefetching'> = (visit) =
 export const fireFlashEvent: GlobalEventTrigger<'flash'> = (flash) => {
   return fireEvent('flash', { detail: { flash } })
 }
+
+export const fireLocationEvent: GlobalEventTrigger<'location'> = (url, versionChange) => {
+  return fireEvent('location', { cancelable: true, detail: { url, versionChange } })
+}

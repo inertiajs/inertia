@@ -198,6 +198,14 @@ module.exports = {
 
     return res.status(200).send(applyDefaultNonce(req, html))
   },
-  location: (res, href) => res.status(409).header('X-Inertia-Location', href).send(''),
+  location: (res, href, version) => {
+    res.status(409).header('X-Inertia-Location', href)
+
+    if (version) {
+      res.header('X-Inertia-Version', version)
+    }
+
+    return res.send('')
+  },
   redirect: (res, href) => res.status(409).header('X-Inertia-Redirect', href).send(''),
 }

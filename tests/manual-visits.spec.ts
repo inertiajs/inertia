@@ -29,6 +29,45 @@ test('can make a location visit', async ({ page }) => {
   await expect(dump.headers).not.toHaveProperty('x-inertia')
 })
 
+test('does not force a hard refresh when an asset version change lands on a background request', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/visits/async-location-visit')
+
+  await page.fill('#draft', 'unsaved work')
+
+  const response = page.waitForResponse('**/visits/async-location-visit**')
+  await page.getByRole('button', { name: 'Background reload' }).click()
+  await response
+
+  await expect(page.locator('#version-change')).toHaveText('true')
+  await expect(page.locator('#draft')).toHaveValue('unsaved work')
+})
+
+test('lets you handle a background asset version change yourself', async ({ page }) => {
+  pageLoads.watch(page)
+  await page.goto('/visits/async-location-visit')
+
+  await page.fill('#draft', 'unsaved work')
+  await page.getByRole('button', { name: 'Banner mode' }).click()
+
+  const response = page.waitForResponse('**/visits/async-location-visit**')
+  await page.getByRole('button', { name: 'Background reload' }).click()
+  await response
+
+  await expect(page.locator('#banner')).toHaveText('A new version is available')
+  await expect(page.locator('#draft')).toHaveValue('unsaved work')
+})
+
+test('still honors a manual location visit made from a background request', async ({ page }) => {
+  await page.goto('/visits/async-location-visit')
+
+  await page.getByRole('button', { name: 'Background manual location' }).click()
+
+  const dump = await shouldBeDumpPage(page, 'get')
+
+  await expect(dump.headers).not.toHaveProperty('x-inertia')
+})
+
 test.describe('Auto-cancellation', () => {
   test('will automatically cancel a pending visits when a new request is made', async ({ page }) => {
     pageLoads.watch(page)

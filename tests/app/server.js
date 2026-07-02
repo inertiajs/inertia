@@ -1923,6 +1923,17 @@ app.post('/redirect-hash', (req, res) => {
 })
 
 app.get('/location', ({ res }) => inertia.location(res, '/dump/get'))
+app.get('/visits/async-location-visit', (req, res) => {
+  if (req.headers['x-simulate-version-change']) {
+    return inertia.location(res, req.originalUrl, 'updated-version')
+  }
+
+  if (req.headers['x-simulate-manual-location']) {
+    return inertia.location(res, '/dump/get')
+  }
+
+  inertia.render(req, res, { component: 'Visits/AsyncLocationVisit' })
+})
 app.post('/redirect-external', (req, res) => inertia.location(res, '/non-inertia'))
 app.post('/disconnect', (req, res) => res.socket.destroy())
 app.post('/json', (req, res) => res.status(200).json({ foo: 'bar' }))

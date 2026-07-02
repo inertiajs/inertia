@@ -7,6 +7,7 @@ import {
   fireErrorEvent,
   fireFlashEvent,
   fireHttpExceptionEvent,
+  fireLocationEvent,
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
@@ -202,13 +203,27 @@ export class Response {
    */
   protected locationVisit(url: URL): boolean | void {
     try {
-      SessionStorage.set(SessionStorage.locationVisitKey, {
-        preserveScroll: this.requestParams.all().preserveScroll === true,
-      })
-
       if (typeof window === 'undefined') {
         return
       }
+
+      const responseVersion = this.getHeader('x-inertia-version')
+      const versionChange = !!responseVersion && responseVersion !== currentPage.get().version
+
+      if (!fireLocationEvent(url, versionChange)) {
+        return
+      }
+
+      // A version change on a background request only needs to pick up new assets, so we don't
+      // force a full-page navigation the user never initiated. The next user-initiated visit
+      // hits the same location response and reloads then.
+      if (versionChange && this.requestParams.all().async) {
+        return
+      }
+
+      SessionStorage.set(SessionStorage.locationVisitKey, {
+        preserveScroll: this.requestParams.all().preserveScroll === true,
+      })
 
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()
