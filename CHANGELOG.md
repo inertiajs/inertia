@@ -7,9 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.5.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.6.0...3.x)
 
 - Nothing yet
+
+## [v3.6.0](https://github.com/inertiajs/inertia/compare/v3.5.0...v3.6.0) - 2026-07-02
+
+### What's Changed
+
+* Bump the github-actions group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3167
+* [3.x]  Improve HTTPS Vite SSR performance on Linux with small response sizes by [@nckrtl](https://github.com/nckrtl) in https://github.com/inertiajs/inertia/pull/3183
+* [3.x] Defer forced reloads to a cancelable `location` event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3180
+* [3.x] Add poll marker to visit for polling requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3184
+* [3.x] Send `X-Requested-With` header from the built-in HTTP client by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3186
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.5.0...v3.6.0
 
 ## [v3.5.0](https://github.com/inertiajs/inertia/compare/v3.4.0...v3.5.0) - 2026-06-25
 
