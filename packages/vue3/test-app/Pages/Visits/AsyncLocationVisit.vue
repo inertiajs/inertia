@@ -1,26 +1,22 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 
 const draft = ref('')
 const banner = ref('')
 const bannerMode = ref(false)
 const lastVersionChange = ref('')
 
-let stopListening: VoidFunction
-
-onMounted(() => {
-  stopListening = router.on('location', (event) => {
+onUnmounted(
+  router.on('location', (event) => {
     lastVersionChange.value = String(event.detail.versionChange)
 
     if (bannerMode.value && event.detail.versionChange) {
       event.preventDefault()
       banner.value = 'A new version is available'
     }
-  })
-})
-
-onUnmounted(() => stopListening?.())
+  }),
+)
 
 const backgroundReload = () => {
   router.reload({ headers: { 'X-Simulate-Version-Change': '1' } })
