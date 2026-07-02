@@ -555,6 +555,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
+  poll?: boolean
   cached?: boolean
 }
 

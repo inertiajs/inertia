@@ -344,3 +344,12 @@ test('it preserves validation errors when poll reloads data', async ({ page }) =
   await expect(page.locator('#form-error')).toBeVisible()
   await expect(page.locator('#form-error')).toHaveText('The name field is required.')
 })
+
+test('poll requests carry the poll marker while regular reloads do not', async ({ page }) => {
+  await page.goto('/poll/flag')
+
+  await expect(page.locator('#poll-flag')).toHaveText('poll: true')
+
+  await page.getByRole('button', { name: 'Reload' }).click()
+  await expect(page.locator('#reload-flag')).toHaveText('reload: false')
+})
