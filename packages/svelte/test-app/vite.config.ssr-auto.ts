@@ -18,6 +18,12 @@ export default defineConfig({
         port: 13720,
       },
     }),
-    svelte(),
+    svelte({
+      compilerOptions: {
+        experimental: {
+          async: true,
+        },
+      },
+    }),
   ],
 })

@@ -162,6 +162,12 @@ app.get('/ssr-auto/with-app', (req, res) =>
   }),
 )
 
+app.get('/ssr-auto/async', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Async',
+  }),
+)
+
 app.get('/ssr/infinite-scroll', (req, res) => {
   const { paginated, scrollProp } = paginateUsers(1, 15, 40)
 

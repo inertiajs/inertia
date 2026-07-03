@@ -137,7 +137,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           withApp(context, { ssr: true, page })
         }
 
-        svelteApp = render(App, { props, context })
+        svelteApp = await render(App, { props, context })
       }
 
       const body = buildSSRBody(id, page, svelteApp.body)

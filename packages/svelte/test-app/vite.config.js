@@ -22,5 +22,14 @@ export default defineConfig({
       '@': __dirname,
     },
   },
-  plugins: [inertia(), svelte()],
+  plugins: [
+    inertia(),
+    svelte({
+      compilerOptions: {
+        experimental: {
+          async: true,
+        },
+      },
+    }),
+  ],
 })
