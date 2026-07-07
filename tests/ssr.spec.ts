@@ -279,5 +279,29 @@ test.describe('SSR Auto Transform', () => {
       expect(html).toMatch(/Locale:.*en-CA/)
       expect(html).toMatch(/Component:.*SSR\/WithApp/)
     })
+
+    test('it renders components with top-level await during SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
+      const response = await page.request.get('/ssr-auto/async')
+      const html = await response.text()
+
+      // Verify that the top-level await resolved correctly on the server
+      expect(html).toContain('Async SSR Page')
+      expect(html).toContain('Result: Hello from async SSR!')
+    })
+
+    test('it hydrates async components without mismatch after SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
+      consoleMessages.listen(page)
+
+      await page.goto('/ssr-auto/async')
+
+      await expect(page.getByTestId('async-ssr-title')).toHaveText('Async SSR Page')
+      await expect(page.getByTestId('async-result')).toHaveText('Result: Hello from async SSR!')
+
+      expect(consoleMessages.errors).toHaveLength(0)
+    })
   })
 })

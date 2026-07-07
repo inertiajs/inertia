@@ -53,6 +53,10 @@
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
+        // Explicitly sync the global page store before swapping components,
+        // ensuring the page store is up-to-date when the new component's
+        // script block runs (necessary for async: true).
+        setPage(args.page)
         component = args.component
         page = args.page
         key = args.preserveState ? key : Date.now()

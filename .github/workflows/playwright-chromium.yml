@@ -7,13 +7,22 @@ permissions:
 jobs:
   test-chromium:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }})
+    name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
         http: ['default', 'axios']
+        svelte-async: ['false', 'true']
+        exclude:
+          - adapter: 'vue'
+            svelte-async: 'true'
+          - adapter: 'react'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            http: 'axios'
+            svelte-async: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -60,23 +69,36 @@ jobs:
         run: pnpm test:${{ matrix.adapter }}
         env:
           VITE_HTTP_CLIENT: ${{ matrix.http }}
+          SVELTE_ASYNC: ${{ matrix.svelte-async }}
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-${{ matrix.http }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-${{ matrix.http }}${{ matrix.svelte-async == 'true' && '-async' || '' }}
           path: test-results
 
   test-chromium-ssr:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }})
+    name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
         node-version: ['22.x', '24.x', 'latest']
+        svelte-async: ['false', 'true']
+        exclude:
+          - adapter: 'vue'
+            svelte-async: 'true'
+          - adapter: 'react'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            node-version: '22.x'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            node-version: 'latest'
+            svelte-async: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -121,10 +143,12 @@ jobs:
 
       - name: Run Playwright SSR Tests
         run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
+        env:
+          SVELTE_ASYNC: ${{ matrix.svelte-async }}
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr-node-${{ matrix.node-version }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr-node-${{ matrix.node-version }}${{ matrix.svelte-async == 'true' && '-async' || '' }}
           path: test-results
