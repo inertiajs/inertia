@@ -30,6 +30,23 @@ function normalizeHeaders(headers: unknown): HttpResponseHeaders {
 }
 
 /**
+ * Axios defaults the content type to `application/x-www-form-urlencoded` for
+ * POST/PUT/PATCH requests, which mislabels raw binary payloads. The built-in
+ * XHR client leaves these untouched, so we mirror that behavior here.
+ */
+function isBinaryRequestBody(value: unknown): boolean {
+  return (
+    (typeof Blob !== 'undefined' && value instanceof Blob) ||
+    (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) ||
+    (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(value))
+  )
+}
+
+function hasContentTypeHeader(headers: HttpRequestConfig['headers']): boolean {
+  return Object.keys(headers ?? {}).some((key) => key.toLowerCase() === 'content-type')
+}
+
+/**
  * Convert Axios progress event to framework-agnostic progress event
  */
 function toHttpProgressEvent(axiosEvent: AxiosProgressEvent): HttpProgressEvent {
@@ -94,13 +111,19 @@ export class AxiosHttpClient implements HttpClient {
   protected async doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     const axios = await this.getAxios()
 
+    const headers = { ...(config.headers ?? {}) } as Record<string, unknown>
+
+    if (isBinaryRequestBody(config.data) && !hasContentTypeHeader(config.headers)) {
+      headers['Content-Type'] = false
+    }
+
     try {
       const response = await axios({
         method: config.method,
         url: config.url,
         data: config.data,
         params: config.params,
-        headers: config.headers as Record<string, string>,
+        headers: headers as Record<string, string>,
         signal: config.signal,
         responseType: 'text',
         onUploadProgress: config.onUploadProgress
