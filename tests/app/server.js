@@ -3068,6 +3068,17 @@ app.all('/api/headers', upload.none(), (req, res) => {
   })
 })
 
+app.post('/api/raw-body', express.raw({ type: () => true }), (req, res) => {
+  const isBuffer = Buffer.isBuffer(req.body)
+
+  res.json({
+    body: isBuffer ? req.body.toString('utf8') : null,
+    form: !isBuffer && typeof req.body === 'object' && req.body !== null ? req.body : {},
+    headers: req.headers,
+    method: req.method.toLowerCase(),
+  })
+})
+
 // Nested data endpoint
 app.post('/api/nested', upload.none(), (req, res) => {
   res.json({
