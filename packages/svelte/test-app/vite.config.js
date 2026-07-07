@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { defineConfig } from 'vite'
 
 const isSSR = process.argv.includes('--ssr')
+const asyncEnabled = process.env.SVELTE_ASYNC === 'true'
 
 export default defineConfig({
   build: {
@@ -27,8 +28,13 @@ export default defineConfig({
     svelte({
       compilerOptions: {
         experimental: {
-          async: true,
+          async: asyncEnabled,
         },
+      },
+      dynamicCompileOptions({ filename }) {
+        if (filename.includes('/Pages/SSR/Async.svelte')) {
+          return { experimental: { async: true } }
+        }
       },
     }),
   ],

@@ -281,6 +281,8 @@ test.describe('SSR Auto Transform', () => {
     })
 
     test('it renders components with top-level await during SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
       const response = await page.request.get('/ssr-auto/async')
       const html = await response.text()
 
@@ -290,6 +292,8 @@ test.describe('SSR Auto Transform', () => {
     })
 
     test('it hydrates async components without mismatch after SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
       consoleMessages.listen(page)
 
       await page.goto('/ssr-auto/async')
