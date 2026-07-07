@@ -37,15 +37,14 @@ function isFormDataRequestBody(value: unknown): value is FormData {
   return typeof FormData !== 'undefined' && value instanceof FormData
 }
 
-function isRawRequestBody(value: unknown): value is Document | XMLHttpRequestBodyInit {
+function isRawRequestBody(value: unknown): value is XMLHttpRequestBodyInit {
   return (
     typeof value === 'string' ||
     isFormDataRequestBody(value) ||
     (typeof Blob !== 'undefined' && value instanceof Blob) ||
     (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) ||
     (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(value)) ||
-    (typeof URLSearchParams !== 'undefined' && value instanceof URLSearchParams) ||
-    (typeof Document !== 'undefined' && value instanceof Document)
+    (typeof URLSearchParams !== 'undefined' && value instanceof URLSearchParams)
   )
 }
 
