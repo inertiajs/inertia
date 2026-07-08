@@ -1,12 +1,12 @@
 import { cloneDeep, isEqual } from 'es-toolkit'
-import { get, set } from 'es-toolkit/compat'
+import { get } from 'es-toolkit/compat'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
-import { stripTopLevelUndefined } from './objectUtils'
+import { setImmutable, stripTopLevelUndefined } from './objectUtils'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
@@ -468,7 +468,7 @@ export class Router {
       props(currentProps) {
         const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
 
-        return set(cloneDeep(currentProps), name, newValue)
+        return setImmutable(currentProps, name, newValue)
       },
       ...(options || {}),
     })

@@ -413,6 +413,16 @@ app.get('/client-side-visit/props', (req, res) =>
   }),
 )
 
+app.get('/client-side-visit/replace-prop-rerender', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/ReplacePropRerender',
+    props: {
+      user: { name: 'John Doe' },
+      other: { label: 'untouched' },
+    },
+  }),
+)
+
 app.get('/client-side-visit/sequential', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Sequential',

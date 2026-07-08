@@ -151,3 +151,22 @@ test.describe('Client-side visits with props manipulation', () => {
     })
   })
 })
+
+test.describe('React', () => {
+  test.skip(process.env.PACKAGE !== 'react', 'Only for React')
+
+  test('replaceProp preserves the identity of untouched props so memoized children do not re-render', async ({
+    page,
+  }) => {
+    await page.goto('/client-side-visit/replace-prop-rerender')
+
+    await expect(page.locator('#current-value')).toHaveText('Current value: John Doe')
+    await expect(page.locator('#memo-value')).toHaveText('Memo value: untouched')
+    const initialRenderCount = await page.locator('#memo-render-count').textContent()
+
+    await page.getByRole('button', { name: 'Replace user.name' }).click()
+
+    await expect(page.locator('#current-value')).toHaveText('Current value: Jane Smith')
+    await expect(page.locator('#memo-render-count')).toHaveText(initialRenderCount!)
+  })
+})
