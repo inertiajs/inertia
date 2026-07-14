@@ -76,6 +76,7 @@ export class InitialVisit {
           .set(currentPage.get(), {
             preserveScroll: locationVisit.preserveScroll,
             preserveState: true,
+            initialRender: true,
             visitId,
           })
           .then(() => {
@@ -100,15 +101,17 @@ export class InitialVisit {
 
     const visitId = uid()
 
-    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true, visitId }).then(() => {
-      if (navigationType.isReload()) {
-        Scroll.restore(history.getScrollRegions())
-      } else {
-        Scroll.scrollToAnchor()
-      }
+    currentPage
+      .set(currentPage.get(), { preserveScroll: true, preserveState: true, initialRender: true, visitId })
+      .then(() => {
+        if (navigationType.isReload()) {
+          Scroll.restore(history.getScrollRegions())
+        } else {
+          Scroll.scrollToAnchor()
+        }
 
-      this.fireInitialEvents(visitId)
-    })
+        this.fireInitialEvents(visitId)
+      })
   }
 
   protected static fireInitialEvents(visitId: string): void {

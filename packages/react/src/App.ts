@@ -50,13 +50,16 @@ function isLayoutResolver(value: unknown): boolean {
   )
 }
 
-let currentIsInitialPage = true
+let pendingInitialSwap: ReactPageHandlerArgs | null = null
 let routerIsInitialized = false
-let swapComponent: PageHandler<ReactComponent> = async () => {
+let swapComponent: PageHandler<ReactComponent> = async (args) => {
   // Dummy function so we can init the router outside of the useEffect hook. This is
   // needed so `router.reload()` works right away (on mount) in any of the user's
   // components. We swap in the real function in the useEffect hook below.
-  currentIsInitialPage = false
+  // The router can swap before that (e.g. a back_forward visit that restores a page
+  // from history), so we remember it here and replay it once the real function is in
+  // place instead of dropping the swap.
+  pendingInitialSwap = args
 }
 
 type CurrentPage = {
@@ -130,11 +133,10 @@ export default function App<SharedProps extends PageProps = PageProps>({
   }
 
   useEffect(() => {
-    swapComponent = async ({ component, page, preserveState }: ReactPageHandlerArgs) => {
-      if (currentIsInitialPage) {
+    swapComponent = async ({ component, page, preserveState, initialRender }: ReactPageHandlerArgs) => {
+      if (initialRender) {
         // We block setting the current page on the initial page to
         // prevent the initial page from being re-rendered again.
-        currentIsInitialPage = false
         return
       }
 
@@ -149,6 +151,13 @@ export default function App<SharedProps extends PageProps = PageProps>({
           key: preserveState ? current.key : Date.now(),
         })),
       )
+    }
+
+    // Replay the swap the dummy function above captured before we got here, if any.
+    if (pendingInitialSwap) {
+      const pending = pendingInitialSwap
+      pendingInitialSwap = null
+      swapComponent(pending)
     }
 
     const syncServerHead = (event: { detail: { page: Page } }) => {
