@@ -2925,6 +2925,29 @@ app.get('/deferred-props/back-button/b', (req, res) => {
   )
 })
 
+app.get('/deferred-props/tab-duplication', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'DeferredProps/TabDuplication',
+      deferredProps: {
+        default: ['message'],
+      },
+      props: {},
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'DeferredProps/TabDuplication',
+        props: {
+          message: req.headers['x-inertia-partial-data']?.includes('message') ? 'Message loaded!' : undefined,
+        },
+      }),
+    300,
+  )
+})
+
 app.get('/reload/concurrent', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']
 

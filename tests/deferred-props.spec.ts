@@ -520,3 +520,40 @@ test('it does not refetch deferred props that were already loaded on a previous 
 
   expect(requests.requests).toHaveLength(0)
 })
+
+test('it restores already-resolved deferred props on a back_forward initial visit', async ({ page }) => {
+  await gotoPageAndWaitForContent(page, '/deferred-props/tab-duplication')
+
+  await expect(page.locator('#fallback')).toBeVisible()
+
+  await page.waitForResponse(page.url())
+
+  await expect(page.locator('#fallback')).not.toBeVisible()
+  await expect(page.locator('#message')).toContainText('Message loaded!')
+
+  // Duplicating a tab in Chrome or Firefox loads a fresh document that restores the
+  // original tab's history state (already holding the resolved deferred props) and is
+  // reported as a back_forward navigation. Playwright/CDP can't clone a tab, so we
+  // stand in for it: reload() keeps the real history state, and we force the reported
+  // navigation type to back_forward, which is the only signal no API exposes.
+  await page.addInitScript(() => {
+    const original = window.performance.getEntriesByType.bind(window.performance)
+
+    window.performance.getEntriesByType = (type: string) => {
+      const entries = original(type)
+
+      if (type === 'navigation') {
+        return entries.map(
+          (entry) => new Proxy(entry, { get: (t, p) => (p === 'type' ? 'back_forward' : (t as any)[p]) }),
+        )
+      }
+
+      return entries
+    }
+  })
+
+  await page.reload()
+
+  await expect(page.locator('#message')).toContainText('Message loaded!')
+  await expect(page.locator('#fallback')).not.toBeVisible()
+})
