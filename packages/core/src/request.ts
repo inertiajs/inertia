@@ -41,6 +41,10 @@ export class Request {
     return this.requestParams.isPrefetch()
   }
 
+  public getUrl(): URL {
+    return this.requestParams.all().url
+  }
+
   public isOptimistic(): boolean {
     return this.optimistic
   }
