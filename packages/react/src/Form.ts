@@ -128,7 +128,8 @@ const Form = forwardRef<FormComponentRef, FormProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
-    const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.current, submitter)
+    const getFormData = (submitter?: FormSubmitter): FormData =>
+      formElement.current ? new FormData(formElement.current, submitter) : new FormData()
 
     // Convert the FormData to an object because we can't compare two FormData
     // instances directly (which is needed for isDirty), mergeDataIntoQueryString()
