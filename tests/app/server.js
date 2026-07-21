@@ -1723,6 +1723,20 @@ app.get('/deferred-props/rapid-navigation{/:id}', (req, res) => {
   )
 })
 
+app.get('/async-visits/page-a', (req, res) => inertia.render(req, res, { component: 'AsyncVisits/PageA' }))
+
+app.get('/async-visits/page-b', (req, res) => {
+  setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/PageB' }), 600)
+})
+
+app.get('/async-visits/page-c', (req, res) => inertia.render(req, res, { component: 'AsyncVisits/PageC' }))
+
+app.get('/async-visits/reload-origin', (req, res) => {
+  const delay = req.headers['x-repro-delay'] ? 600 : 0
+
+  setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/ReloadOrigin' }), delay)
+})
+
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
