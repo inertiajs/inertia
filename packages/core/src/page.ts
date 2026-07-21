@@ -46,11 +46,13 @@ class CurrentPage {
       preserveScroll = false,
       preserveState = false,
       viewTransition = false,
+      initialRender = false,
     }: {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
       viewTransition?: Visit['viewTransition']
+      initialRender?: boolean
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -129,6 +131,7 @@ class CurrentPage {
           page,
           preserveState,
           viewTransition,
+          initialRender,
         }).then(() => {
           if (preserveScroll) {
             // Scroll regions must be explicitly restored since the DOM elements are destroyed
@@ -217,13 +220,15 @@ class CurrentPage {
     page,
     preserveState,
     viewTransition,
+    initialRender = false,
   }: {
     component: Component
     page: Page
     preserveState: boolean
     viewTransition: Visit['viewTransition']
+    initialRender?: boolean
   }): Promise<unknown> {
-    const doSwap = () => this.swapComponent({ component, page, preserveState })
+    const doSwap = () => this.swapComponent({ component, page, preserveState, initialRender })
 
     if (!viewTransition || !document?.startViewTransition || document.visibilityState === 'hidden') {
       return doSwap()
