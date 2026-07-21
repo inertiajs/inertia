@@ -1,8 +1,8 @@
 import { set } from 'es-toolkit/compat'
 import { describe, expect, it } from 'vitest'
-import { setImmutable } from '../src/objectUtils'
+import { setPathPreservingIdentity } from '../src/objectUtils'
 
-describe('setImmutable', () => {
+describe('setPathPreservingIdentity', () => {
   it('matches es-toolkit set() semantics for values', () => {
     const cases: Array<[Record<string, unknown>, string, unknown]> = [
       [{ a: 1 }, 'a', 2],
@@ -16,7 +16,7 @@ describe('setImmutable', () => {
     ]
 
     for (const [target, path, value] of cases) {
-      expect(setImmutable(structuredClone(target), path, value)).toEqual(
+      expect(setPathPreservingIdentity(structuredClone(target), path, value)).toEqual(
         set(structuredClone(target), path, value),
       )
     }
@@ -26,7 +26,7 @@ describe('setImmutable', () => {
     const target = { user: { name: 'Joe' }, other: { keep: true } }
     const snapshot = structuredClone(target)
 
-    setImmutable(target, 'user.name', 'Jane')
+    setPathPreservingIdentity(target, 'user.name', 'Jane')
 
     expect(target).toEqual(snapshot)
   })
@@ -36,7 +36,7 @@ describe('setImmutable', () => {
     const sibling = { id: 1 }
     const target = { user: { name: 'Joe', sibling }, other }
 
-    const result = setImmutable(target, 'user.name', 'Jane')
+    const result = setPathPreservingIdentity(target, 'user.name', 'Jane')
 
     expect(result.user.name).toBe('Jane')
     expect(result.other).toBe(other) // untouched top-level prop: same object
@@ -45,11 +45,23 @@ describe('setImmutable', () => {
     expect(result.user).not.toBe(target.user) // containers on the path are copies
   })
 
+  it('preserves the identity of untouched siblings on a deeper path', () => {
+    const untouched = { deep: true }
+    const target = { group: { a: { keep: 1 }, b: 2, untouched } }
+
+    const result = setPathPreservingIdentity(target, 'group.b', 3)
+
+    expect(result.group.b).toBe(3)
+    expect(result.group.untouched).toBe(untouched)
+    expect(result.group.a).toBe(target.group.a) // sibling object under the touched container keeps identity
+    expect(result.group).not.toBe(target.group)
+  })
+
   it('preserves identity of untouched array elements', () => {
     const first = { id: 1 }
     const target = { items: [first, { id: 2 }] }
 
-    const result = setImmutable(target, 'items[1].id', 99)
+    const result = setPathPreservingIdentity(target, 'items[1].id', 99)
 
     expect(result.items[0]).toBe(first)
     expect(result.items[1]).toEqual({ id: 99 })

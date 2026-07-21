@@ -419,6 +419,7 @@ app.get('/client-side-visit/replace-prop-rerender', (req, res) =>
     props: {
       user: { name: 'John Doe' },
       other: { label: 'untouched' },
+      profile: { name: 'John Doe', avatar: { label: 'avatar.png' } },
     },
   }),
 )

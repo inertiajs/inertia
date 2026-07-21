@@ -6,7 +6,7 @@ import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
-import { setImmutable, stripTopLevelUndefined } from './objectUtils'
+import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils'
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
@@ -468,7 +468,7 @@ export class Router {
       props(currentProps) {
         const newValue = typeof value === 'function' ? value(get(currentProps, name), currentProps) : value
 
-        return setImmutable(currentProps, name, newValue)
+        return setPathPreservingIdentity(currentProps, name, newValue)
       },
       ...(options || {}),
     })

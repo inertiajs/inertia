@@ -63,36 +63,37 @@ const compareValues = (value1: any, value2: any): boolean => {
   }
 }
 
-// Path-aware copy-on-write "set": copies only the containers along `path` and
-// preserves the identity of everything untouched, matching how partial reloads
-// merge props ({ ...oldProps, ...newProps }). A deep clone here would hand
-// every prop a new identity and defeat consumer memoization (React memo/
-// useMemo, Svelte fine-grained reactivity).
-export const setImmutable = <T>(target: T, path: string, value: unknown): T => {
+// Immutable set at `path`: copies only the containers along the way and keeps
+// every untouched branch by reference, so consumers that memoize on other props
+// don't re-render.
+export const setPathPreservingIdentity = <T>(target: T, path: string, value: unknown): T => {
   const keys = toPath(path)
 
   if (keys.length === 0) {
     return target
   }
 
-  const cloneAlongPath = (node: unknown, depth: number): unknown => {
-    const key = keys[depth]
-    const isLast = depth === keys.length - 1
+  const copyAlongPath = (node: unknown, depth: number): unknown => {
+    if (depth === keys.length) {
+      return value
+    }
 
-    // Copy the container on the path; create one ([] for index keys, matching
-    // es-toolkit's mutable set) when the path walks through a non-object.
+    const key = keys[depth]
+
+    // Copy the container on the path; when it is missing, create an array for an
+    // integer key and an object otherwise, matching es-toolkit's mutable set().
     const copy: any = Array.isArray(node)
       ? [...node]
-      : node !== null && typeof node === 'object'
+      : node && typeof node === 'object'
         ? { ...node }
         : /^(?:0|[1-9]\d*)$/.test(key)
           ? []
           : {}
 
-    copy[key] = isLast ? value : cloneAlongPath((node as any)?.[key], depth + 1)
+    copy[key] = copyAlongPath((node as any)?.[key], depth + 1)
 
     return copy
   }
 
-  return cloneAlongPath(target, 0) as T
+  return copyAlongPath(target, 0) as T
 }
