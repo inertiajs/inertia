@@ -46,10 +46,6 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter './packages/{core,vite}' --filter './packages/${{ matrix.adapter }}*' build
 
-      - name: Get Playwright Version
-        id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
-
       - name: Run Playwright Tests
         run: pnpm test:${{ matrix.adapter }}
         env:
@@ -107,9 +103,8 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter './packages/{core,vite}' --filter './packages/${{ matrix.adapter }}*' build
 
-      - name: Get Playwright Version
-        id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+      - name: Install Playwright Browsers
+        run: pnpm playwright install --with-deps chromium
 
       - name: Run Playwright SSR Tests
         run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
