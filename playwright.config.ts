@@ -31,7 +31,7 @@ if (!adapters.includes(adapter)) {
 const projects = [
   {
     name: 'chromium',
-    use: { ...devices['Desktop Chrome'] },
+    use: { ...devices['Desktop Chrome'], channel: 'chrome' },
   },
   {
     name: 'webkit',
