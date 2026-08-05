@@ -103,9 +103,6 @@ jobs:
       - name: Build Inertia
         run: pnpm -r --filter './packages/{core,vite}' --filter './packages/${{ matrix.adapter }}*' build
 
-      - name: Install Playwright Browsers
-        run: pnpm playwright install --with-deps chromium
-
       - name: Run Playwright SSR Tests
         run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
         env:
