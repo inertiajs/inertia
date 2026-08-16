@@ -1,0 +1,69 @@
+{
+  "name": "@inertiajs/angular",
+  "version": "3.6.1",
+  "license": "MIT",
+  "description": "The Angular adapter for Inertia.js",
+  "contributors": [
+    "Jonathan Reinink <jonathan@reinink.ca>",
+    "Gerard Porto <gporto@gmail.com>"
+  ],
+  "homepage": "https://inertiajs.com/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inertiajs/inertia.git",
+    "directory": "packages/angular"
+  },
+  "bugs": {
+    "url": "https://github.com/inertiajs/inertia/issues"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ng build angular",
+    "build:with-deps": "pnpm build && esbuild dist/fesm2022/inertiajs-angular.mjs --bundle --format=esm --target=es2022 --external:@angular/* --outfile=.angular/with-deps.mjs && esbuild dist/fesm2022/inertiajs-angular-server.mjs --bundle --format=esm --target=es2022 --platform=node --external:@angular/* --outfile=.angular/with-deps-server.mjs",
+    "dev": "ng build angular --watch --configuration development",
+    "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/fesm2022/*.mjs\" \".angular/with-deps*.mjs\" --checkFeatures --module --noCache --verbose",
+    "lint": "oxlint src server",
+    "publint": "pnpm build && publint dist --pack=false",
+    "test": "ng test angular --watch=false",
+    "type-check": "ng build angular --configuration development"
+  },
+  "publishConfig": {
+    "directory": "dist",
+    "linkDirectory": true
+  },
+  "peerDependencies": {
+    "@angular/common": ">=22.1.0 <23.0.0",
+    "@angular/core": ">=22.1.0 <23.0.0",
+    "@angular/platform-browser": ">=22.1.0 <23.0.0",
+    "@angular/platform-server": ">=22.1.0 <23.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/platform-server": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@inertiajs/core": "workspace:*",
+    "es-toolkit": "^1.33.0",
+    "laravel-precognition": "^2.0.0",
+    "tslib": "^2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.1.3",
+    "@angular/cli": "22.1.3",
+    "@angular/common": "22.1.2",
+    "@angular/compiler": "22.1.2",
+    "@angular/compiler-cli": "22.1.2",
+    "@angular/core": "22.1.2",
+    "@angular/platform-browser": "22.1.2",
+    "@angular/platform-server": "22.1.2",
+    "es-check": "^9.6.4",
+    "esbuild": "^0.28.1",
+    "jsdom": "^28.0.0",
+    "ng-packagr": "22.1.1",
+    "publint": "^0.3.17",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.2"
+  },
+  "sideEffects": false
+}

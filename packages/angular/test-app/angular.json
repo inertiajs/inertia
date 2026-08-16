@@ -1,0 +1,96 @@
+{
+  "$schema": "../../../node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "pnpm"
+  },
+  "projects": {
+    "test-app": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "index": {
+              "input": "src/index.html",
+              "output": "index.html"
+            },
+            "outputPath": {
+              "base": "dist",
+              "browser": ""
+            },
+            "tsConfig": "tsconfig.app.json",
+            "assets": [],
+            "styles": ["src/styles.css"]
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "850kB",
+                  "maximumError": "1MB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "unified": {
+              "browser": "src/main-unified.ts",
+              "deleteOutputPath": false,
+              "index": {
+                "input": "src/index-unified.html",
+                "output": "index-unified.html"
+              },
+              "outputHashing": "all"
+            },
+            "ssr": {
+              "browser": "src/main.ts",
+              "server": "src/main.server.ts",
+              "ssr": {
+                "entry": "src/ssr.ts"
+              },
+              "outputMode": "server",
+              "prerender": false,
+              "allowedCommonJsDependencies": ["follow-redirects", "form-data", "https-proxy-agent"],
+              "outputPath": {
+                "base": "dist-ssr",
+                "browser": "browser",
+                "server": "server"
+              },
+              "index": {
+                "input": "src/index.html",
+                "output": "index.html"
+              },
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "test-app:build:production"
+            },
+            "development": {
+              "buildTarget": "test-app:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
+        }
+      }
+    }
+  }
+}

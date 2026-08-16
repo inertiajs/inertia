@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'svelte']
+        adapter: ['vue', 'react', 'svelte', 'angular']
         shard: ['1', '2', '3']
     steps:
       - name: Checkout

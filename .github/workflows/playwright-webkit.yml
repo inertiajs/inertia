@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-15
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'svelte']
+        adapter: ['vue', 'react', 'svelte', 'angular']
         shard: ['1', '2', '3', '4']
     steps:
       - name: Checkout

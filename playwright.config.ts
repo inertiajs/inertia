@@ -6,7 +6,7 @@ declare const process: {
   env: {
     BROWSER?: 'chromium' | 'webkit' | 'firefox'
     CI?: boolean
-    PACKAGE?: 'vue3' | 'react' | 'svelte'
+    PACKAGE?: 'vue3' | 'react' | 'svelte' | 'angular'
     SSR?: 'true'
   }
   platform: string
@@ -17,11 +17,13 @@ const runsInCI = !!process.env.CI
 const runsOnMac = process.platform === 'darwin'
 const ssrEnabled = process.env.SSR === 'true'
 
-const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717 }
+const adapterPorts = { vue3: 13715, react: 13716, svelte: 13717, angular: 13721 }
 const ssrAutoPorts = { vue3: 13718, react: 13719, svelte: 13720 }
 const url = `http://localhost:${adapterPorts[adapter]}`
 
-const adapters = ['react', 'svelte', 'vue3']
+const adapters = ['angular', 'react', 'svelte', 'vue3']
+const browserTestIgnore =
+  adapter === 'angular' ? ['ssr.spec.ts', 'plugin.spec.ts', 'svelte.spec.ts', 'vite-plugin.spec.ts'] : 'ssr.spec.ts'
 
 if (!adapters.includes(adapter)) {
   throw new Error(`Invalid adapter package "${adapter}". Expected one of: ${adapters.join(', ')}.`)
@@ -67,11 +69,15 @@ const webServerConfig = ssrEnabled
         url: 'http://localhost:13714/health',
         reuseExistingServer: !runsInCI,
       },
-      {
-        command: `${buildSSRAutoCommand} && node packages/${adapter}/test-app/dist/ssr-auto.js`,
-        url: `http://localhost:${ssrAutoPorts[adapter]}/health`,
-        reuseExistingServer: !runsInCI,
-      },
+      ...(adapter === 'angular'
+        ? []
+        : [
+            {
+              command: `${buildSSRAutoCommand} && node packages/${adapter}/test-app/dist/ssr-auto.js`,
+              url: `http://localhost:${ssrAutoPorts[adapter]}/health`,
+              reuseExistingServer: !runsInCI,
+            },
+          ]),
       {
         command: serveCommand,
         url,
@@ -87,7 +93,7 @@ const webServerConfig = ssrEnabled
 export default defineConfig({
   testDir: './tests',
   /* Only run SSR tests when SSR=true, otherwise exclude them */
-  ...(ssrEnabled ? { testMatch: 'ssr.spec.ts' } : { testIgnore: 'ssr.spec.ts' }),
+  ...(ssrEnabled ? { testMatch: 'ssr.spec.ts' } : { testIgnore: browserTestIgnore }),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

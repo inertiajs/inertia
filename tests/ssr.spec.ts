@@ -218,6 +218,8 @@ test.describe('SSR InfiniteScroll', () => {
 })
 
 test.describe('SSR Auto Transform', () => {
+  test.skip(process.env.PACKAGE === 'angular', 'Angular uses the Angular CLI SSR builder instead of a Vite transform')
+
   test.describe('Vite plugin SSR transform', () => {
     test('it renders HTML using the auto-transformed SSR entry', async ({ page }) => {
       const response = await page.request.get('/ssr-auto/page1')

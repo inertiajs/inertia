@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'svelte']
+        adapter: ['vue', 'react', 'svelte', 'angular']
         http: ['default', 'axios']
         svelte-async: ['false', 'true']
         exclude:
@@ -22,6 +22,8 @@ jobs:
             svelte-async: 'true'
           - adapter: 'svelte'
             http: 'axios'
+            svelte-async: 'true'
+          - adapter: 'angular'
             svelte-async: 'true'
     steps:
       - name: Checkout
@@ -85,8 +87,8 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'svelte']
-        node-version: ['22.x', '24.x', 'latest']
+        adapter: ['vue', 'react', 'svelte', 'angular']
+        node-version: ['22.x', '24.x', '26.x', 'latest']
         svelte-async: ['false', 'true']
         exclude:
           - adapter: 'vue'
@@ -98,6 +100,16 @@ jobs:
             svelte-async: 'true'
           - adapter: 'svelte'
             node-version: 'latest'
+            svelte-async: 'true'
+          - adapter: 'vue'
+            node-version: '26.x'
+          - adapter: 'react'
+            node-version: '26.x'
+          - adapter: 'svelte'
+            node-version: '26.x'
+          - adapter: 'angular'
+            node-version: 'latest'
+          - adapter: 'angular'
             svelte-async: 'true'
     steps:
       - name: Checkout

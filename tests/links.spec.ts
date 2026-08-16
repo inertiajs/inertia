@@ -42,7 +42,7 @@ test('will avoid an extra reload after a location visit', async ({ page }) => {
   await expect(dump['x-inertia']).toBeUndefined()
   // Requests made: /location (redirect), /dump/get, /assets/index-*.js, /assets/index-*.css
   // Filter to only count page requests (assets may vary by browser)
-  const pageRequests = requests.requests.filter((r) => !r.url().includes('/assets/'))
+  const pageRequests = requests.requests.filter((request) => !['script', 'stylesheet'].includes(request.resourceType()))
   await expect(pageRequests.length).toBe(2)
 })
 

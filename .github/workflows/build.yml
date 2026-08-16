@@ -41,6 +41,9 @@ jobs:
       - name: Test Core
         run: pnpm --filter './packages/core' test
 
+      - name: Test Angular adapter
+        run: pnpm --filter './packages/angular' test
+
   vite-plugin:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: Vite Plugin (Vite ${{ matrix.vite }})

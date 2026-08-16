@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 const upload = multer()
 
-const adapters = ['react', 'svelte', 'vue3']
+const adapters = ['angular', 'react', 'svelte', 'vue3']
 
 if (!adapters.includes(inertia.package)) {
   throw new Error(`Invalid adapter package "${inertia.package}". Expected one of: ${adapters.join(', ')}.`)
@@ -765,7 +765,9 @@ app.post('/precognition/files', upload.any(), (req, res) => {
   setTimeout(() => {
     const only = req.headers['precognition-validate-only'] ? req.headers['precognition-validate-only'].split(',') : []
     const name = req.body['name']
-    const hasAvatar = req.files && req.files.avatar
+    const hasAvatar = Array.isArray(req.files)
+      ? req.files.some((file) => file.fieldname === 'avatar')
+      : Boolean(req.files && req.files.avatar)
     const errors = {}
 
     if (!name) {
@@ -3911,6 +3913,7 @@ app.use((err, req, res, next) => {
 })
 
 const adapterPorts = {
+  angular: 13721,
   vue3: 13715,
   react: 13716,
   svelte: 13717,

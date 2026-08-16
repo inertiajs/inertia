@@ -47,6 +47,9 @@ module.exports = {
     return renderToPort(SSR_PORT, pageData)
   },
   renderAuto(pageData) {
+    if (!SSR_AUTO_PORT) {
+      return Promise.reject(new Error(`SSR auto-transform is not available for the ${process.env.PACKAGE} adapter`))
+    }
     return renderToPort(SSR_AUTO_PORT, pageData)
   },
   SSR_PORT,

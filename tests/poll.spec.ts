@@ -297,7 +297,7 @@ test('it waits for the interval between requests with mode: rest', async ({ page
   requests.listenForFinished(page)
   requests.listenForFailed(page)
 
-  await page.waitForTimeout(2000)
+  await page.waitForTimeout(1900)
 
   await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
   await expect(pollFinished().length).toBe(pollRequests().length)

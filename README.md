@@ -2,7 +2,7 @@
 
 ## About Inertia.js
 
-Inertia.js lets builders ship modern single-page applications in React, Vue, or Svelte without building an API. Your backend keeps doing what it already does well: routing, controllers, models, authorization, validation. Instead of returning a template, it returns a page component with its data. Inertia connects the two halves, so a click never triggers a full page reload.
+Inertia.js lets builders ship modern single-page applications in Angular, React, Vue, or Svelte without building an API. Your backend keeps doing what it already does well: routing, controllers, models, authorization, validation. Instead of returning a template, it returns a page component with its data. Inertia connects the two halves, so a click never triggers a full page reload.
 
 It all stays in one application: one codebase, one router, one source of truth, and the single-page experience your users expect. Fewer moving parts means fewer decisions between an idea and a production application, whether a human or an agent is writing the code.
 
@@ -17,7 +17,7 @@ Everything a real product needs, designed to work together:
 
 ## Adapters
 
-Inertia is the layer between your backend and your frontend, and it works through adapters. It doesn't replace the frameworks you already use, on either side. The React, Vue, and Svelte adapters all live in the [inertiajs/inertia](https://github.com/inertiajs/inertia) repository. On the server, the [Laravel adapter](https://github.com/inertiajs/inertia-laravel) is officially maintained, and [community adapters](https://inertiajs.com/docs/v3/installation/community-adapters) cover Rails, Phoenix, Django, Symfony, AdonisJS, Go, .NET, and more.
+Inertia is the layer between your backend and your frontend, and it works through adapters. It doesn't replace the frameworks you already use, on either side. The Angular, React, Vue, and Svelte adapters all live in the [inertiajs/inertia](https://github.com/inertiajs/inertia) repository. On the server, the [Laravel adapter](https://github.com/inertiajs/inertia-laravel) is officially maintained, and [community adapters](https://inertiajs.com/docs/v3/installation/community-adapters) cover Rails, Phoenix, Django, Symfony, AdonisJS, Go, .NET, and more.
 
 Laravel's official React, Vue, and Svelte [starter kits](https://laravel.com/starter-kits) are built on Inertia. A new application begins with login, registration, password resets, email verification, two-factor authentication, and profile settings already working.
 

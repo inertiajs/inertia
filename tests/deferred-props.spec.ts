@@ -38,8 +38,8 @@ test('can load deferred props', async ({ page }) => {
   await expect(page.getByText('Loading baz...')).not.toBeVisible()
   await expect(page.getByText('Loading qux...')).not.toBeVisible()
   await expect(page.getByText('Loading baz and qux...')).not.toBeVisible()
-  await expect(page.getByText('baz value')).toBeVisible()
-  await expect(page.getByText('qux value')).toBeVisible()
+  await expect(page.getByText('baz value', { exact: true })).toBeVisible()
+  await expect(page.getByText('qux value', { exact: true })).toBeVisible()
   await expect(page.getByText('both baz value and qux value')).toBeVisible()
 })
 

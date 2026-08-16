@@ -4,7 +4,7 @@ Thank you for your interest in contributing to Inertia.js! Your contributions he
 
 Inertia.js is maintained as a monorepo using [pnpm workspaces](https://pnpm.io/workspaces). Below you'll find an overview of the repository and how to get your development environment running.
 
-> **Note:** You'll need **pnpm version 10 or higher**. If you're unsure which version you have, run `pnpm -v`.
+> **Note:** You'll need **pnpm version 11.1.1 or higher**. If you're unsure which version you have, run `pnpm -v`.
 
 ## Repository Overview
 
@@ -12,6 +12,8 @@ Inertia.js is maintained as a monorepo using [pnpm workspaces](https://pnpm.io/w
 inertia/
 ├── packages/          Core libraries and framework adapters
 │   ├── core/          Framework-agnostic core library
+│   ├── angular/       Angular adapter
+│   │   └── test-app/  Angular test application
 │   ├── react/         React adapter
 │   │   └── test-app/  React test application
 │   ├── svelte/        Svelte adapter
@@ -30,7 +32,7 @@ inertia/
 ### Key Components
 
 - **Core Library:** The framework-agnostic engine powering all adapters (`packages/core`).
-- **Adapters:** Framework-specific integrations for React, Svelte, and Vue.
+- **Adapters:** Framework-specific integrations for Angular, React, Svelte, and Vue.
 - **Test Applications:** Minimal frontend apps used for automated testing (`packages/*/test-app/`).
 - **Playwright Tests:** Framework-agnostic end-to-end tests that verify behavior across adapters (`tests/*.spec.ts`).
 - **Playgrounds:** Full Laravel applications for manual testing (`playgrounds/`). These are optional and may eventually be removed.
@@ -57,6 +59,7 @@ If you prefer, you can also start individual watchers from each package director
 
 ```sh
 cd packages/core && pnpm dev
+cd packages/angular && pnpm dev
 cd packages/react && pnpm dev
 ```
 
@@ -64,11 +67,12 @@ cd packages/react && pnpm dev
 
 ## Running Tests
 
-Inertia.js uses Playwright to run a shared end-to-end test suite against each adapter. This is how we verify that Inertia behaves the same across React, Svelte, and Vue.
+Inertia.js uses Playwright to run a shared end-to-end test suite against each adapter. This is how we verify that Inertia behaves the same across Angular, React, Svelte, and Vue.
 
 Run the test suite for a specific adapter:
 
 ```sh
+pnpm test:angular
 pnpm test:react
 pnpm test:svelte
 pnpm test:vue
@@ -106,6 +110,7 @@ All adapters use the same Node.js backend and Playwright test suite. The only di
 
 ```
 tests/app/server.js         Shared Node.js backend
+├── serves: angular test app (when PACKAGE=angular)
 ├── serves: react test app  (when PACKAGE=react)
 ├── serves: svelte test app (when PACKAGE=svelte)
 └── serves: vue test app    (when PACKAGE=vue3)
@@ -117,6 +122,7 @@ When running a test command, the correct adapter is selected automatically:
 
 | Adapter | `PACKAGE` value | Test server port | App URL                                            |
 | ------- | --------------- | ---------------- | -------------------------------------------------- |
+| Angular | `angular`       | 13721            | [http://localhost:13721/](http://localhost:13721/) |
 | React   | `react`         | 13716            | [http://localhost:13716/](http://localhost:13716/) |
 | Svelte  | `svelte`        | 13717            | [http://localhost:13717/](http://localhost:13717/) |
 | Vue 3   | `vue3`          | 13715            | [http://localhost:13715/](http://localhost:13715/) |
@@ -138,15 +144,16 @@ pnpm dev:test-app
 Or start an individual one:
 
 ```sh
+pnpm dev:test-app:angular
 pnpm dev:test-app:react
 pnpm dev:test-app:svelte
 pnpm dev:test-app:vue
 ```
 
-Each test app runs two servers:
+Each test app runs two processes:
 
 - A Node.js backend that automatically restarts when changed
-- A Vite development server for the frontend
+- A frontend watcher (Angular CLI for Angular, Vite for the other adapters)
 
 If you are developing a new feature or fixing a bug, you can use these test apps to develop and test your changes.
 
@@ -162,6 +169,7 @@ Create the same frontend page in each test application:
 packages/react/test-app/Pages/YourFeature.jsx
 packages/svelte/test-app/Pages/YourFeature.svelte
 packages/vue3/test-app/Pages/YourFeature.vue
+packages/angular/test-app/src/your-feature.ts
 ```
 
 Each page should provide the same behavior and functionality.
@@ -199,6 +207,7 @@ test('your feature works', async ({ page }) => {
 Be sure to run your test for each adapter:
 
 ```sh
+pnpm test:angular -g "your feature"
 pnpm test:react -g "your feature"
 pnpm test:svelte -g "your feature"
 pnpm test:vue -g "your feature"
