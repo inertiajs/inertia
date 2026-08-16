@@ -1,0 +1,51 @@
+{
+  "$schema": "../../node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": { "packageManager": "pnpm" },
+  "projects": {
+    "playground": {
+      "projectType": "application",
+      "root": "",
+      "sourceRoot": "resources/app",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "resources/app/main.ts",
+            "index": "resources/app/index.html",
+            "outputPath": { "base": "public/build/angular", "browser": "" },
+            "tsConfig": "tsconfig.app.json",
+            "styles": ["resources/css/app.css"],
+            "assets": []
+          },
+          "configurations": {
+            "production": {
+              "baseHref": "/build/angular/",
+              "outputHashing": "none",
+              "budgets": [{ "type": "initial", "maximumWarning": "750kB", "maximumError": "1MB" }]
+            },
+            "development": {
+              "baseHref": "/build/angular/",
+              "outputHashing": "none",
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "ssr": {
+              "browser": "resources/app/main.ts",
+              "server": "resources/app/main.server.ts",
+              "ssr": { "entry": "resources/app/ssr.ts" },
+              "outputMode": "server",
+              "prerender": false,
+              "allowedCommonJsDependencies": ["follow-redirects", "form-data", "https-proxy-agent"],
+              "outputPath": { "base": "bootstrap/angular-ssr", "browser": "browser", "server": "server" },
+              "outputHashing": "none"
+            }
+          },
+          "defaultConfiguration": "production"
+        }
+      }
+    }
+  }
+}

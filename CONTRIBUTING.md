@@ -21,6 +21,7 @@ inertia/
 │   └── vue3/          Vue 3 adapter
 │       └── test-app/  Vue 3 test application
 ├── playgrounds/       Full Laravel applications for manual testing
+│   ├── angular/       Laravel + Angular
 │   ├── react/         Laravel + React
 │   ├── svelte5/       Laravel + Svelte 5
 │   └── vue3/          Laravel + Vue 3
@@ -226,6 +227,7 @@ The playgrounds are provided as-is and are not part of the automated test setup.
 To start a playground, simply run:
 
 ```sh
+pnpm playground:angular
 pnpm playground:react
 ```
 
@@ -243,6 +245,7 @@ Visit the application at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 Each playground has its own pnpm script:
 
 ```sh
+pnpm playground:angular
 pnpm playground:react
 pnpm playground:svelte
 pnpm playground:vue

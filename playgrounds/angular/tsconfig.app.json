@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "outDir": "./out-tsc/app", "types": ["node"] },
+  "include": ["resources/app/**/*.ts"]
+}
