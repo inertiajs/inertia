@@ -89,6 +89,29 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('SSR ClientOnly', () => {
+  test('it renders the fallback instead of the children on the server', async ({ page }) => {
+    const response = await page.request.get('/ssr/client-only')
+    const html = await response.text()
+
+    expect(html).toContain('Loading widget...')
+    expect(html).not.toContain('Client path:')
+  })
+
+  test('it swaps the fallback for the children after hydration', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/client-only')
+
+    await expect(page.getByTestId('client-only-content')).toHaveText('Client path: /ssr/client-only')
+    await expect(page.getByTestId('client-only-fallback')).toHaveCount(0)
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})
+
 test.describe('Head title escaping', () => {
   test.beforeEach(() => {
     test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')

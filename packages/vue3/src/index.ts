@@ -3,6 +3,7 @@ import type { VueInertiaAppConfig } from './types'
 
 export { http, progress, router } from '@inertiajs/core'
 export { default as App, usePage } from './app'
+export { default as ClientOnly } from './clientOnly'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './deferred'
 export { createForm, default as Form, useFormContext } from './form'

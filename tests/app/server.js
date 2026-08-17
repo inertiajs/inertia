@@ -75,6 +75,13 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/client-only', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/ClientOnly',
+    props: {},
+  }),
+)
+
 app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
@@ -177,6 +184,13 @@ app.get('/ssr/infinite-scroll', (req, res) => {
     scrollProps: { users: scrollProp },
   })
 })
+
+app.get('/client-only', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientOnly',
+    props: {},
+  }),
+)
 
 // createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
