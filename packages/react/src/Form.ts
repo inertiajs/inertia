@@ -284,6 +284,7 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       setError: form.setError,
       reset,
       submit,
+      cancel: form.cancel,
       defaults,
       getData,
       getFormData,

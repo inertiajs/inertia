@@ -362,6 +362,7 @@ const Form = defineComponent({
       },
       reset,
       submit,
+      cancel: () => form.cancel(),
       defaults,
       getData,
       getFormData,

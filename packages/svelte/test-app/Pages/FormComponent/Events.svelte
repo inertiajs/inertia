@@ -83,7 +83,7 @@
   {onError}
   {onCancelToken}
 >
-  {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful })}
+  {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful, cancel })}
     <h1>Form Events & State</h1>
 
     <div>
@@ -117,6 +117,7 @@
       <button type="button" onclick={() => (shouldFail = true)}>Fail Request</button>
       <button type="button" onclick={() => (shouldDelay = true)}>Should Delay</button>
       <button type="button" onclick={cancelVisit}>Cancel Visit</button>
+      <button type="button" onclick={cancel}>Cancel Submission</button>
       <button type="submit">Submit</button>
     </div>
   {/snippet}

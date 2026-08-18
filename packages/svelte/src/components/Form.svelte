@@ -246,6 +246,10 @@
     isDirty = false
   }
 
+  export function cancel() {
+    form.cancel()
+  }
+
   export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
     return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
   }
@@ -315,6 +319,7 @@
       setError,
       reset,
       submit,
+      cancel,
       defaults,
       getData,
       getFormData,
@@ -360,6 +365,7 @@
     setError,
     isDirty,
     submit,
+    cancel,
     defaults,
     reset,
     getData,
