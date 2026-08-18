@@ -1,7 +1,7 @@
 <script lang="ts">
   import { usePoll } from '@inertiajs/svelte'
 
-  const { start, stop } = usePoll(
+  const poll = usePoll(
     500,
     {
       only: ['custom_prop'],
@@ -15,5 +15,6 @@
   )
 </script>
 
-<button onclick={() => start()}>Start</button>
-<button onclick={() => stop()}>Stop</button>
+<button onclick={() => poll.start()}>Start</button>
+<button onclick={() => poll.stop()}>Stop</button>
+<div>Polling: {poll.polling ? 'yes' : 'no'}</div>
