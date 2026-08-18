@@ -710,6 +710,15 @@ test.describe('Form Component', () => {
       await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart,onCancel,onFinish')
     })
 
+    test('does not cancel a submission that already succeeded', async ({ page }) => {
+      await page.goto('/form-component/unmount-cancel/yes')
+
+      await page.getByRole('button', { name: 'Close On Success' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart,onSuccess,onFinish')
+    })
+
     test('keeps the submission running when the form unmounts without the attribute', async ({ page }) => {
       await page.goto('/form-component/unmount-cancel/no')
 

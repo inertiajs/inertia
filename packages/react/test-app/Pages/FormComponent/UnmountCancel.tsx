@@ -4,6 +4,7 @@ import { useState } from 'react'
 export default ({ cancelOnUnmount }: { cancelOnUnmount: boolean }) => {
   const [events, setEvents] = useState<string[]>([])
   const [showModal, setShowModal] = useState(true)
+  const [closeOnSuccess, setCloseOnSuccess] = useState(false)
 
   function log(eventName: string) {
     setEvents((previousEvents) => [...previousEvents, eventName])
@@ -14,8 +15,16 @@ export default ({ cancelOnUnmount }: { cancelOnUnmount: boolean }) => {
     onStart: () => log('onStart'),
     onFinish: () => log('onFinish'),
     onCancel: () => log('onCancel'),
-    onSuccess: () => log('onSuccess'),
     onCancelToken: () => log('onCancelToken'),
+    onSuccess: async () => {
+      log('onSuccess')
+
+      if (closeOnSuccess) {
+        setShowModal(false)
+
+        await new Promise((resolve) => setTimeout(resolve, 50))
+      }
+    },
   }
 
   return (
@@ -41,6 +50,9 @@ export default ({ cancelOnUnmount }: { cancelOnUnmount: boolean }) => {
 
       <button type="button" onClick={() => setShowModal(false)}>
         Close Modal
+      </button>
+      <button type="button" onClick={() => setCloseOnSuccess(true)}>
+        Close On Success
       </button>
     </div>
   )

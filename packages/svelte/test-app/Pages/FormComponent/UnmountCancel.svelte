@@ -5,6 +5,7 @@
 
   let events: string[] = $state([])
   let showModal = $state(true)
+  let closeOnSuccess = $state(false)
 
   function log(eventName: string) {
     events = [...events, eventName]
@@ -26,8 +27,14 @@
     log('onCancel')
   }
 
-  function onSuccess() {
+  async function onSuccess() {
     log('onSuccess')
+
+    if (closeOnSuccess) {
+      showModal = false
+
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
   }
 
   function onCancelToken() {
@@ -61,4 +68,5 @@
   {/if}
 
   <button type="button" onclick={() => (showModal = false)}>Close Modal</button>
+  <button type="button" onclick={() => (closeOnSuccess = true)}>Close On Success</button>
 </div>

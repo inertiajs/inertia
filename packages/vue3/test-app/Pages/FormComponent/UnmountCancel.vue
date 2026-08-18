@@ -11,13 +11,23 @@ function log(eventName: string) {
   events.value.push(eventName)
 }
 
+const closeOnSuccess = ref(false)
+
 const formEvents = {
   onBefore: () => log('onBefore'),
   onStart: () => log('onStart'),
   onFinish: () => log('onFinish'),
   onCancel: () => log('onCancel'),
-  onSuccess: () => log('onSuccess'),
   onCancelToken: () => log('onCancelToken'),
+  onSuccess: async () => {
+    log('onSuccess')
+
+    if (closeOnSuccess.value) {
+      showModal.value = false
+
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  },
 }
 </script>
 
@@ -43,5 +53,6 @@ const formEvents = {
     </div>
 
     <button type="button" @click="showModal = false">Close Modal</button>
+    <button type="button" @click="closeOnSuccess = true">Close On Success</button>
   </div>
 </template>
