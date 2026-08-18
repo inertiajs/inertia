@@ -2035,6 +2035,22 @@ app.post('/form-component/errors/bag', (req, res) =>
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
+app.get('/form-component/unmount-cancel/:cancelOnUnmount', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/UnmountCancel',
+    props: { cancelOnUnmount: req.params.cancelOnUnmount === 'yes' },
+  }),
+)
+app.post('/form-component/unmount-cancel/:cancelOnUnmount', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/UnmountCancel',
+        props: { cancelOnUnmount: req.params.cancelOnUnmount === 'yes' },
+      }),
+    500,
+  ),
+)
 app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
   inertia.render(req, res, {
     component: 'FormComponent/DisableWhileProcessing',

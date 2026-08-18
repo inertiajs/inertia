@@ -130,6 +130,10 @@ const Form = defineComponent({
       type: Boolean,
       default: false,
     },
+    cancelOnUnmount: {
+      type: Boolean,
+      default: false,
+    },
     invalidateCacheTags: {
       type: [String, Array] as PropType<FormComponentProps['invalidateCacheTags']>,
       default: () => [],
@@ -232,7 +236,13 @@ const Form = defineComponent({
       (value) => form.setValidationTimeout(value),
     )
 
-    onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
+    onBeforeUnmount(() => {
+      formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate))
+
+      if (props.cancelOnUnmount) {
+        form.cancel()
+      }
+    })
 
     const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.value, submitter)
 
