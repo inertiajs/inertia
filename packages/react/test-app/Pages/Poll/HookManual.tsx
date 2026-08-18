@@ -1,7 +1,7 @@
 import { usePoll } from '@inertiajs/react'
 
 export default () => {
-  const { start, stop } = usePoll(
+  const { start, stop, polling } = usePoll(
     500,
     {
       only: ['custom_prop'],
@@ -18,6 +18,7 @@ export default () => {
     <>
       <button onClick={start}>Start</button>
       <button onClick={stop}>Stop</button>
+      <div>Polling: {polling ? 'yes' : 'no'}</div>
     </>
   )
 }
