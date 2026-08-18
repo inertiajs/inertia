@@ -1,5 +1,5 @@
 import { cloneDeep, isEqual } from 'es-toolkit'
-import { get } from 'es-toolkit/compat'
+import { get, set } from 'es-toolkit/compat'
 import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
@@ -28,6 +28,7 @@ import {
   OptimisticCallback,
   Page,
   PageFlashData,
+  PageProps,
   PendingVisit,
   PollOptions,
   PrefetchedResponse,
@@ -639,6 +640,8 @@ export class Router {
 
     const intermediateProps = resolvedPageProps !== null ? { ...resolvedPageProps } : { ...sharedProps }
 
+    const onceProps = this.preserveOncePropsOnInstantVisit(current, intermediateProps)
+
     const intermediatePage: Page = {
       component: visit.component!,
       url: visit.url.pathname + visit.url.search + visit.url.hash,
@@ -652,6 +655,7 @@ export class Router {
       clearHistory: false,
       encryptHistory: current.encryptHistory,
       sharedProps: current.sharedProps,
+      onceProps,
       rememberedState: {},
     }
 
@@ -662,6 +666,34 @@ export class Router {
       viewTransition: visit.viewTransition,
       visitId: visit.id,
     })
+  }
+
+  /**
+   * Once props are remembered client-side, so the placeholder page must preserve their values
+   * and registry. Otherwise the swap discards the value, and an in-flight prefetch that already
+   * claimed the prop resolves with nothing to restore it from.
+   */
+  protected preserveOncePropsOnInstantVisit(current: Page, props: PageProps): Page['onceProps'] {
+    const onceProps: NonNullable<Page['onceProps']> = {}
+
+    Object.entries(current.onceProps ?? {}).forEach(([key, onceProp]) => {
+      if (get(props, onceProp.prop) !== undefined) {
+        // The visit provided its own value, so we can't claim to remember the once prop
+        return
+      }
+
+      const currentValue = get(current.props, onceProp.prop)
+
+      if (currentValue === undefined) {
+        return
+      }
+
+      set(props, onceProp.prop, currentValue)
+
+      onceProps[key] = onceProp
+    })
+
+    return onceProps
   }
 
   protected getPrefetchParams(href: string | URL | UrlMethodPair, options: VisitOptions): ActiveVisit {
