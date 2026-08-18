@@ -54,7 +54,14 @@ export class Request {
   }
 
   public async send() {
-    this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
+    this.requestParams.onCancelToken(() => {
+      // Once the response has arrived it's too late to cancel, the page is already being updated
+      if (this.response) {
+        return
+      }
+
+      this.cancel({ cancelled: true })
+    })
 
     fireStartEvent(this.requestParams.all())
     this.requestParams.onStart()

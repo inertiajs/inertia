@@ -698,6 +698,39 @@ test.describe('Form Component', () => {
     expect(consoleMessages.errors).toEqual([])
   })
 
+  test.describe('Cancel On Unmount', () => {
+    test('cancels an in-flight submission when the form unmounts', async ({ page }) => {
+      await page.goto('/form-component/unmount-cancel/yes')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart')
+
+      await page.getByRole('button', { name: 'Close Modal' }).click()
+
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart,onCancel,onFinish')
+    })
+
+    test('does not cancel a submission that already succeeded', async ({ page }) => {
+      await page.goto('/form-component/unmount-cancel/yes')
+
+      await page.getByRole('button', { name: 'Close On Success' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart,onSuccess,onFinish')
+    })
+
+    test('keeps the submission running when the form unmounts without the attribute', async ({ page }) => {
+      await page.goto('/form-component/unmount-cancel/no')
+
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart')
+
+      await page.getByRole('button', { name: 'Close Modal' }).click()
+
+      await expect(page.locator('#events')).toHaveText('onBefore,onCancelToken,onStart,onSuccess,onFinish')
+    })
+  })
+
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/methods')

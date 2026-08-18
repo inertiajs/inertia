@@ -71,6 +71,7 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       onCancelToken = noop,
       onSubmitComplete = noop,
       disableWhileProcessing = false,
+      cancelOnUnmount = false,
       resetOnError = false,
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
@@ -128,6 +129,9 @@ const Form = forwardRef<FormComponentRef, FormProps>(
     const [isDirty, setIsDirty] = useState(false)
     const defaultData = useRef<FormData>(new FormData())
 
+    const cancelOnUnmountRef = useRef(cancelOnUnmount)
+    cancelOnUnmountRef.current = cancelOnUnmount
+
     const getFormData = (submitter?: FormSubmitter): FormData =>
       formElement.current ? new FormData(formElement.current, submitter) : new FormData()
 
@@ -174,6 +178,10 @@ const Form = forwardRef<FormComponentRef, FormProps>(
 
       return () => {
         formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+
+        if (cancelOnUnmountRef.current) {
+          form.cancel()
+        }
       }
     }, [])
 

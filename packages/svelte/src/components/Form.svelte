@@ -43,6 +43,7 @@
     onError?: FormComponentProps['onError']
     onSubmitComplete?: FormComponentProps['onSubmitComplete']
     disableWhileProcessing?: boolean
+    cancelOnUnmount?: FormComponentProps['cancelOnUnmount']
     invalidateCacheTags?: FormComponentProps['invalidateCacheTags']
     resetOnError?: FormComponentProps['resetOnError']
     resetOnSuccess?: FormComponentProps['resetOnSuccess']
@@ -76,6 +77,7 @@
     onError = noop,
     onSubmitComplete = noop,
     disableWhileProcessing = false,
+    cancelOnUnmount = false,
     invalidateCacheTags = [],
     resetOnError = false,
     resetOnSuccess = false,
@@ -285,6 +287,10 @@
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
+
+      if (cancelOnUnmount) {
+        form.cancel()
+      }
     }
   })
 
