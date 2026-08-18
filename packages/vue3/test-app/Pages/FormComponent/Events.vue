@@ -61,7 +61,7 @@ function cancelVisit() {
     :action="action"
     method="post"
     v-bind="formEvents()"
-    v-slot="{ processing, progress, wasSuccessful, recentlySuccessful }"
+    v-slot="{ processing, progress, wasSuccessful, recentlySuccessful, cancel }"
   >
     <h1>Form Events & State</h1>
 
@@ -95,6 +95,7 @@ function cancelVisit() {
       <button type="button" @click="shouldFail = true">Fail Request</button>
       <button type="button" @click="shouldDelay = true">Should Delay</button>
       <button type="button" @click="cancelVisit">Cancel Visit</button>
+      <button type="button" @click="cancel">Cancel Submission</button>
       <button type="submit">Submit</button>
     </div>
   </Form>

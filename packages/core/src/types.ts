@@ -835,6 +835,7 @@ export type FormComponentMethods<TForm extends object = Record<string, any>> = {
   }
   reset: <K extends FormDataKeys<TForm>>(...fields: K[]) => void
   submit: () => void
+  cancel: () => void
   defaults: () => void
   getData: () => TForm
   getFormData: () => FormData

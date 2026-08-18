@@ -311,7 +311,7 @@ test.describe('Form Component', () => {
     })
 
     const waitForEvents = async (page: Page, events: string[]) => {
-      await page.waitForFunction(async (expected) => {
+      await page.waitForFunction((expected) => {
         return document.querySelector('#events')?.innerText === expected
       }, events.join(','))
     }
@@ -344,6 +344,17 @@ test.describe('Form Component', () => {
       await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
     })
 
+    test('cancels the request via the exposed cancel method', async ({ page }) => {
+      await page.getByRole('button', { name: 'Should Delay' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+      await expect(page.locator('#processing')).toHaveText('true')
+
+      await page.getByRole('button', { name: 'Cancel Submission' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onCancel', 'onFinish'])
+      await expect(page.locator('#processing')).toHaveText('false')
+    })
+
     test('fires onProgress during file upload', async ({ page }) => {
       const file = {
         name: 'test.jpg',
@@ -354,7 +365,8 @@ test.describe('Form Component', () => {
       await page.setInputFiles('#avatar', file)
       await page.getByRole('button', { name: 'Submit' }).click()
 
-      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onProgress'])
+      // onProgress can fire multiple times, so the event list can't be matched exactly
+      await expect(page.locator('#events')).toContainText('onBefore,onCancelToken,onStart,onProgress')
     })
 
     test('updates processing during request', async ({ page }) => {

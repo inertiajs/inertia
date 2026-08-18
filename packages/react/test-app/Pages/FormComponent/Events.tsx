@@ -58,7 +58,7 @@ export default () => {
 
   return (
     <Form action={action} method="post" {...formEvents}>
-      {({ processing, progress, wasSuccessful, recentlySuccessful }) => (
+      {({ processing, progress, wasSuccessful, recentlySuccessful, cancel }) => (
         <>
           <h1>Form Events & State</h1>
 
@@ -101,6 +101,9 @@ export default () => {
             </button>
             <button type="button" onClick={cancelVisit}>
               Cancel Visit
+            </button>
+            <button type="button" onClick={cancel}>
+              Cancel Submission
             </button>
             <button type="submit">Submit</button>
           </div>
