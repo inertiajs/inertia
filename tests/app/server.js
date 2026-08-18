@@ -2900,6 +2900,25 @@ app.get('/once-props/client-side-visit', (req, res) => {
   })
 })
 
+app.get('/once-props/instant/:page', (req, res) => {
+  const { isPartialRequest, shouldResolveProp, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+  const deferFoo = req.query.deferred === '1' && !isPartialRequest && !hasPropAlready
+  const delay = page === 'b' && !isPartialRequest ? 500 : 0
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: `OnceProps/InstantPage${page.toUpperCase()}`,
+      props: {
+        foo: !deferFoo && shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+        bar: `bar-${page}`,
+      },
+      deferredProps: deferFoo ? { default: ['foo'] } : {},
+      onceProps: { foo: { prop: 'foo', expiresAt: null } },
+    })
+  }, delay)
+})
+
 app.get('/deferred-props/back-button/a', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {

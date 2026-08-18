@@ -515,3 +515,54 @@ test('it provides once props as second argument in client-side visit props callb
   await expect(page.getByText('Foo: foo-initial')).toBeVisible()
   await expect(page.getByText('Bar: bar-updated')).toBeVisible()
 })
+
+test('instant visit reuses the remembered once prop', async ({ page }) => {
+  await page.goto('/once-props/instant/a')
+
+  const fooText = await page.locator('#foo').innerText()
+  expect(fooText.startsWith('Foo: foo-a')).toBe(true)
+
+  await page.getByRole('button', { name: 'Instant visit to Page B' }).click()
+
+  await expect(page.getByText(fooText)).toBeVisible()
+
+  await page.waitForResponse((response) => response.url().includes('/once-props/instant/b'))
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('instant visit adopting an in-flight prefetch preserves the once prop', async ({ page }) => {
+  await page.goto('/once-props/instant/a')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b'))
+
+  await page.getByRole('button', { name: 'Prefetch Page B' }).click()
+  await page.getByRole('button', { name: 'Instant visit to Page B' }).click()
+
+  await prefetchPromise
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('instant visit adopting an in-flight prefetch preserves the deferred once prop', async ({ page }) => {
+  await page.goto('/once-props/instant/a')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  const prefetchPromise = page.waitForResponse((response) =>
+    response.url().includes('/once-props/instant/b?deferred=1'),
+  )
+
+  await page.getByRole('button', { name: 'Prefetch Deferred Page B' }).click()
+  await page.getByRole('button', { name: 'Instant visit to Deferred Page B' }).click()
+
+  await prefetchPromise
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText('Loading foo...')).not.toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
