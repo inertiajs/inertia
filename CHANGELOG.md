@@ -7,9 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.6.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.7.0...3.x)
 
 - Nothing yet
+
+## [v3.7.0](https://github.com/inertiajs/inertia/compare/v3.6.1...v3.7.0) - 2026-08-18
+
+### What's Changed
+
+* Bump stefanzweifel/git-auto-commit-action from 7.1.0 to 7.2.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3192
+* [3.x] Guard Form getFormData against a missing form element by [@NiekNijland](https://github.com/NiekNijland) in https://github.com/inertiajs/inertia/pull/3203
+* [3.x] Preserve identity of untouched props in replaceProp by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/3194
+* [3.x] Fix React dropping the restored page on `back_forward` visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3196
+* [3.x] Don't cancel background async visits on navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3198
+* Bump actions/setup-node from 6.4.0 to 7.0.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3205
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3207
+* Bump actions/checkout from 7.0.0 to 7.0.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3209
+* Bump pnpm/action-setup from 6.0.9 to 6.0.10 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3211
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3223
+* [3.x] Return `polling` state from `usePoll` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3220
+* [3.x] Preserve once props during instant visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3221
+* [3.x] Expose `cancel` on the `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3224
+* [3.x] Add `cancelOnUnmount` to the `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3225
+
+### New Contributors
+
+* [@NiekNijland](https://github.com/NiekNijland) made their first contribution in https://github.com/inertiajs/inertia/pull/3203
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.6.1...v3.7.0
 
 ## [v3.6.1](https://github.com/inertiajs/inertia/compare/v3.6.0...v3.6.1) - 2026-07-07
 
