@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { ClientOnly } from '@inertiajs/svelte'
+  import { ClientOnly, inertia } from '@inertiajs/svelte'
+  import ClientOnlyChild from '@/Components/ClientOnlyChild.svelte'
+  import ClientOnlyFallback from '@/Components/ClientOnlyFallback.svelte'
 </script>
 
 <div>
@@ -7,9 +9,16 @@
 
   <ClientOnly>
     {#snippet fallback()}
-      <p data-testid="client-only-fallback">Loading widget...</p>
+      <ClientOnlyFallback />
     {/snippet}
 
     <p data-testid="client-only-content">Client path: /client-only</p>
+    <ClientOnlyChild />
   </ClientOnly>
+
+  <a href="/client-only" use:inertia data-testid="revisit-link">Revisit</a>
+  <a href="/client-only" use:inertia={{ preserveState: true }} data-testid="preserve-state-link">
+    Revisit (preserve state)
+  </a>
+  <a href="/" use:inertia data-testid="leave-link">Leave</a>
 </div>

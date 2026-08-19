@@ -7,6 +7,8 @@ import DefaultLayout from './Layouts/DefaultLayout.svelte'
 
 window.testing = { Inertia: router }
 window.resolverReceivedPage = null as Page | null
+window._inertia_client_only_fallback_renders = 0
+window._inertia_client_only_child_mounts = 0
 
 const params = new URLSearchParams(window.location.search)
 

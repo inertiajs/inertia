@@ -11,8 +11,9 @@
 </script>
 
 <script lang="ts">
-  import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
+  import { isPropsObjectOrCallback, isPropsObject, markClientRendered, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
+  import { onMount } from 'svelte'
   import type { Component } from 'svelte'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
@@ -48,6 +49,8 @@
   const isServer = typeof window === 'undefined'
 
   if (!isServer) {
+    onMount(() => markClientRendered())
+
     // svelte-ignore state_referenced_locally
     router.init<ResolvedComponent>({
       initialPage,

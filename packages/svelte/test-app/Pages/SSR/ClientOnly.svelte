@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ClientOnly } from '@inertiajs/svelte'
+  import { ClientOnly, inertia } from '@inertiajs/svelte'
+  import ClientOnlyFallback from '@/Components/ClientOnlyFallback.svelte'
 
   const clientPath = () => window.location.pathname
 </script>
@@ -9,9 +10,12 @@
 
   <ClientOnly>
     {#snippet fallback()}
-      <p data-testid="client-only-fallback">Loading widget...</p>
+      <ClientOnlyFallback />
     {/snippet}
 
     <p data-testid="client-only-content">Client path: {clientPath()}</p>
   </ClientOnly>
+
+  <a href="/ssr/page2" use:inertia data-testid="leave-link">Leave</a>
+  <a href="/ssr/client-only" use:inertia data-testid="revisit-link">Revisit</a>
 </div>

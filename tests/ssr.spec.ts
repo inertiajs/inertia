@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { consoleMessages, pageLoads } from './support'
+import { clickLinkAndGoBack, clientOnlyProbe, consoleMessages, pageLoads } from './support'
 
 const SSR_SERVER_PORT = 13714
 const SSR_AUTO_PORTS: Record<string, number> = { vue3: 13718, react: 13719, svelte: 13720 }
@@ -103,12 +103,67 @@ test.describe('SSR ClientOnly', () => {
 
     await page.goto('/ssr/client-only')
 
-    await expect(page.getByTestId('client-only-content')).toHaveText('Client path: /ssr/client-only')
-    await expect(page.getByTestId('client-only-fallback')).toHaveCount(0)
+    // Rendered exactly once, during the hydration pass -- never again afterwards.
+    await clientOnlyProbe.expectRendered(page, 'Client path: /ssr/client-only', 1)
 
     const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
     expect(hydrationErrors).toHaveLength(0)
     expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('the fallback never re-renders after navigating away and back', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    await page.goto('/ssr/client-only')
+    await expect(page.getByTestId('client-only-content')).toBeVisible()
+    await clientOnlyProbe.reset(page)
+
+    await clickLinkAndGoBack(page, 'leave-link', () => expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 2'))
+
+    await clientOnlyProbe.expectRendered(page, 'Client path: /ssr/client-only')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+
+  test('the fallback never re-renders after revisiting the same page', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    await page.goto('/ssr/client-only')
+    await expect(page.getByTestId('client-only-content')).toBeVisible()
+    await clientOnlyProbe.reset(page)
+
+    await page.getByTestId('revisit-link').click()
+
+    await clientOnlyProbe.expectRendered(page, 'Client path: /ssr/client-only')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+
+  test('the fallback never shows on first SPA navigation to a ClientOnly page from an SSR page with no ClientOnly', async ({
+    page,
+  }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    // Land on an SSR-hydrated page that contains no ClientOnly at all. Nothing here
+    // ever calls markClientRendered() via a ClientOnly mount, since there is no
+    // ClientOnly instance on this page -- "hydration is over" must still get recorded
+    // some other way, or the next ClientOnly encountered anywhere in the SPA will
+    // wrongly think it's still in the middle of a hydration pass.
+    await page.goto('/ssr/page1')
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 1')
+
+    await page.getByTestId('to-client-only-link').click()
+
+    await clientOnlyProbe.expectRendered(page, 'Client path: /ssr/client-only')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    // Confirm this was a real SPA navigation, not a full document reload.
+    expect(pageLoads.count).toBe(1)
   })
 })
 
