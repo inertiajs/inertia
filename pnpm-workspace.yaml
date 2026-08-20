@@ -17,6 +17,23 @@ overrides:
 
 auditConfig:
   ignoreGhsas:
-    # vite server.fs.deny bypass (dev-only, Windows-only). Affects vite 5.x, which is
-    # pinned to the Svelte 4 toolchain (vite-plugin-svelte@3) we keep on the 2.x line.
+    # The advisories below only affect svelte 4.x and vite 5.x, which are pinned to the
+    # Svelte 4 toolchain (vite-plugin-svelte@3) we keep supporting on the 2.x line. Both
+    # are on their latest 4.x/5.x release and neither line received a backported fix.
+
+    # vite server.fs.deny bypass (dev-only, Windows-only).
     - GHSA-fx2h-pf6j-xcff
+    # vite path traversal in optimized deps `.map` handling (dev-only).
+    - GHSA-4w7w-66w2-5vf9
+    # vite/launch-editor NTLMv2 hash disclosure via UNC paths (dev-only, Windows-only).
+    - GHSA-v6wh-96g9-6wx3
+    # svelte SSR XSS via spread attributes.
+    - GHSA-crpf-4hrx-3jrp
+    - GHSA-f7gr-6p89-r883
+    - GHSA-pr6f-5x2q-rwfp
+    # svelte SSR does not validate dynamic `<svelte:element>` tag names.
+    - GHSA-m56q-vw4c-c2cp
+    # svelte SSR XSS via contenteditable `bind:innerText` and `bind:textContent`.
+    - GHSA-phwv-c562-gvmh
+    # svelte XSS via DOM clobbering of internal framework state.
+    - GHSA-rcqx-6q8c-2c42
