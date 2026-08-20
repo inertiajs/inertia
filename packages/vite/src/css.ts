@@ -82,6 +82,10 @@ function isCSSRequest(url: string): boolean {
 }
 
 function resolveDevServerOrigin(server: ViteDevServer): string {
+  if (server.config.server.origin) {
+    return server.config.server.origin
+  }
+
   const url = server.resolvedUrls?.local[0] ?? server.resolvedUrls?.network[0]
 
   if (url) {
