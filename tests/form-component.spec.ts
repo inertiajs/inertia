@@ -654,6 +654,27 @@ test.describe('Form Component', () => {
     })
   })
 
+  test('does not throw when a form event fires while the form is unmounting', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/form-component/unmount-race')
+
+    await page.evaluate(async () => {
+      const form = document.querySelector('form')!
+
+      ;(document.querySelector('#hide') as HTMLButtonElement).click()
+
+      // React nulls the form ref when the unmount commits (a microtask) but removes the
+      // listener in a later passive effect, so this dispatch used to hit new FormData(null)
+      await Promise.resolve()
+
+      form.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+
+    await expect(page.locator('form')).toHaveCount(0)
+    expect(consoleMessages.errors).toEqual([])
+  })
+
   test.describe('Methods', () => {
     test.beforeEach(async ({ page }) => {
       await page.goto('/form-component/methods')
