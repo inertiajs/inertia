@@ -72,6 +72,7 @@ export class InitialVisit {
           .set(currentPage.get(), {
             preserveScroll: locationVisit.preserveScroll,
             preserveState: true,
+            initialRender: true,
           })
           .then(() => {
             if (locationVisit.preserveScroll) {
@@ -93,7 +94,7 @@ export class InitialVisit {
       currentPage.setUrlHash(window.location.hash)
     }
 
-    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true }).then(() => {
+    currentPage.set(currentPage.get(), { preserveScroll: true, preserveState: true, initialRender: true }).then(() => {
       if (navigationType.isReload()) {
         Scroll.restore(history.getScrollRegions())
       } else {
