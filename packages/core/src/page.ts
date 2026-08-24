@@ -256,8 +256,8 @@ class CurrentPage {
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
 
-      // A newer transition aborts this one, rejecting `ready` with an AbortError.
-      // That's expected, so swallow it to avoid an unhandled rejection.
+      // A newer transition, or the tab going hidden mid-flight, aborts this one,
+      // rejecting these promises. That's expected, so swallow it to avoid an unhandled rejection.
       transitionResult.ready.catch(() => {})
       transitionResult.finished.catch(() => {})
       transitionResult.updateCallbackDone.catch(() => {})
