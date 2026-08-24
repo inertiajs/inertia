@@ -134,6 +134,55 @@ app.get('/ssr/server-head', (req, res) =>
   }),
 )
 
+app.get('/ssr/layer', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Layer',
+    props: {},
+    layer: { key: 'ssr-layer', base: '/ssr/layer-base' },
+  }),
+)
+
+// A cold render resolves props.head from the layer, even though it draws over a blank base.
+app.get('/ssr/layer-head', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Layer',
+    props: {
+      head: ['<title>Layer Head SSR</title>', '<meta name="description" content="Layer head description">'],
+    },
+    layer: { key: 'ssr-layer-head', base: '/ssr/layer-base' },
+  }),
+)
+
+app.get('/ssr/layer-base', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/LayerBase',
+    props: {},
+  }),
+)
+
+// The base beneath this is what the SSR entries' `loading` option matches on.
+app.get('/ssr/layer-loading', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Layer',
+    props: {},
+    layer: { key: 'ssr-layer-loading', base: '/ssr/layer-loading-base?delay=1500' },
+  }),
+)
+
+app.get('/ssr/layer-loading-base', (req, res) => {
+  const respond = () =>
+    inertia.renderSSR(req, res, {
+      component: 'SSR/LayerBase',
+      props: {},
+    })
+
+  if (req.query.delay) {
+    setTimeout(respond, Number(req.query.delay))
+  } else {
+    respond()
+  }
+})
+
 // SSR auto-transform test routes (uses the Vite plugin SSR transform)
 app.get('/ssr-auto/page1', (req, res) =>
   inertia.renderSSRAuto(req, res, {
@@ -165,6 +214,14 @@ app.get('/ssr-auto/with-app', (req, res) =>
 app.get('/ssr-auto/async', (req, res) =>
   inertia.renderSSRAuto(req, res, {
     component: 'SSR/Async',
+  }),
+)
+
+app.get('/ssr-auto/layer', (req, res) =>
+  inertia.renderSSRAuto(req, res, {
+    component: 'SSR/Layer',
+    props: {},
+    layer: { key: 'ssr-layer', base: '/ssr/layer-base' },
   }),
 )
 
@@ -1095,6 +1152,13 @@ app.get('/prefetch/tags/:pageNumber{/:propType}', (req, res) => {
   })
 })
 
+app.get('/history/non-serializable', (req, res) => {
+  inertia.render(req, res, {
+    component: 'History/NonSerializable',
+    props: {},
+  })
+})
+
 app.get('/history/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Page',
@@ -1130,6 +1194,458 @@ app.get('/history-quota/:pageNumber', (req, res) => {
       largeData,
     },
   })
+})
+
+// A counter per browser context, not per server: Playwright gives each test its own cookie jar, so
+// a row can assert an absolute count without depending on the rows that ran before it.
+const countFor = (req, res, name) => {
+  const seen = Number((req.headers.cookie || '').match(new RegExp(`${name}=(\\d+)`))?.[1] ?? 0)
+
+  res.cookie(name, String(seen + 1), { path: '/' })
+
+  return seen
+}
+
+app.get('/layers/base', (req, res) => {
+  // `?stale` leaves behind what a failed form post would, so a layer opening over it has something
+  // to wrongly replay. `?delay` holds the response open long enough to close a layer mid-walk. The
+  // settled users scroll prop is what a layer's own infinite scroll must not read instead of its own.
+  const stale = req.query.stale !== undefined
+  const respond = () =>
+    inertia.render(req, res, {
+      component: 'Layers/Base',
+      props: {
+        likes: 0,
+        ...(stale && { errors: { name: 'The name field is required.' } }),
+      },
+      flash: stale ? { message: 'Base flash' } : undefined,
+      scrollProps: {
+        users: { pageName: 'page', currentPage: 1, nextPage: null, previousPage: null, reset: false },
+      },
+    })
+
+  if (req.query.delay) {
+    setTimeout(respond, Number(req.query.delay))
+  } else {
+    respond()
+  }
+})
+
+app.post('/layers/like', (req, res) => {
+  // Slow enough that a test can assert on the optimistic state while the request is still in flight
+  setTimeout(() => inertia.render(req, res, { component: 'Layers/Base', props: { likes: 1 } }), 1000)
+})
+
+// Counts its answers, so a layer-targeted partial has something observable to refresh.
+app.get('/layers/panel/:name', (req, res) => {
+  // `?invalid` is what a failed submit redirects back to; `?delay` holds the response open.
+  const respond = () =>
+    inertia.render(req, res, {
+      component: 'Layers/Panel',
+      props: {
+        name: req.params.name,
+        count: countFor(req, res, 'layers-panel-answers') + 1,
+        ...(req.query.invalid !== undefined && { errors: { note: 'The note field is required.' } }),
+      },
+      layer: { key: `panel:${req.params.name}`, base: '/layers/base' },
+    })
+
+  if (req.query.delay) {
+    setTimeout(respond, Number(req.query.delay))
+  } else {
+    respond()
+  }
+})
+
+// A layer with a deferred group of its own. The follow-up is held open long enough for a test to
+// see the fallback before it resolves.
+app.get('/layers/deferred', (req, res) => {
+  const partial = req.headers['x-inertia-partial-data'] !== undefined
+  const respond = () =>
+    inertia.render(req, res, {
+      component: 'Layers/Deferred',
+      props: {
+        name: 'deferred',
+        ...(partial && { stats: [1, 2, 3] }),
+      },
+      layer: { key: 'deferred-panel', base: '/layers/base' },
+      ...(!partial && { deferredProps: { slow: ['stats'] }, rescuedProps: ['stats'] }),
+    })
+
+  if (partial) {
+    setTimeout(respond, 300)
+  } else {
+    respond()
+  }
+})
+
+app.post('/layers/panel/:name/save', (req, res) => res.redirect(303, `/layers/panel/${req.params.name}?invalid`))
+
+// The same failed save, held open long enough for the optimistic update to be observable.
+app.post('/layers/panel/:name/save-slow', (req, res) =>
+  res.redirect(303, `/layers/panel/${req.params.name}?invalid&delay=500`),
+)
+
+app.post('/layers/panel/:name/next', (req, res) => res.redirect(303, '/layers/panel/second'))
+
+// One key, two urls: the second step rewrites the layer the first opened rather than stacking.
+app.get('/layers/step/:name', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: {
+      name: req.params.name,
+    },
+    layer: { key: 'step', base: '/layers/base' },
+  })
+})
+
+app.get('/layers/slow', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Layers/Slow',
+    props: {},
+    layer: { key: 'slow', base: '/layers/base' },
+  })
+})
+
+app.get('/layers/waypoint/:name', (req, res) => {
+  inertia.render(req, res, {
+    component: 'Layers/Waypoint',
+    props: {
+      name: req.params.name,
+      next: req.params.name === 'a' ? 'b' : 'c',
+    },
+  })
+})
+
+const layersSignedIn = (req) => /layers-auth=1/.test(req.headers.cookie || '')
+
+const layersIntended = (req) => (req.headers.cookie || '').match(/layers-intended=([^;]+)/)
+
+app.get('/layers/settings', (req, res) => {
+  if (!layersSignedIn(req)) {
+    // The session expired mid-click, so the layer the user asked for is remembered and signing
+    // back in returns them to it.
+    res.cookie('layers-intended', req.originalUrl, { path: '/' })
+
+    return res.redirect(302, '/layers/login')
+  }
+
+  inertia.render(req, res, {
+    component: 'Layers/Settings',
+    props: {},
+    layer: { key: 'settings', base: '/layers/base' },
+  })
+})
+
+app.get('/layers/login', (req, res) => inertia.render(req, res, { component: 'Layers/Login', props: {} }))
+
+// The detour fixtures: the guarded route redirects to a marked prompt until the complete POST
+// confirms it, so the open lands on the prompt and the return trip re-composes over the base.
+// `?mark` renders the layer response carrying the mark too, which is the malformed case.
+const layersGuardedConfirmed = (req) => /layers-confirmed=1/.test(req.headers.cookie || '')
+
+app.get('/layers/guarded', (req, res) => {
+  if (!layersGuardedConfirmed(req)) {
+    return res.redirect(302, '/layers/prompt')
+  }
+
+  inertia.render(req, res, {
+    component: 'Layers/Guarded',
+    // A prop the layer component does not declare, so a fallthrough attribute would show up on it.
+    props: { note: 'guarded' },
+    layer: { key: 'guarded', base: '/layers/base' },
+    ...(req.query.mark ? { interstitial: true } : {}),
+  })
+})
+
+app.get('/layers/prompt', (req, res) =>
+  inertia.render(req, res, { component: 'Layers/Prompt', props: {}, interstitial: true }),
+)
+
+app.post('/layers/prompt/complete', (req, res) => {
+  res.cookie('layers-confirmed', '1', { path: '/' })
+
+  res.redirect(303, '/layers/guarded')
+})
+
+// The layer opens cold over the headed base, so the walk brings the base's <Head> in after the
+// layer's own and the head rows can watch which title survives.
+app.get('/layers/headed', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Headed',
+    props: { suffix: 'Layered' },
+    layer: { key: 'headed', base: '/layers/headed-base' },
+  }),
+)
+
+app.get('/layers/headed-base', (req, res) => inertia.render(req, res, { component: 'Layers/HeadedBase', props: {} }))
+
+// Each page carries its own [scroll-region], and the layer opens cold over the base, so a row can
+// scroll the layer's during the cold window and watch the walk restore each tier its own.
+app.get('/layers/scroll-base', (req, res) => inertia.render(req, res, { component: 'Layers/ScrollBase', props: {} }))
+
+app.get('/layers/scroll', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ScrollLayer',
+    props: {},
+    layer: { key: 'scroll', base: '/layers/scroll-base' },
+  }),
+)
+
+// The layer's own infinite scroll, merged into the open layer on the carried-layerId reload. The
+// base's settled users scroll prop sits untouched on the composite.
+app.get('/layers/infinite', (req, res) => {
+  const page = req.query.page ? parseInt(req.query.page) : 1
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40)
+
+  inertia.render(req, res, {
+    component: 'Layers/Infinite',
+    props: { users: paginated },
+    mergeProps: ['users.data'],
+    scrollProps: { users: scrollProp },
+    layer: { key: 'infinite', base: '/layers/base' },
+  })
+})
+
+app.post('/layers/login', (req, res) => {
+  const intended = layersIntended(req)
+
+  res.cookie('layers-auth', '1', { path: '/' })
+
+  res.redirect(303, intended ? decodeURIComponent(intended[1]) : '/layers/base')
+})
+
+// A chain two deep: opening the outer url cold walks through both, in three requests.
+app.get('/layers/chain/outer', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainOuter',
+    props: {},
+    layer: { key: 'chain-outer', base: '/layers/chain/inner' },
+  }),
+)
+
+app.get('/layers/chain/inner', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainInner',
+    props: {},
+    layer: { key: 'chain-inner', base: '/layers/base' },
+  }),
+)
+
+// A chain three deep: the walk inserts the middle and bottom layers beneath dialogs already open.
+app.get('/layers/chain/top', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainOuter',
+    props: {},
+    layer: { key: 'chain-top', base: '/layers/chain/middle' },
+  }),
+)
+
+app.get('/layers/chain/middle', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainInner',
+    props: {},
+    layer: { key: 'chain-middle', base: '/layers/chain/inner' },
+  }),
+)
+
+// The base answers the walk with a server error, so the walk lands on the layer it reached deepest
+// instead of painting the error overlay over it.
+app.get('/layers/cold-fail', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'fail' },
+    layer: { key: 'fail', base: '/layers/fail-hop' },
+  }),
+)
+
+app.get('/layers/fail-hop', (req, res) => {
+  res.header('Vary', 'Accept')
+  res.header('X-Inertia', true)
+  return res.status(500).json({
+    component: 'ErrorPage',
+    props: { status: 500 },
+    url: req.originalUrl,
+    version: null,
+  })
+})
+
+// The walk's first hop 500s; the recovery visit the landing makes is answered with the base page.
+app.get('/layers/fail-once', (req, res) => {
+  if (countFor(req, res, 'layers-fail-once-answered') === 0) {
+    res.header('Vary', 'Accept')
+    res.header('X-Inertia', true)
+    return res.status(500).json({
+      component: 'ErrorPage',
+      props: { status: 500 },
+      url: req.originalUrl,
+      version: null,
+    })
+  }
+
+  return inertia.render(req, res, {
+    component: 'Layers/Base',
+    props: { likes: 0 },
+  })
+})
+
+app.get('/layers/fail-recover', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'fail' },
+    layer: { key: 'fail-recover', base: '/layers/fail-once' },
+  }),
+)
+
+// The declared base is held open long enough to close the layer while its walk is still out.
+app.get('/layers/slow-base-panel', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'slow' },
+    layer: { key: 'slow-base-panel', base: '/layers/base?delay=1500' },
+  }),
+)
+
+// `likes` counts every answer, so a reload, or a close's refresh, is visibly not the same page.
+app.get('/layers/counted/base', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Base',
+    props: { likes: countFor(req, res, 'layers-counted-base-answers') },
+  }),
+)
+
+// Counts its answers too, and drops a prop it rendered on the open whenever the request carries
+// partial headers, so the layer merge keeps the dropped prop as the deliberate ghost.
+app.get('/layers/counted/panel', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: {
+      name: 'counted',
+      count: countFor(req, res, 'layers-counted-panel-answers') + 1,
+      ...(!req.headers['x-inertia-partial-data'] && { tag: 'first' }),
+    },
+    layer: { key: 'counted-panel', base: '/layers/counted/base' },
+  }),
+)
+
+// A layer the base opens through a handle, which the base's handle hears events from.
+app.get('/layers/child', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Child',
+    props: {},
+    layer: { key: 'child', base: '/layers/base' },
+  }),
+)
+
+// Stages a flash in a cookie, standing in for the session flash Laravel keeps for the refresh the
+// client runs after a close. The route below emits it exactly once.
+app.post('/layers/close', (req, res) => {
+  res.cookie('layers-close-flash', 'Saved from the panel', { path: '/' })
+
+  inertia.render(req, res, { close: true })
+})
+
+app.get('/layers/close-flash/base', (req, res) => {
+  const staged = (req.headers.cookie || '').match(/layers-close-flash=([^;]+)/)
+
+  if (staged) {
+    res.clearCookie('layers-close-flash', { path: '/' })
+  }
+
+  inertia.render(req, res, {
+    component: 'Layers/Base',
+    props: { likes: countFor(req, res, 'layers-close-base-answers') },
+    ...(staged && { flash: { message: decodeURIComponent(staged[1]) } }),
+  })
+})
+
+// A layer with no base is not a layer at all cold: its url renders as the page it would be.
+app.get('/layers/promote-cold', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'promote' },
+    layer: { key: 'promote' },
+  }),
+)
+
+// The bases beneath these are what the test apps' `loading` option matches on.
+app.get('/layers/loading/base', (req, res) => {
+  const respond = () => inertia.render(req, res, { component: 'Layers/Base', props: { likes: 0 } })
+
+  if (req.query.delay) {
+    setTimeout(respond, Number(req.query.delay))
+  } else {
+    respond()
+  }
+})
+
+app.get('/layers/loading/panel', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'loading' },
+    layer: { key: 'loading-panel', base: '/layers/loading/base?delay=1500' },
+  }),
+)
+
+app.get('/layers/loading/slow-import', (req, res) =>
+  inertia.render(req, res, { component: 'Layers/SlowImport', props: {} }),
+)
+
+app.get('/layers/loading/slow-import/panel', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'slow-import' },
+    layer: { key: 'loading-slow-import', base: '/layers/loading/slow-import' },
+  }),
+)
+
+app.get('/layers/loading/chain/outer', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainOuter',
+    props: {},
+    layer: { key: 'loading-chain-outer', base: '/layers/loading/chain/inner' },
+  }),
+)
+
+app.get('/layers/loading/chain/inner', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ChainInner',
+    props: {},
+    layer: { key: 'loading-chain-inner', base: '/layers/loading/base?delay=1500' },
+  }),
+)
+
+// A page whose module scope calls usePage(), which must not throw outside component init.
+app.get('/layers/module-scope', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/ModuleScope',
+    props: {},
+  }),
+)
+
+// A hop that does not carry the version is one whose layer response never seeded the walk.
+app.get('/layers/version/outer', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Layers/Panel',
+    props: { name: 'version' },
+    layer: { key: 'version', base: '/layers/version-guard' },
+    version: 'v1',
+  }),
+)
+
+app.get('/layers/version-guard', (req, res) => {
+  if (req.get('X-Inertia-Version') === 'v1') {
+    return inertia.render(req, res, {
+      component: 'Layers/Base',
+      props: { likes: 0 },
+    })
+  }
+
+  // The version mismatch Laravel's middleware answers with: the hop is a background visit, so the
+  // client lands the walk rather than reloading, and the base the layer declared never arrives.
+  res.header('X-Inertia-Location', req.originalUrl)
+  res.header('X-Inertia-Version', 'v1')
+  return res.status(409).send('')
 })
 
 app.get('/when-visible', (req, res) => {

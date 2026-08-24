@@ -1,4 +1,5 @@
 import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
+import Layer from './Layouts/Layer.svelte'
 
 // This file uses createInertiaApp as a standalone expression (not exported)
 // The Vite plugin SSR transform will automatically:
@@ -7,6 +8,7 @@ import { createInertiaApp, type ResolvedComponent } from '@inertiajs/svelte'
 // 3. Export a default render function
 
 createInertiaApp<{ locale?: string }>({
+  layer: Layer,
   resolve: (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.svelte', { eager: true })
     return pages[`./Pages/${name}.svelte`]
