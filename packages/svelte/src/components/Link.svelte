@@ -2,6 +2,9 @@
   import { isUrlMethodPair, resolveUrlMethodPairComponent } from '@inertiajs/core'
   import type { LinkComponentBaseProps } from '@inertiajs/core'
   import { inertia } from '../index'
+  import { layerId } from '../page.svelte'
+
+  const currentLayerId = layerId()
 
   interface Props {
     href?: LinkComponentBaseProps['href']
@@ -95,6 +98,7 @@
 <svelte:element
   this={asProp}
   use:inertia={{
+    layerId: currentLayerId,
     ...(asProp !== 'a' ? { href: _href } : {}),
     data,
     method: _method,

@@ -1,4 +1,5 @@
 import { ActiveVisit, router } from '../index'
+import { tierOf } from '../layers'
 import { page as currentPage } from '../page'
 import { Page, PendingVisit, ReloadOptions, ScrollProp, UseInfiniteScrollDataManager } from '../types'
 
@@ -18,6 +19,8 @@ export type InfiniteScrollPageIdentifier = string | number | null
 export type InfiniteScrollOnCompleteDetails = { page: InfiniteScrollPageIdentifier; completed: boolean }
 
 export const useInfiniteScrollData = (options: {
+  /** @internal */
+  layerId?: string
   getPropName: () => string
   onBeforeUpdate: () => void
   onBeforePreviousRequest: () => void
@@ -35,7 +38,7 @@ export const useInfiniteScrollData = (options: {
   onReset?: () => void
 }): UseInfiniteScrollDataManager => {
   const getScrollPropFromCurrentPage = (): ScrollProp => {
-    const scrollProp = currentPage.get().scrollProps?.[options.getPropName()]
+    const scrollProp = tierOf(currentPage.get(), options.layerId).scrollProps?.[options.getPropName()]
 
     if (scrollProp) {
       return scrollProp
@@ -72,7 +75,7 @@ export const useInfiniteScrollData = (options: {
   if (typeof window !== 'undefined') {
     resetState()
 
-    const rememberedState = router.restore(getRememberKey()) as InfiniteScrollState | undefined
+    const rememberedState = router.restore(getRememberKey(), options.layerId) as InfiniteScrollState | undefined
 
     if (
       rememberedState &&
@@ -124,6 +127,7 @@ export const useInfiniteScrollData = (options: {
         requestCount: state.requestCount,
       } as InfiniteScrollState,
       getRememberKey(),
+      options.layerId,
     )
   }
 
@@ -144,6 +148,7 @@ export const useInfiniteScrollData = (options: {
       ...reloadOptions,
       data: { ...(reloadOptions.data || {}), [getPageName()]: page },
       only: [...(reloadOptions.only || []), options.getPropName()],
+      layerId: options.layerId,
       preserveUrl: true, // we handle URL updates manually via useInfiniteScrollQueryString()
       headers: {
         [MERGE_INTENT_HEADER]: side === 'previous' ? 'prepend' : 'append',

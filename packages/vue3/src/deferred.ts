@@ -1,7 +1,8 @@
-import { isSameUrlWithoutQueryOrHash, partialReloadRequestsSomeProps, router } from '@inertiajs/core'
+import { partialReloadFillsDeferred, router } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, ref, type SlotsType } from 'vue'
 import { usePage } from './app'
+import { useLayerId } from './useLayer'
 
 export default defineComponent({
   name: 'Deferred',
@@ -17,6 +18,7 @@ export default defineComponent({
     rescue: { reloading: boolean }
   }>,
   setup(props, { slots }) {
+    const layerId = useLayerId()
     const reloading = ref(false)
     const activeReloads = new Set<object>()
     const page = usePage()
@@ -30,11 +32,7 @@ export default defineComponent({
       removeStartListener = router.on('start', (e) => {
         const visit = e.detail.visit
 
-        if (
-          visit.preserveState === true &&
-          isSameUrlWithoutQueryOrHash(visit.url, window.location) &&
-          partialReloadRequestsSomeProps(visit, keys.value)
-        ) {
+        if (partialReloadFillsDeferred(visit, { layerId, url: page.url }, keys.value)) {
           activeReloads.add(visit)
           reloading.value = true
         }

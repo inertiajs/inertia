@@ -1,6 +1,8 @@
-import { cloneDeep, isEqual } from 'es-toolkit'
+import { isEqual } from 'es-toolkit'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { eventHandler } from './eventHandler'
+import { addressOf, encryptsHistory, layerClosing, mapLayers, promoteDeepestLayer } from './layers'
+import { toStructuredCloneable } from './objectUtils'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -18,21 +20,34 @@ class History {
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
-  public remember(data: unknown, key: string): void {
+  public remember(data: unknown, key: string, layerId?: string): void {
+    if (isServer) {
+      return
+    }
+
+    const current = currentPage.get().rememberedState ?? {}
+
     this.replaceState({
       ...currentPage.getWithoutFlashData(),
-      rememberedState: {
-        ...(currentPage.get()?.rememberedState ?? {}),
-        [key]: data,
-      },
+      rememberedState: layerId
+        ? { ...current, [layerId]: { ...(current[layerId] ?? {}), [key]: data } }
+        : { ...current, [key]: data },
     })
   }
 
-  public restore(key: string): unknown {
+  public restore(key: string, layerId?: string): unknown {
     if (!isServer) {
-      return this.current[this.rememberedState]?.[key] !== undefined
-        ? this.current[this.rememberedState]?.[key]
-        : this.initialState?.[this.rememberedState]?.[key]
+      const current = this.current[this.rememberedState] as Record<string, unknown> | undefined
+      const initial = this.initialState?.[this.rememberedState] as Record<string, unknown> | undefined
+
+      if (layerId) {
+        const stored = (current?.[layerId] ?? {}) as Record<string, unknown>
+        const storedInitial = (initial?.[layerId] ?? {}) as Record<string, unknown>
+
+        return stored[key] !== undefined ? stored[key] : storedInitial[key]
+      }
+
+      return current?.[key] !== undefined ? current?.[key] : initial?.[key]
     }
   }
 
@@ -52,7 +67,7 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
+        const doPush = () => this.doPushState({ page: data }, addressOf(page)).then(() => cb?.())
 
         if (isChromeIOS) {
           return new Promise((resolve) => {
@@ -67,23 +82,22 @@ class History {
 
   protected clonePageProps(page: Page): Page {
     try {
-      structuredClone(page.props)
+      structuredClone(page)
       return page
     } catch {
-      // Props contain non-serializable data (e.g., Proxies, functions).
-      // Clone them to ensure they can be safely stored in browser history.
-      return {
-        ...page,
-        props: cloneDeep(page.props),
-      }
+      // Props contain non-serializable data (e.g., Proxies, functions), which
+      // the browser cannot store in history. Drop what it cannot carry.
+      return toStructuredCloneable(page)
     }
   }
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
-    const pageWithClonedProps = this.clonePageProps(page)
+    const open = layerClosing.withoutClosingLayers(page)
+    const entry = open.component === '' ? promoteDeepestLayer(open) : open
+    const pageWithClonedProps = this.clonePageProps(entry)
 
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
+      return encryptsHistory(entry) ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
     })
   }
 
@@ -117,20 +131,24 @@ class History {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
+  public saveScrollPositions(scrollRegions: ScrollRegion[], scrollRegionLayers?: (string | null)[]): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
         if (!window.history.state?.page) {
           return
         }
 
-        if (isEqual(this.getScrollRegions(), scrollRegions)) {
+        if (
+          isEqual(this.getScrollRegions(), scrollRegions) &&
+          isEqual(this.getScrollRegionLayers() ?? [], scrollRegionLayers ?? [])
+        ) {
           return
         }
 
         return this.doReplaceState({
           page: window.history.state.page,
           scrollRegions,
+          scrollRegionLayers,
         })
       })
     })
@@ -159,6 +177,10 @@ class History {
     return window.history.state?.scrollRegions || []
   }
 
+  public getScrollRegionLayers(): (string | null)[] | undefined {
+    return window.history.state?.scrollRegionLayers
+  }
+
   public getDocumentScrollPosition(): ScrollRegion {
     return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
@@ -171,7 +193,12 @@ class History {
 
     // Exclude flash from the merge to prevent callers (like router.remember())
     // from accidentally clearing flash data on the current page.
-    const { flash, ...pageWithoutFlash } = page
+    const live = currentPage.get().layers ?? []
+    const { flash, ...pageWithoutFlash } = mapLayers(page, (layer) => ({
+      ...layer,
+      flash: live.find((open) => open.id === layer.id)?.flash ?? {},
+    }))
+
     currentPage.merge(pageWithoutFlash)
 
     if (isServer) {
@@ -189,7 +216,7 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
+        const doReplace = () => this.doReplaceState({ page: data }, addressOf(page)).then(() => cb?.())
 
         if (isChromeIOS) {
           return new Promise((resolve) => {
@@ -200,6 +227,12 @@ class History {
         return doReplace()
       })
     })
+  }
+
+  // Steps back over the entries a closing stack stands on, behind the writes queued ahead of it:
+  // under encryption those are genuinely async, and stepping early would cross the wrong entry.
+  public back(entries: number): void {
+    queue.add(() => Promise.resolve().then(() => window.history.go(-entries)))
   }
 
   protected isHistoryThrottleError(error: unknown): error is Error & { name: 'SecurityError' } {
@@ -232,14 +265,19 @@ class History {
     data: {
       page: Page | ArrayBuffer
       scrollRegions?: ScrollRegion[]
+      scrollRegionLayers?: (string | null)[]
       documentScrollPosition?: ScrollRegion
     },
     url?: string,
   ): Promise<void> {
     return this.withThrottleProtection(() => {
+      const { scrollRegionLayers, ...state } = data
+      const carriedLayers = 'scrollRegionLayers' in data ? scrollRegionLayers : window.history.state?.scrollRegionLayers
+
       window.history.replaceState(
         {
-          ...data,
+          ...state,
+          ...(carriedLayers !== undefined && { scrollRegionLayers: carriedLayers }),
           scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
           documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
         },
@@ -253,6 +291,7 @@ class History {
     data: {
       page: Page | ArrayBuffer
       scrollRegions?: ScrollRegion[]
+      scrollRegionLayers?: (string | null)[]
       documentScrollPosition?: ScrollRegion
     },
     url: string,
@@ -261,6 +300,13 @@ class History {
       try {
         window.history.pushState(data, '', url)
       } catch (error) {
+        if (this.isHistoryThrottleError(error)) {
+          console.error(error.message)
+          eventHandler.fireInternalEvent('historyEntryDropped', url)
+
+          return
+        }
+
         if (!this.isQuotaExceededError(error)) {
           throw error
         }

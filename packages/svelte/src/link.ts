@@ -171,6 +171,7 @@ function link(
     }
 
     baseParams = {
+      layerId: params.layerId,
       data,
       method,
       replace: params.replace || false,

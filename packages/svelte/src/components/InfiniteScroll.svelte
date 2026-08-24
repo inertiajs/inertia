@@ -8,8 +8,8 @@
     type ReloadOptions,
     useInfiniteScroll,
   } from '@inertiajs/core'
-  import { onDestroy, onMount } from 'svelte'
-  import { usePage } from '../page.svelte'
+  import { getContext, onDestroy, onMount } from 'svelte'
+  import { layerIdKey, usePage } from '../page.svelte'
 
   interface Props {
     data: InfiniteScrollComponentBaseProps['data']
@@ -132,6 +132,7 @@
     const resolvedEndElement = resolveHTMLElement(endElement, endElementRef)
 
     infiniteScrollInstance = useInfiniteScroll({
+      layerId: getContext<string | undefined>(layerIdKey),
       // Data
       getPropName: () => data,
       inReverseMode: () => reverse ?? false,

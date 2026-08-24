@@ -7,7 +7,7 @@ const isFirefox = !isServer && /Firefox/i.test(window.navigator.userAgent)
 
 export class Scroll {
   public static save(): void {
-    history.saveScrollPositions(this.getScrollRegions())
+    history.saveScrollPositions(this.getScrollRegions(), this.getScrollRegionLayers())
   }
 
   public static getScrollRegions(): ScrollRegion[] {
@@ -15,6 +15,16 @@ export class Scroll {
       top: region.scrollTop,
       left: region.scrollLeft,
     }))
+  }
+
+  public static getScrollRegionLayers(): (string | null)[] | undefined {
+    const tiers = Array.from(this.regions()).map((region) => this.tierOf(region))
+
+    return tiers.some((tier) => tier !== null) ? tiers : undefined
+  }
+
+  protected static tierOf(region: Element): string | null {
+    return region.closest('[data-layer-id]')?.getAttribute('data-layer-id') ?? null
   }
 
   protected static regions(): NodeListOf<Element> {
@@ -71,17 +81,25 @@ export class Scroll {
 
     window.requestAnimationFrame(() => {
       this.restoreDocument()
-      this.restoreScrollRegions(scrollRegions)
+      this.restoreScrollRegions(scrollRegions, history.getScrollRegionLayers())
     })
   }
 
-  public static restoreScrollRegions(scrollRegions: ScrollRegion[]): void {
+  public static restoreScrollRegions(scrollRegions: ScrollRegion[], scrollRegionLayers?: (string | null)[]): void {
     if (isServer) {
       return
     }
 
+    // A region takes the next saved position of its own tier. An entry written before layers
+    // existed carries no tiers, and lines up by index as it always did.
+    const savedByTier = new Map<string | null, ScrollRegion[]>()
+
+    scrollRegionLayers?.forEach((tier, index) => {
+      savedByTier.set(tier, [...(savedByTier.get(tier) ?? []), scrollRegions[index]])
+    })
+
     this.regions().forEach((region: Element, index: number) => {
-      const scrollPosition = scrollRegions[index]
+      const scrollPosition = scrollRegionLayers ? savedByTier.get(this.tierOf(region))?.shift() : scrollRegions[index]
 
       if (!scrollPosition) {
         return

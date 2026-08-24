@@ -1,3 +1,4 @@
+import { addressOf } from './layers'
 import { GlobalEventDetails, GlobalEventNames, GlobalEventTrigger } from './types'
 
 function fireEvent<TEventName extends GlobalEventNames>(
@@ -32,7 +33,7 @@ export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) 
 }
 
 export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, { cached = false, visitId } = {}) => {
-  return fireEvent('navigate', { detail: { page, cached, visitId } })
+  return fireEvent('navigate', { detail: { page, url: addressOf(page), cached, visitId } })
 }
 
 export const fireClientVisitEvent: GlobalEventTrigger<'clientVisit'> = (page, { replace, visitId }) => {
@@ -48,7 +49,7 @@ export const fireStartEvent: GlobalEventTrigger<'start'> = (visit) => {
 }
 
 export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page, { visitId } = {}) => {
-  return fireEvent('success', { detail: { page, visitId } })
+  return fireEvent('success', { detail: { page, url: addressOf(page), visitId } })
 }
 
 export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, visit) => {

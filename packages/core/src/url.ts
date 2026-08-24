@@ -11,8 +11,11 @@ import type {
   VisitOptions,
 } from './types'
 
+// A relative href needs an origin to resolve against, and a server has no location to read one from.
+const ssrOrigin = 'http://ssr.inertia'
+
 export function hrefToUrl(href: string | URL): URL {
-  return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
+  return new URL(href.toString(), typeof window === 'undefined' ? ssrOrigin : window.location.toString())
 }
 
 export const transformUrlAndData = (

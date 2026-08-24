@@ -9,10 +9,11 @@ import {
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
+import { closeUnlandedLayer, layerAt } from './layers'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
-import type { ActiveVisit, Page } from './types'
+import type { ActiveVisit, BaseSnapshot, Page } from './types'
 import { HttpProgressEvent, HttpRequestConfig, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
 
@@ -26,6 +27,7 @@ export class Request {
   constructor(
     params: ActiveVisit,
     protected page: Page,
+    protected capturedBase: BaseSnapshot,
     { optimistic = false }: { optimistic?: boolean } = {},
   ) {
     this.requestParams = RequestParams.create(params)
@@ -33,8 +35,13 @@ export class Request {
     this.optimistic = optimistic
   }
 
-  public static create(params: ActiveVisit, page: Page, options?: { optimistic?: boolean }): Request {
-    return new Request(params, page, options)
+  public static create(
+    params: ActiveVisit,
+    page: Page,
+    capturedBase: BaseSnapshot,
+    options?: { optimistic?: boolean },
+  ): Request {
+    return new Request(params, page, capturedBase, options)
   }
 
   public isPrefetch(): boolean {
@@ -43,6 +50,10 @@ export class Request {
 
   public getUrl(): URL {
     return this.requestParams.all().url
+  }
+
+  public get layerId(): string | undefined {
+    return this.requestParams.all().layerId
   }
 
   public isOptimistic(): boolean {
@@ -91,14 +102,14 @@ export class Request {
       .getClient()
       .request(processedConfig)
       .then((response) => {
-        this.response = Response.create(this.requestParams, response, this.page)
+        this.response = Response.create(this.requestParams, response, this.page, this.capturedBase)
 
         return this.response.handle()
       })
       .catch((error) => {
         // Handle HTTP error responses (4xx/5xx)
         if (error instanceof HttpResponseError) {
-          this.response = Response.create(this.requestParams, error.response, this.page)
+          this.response = Response.create(this.requestParams, error.response, this.page, this.capturedBase)
 
           return this.response.handle()
         }
@@ -110,6 +121,10 @@ export class Request {
         if (error instanceof HttpCancelledError) {
           return
         }
+
+        // A request that never brought a response back leaves nothing to open the layer it was
+        // aimed at, so the attempt is spent here as it is on every other terminal path.
+        closeUnlandedLayer(currentPage.get(), this.requestParams.all().layerId)
 
         if (this.requestParams.all().onNetworkError(error) === false) {
           return
@@ -163,6 +178,8 @@ export class Request {
 
     this.requestParams.markAsCancelled({ cancelled, interrupted })
 
+    closeUnlandedLayer(currentPage.get(), this.requestParams.all().layerId)
+
     this.fireFinishEvents()
   }
 
@@ -187,16 +204,22 @@ export class Request {
       headers['X-Inertia-Version'] = page.version
     }
 
-    const onceProps = Object.entries(page.onceProps || {})
-      .filter(([, onceProp]) => {
-        if (get(page.props, onceProp.prop) === undefined) {
-          // The prop could deferred and not be loaded yet
-          return false
-        }
+    // A request names its own tier's once keys in the except header, never a union with another's.
+    // A visit opening a layer has no tier of its own yet, so it names none.
+    const { layerId } = this.requestParams.all()
+    const tier = layerId === undefined ? page : layerAt(page, layerId)
+    const onceProps = tier
+      ? Object.entries(tier.onceProps || {})
+          .filter(([, onceProp]) => {
+            if (get(tier.props, onceProp.prop) === undefined) {
+              // The prop could deferred and not be loaded yet
+              return false
+            }
 
-        return !onceProp.expiresAt || onceProp.expiresAt > Date.now()
-      })
-      .map(([key]) => key)
+            return !onceProp.expiresAt || onceProp.expiresAt > Date.now()
+          })
+          .map(([key]) => key)
+      : []
 
     if (onceProps.length > 0) {
       headers['X-Inertia-Except-Once-Props'] = onceProps.join(',')

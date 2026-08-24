@@ -4,12 +4,15 @@ import {
   exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
+  normalizeLoading,
+  resolveInitialPage,
   resolveServerHead,
   router,
   setupProgress,
   type CreateInertiaAppOptions,
   type CreateInertiaAppOptionsForCSR,
   type InertiaAppSSRResponse,
+  type LoadingOption,
   type Page,
   type PageProps,
   type SharedPageProps,
@@ -17,7 +20,7 @@ import {
 import { hydrate, mount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
-import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
+import type { ComponentResolver, LayerComponent, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 
 type SvelteRenderResult = { body: string; head: string }
 
@@ -39,6 +42,8 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SvelteRenderResult | void,
   SvelteInertiaAppConfig
 > & {
+  layer?: LayerComponent
+  loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
   withApp?: never
 }
 
@@ -52,6 +57,8 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
   'setup'
 > & {
   page?: Page<SharedProps>
+  layer?: LayerComponent
+  loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
 } & (
     | { setup?: undefined; withApp?: SvelteWithApp<SharedProps> }
     | { setup: (options: SetupOptions<SharedProps>) => SvelteRenderResult | void; withApp?: never }
@@ -84,6 +91,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    layer,
+    loading,
     serverHead,
     withApp,
     dev = !!import.meta.env?.DEV,
@@ -109,17 +118,30 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const resolveComponent = (name: string, page?: Page) => Promise.resolve(resolve!(name, page))
 
+  // The renderer reads `component.default`, so a bare component is wrapped the way a module arrives.
+  const resolveLoading = normalizeLoading<ResolvedComponent>(loading, {
+    normalize: (value) =>
+      (value && typeof value === 'object' && 'default' in value ? value : { default: value }) as ResolvedComponent,
+  })
+
   // SSR render function factory - when on server without page, return a render function
   // This is used by the Vite plugin's SSR transform
   if (isServer && !page) {
     return async (page: Page<SharedProps>, render: SvelteServerRender) => {
-      const initialComponent = (await resolveComponent(page.component, page)) as ResolvedComponent
+      const {
+        page: initialPage,
+        component: initialComponent,
+        layers: initialLayers,
+      } = await resolveInitialPage(page, resolveComponent, resolveLoading)
 
       const props: InertiaAppProps<SharedProps> = {
-        initialPage: page,
+        initialPage,
         initialComponent,
+        initialLayers,
         resolveComponent,
+        resolveLoading,
         defaultLayout: layout,
+        layer,
       }
 
       let svelteApp: SvelteRenderResult
@@ -144,12 +166,18 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
       return {
         body,
-        head: [...resolveServerHead(page, serverHead), svelteApp.head],
+        head: [...resolveServerHead(initialPage, serverHead), svelteApp.head],
       }
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+  const initialResponse = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+
+  const [{ page: initialPage, component: initialComponent, layers: initialLayers }] = await Promise.all([
+    resolveInitialPage(initialResponse, resolveComponent, resolveLoading),
+    router.decryptHistory().catch(() => {}),
+  ])
+
   const serverHeadManager =
     !isServer && serverHead
       ? createHeadManager(
@@ -160,12 +188,15 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         )
       : null
 
-  const [initialComponent] = await Promise.all([
-    resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
-    router.decryptHistory().catch(() => {}),
-  ])
-
-  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage,
+    initialComponent,
+    initialLayers,
+    resolveComponent,
+    resolveLoading,
+    defaultLayout: layout,
+    layer,
+  }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
@@ -176,7 +207,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     const svelteApp = await setup({ el: null, App, props })
 
     if (svelteApp) {
-      const body = buildSSRBody(id, initialPage, svelteApp.body)
+      const body = buildSSRBody(id, initialResponse, svelteApp.body)
 
       return {
         body,

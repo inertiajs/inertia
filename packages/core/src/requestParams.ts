@@ -1,3 +1,4 @@
+import { tierOf } from './layers'
 import { page as currentPage } from './page'
 import { Response } from './response'
 import {
@@ -75,6 +76,18 @@ export class RequestParams {
     return this.params.poll === true
   }
 
+  public isReload() {
+    return this.params.reload === true
+  }
+
+  public isWalkRequest() {
+    return this.params.walk === true
+  }
+
+  public fabricatedLayer() {
+    return this.params.fabricatedLayer === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,
@@ -133,7 +146,8 @@ export class RequestParams {
     }
 
     if (this.isPartial()) {
-      headers['X-Inertia-Partial-Component'] = currentPage.get().component
+      // A partial names its own tier's component, so the server answers that route's partial.
+      headers['X-Inertia-Partial-Component'] = tierOf(currentPage.get(), this.params.layerId).component
     }
 
     const only = this.params.only.concat(this.params.reset)
