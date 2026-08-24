@@ -259,6 +259,8 @@ class CurrentPage {
       // A newer transition aborts this one, rejecting `ready` with an AbortError.
       // That's expected, so swallow it to avoid an unhandled rejection.
       transitionResult.ready.catch(() => {})
+      transitionResult.finished.catch(() => {})
+      transitionResult.updateCallbackDone.catch(() => {})
 
       viewTransitionCallback(transitionResult)
     })

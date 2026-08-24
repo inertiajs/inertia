@@ -107,4 +107,24 @@ test.describe('View Transitions', () => {
     await page.waitForTimeout(500)
     await expect(consoleMessages.errors).toEqual([])
   })
+
+  test('does not throw when the tab is hidden while a view transition is in flight', async ({ page, context }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Transition with boolean' }).click()
+
+    // Backgrounding the tab mid-transition aborts it, rejecting `finished` and
+    // `updateCallbackDone` on Chromium. They must be handled internally so it
+    // never surfaces as an unhandled rejection.
+    const otherPage = await context.newPage()
+    await page.waitForTimeout(500)
+    await otherPage.close()
+
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await expect(consoleMessages.errors).toEqual([])
+  })
 })
