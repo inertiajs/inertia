@@ -114,7 +114,7 @@ export type LiveOption = LiveTransport | LiveOptions
  * their app options rather than living on the shared ones.
  */
 export type LiveAppOption = {
-  /** Transport that delivers live prop updates, or the object form with its options. */
+  /** Configure live prop updates. Use `echo()` from the adapter for Laravel Echo. */
   live?: LiveOption
 }
 

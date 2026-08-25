@@ -1,7 +1,7 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
-import { echoTransport } from '@inertiajs/vue3/echo'
+import { echo } from '@inertiajs/vue3/echo'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
 import { resolveFakeEcho } from './fakeEcho'
@@ -66,7 +66,7 @@ createInertiaApp({
     },
   }),
   ...(window.location.pathname === '/echo-transport' && {
-    live: echoTransport({ echo: resolveFakeEcho }),
+    live: echo({ resolve: resolveFakeEcho }),
   }),
   ...(params.has('withAppDefaults') && {
     defaults: {

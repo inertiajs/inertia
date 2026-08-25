@@ -1,22 +1,26 @@
-import type { LiveTransport } from '@inertiajs/core'
-import { createEchoTransport, type EchoInstanceLike } from '@inertiajs/core/echo'
-import { echo, echoIsConfigured } from '@laravel/echo-react'
+import type { LiveOptions } from '@inertiajs/core'
+import { createEchoTransport, type EchoInstance } from '@inertiajs/core/echo'
+import { echo as resolveEcho, echoIsConfigured } from '@laravel/echo-react'
 
-export type EchoTransportOptions = {
+export type EchoOptions = {
+  throttle?: number
+  pauseWhenHidden?: boolean
+
   /**
    * Resolve the Echo instance yourself, instead of the one `configureEcho()`
    * from `@laravel/echo-react` set up.
    */
-  echo?: () => EchoInstanceLike
+  resolve?: () => EchoInstance
 }
 
 /**
  * Delivers live prop updates over the Echo instance `configureEcho()` set up.
  */
-export const echoTransport = (options: EchoTransportOptions = {}): LiveTransport => {
-  if (options.echo) {
-    return createEchoTransport({ echo: options.echo, echoIsConfigured: () => true })
-  }
+export const echo = ({ resolve, ...options }: EchoOptions = {}): LiveOptions => {
+  const transport = createEchoTransport({
+    echo: resolve ?? (resolveEcho as () => EchoInstance),
+    echoIsConfigured: resolve ? () => true : echoIsConfigured,
+  })
 
-  return createEchoTransport({ echo: echo as () => EchoInstanceLike, echoIsConfigured })
+  return { transport, ...options }
 }

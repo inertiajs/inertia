@@ -1,7 +1,7 @@
-import type { EchoInstanceLike } from '@inertiajs/core/echo'
+import type { EchoInstance } from '@inertiajs/core/echo'
 import { EventFormatter } from 'laravel-echo'
 
-type EchoResolver = () => EchoInstanceLike
+type EchoResolver = () => EchoInstance
 
 // A namespace is what makes the event formatter interesting: anything that
 // doesn't start with a dot or a backslash gets prefixed with it
@@ -122,4 +122,4 @@ if (typeof window !== 'undefined') {
   }
 }
 
-export const resolveFakeEcho: EchoResolver = () => instance as unknown as EchoInstanceLike
+export const resolveFakeEcho: EchoResolver = () => instance as unknown as EchoInstance

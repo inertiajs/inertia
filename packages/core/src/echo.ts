@@ -5,11 +5,11 @@ import { LiveChannel, LiveChannelType, LiveConnectionStatus, LiveTransport } fro
  * so every `@laravel/echo-*` package satisfies it without core depending on any
  * of them.
  */
-export interface EchoInstanceLike {
-  channel(name: string): EchoChannelLike
-  private(name: string): EchoChannelLike
-  encryptedPrivate(name: string): EchoChannelLike
-  join(name: string): EchoChannelLike
+export interface EchoInstance {
+  channel(name: string): EchoChannel
+  private(name: string): EchoChannel
+  encryptedPrivate(name: string): EchoChannel
+  join(name: string): EchoChannel
   leaveChannel(name: string): void
   socketId(): string | null | undefined
   connector: {
@@ -17,14 +17,14 @@ export interface EchoInstanceLike {
   }
 }
 
-export interface EchoChannelLike {
+export interface EchoChannel {
   listen(event: string, callback: (payload: unknown) => void): unknown
   stopListening(event: string, callback: (payload: unknown) => void): unknown
 }
 
 export type EchoTransportConfig = {
   /** Resolves the Echo instance, e.g. `echo` from `@laravel/echo-vue`. */
-  echo: () => EchoInstanceLike
+  echo: () => EchoInstance
   /** Reports whether `configureEcho()` has run yet. */
   echoIsConfigured: () => boolean
 }
@@ -35,7 +35,7 @@ export type EchoTransportConfig = {
  */
 const channelTypes: Record<
   LiveChannelType,
-  { prefix: string; subscribe: (echo: EchoInstanceLike, name: string) => EchoChannelLike }
+  { prefix: string; subscribe: (echo: EchoInstance, name: string) => EchoChannel }
 > = {
   public: { prefix: '', subscribe: (echo, name) => echo.channel(name) },
   private: { prefix: 'private-', subscribe: (echo, name) => echo.private(name) },
@@ -71,12 +71,12 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
   const listeners = new Map<string, number>()
 
   let statusCallback: ((status: LiveConnectionStatus) => void) | null = null
-  let watch: { instance: EchoInstanceLike; stop: VoidFunction } | null = null
+  let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
 
-  const resolve = (): EchoInstanceLike => {
+  const resolve = (): EchoInstance => {
     if (!echoIsConfigured()) {
       throw new Error(
-        'Echo has not been configured. Call `configureEcho()` before Inertia subscribes to a live prop, or pass an `echo` resolver to `echoTransport()`.',
+        'Echo has not been configured. Call `configureEcho()` before Inertia subscribes to a live prop, or pass a `resolve` option to `echo()`.',
       )
     }
 
@@ -85,7 +85,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
   // Watch only after a subscription exists, so resolving Echo does not connect
   // before anything can receive. Re-arm when configureEcho() swaps instances.
-  const watchConnection = (instance: EchoInstanceLike): void => {
+  const watchConnection = (instance: EchoInstance): void => {
     if (!statusCallback || watch?.instance === instance) {
       return
     }

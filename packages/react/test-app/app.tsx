@@ -1,7 +1,7 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
-import { echoTransport } from '@inertiajs/react/echo'
+import { echo } from '@inertiajs/react/echo'
 import { createRoot } from 'react-dom/client'
 import { resolveFakeEcho } from './fakeEcho'
 import { fakeLiveTransport } from './fakeLiveTransport'
@@ -39,7 +39,7 @@ createInertiaApp({
     },
   }),
   ...(window.location.pathname === '/echo-transport' && {
-    live: echoTransport({ echo: resolveFakeEcho }),
+    live: echo({ resolve: resolveFakeEcho }),
   }),
   page: window.initialPage,
   resolve: async (name, page) => {

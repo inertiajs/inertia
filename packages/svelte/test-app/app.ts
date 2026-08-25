@@ -1,7 +1,7 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
-import { echoTransport } from '@inertiajs/svelte/echo'
+import { echo } from '@inertiajs/svelte/echo'
 import { hydrate, mount } from 'svelte'
 import { resolveFakeEcho } from './fakeEcho'
 import { fakeLiveTransport } from './fakeLiveTransport'
@@ -39,7 +39,7 @@ createInertiaApp({
     },
   }),
   ...(window.location.pathname === '/echo-transport' && {
-    live: echoTransport({ echo: resolveFakeEcho }),
+    live: echo({ resolve: resolveFakeEcho }),
   }),
   page: window.initialPage,
   resolve: async (name, page) => {
