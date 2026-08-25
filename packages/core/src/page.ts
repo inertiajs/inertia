@@ -32,7 +32,7 @@ class CurrentPage {
     resolveComponent,
     onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.page = { ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] }
+    this.assignPage({ ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] })
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
@@ -111,8 +111,8 @@ class CurrentPage {
           viewTransition = false
         }
 
-        this.page = page
         this.cleared = false
+        this.assignPage(page)
 
         if (this.hasOnceProps()) {
           prefetchedRequests.updateCachedOncePropsFromCurrentPage()
@@ -178,8 +178,8 @@ class CurrentPage {
     } = {},
   ) {
     return this.resolve(page.component, page).then((component) => {
-      this.page = page
       this.cleared = false
+      this.assignPage(page)
       history.setCurrent(page)
       return this.swap({ component, page, preserveState, viewTransition: false })
     })
@@ -203,6 +203,21 @@ class CurrentPage {
 
   public hasOnceProps(): boolean {
     return Object.keys(this.page.onceProps ?? {}).length > 0
+  }
+
+  /**
+   * Replace the whole page object and announce it. Everything that reacts to
+   * the page changing hangs off this, so a swap has to come through here.
+   *
+   * The partial mutations below deliberately do not, since they only touch
+   * props, flash or history state. `merge()` is the exception: it takes a
+   * `Partial<Page>` and `history.replaceState` passes a whole page through it,
+   * so it can change structural metadata without anything being told.
+   */
+  protected assignPage(page: Page): void {
+    this.page = page
+
+    eventHandler.fireInternalEvent('pageUpdated', page)
   }
 
   public merge(data: Partial<Page>): void {

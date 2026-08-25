@@ -10,6 +10,7 @@ import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
 import { page as currentPage } from './page'
+import { trackPropRefresh, untrackPropRefresh } from './propRefreshes'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
 import type { ActiveVisit, Page } from './types'
@@ -54,31 +55,46 @@ export class Request {
   }
 
   public async send() {
+    // Track the refresh first: a caller may cancel from `onCancelToken`, which
+    // runs synchronously, and the untracking that follows would find nothing.
+    trackPropRefresh(this.requestParams.all())
+
     this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
 
-    fireStartEvent(this.requestParams.all())
-    this.requestParams.onStart()
+    let originallyPrefetch = false
+    let processedConfig: HttpRequestConfig
 
-    if (this.requestParams.all().prefetch) {
-      this.requestParams.onPrefetching()
-      firePrefetchingEvent(this.requestParams.all())
+    try {
+      fireStartEvent(this.requestParams.all())
+      this.requestParams.onStart()
+
+      if (this.requestParams.all().prefetch) {
+        this.requestParams.onPrefetching()
+        firePrefetchingEvent(this.requestParams.all())
+      }
+
+      // We capture this up here because the response
+      // will clear the prefetch flag so it can use it
+      // as a regular response once the prefetch is done
+      originallyPrefetch = this.requestParams.all().prefetch
+
+      const config: HttpRequestConfig = {
+        method: this.requestParams.all().method,
+        url: urlWithoutHash(this.requestParams.all().url).href,
+        data: this.requestParams.data(),
+        signal: this.cancelToken.signal,
+        headers: this.getHeaders(),
+        onUploadProgress: this.onProgress.bind(this),
+      }
+
+      processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
+    } catch (error) {
+      // The request never got off the ground, so the `finally` below that would
+      // normally untrack it never attaches
+      untrackPropRefresh(this.requestParams.all())
+
+      throw error
     }
-
-    // We capture this up here because the response
-    // will clear the prefetch flag so it can use it
-    // as a regular response once the prefetch is done
-    const originallyPrefetch = this.requestParams.all().prefetch
-
-    const config: HttpRequestConfig = {
-      method: this.requestParams.all().method,
-      url: urlWithoutHash(this.requestParams.all().url).href,
-      data: this.requestParams.data(),
-      signal: this.cancelToken.signal,
-      headers: this.getHeaders(),
-      onUploadProgress: this.onProgress.bind(this),
-    }
-
-    const processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
 
     return http
       .getClient()
@@ -141,6 +157,8 @@ export class Request {
     }
 
     this.requestHasFinished = true
+
+    untrackPropRefresh(this.requestParams.all())
 
     fireFinishEvent(this.requestParams.all())
     this.requestParams.onFinish()

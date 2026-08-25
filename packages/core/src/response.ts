@@ -438,6 +438,15 @@ export class Response {
       }
     }
 
+    // Preserve the existing live props, a partial response only carries the
+    // entries for the props it refreshed
+    if (currentPage.get().liveProps) {
+      pageResponse.liveProps = {
+        ...(currentPage.get().liveProps || {}),
+        ...(pageResponse.liveProps || {}),
+      }
+    }
+
     // Preserve the existing onceProps
     if (currentPage.hasOnceProps()) {
       pageResponse.onceProps = {
@@ -475,10 +484,8 @@ export class Response {
   }
 
   /**
-   * By default, the Laravel adapter shares validation errors via Inertia::always(),
-   * so responses always include errors, even when empty. Components like
-   * InfiniteScroll and WhenVisible, as well as loading deferred props,
-   * perform async requests that should practically never reset errors.
+   * Preserve existing validation errors across async visits that should not clear
+   * the error bag, even when the server shares an empty one.
    */
   protected shouldPreserveErrors(pageResponse: Page): boolean {
     if (!this.requestParams.all().preserveErrors) {

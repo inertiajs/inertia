@@ -36,6 +36,10 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
+    },
+    "./echo": {
+      "types": "./types/echo.d.ts",
+      "import": "./dist/echo.js"
     }
   },
   "typesVersions": {
@@ -45,6 +49,9 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
+      ],
+      "echo": [
+        "types/echo.d.ts"
       ]
     }
   },

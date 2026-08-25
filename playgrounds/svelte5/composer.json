@@ -11,6 +11,7 @@
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.1.0",
         "laravel/framework": "^13.0",
+        "laravel/reverb": "^1.11",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {

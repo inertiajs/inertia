@@ -119,6 +119,25 @@ const setHidden = (page, hidden: boolean) =>
   })
 })
 
+test('it throttles a poll that starts in a tab that was already hidden', async ({ page }) => {
+  // A tab hidden before the app boots never fires `visibilitychange`, so the
+  // poll has to seed its own throttle from the current visibility
+  await page.addInitScript(() => {
+    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true })
+    Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' })
+  })
+
+  await page.goto('/poll/overlap/rest?interval=100&delay=10')
+
+  await page.waitForResponse(page.url())
+
+  requests.listen(page)
+  await page.waitForTimeout(2200)
+
+  await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+  await expect(pollRequests().length).toBeLessThanOrEqual(3)
+})
+
 test('it keeps the throttled cadence when staying in the background past one cycle', async ({ page }) => {
   await page.goto('/poll/overlap/rest?interval=100&delay=10')
 

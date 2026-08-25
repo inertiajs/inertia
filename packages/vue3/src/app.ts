@@ -276,6 +276,7 @@ export function usePage<TPageProps extends PageProps = PageProps>(): Page<TPageP
       rememberedState: computed(() => page.value?.rememberedState),
       encryptHistory: computed(() => page.value?.encryptHistory),
       scrollProps: computed(() => page.value?.scrollProps),
+      liveProps: computed(() => page.value?.liveProps),
       flash: computed(() => page.value?.flash),
     }) as Page
   }

@@ -1,7 +1,7 @@
 import { config as coreConfig } from '@inertiajs/core'
 import type { SvelteInertiaAppConfig } from './types'
 
-export { http, progress, router } from '@inertiajs/core'
+export { http, progress, router, socketId } from '@inertiajs/core'
 export { default as App } from './components/App.svelte'
 export { createForm } from './components/createForm'
 export { default as Deferred } from './components/Deferred.svelte'
@@ -24,6 +24,7 @@ export {
 export { default as useHttp } from './useHttp.svelte'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch.svelte'
+export { type InertiaProp, default as useProp } from './useProp.svelte'
 export { default as useRemember } from './useRemember.svelte'
 
 export const config = coreConfig.extend<SvelteInertiaAppConfig>({})

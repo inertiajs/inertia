@@ -1,0 +1,359 @@
+import { router } from '.'
+import { eventHandler } from './eventHandler'
+import { fireLiveEvent } from './events'
+import { page as currentPage } from './page'
+import { propRefreshes } from './propRefreshes'
+import { socketId } from './socketId'
+import { LiveChannel, LiveOption, LiveOptions, LiveProp, LiveTransport, Page } from './types'
+import { visibility } from './visibility'
+
+const DEFAULT_THROTTLE = 1000
+
+/**
+ * How long to keep gathering props before sending the first request of a burst.
+ * Long enough for the frames of one server action, which arrive as separate
+ * tasks a few milliseconds apart, and short enough to go unnoticed.
+ */
+const COLLECT_WINDOW = 32
+
+/**
+ * How long a prop still owes its throttle. Zero the moment the window has
+ * elapsed, and zero for a prop that has never been flushed.
+ */
+export const throttleWait = (throttle: number, flushedAt: number | undefined, now: number): number => {
+  return Math.max(0, throttle - (now - (flushedAt ?? -Infinity)))
+}
+
+/**
+ * One channel and event, paired with the props it feeds. Keyed by
+ * `subscriptionKey`, which is what the transport is asked to subscribe to.
+ */
+type Subscription = {
+  channel: LiveChannel
+  event: string
+  props: Set<string>
+}
+
+const subscriptionKey = (channel: LiveChannel, event: string): string => `${channel.type}:${channel.name}::${event}`
+
+const isTransport = (live: LiveOption): live is LiveTransport => {
+  return typeof (live as LiveTransport).subscribe === 'function'
+}
+
+/**
+ * Keeps the props the server marked as live in sync with the broadcaster. Every
+ * page swap diffs the server's live props against the active subscriptions, and an incoming
+ * event marks the props it feeds for reload in one throttled partial request.
+ */
+class Live {
+  protected transport: LiveTransport | null = null
+  protected throttle = DEFAULT_THROTTLE
+  protected pauseWhenHidden = true
+  protected paused = false
+  protected liveProps: Record<string, LiveProp> = {}
+  protected subscriptions = new Map<string, Subscription>()
+  protected unsubscribers = new Map<string, VoidFunction>()
+  protected dirty = new Set<string>()
+  protected flushedAt = new Map<string, number>()
+  protected pending: { at: number; timeoutId: number } | null = null
+
+  /**
+   * Wire up a transport and adopt its socket id resolver.
+   *
+   * A second configure is ignored because existing listeners and subscriptions
+   * have no disposal path for swapping transports.
+   */
+  public configure(live: LiveOption): void {
+    if (typeof window === 'undefined' || this.transport) {
+      return
+    }
+
+    const options: LiveOptions = isTransport(live) ? { transport: live } : live
+
+    this.transport = options.transport
+    this.throttle = options.throttle ?? DEFAULT_THROTTLE
+    this.pauseWhenHidden = options.pauseWhenHidden ?? true
+
+    // Only adopt the transport's resolver if it has one, so a transport that
+    // cannot report a socket id leaves an app-registered resolver alone
+    if (this.transport.socketId) {
+      socketId.resolveUsing(this.transport.socketId)
+    }
+
+    eventHandler.on('pageUpdated', (page: Page) => this.sync(page))
+
+    propRefreshes.onChange(() => this.scheduleFlush())
+
+    visibility.onChange((hidden) => {
+      if (!hidden) {
+        this.scheduleFlush()
+      }
+    })
+
+    // This callback owns connection state. `connected` keeps repeated statuses
+    // idempotent, and `hasConnected` separates reconnects from the first connect.
+    let connected = false
+    let hasConnected = false
+
+    this.transport.onStatusChange?.((status) => {
+      const reconnected = status === 'connected' && hasConnected && !connected
+
+      connected = status === 'connected'
+
+      if (connected) {
+        hasConnected = true
+      }
+
+      if (reconnected) {
+        // Events that fired while the connection was down never arrived, so
+        // every live prop is potentially stale
+        Object.keys(this.liveProps).forEach((prop) => this.markDirty(prop, { force: true }))
+        this.scheduleFlush()
+      }
+    })
+
+    if (currentPage.get()) {
+      this.sync(currentPage.get())
+    }
+  }
+
+  /**
+   * Stop reloading props until `resume()` is called, remembering events that
+   * arrive while paused. Without a transport, there is nothing to pause.
+   */
+  public pause(): void {
+    if (!this.transport) {
+      return
+    }
+
+    this.paused = true
+
+    this.clearTimeout()
+  }
+
+  public resume(): void {
+    if (!this.transport) {
+      return
+    }
+
+    this.paused = false
+
+    this.scheduleFlush()
+  }
+
+  protected isPaused(): boolean {
+    return this.paused || (this.pauseWhenHidden && visibility.isHidden())
+  }
+
+  /**
+   * Reload a live prop right away, ignoring the throttle.
+   */
+  public refresh(prop: string): void {
+    if (!this.transport) {
+      return
+    }
+
+    this.markDirty(prop, { force: true })
+    this.scheduleFlush()
+  }
+
+  protected sync(page: Page): void {
+    const transport = this.transport
+
+    if (!transport) {
+      return
+    }
+
+    this.liveProps = page.liveProps ?? {}
+
+    const desired = new Map<string, Subscription>()
+
+    Object.entries(this.liveProps).forEach(([prop, entry]) => {
+      entry.listeners.forEach(({ channel, events }) => {
+        events.forEach((event) => {
+          const key = subscriptionKey(channel, event)
+          const existing = desired.get(key)
+
+          if (existing) {
+            existing.props.add(prop)
+          } else {
+            desired.set(key, { channel, event, props: new Set([prop]) })
+          }
+        })
+      })
+    })
+
+    // Replace the index before touching the transport, so an event delivered
+    // synchronously from `subscribe()` already resolves to its subscription
+    this.subscriptions = desired
+
+    // Subscribe before unsubscribing so refcounted transports keep shared
+    // channels alive while the event set changes.
+    desired.forEach(({ channel, event }, key) => {
+      if (this.unsubscribers.has(key)) {
+        return
+      }
+
+      this.unsubscribers.set(
+        key,
+        transport.subscribe(channel, event, (payload) => this.handleEvent(key, payload)),
+      )
+    })
+
+    this.unsubscribers.forEach((unsubscribe, key) => {
+      if (!desired.has(key)) {
+        unsubscribe()
+        this.unsubscribers.delete(key)
+      }
+    })
+
+    this.dirty.forEach((prop) => {
+      if (!(prop in this.liveProps)) {
+        this.dirty.delete(prop)
+      }
+    })
+  }
+
+  protected handleEvent(key: string, payload: unknown): void {
+    const subscription = this.subscriptions.get(key)
+
+    if (!subscription) {
+      return
+    }
+
+    const props = Array.from(subscription.props)
+
+    const cancelled = !fireLiveEvent({
+      props,
+      channel: subscription.channel,
+      event: subscription.event,
+      payload,
+    })
+
+    if (cancelled) {
+      return
+    }
+
+    props.forEach((prop) => this.markDirty(prop))
+
+    this.scheduleFlush()
+  }
+
+  /**
+   * Forcing a prop clears the throttle debt it owes, and nothing else. It stays
+   * that prop's business, so forcing one never lets another skip its throttle.
+   */
+  protected markDirty(prop: string, { force = false }: { force?: boolean } = {}): void {
+    this.dirty.add(prop)
+
+    if (force) {
+      this.flushedAt.delete(prop)
+    }
+  }
+
+  /**
+   * Schedule the next flush, keeping whichever deadline comes first so a prop
+   * that owes nothing never waits out a slower neighbour's timer.
+   */
+  protected scheduleFlush(): void {
+    if (this.dirty.size === 0 || this.isPaused() || typeof window === 'undefined') {
+      return
+    }
+
+    const wait = this.shortestWait()
+
+    if (wait === null) {
+      // Every dirty prop is in flight. The refresh registry reports when those
+      // requests finish, which schedules the next attempt for us.
+      return
+    }
+
+    // Even a flush that owes the throttle nothing waits out the collect window,
+    // so props still on their way join the request rather than following it
+    const delay = Math.max(COLLECT_WINDOW, wait)
+    const at = Date.now() + delay
+
+    // Strictly earlier, or a burst of events a millisecond apart would keep
+    // pushing the deadline out and never fire
+    if (this.pending && at >= this.pending.at) {
+      return
+    }
+
+    this.clearTimeout()
+
+    this.pending = {
+      at,
+      timeoutId: window.setTimeout(() => {
+        this.pending = null
+        this.attemptFlush()
+      }, delay),
+    }
+  }
+
+  /**
+   * How long until the given prop may go out, or null when it may not. A prop a
+   * request in flight already claims is skipped, since reloading it risks
+   * overwriting fresher data with an older response.
+   */
+  protected waitFor(prop: string, now: number): number | null {
+    if (propRefreshes.isRefreshing(prop)) {
+      return null
+    }
+
+    return throttleWait(this.throttleFor(prop), this.flushedAt.get(prop), now)
+  }
+
+  /**
+   * How long until the first dirty prop may go out, or null when none may.
+   */
+  protected shortestWait(): number | null {
+    const now = Date.now()
+
+    const waits = Array.from(this.dirty)
+      .map((prop) => this.waitFor(prop, now))
+      .filter((wait): wait is number => wait !== null)
+
+    return waits.length > 0 ? Math.min(...waits) : null
+  }
+
+  /**
+   * Flush every dirty prop whose throttle has expired and that no request in
+   * flight already claims, then reschedule for whatever had to stay behind.
+   */
+  protected attemptFlush(): void {
+    if (this.isPaused()) {
+      return
+    }
+
+    const now = Date.now()
+    const ready = Array.from(this.dirty).filter((prop) => this.waitFor(prop, now) === 0)
+
+    if (ready.length > 0) {
+      ready.forEach((prop) => this.flushedAt.set(prop, now))
+      this.flush(ready)
+    }
+
+    this.scheduleFlush()
+  }
+
+  protected flush(only: string[]): void {
+    only.forEach((prop) => this.dirty.delete(prop))
+
+    router.reload({ only, preserveErrors: true })
+  }
+
+  protected throttleFor(prop: string): number {
+    return this.liveProps[prop]?.throttle ?? this.throttle
+  }
+
+  protected clearTimeout(): void {
+    if (this.pending) {
+      window.clearTimeout(this.pending.timeoutId)
+      this.pending = null
+    }
+  }
+}
+
+export const live = new Live()
+
+export const configureLive = (option: LiveOption): void => live.configure(option)

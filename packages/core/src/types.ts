@@ -51,6 +51,80 @@ export type HttpErrorHandler = (
   error: HttpResponseError | HttpNetworkError | HttpCancelledError,
 ) => void | Promise<void>
 
+/**
+ * Resolves the websocket connection id that Inertia sends along as the
+ * `X-Socket-Id` header, so the server can skip broadcasting back to it.
+ */
+export type SocketIdResolver = () => string | null | undefined
+
+export type LiveChannelType = 'public' | 'private' | 'presence' | 'encrypted-private'
+
+/**
+ * A channel a live prop listens on. Names arrive unprefixed, applying any
+ * broadcaster specific prefix is up to the transport.
+ */
+export type LiveChannel = {
+  name: string
+  type: LiveChannelType
+}
+
+/**
+ * A channel paired with only the events that broadcast on it. This stays paired
+ * instead of being flattened so the client does not subscribe to a cross
+ * product of unrelated channels and events.
+ */
+export type LiveListener = {
+  channel: LiveChannel
+  events: string[]
+}
+
+export type LiveProp = {
+  listeners: LiveListener[]
+  throttle?: number
+}
+
+/**
+ * Mirrors Laravel Echo's connection lifecycle statuses so transports can pass
+ * broadcaster state through without collapsing transitional states.
+ */
+export type LiveConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
+
+export type LiveEventHandler = (payload: unknown) => void
+
+/**
+ * The seam between the live engine and a broadcaster. A transport turns a
+ * channel and event name into a subscription and hands the payload back.
+ */
+export interface LiveTransport {
+  subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
+  socketId?: SocketIdResolver
+  onStatusChange?(callback: (status: LiveConnectionStatus) => void): VoidFunction
+}
+
+export type LiveOptions = {
+  transport: LiveTransport
+  throttle?: number
+  pauseWhenHidden?: boolean
+}
+
+export type LiveOption = LiveTransport | LiveOptions
+
+/**
+ * Only the adapters that wire live props accept this, so it is intersected into
+ * their app options rather than living on the shared ones.
+ */
+export type LiveAppOption = {
+  /** Transport that delivers live prop updates, or the object form with its options. */
+  live?: LiveOption
+}
+
+export type LiveEventDetails = {
+  props: string[]
+  channel: LiveChannel
+  event: string
+  payload: unknown
+}
+
 export interface PageFlashData {
   [key: string]: unknown
 }
@@ -244,6 +318,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   matchPropsOn?: string[]
   sharedProps?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  liveProps?: Record<string, LiveProp>
   flash: FlashData
   onceProps?: Record<
     string,
@@ -464,6 +539,11 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: boolean | void
   }
+  live: {
+    parameters: [LiveEventDetails]
+    details: LiveEventDetails
+    result: boolean | void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -498,7 +578,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
   ...params: GlobalEventParameters<TEventName, T>
 ) => GlobalEventResult<TEventName, T>
 
-export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded'
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded' | 'pageUpdated'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: CancelTokenCallback
@@ -992,5 +1072,6 @@ declare global {
     'inertia:clientVisit': GlobalEvent<'clientVisit'>
     'inertia:flash': GlobalEvent<'flash'>
     'inertia:location': GlobalEvent<'location'>
+    'inertia:live': GlobalEvent<'live'>
   }
 }

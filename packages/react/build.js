@@ -41,6 +41,7 @@ const config = {
 const builds = [
   { entryPoints: ['src/index.ts'], format: 'esm', outfile: 'dist/index.js', platform: 'browser' },
   { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.js', platform: 'node' },
+  { entryPoints: ['src/echo.ts'], format: 'esm', outfile: 'dist/echo.js', platform: 'browser' },
 ]
 
 builds.forEach(async (build) => {

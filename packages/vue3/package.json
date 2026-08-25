@@ -31,12 +31,19 @@
     "./server": {
       "types": "./types/server.d.ts",
       "import": "./dist/server.js"
+    },
+    "./echo": {
+      "types": "./types/echo.d.ts",
+      "import": "./dist/echo.js"
     }
   },
   "typesVersions": {
     "*": {
       "server": [
         "types/server.d.ts"
+      ],
+      "echo": [
+        "types/echo.d.ts"
       ]
     }
   },
@@ -50,15 +57,23 @@
     "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/index.js\" --checkFeatures --module --noCache --verbose"
   },
   "devDependencies": {
+    "@laravel/echo-vue": "^2.4.0",
     "axios": "^1.17.0",
     "es-check": "^9.6.1",
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
+    "laravel-echo": "^2.4.0",
     "typescript": "^6.0.3",
     "vue": "^3.5.29"
   },
   "peerDependencies": {
+    "@laravel/echo-vue": "^2.0.0",
     "vue": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@laravel/echo-vue": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",

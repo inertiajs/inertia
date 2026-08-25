@@ -1,9 +1,14 @@
 <?php
 
+use App\Events\ActivityLogged;
+use App\Events\OrderUpdated;
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\Todo;
+use App\Models\User;
+use App\Support\LiveDemo;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -550,3 +555,85 @@ Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
 Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
 Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
 Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));
+
+/*
+|--------------------------------------------------------------------------
+| Live props demo
+|--------------------------------------------------------------------------
+|
+| Broadcasts over Reverb. Open two browser windows side by side, or trigger
+| the events from the terminal with `php artisan live:broadcast`.
+|
+*/
+
+Route::get('/live', function () {
+    // Private channels need an authenticated user before Laravel will authorize
+    // the subscription, and the playground has no real login
+    if (! Auth::check()) {
+        Auth::loginUsingId(User::first()->id);
+    }
+
+    return Inertia::render('Live', [
+        'order' => Inertia::live(fn () => LiveDemo::order(), on: new OrderUpdated),
+        'stats' => Inertia::live(fn () => LiveDemo::stats(), on: new OrderUpdated),
+        'activity' => Inertia::live(fn () => LiveDemo::activity(), on: new ActivityLogged, throttle: 4000),
+        'renderedAt' => now()->format('H:i:s'),
+        'triggeredAt' => now()->format('H:i:s'),
+        'socketIdHeader' => Inertia::always(fn () => request()->header('X-Socket-Id')),
+    ]);
+});
+
+Route::post('/live/order', function () {
+    LiveDemo::advanceOrder('everyone');
+
+    broadcast(new OrderUpdated);
+
+    return back();
+});
+
+Route::post('/live/order-to-others', function () {
+    LiveDemo::advanceOrder('to-others');
+
+    broadcast(new OrderUpdated)->toOthers();
+
+    return back();
+});
+
+Route::post('/live/activity', function () {
+    LiveDemo::logActivity('Someone left a note');
+
+    broadcast(new ActivityLogged);
+
+    return back();
+});
+
+Route::post('/live/both', function () {
+    LiveDemo::advanceOrder('both');
+    LiveDemo::logActivity('Order and activity changed together');
+
+    broadcast(new OrderUpdated);
+    broadcast(new ActivityLogged);
+
+    return back();
+});
+
+Route::post('/live/burst', function () {
+    foreach (range(1, 8) as $i) {
+        LiveDemo::advanceOrder("burst {$i}");
+
+        broadcast(new OrderUpdated);
+
+        usleep(150_000);
+    }
+
+    return back();
+});
+
+Route::post('/live/reset', function () {
+    LiveDemo::reset();
+
+    broadcast(new OrderUpdated);
+    broadcast(new ActivityLogged);
+
+    return back();
+});

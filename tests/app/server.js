@@ -3252,6 +3252,235 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
+// useProp loading state. Partial reloads are deliberately slow so the loading flag
+// is observable, and an explicit `delay` lets a test overlap two requests for the
+// same prop. Props are filtered by the partial headers so an untouched prop keeps
+// its value, which is what proves loading is tracked per prop.
+app.get('/use-prop', (req, res) => {
+  const isPartial = !!req.headers['x-inertia-partial-component']
+  const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
+  const except = (req.headers['x-inertia-partial-except'] || '').split(',').filter(Boolean)
+  const delay = parseInt(req.query.delay || '0', 10) || (isPartial ? 500 : 0)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  const related = (prop, candidate) =>
+    prop === candidate || prop.startsWith(`${candidate}.`) || candidate.startsWith(`${prop}.`)
+  const wants = (prop) =>
+    (only.length === 0 || only.some((candidate) => related(prop, candidate))) &&
+    !except.some((candidate) => related(prop, candidate))
+
+  const props = {}
+
+  if (wants('users')) {
+    props.users = value('users')
+  }
+
+  if (wants('stats')) {
+    props.stats = value('stats')
+  }
+
+  if (wants('user')) {
+    props.user = { name: value('name'), email: value('email') }
+  }
+
+  // Deferred on the initial load, so it only ships when it is asked for by name
+  if (only.some((candidate) => related('orders', candidate))) {
+    props.orders = value('orders')
+  }
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'UseProp',
+      props,
+      deferredProps: isPartial ? {} : { default: ['orders'] },
+    })
+  }, delay)
+})
+
+app.get('/socket-id', (req, res) =>
+  inertia.render(req, res, {
+    component: 'SocketId',
+    props: { socketIdHeader: req.headers['x-socket-id'] ?? null },
+  }),
+)
+
+// Live props, filtered by the same partial rule as the props themselves,
+// mirroring what the Laravel adapter sends.
+const liveProps = {
+  order: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
+  stats: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
+  // Two events on one channel, which is what an explicit `channel:` argument
+  // produces on the server
+  feed: {
+    listeners: [
+      {
+        channel: { name: 'feed', type: 'public' },
+        events: ['App\\Events\\FeedUpdated', 'App\\Events\\FeedCleared'],
+      },
+    ],
+  },
+  throttled: {
+    listeners: [
+      {
+        channel: { name: 'throttled', type: 'public' },
+        events: ['App\\Events\\ThrottledUpdated'],
+      },
+    ],
+    throttle: 5000,
+  },
+  // Shares a channel with order and stats, but listens for a different event,
+  // the way a server action that broadcasts twice reaches the client
+  notes: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\NotesUpdated'],
+      },
+    ],
+  },
+  'account.balance': {
+    listeners: [
+      {
+        channel: { name: 'accounts.1', type: 'private' },
+        events: ['App\\Events\\BalanceUpdated'],
+      },
+    ],
+  },
+  // Two events on two different channels, which the flat channels/events shape
+  // could only express as a cross product
+  multi: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderArchived'],
+      },
+      {
+        channel: { name: 'users.7', type: 'private' },
+        events: ['App\\Events\\UserUpdated'],
+      },
+    ],
+  },
+}
+
+app.get('/live', (req, res) => {
+  const requested = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
+  const wants = (prop) => requested.length === 0 || requested.includes(prop)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  inertia.render(req, res, {
+    component: 'Live',
+    props: {
+      order: value('order'),
+      stats: value('stats'),
+      feed: value('feed'),
+      throttled: value('throttled'),
+      notes: value('notes'),
+      multi: value('multi'),
+      plain: value('plain'),
+      account: { balance: value('balance') },
+    },
+    alwaysProps: {
+      socketIdHeader: req.headers['x-socket-id'] ?? null,
+    },
+    liveProps: Object.fromEntries(Object.entries(liveProps).filter(([prop]) => wants(prop))),
+  })
+})
+
+// Live props over the Echo transport. Every channel type is represented, and two
+// props share a channel through different events so the transport has to refcount.
+const echoLiveProps = (drop, swap) => {
+  const props = {
+    order: {
+      listeners: [
+        {
+          channel: { name: 'orders.1', type: 'private' },
+          events: ['App\\Events\\OrderUpdated'],
+        },
+      ],
+    },
+    stats: {
+      listeners: [
+        {
+          channel: { name: 'orders.1', type: 'private' },
+          events: ['App\\Events\\StatsUpdated'],
+        },
+      ],
+    },
+    room: {
+      listeners: [
+        {
+          channel: { name: 'rooms.1', type: 'presence' },
+          events: ['App\\Events\\RoomUpdated'],
+        },
+      ],
+    },
+    secret: {
+      listeners: [
+        {
+          channel: { name: 'secrets.1', type: 'encrypted-private' },
+          events: ['App\\Events\\SecretUpdated'],
+        },
+      ],
+    },
+    news: {
+      listeners: [
+        {
+          channel: { name: 'news', type: 'public' },
+          events: ['news.published'],
+        },
+      ],
+    },
+  }
+
+  // Keep the channel but replace the events on it, so the transport is asked to
+  // subscribe to new keys on a channel it already holds
+  if (swap) {
+    props.order.listeners[0].events = ['App\\Events\\OrderArchived']
+    props.stats.listeners[0].events = ['App\\Events\\StatsArchived']
+  }
+
+  delete props[drop]
+
+  return props
+}
+
+app.get('/echo-transport', (req, res) => {
+  const requested = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
+  const wants = (prop) => requested.length === 0 || requested.includes(prop)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  inertia.render(req, res, {
+    component: 'EchoTransport',
+    props: {
+      order: value('order'),
+      stats: value('stats'),
+      room: value('room'),
+      secret: value('secret'),
+      news: value('news'),
+    },
+    alwaysProps: {
+      socketIdHeader: req.headers['x-socket-id'] ?? null,
+    },
+    liveProps: Object.fromEntries(
+      Object.entries(echoLiveProps(req.query.drop, req.query.swap)).filter(([prop]) => wants(prop)),
+    ),
+  })
+})
+
 // Optimistic updates (state scoped per session cookie to avoid cross-worker interference)
 const optimisticSessions = {}
 

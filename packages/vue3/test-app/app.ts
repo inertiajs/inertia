@@ -1,8 +1,11 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
+import { echoTransport } from '@inertiajs/vue3/echo'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
+import { resolveFakeEcho } from './fakeEcho'
+import { fakeLiveTransport } from './fakeLiveTransport'
 import AppLayout from './Layouts/AppLayout.vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
 
@@ -52,6 +55,19 @@ createInertiaApp({
     inst.mount(el)
   },
   http: getHttpConfig(),
+  // Only the live props page has a manifest, and the fake transport registers a
+  // socket id resolver that other tests don't expect
+  ...(window.location.pathname === '/live' && {
+    live: {
+      transport: fakeLiveTransport(),
+      // Opt-in so the tests that rely on the defaults keep their timings
+      ...(params.has('liveThrottle') && { throttle: Number(params.get('liveThrottle')) }),
+      ...(params.get('liveKeepAlive') === '1' && { pauseWhenHidden: false }),
+    },
+  }),
+  ...(window.location.pathname === '/echo-transport' && {
+    live: echoTransport({ echo: resolveFakeEcho }),
+  }),
   ...(params.has('withAppDefaults') && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {
