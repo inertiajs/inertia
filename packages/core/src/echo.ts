@@ -1,3 +1,4 @@
+import { liveChannelName } from './liveChannel'
 import { LiveChannel, LiveChannelType, LiveConnectionStatus, LiveTransport } from './types'
 
 /**
@@ -30,30 +31,24 @@ export type EchoTransportConfig = {
 }
 
 /**
- * Echo subscribes with unprefixed names but stores protected channels under
- * their prefixed names, which is what `leaveChannel()` expects.
+ * Map live channel types to their Echo subscription methods.
  */
-const channelTypes: Record<
-  LiveChannelType,
-  { prefix: string; subscribe: (echo: EchoInstance, name: string) => EchoChannel }
-> = {
-  public: { prefix: '', subscribe: (echo, name) => echo.channel(name) },
-  private: { prefix: 'private-', subscribe: (echo, name) => echo.private(name) },
-  presence: { prefix: 'presence-', subscribe: (echo, name) => echo.join(name) },
-  'encrypted-private': { prefix: 'private-encrypted-', subscribe: (echo, name) => echo.encryptedPrivate(name) },
+const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) => EchoChannel> = {
+  public: (echo, name) => echo.channel(name),
+  private: (echo, name) => echo.private(name),
+  presence: (echo, name) => echo.join(name),
+  'encrypted-private': (echo, name) => echo.encryptedPrivate(name),
 }
 
 // An unrecognised type falls back to a public channel rather than throwing,
 // since the manifest is a hand-synced contract with the server
-const typeFor = (channel: LiveChannel) => channelTypes[channel.type] ?? channelTypes.public
+const subscriberFor = (channel: LiveChannel) => subscribers[channel.type] ?? subscribers.public
 
 /**
  * Refcount by type and name so public `private-*` channels stay distinct from
  * private channels with the same stored name.
  */
 const channelKey = (channel: LiveChannel): string => `${channel.type}:${channel.name}`
-
-const prefixedChannelName = (channel: LiveChannel): string => `${typeFor(channel).prefix}${channel.name}`
 
 /**
  * Laravel already sends the broadcast name. Prefix literal names with `.` so
@@ -106,7 +101,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
       const name = formatEvent(event)
       const instance = resolve()
 
-      typeFor(channel).subscribe(instance, channel.name).listen(name, handler)
+      subscriberFor(channel)(instance, channel.name).listen(name, handler)
       watchConnection(instance)
 
       listeners.set(key, (listeners.get(key) ?? 0) + 1)
@@ -114,7 +109,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
       return () => {
         const current = resolve()
 
-        typeFor(channel).subscribe(current, channel.name).stopListening(name, handler)
+        subscriberFor(channel)(current, channel.name).stopListening(name, handler)
 
         const remaining = (listeners.get(key) ?? 1) - 1
 
@@ -126,7 +121,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
         // Unbinding the callback leaves the channel itself subscribed, so the
         // last listener has to leave it as well
         listeners.delete(key)
-        current.leaveChannel(prefixedChannelName(channel))
+        current.leaveChannel(liveChannelName(channel))
       }
     },
 
