@@ -10,8 +10,8 @@ const notify = (): void => {
 }
 
 /**
- * Start tracking a request. Prefetches and requests aimed at another page are
- * ignored, since neither refreshes the props you're looking at.
+ * Prefetches and requests aimed at another page are ignored, since neither
+ * refreshes the props you're looking at.
  */
 export const trackPropRefresh = (visit: ActiveVisit): void => {
   if (typeof window === 'undefined' || visit.prefetch) {
@@ -27,10 +27,6 @@ export const trackPropRefresh = (visit: ActiveVisit): void => {
   notify()
 }
 
-/**
- * Stop tracking a request, whether it completed, was cancelled, or never made
- * it off the ground.
- */
 export const untrackPropRefresh = (visit: ActiveVisit): void => {
   if (activeVisits.delete(visit.id)) {
     notify()
@@ -38,13 +34,9 @@ export const untrackPropRefresh = (visit: ActiveVisit): void => {
 }
 
 /**
- * Tracks which props in-flight requests will refresh. The write side stays
- * private so callers cannot register visits they never finish.
+ * The write side stays private so callers cannot register visits they never finish.
  */
 export const propRefreshes = {
-  /**
-   * Determine if any in-flight request will refresh the given prop path.
-   */
   isRefreshing(prop: string): boolean {
     for (const visit of activeVisits.values()) {
       if (visitRefreshesProp(visit, prop)) {
@@ -55,9 +47,6 @@ export const propRefreshes = {
     return false
   },
 
-  /**
-   * Register a listener that runs whenever the tracked state changes.
-   */
   onChange(listener: VoidFunction): VoidFunction {
     listeners.add(listener)
 

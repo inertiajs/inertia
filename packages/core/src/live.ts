@@ -19,16 +19,16 @@ const DEFAULT_THROTTLE = 1000
 const COLLECT_WINDOW = 32
 
 /**
- * How long a prop still owes its throttle. Zero the moment the window has
- * elapsed, and zero for a prop that has never been flushed.
+ * Zero the moment the throttle window has elapsed, and zero for a prop that has
+ * never been flushed.
  */
 export const throttleWait = (throttle: number, flushedAt: number | undefined, now: number): number => {
   return Math.max(0, throttle - (now - (flushedAt ?? -Infinity)))
 }
 
 /**
- * One channel and event, paired with the props it feeds. Keyed by
- * `subscriptionKey`, which is what the transport is asked to subscribe to.
+ * Keyed by `subscriptionKey`, which is what the transport is asked to subscribe
+ * to.
  */
 type Subscription = {
   channel: LiveChannel
@@ -39,9 +39,8 @@ type Subscription = {
 const subscriptionKey = (channel: LiveChannel, event: string): string => `${channel.type}:${channel.name}::${event}`
 
 /**
- * The page a buffered value belongs to. Compared the way `pendingDeferredProps`
- * compares its own, since a partial reload replaces the page object without
- * changing which page it is.
+ * Compared the way `pendingDeferredProps` compares its own, since a partial
+ * reload replaces the page object without changing which page it is.
  */
 const pageKey = (page: Page): string => `${page.component}::${page.url}`
 
@@ -50,8 +49,7 @@ const isTransport = (live: LiveOption): live is LiveTransport => {
 }
 
 /**
- * The envelope a broadcast nests prop values under. Everything else on the
- * payload belongs to the application.
+ * Everything outside this envelope belongs to the application.
  */
 type LivePayload = {
   __inertia?: {
@@ -60,9 +58,9 @@ type LivePayload = {
 }
 
 /**
- * The prop values a broadcast carried, keyed by prop dot path. A payload that
- * carries none, or that isn't an object at all, reads as an empty set, which
- * leaves every prop of the subscription to reload as it always has.
+ * Keyed by prop dot path. A payload that carries none, or that isn't an object
+ * at all, reads as an empty set, which leaves every prop of the subscription to
+ * reload as it always has.
  */
 const propValues = (payload: unknown): Record<string, unknown> => {
   const props = (payload as LivePayload | null | undefined)?.__inertia?.props
@@ -71,9 +69,9 @@ const propValues = (payload: unknown): Record<string, unknown> => {
 }
 
 /**
- * Keeps the props the server marked as live in sync with the broadcaster. Every
- * page swap diffs the server's live props against the active subscriptions, and an incoming
- * event marks the props it feeds for reload in one throttled partial request.
+ * Every page swap diffs the server's live props against the active
+ * subscriptions, and an incoming event marks the props it feeds for reload in
+ * one throttled partial request.
  */
 class Live {
   protected transport: LiveTransport | null = null
@@ -90,8 +88,6 @@ class Live {
   protected pendingWrite: number | null = null
 
   /**
-   * Wire up a transport and adopt its socket id resolver.
-   *
    * A second configure is ignored because existing listeners and subscriptions
    * have no disposal path for swapping transports.
    */
@@ -145,8 +141,8 @@ class Live {
   }
 
   /**
-   * Whether reloads should hold off. A hidden tab is not worth a request, while
-   * a value a broadcast already delivered is free to apply either way.
+   * A hidden tab is not worth a request, while a value a broadcast already
+   * delivered is free to apply either way.
    */
   protected isPaused(): boolean {
     return this.pauseWhenHidden && visibility.isHidden()
@@ -274,9 +270,8 @@ class Live {
   }
 
   /**
-   * Coalesce the values collected so far into one page write. Every write
-   * replaces the history entry, and one per event trips the browser's rate
-   * limit, so a burst of events becomes a single write.
+   * Every write replaces the history entry, and one per event trips the
+   * browser's rate limit, so a burst of events becomes a single write.
    */
   protected scheduleWrite(): void {
     if (this.pendingWrite !== null || typeof window === 'undefined') {
@@ -302,9 +297,7 @@ class Live {
 
     // Ancestors first. `setPathPreservingIdentity` rebuilds every container
     // along the path, so writing `order` after `order.total` would rebuild
-    // `order` from what the payload carried and lose the narrower write.
-    // Sorting is stable, so paths that do not overlap keep the order the
-    // manifest lists them in.
+    // `order` from the payload and lose the narrower write.
     values.sort(([a], [b]) => toPath(a).length - toPath(b).length)
 
     router.replace({
@@ -328,8 +321,8 @@ class Live {
   }
 
   /**
-   * Schedule the next flush, keeping whichever deadline comes first so a prop
-   * that owes nothing never waits out a slower neighbour's timer.
+   * Keeps whichever deadline comes first, so a prop that owes nothing never
+   * waits out a slower neighbour's timer.
    */
   protected scheduleFlush(): void {
     if (this.dirty.size === 0 || this.isPaused() || typeof window === 'undefined') {
@@ -367,8 +360,7 @@ class Live {
   }
 
   /**
-   * How long until the given prop may go out, or null when it may not. A prop a
-   * request in flight already claims is skipped, since reloading it risks
+   * Null for a prop a request in flight already claims, since reloading it risks
    * overwriting fresher data with an older response.
    */
   protected waitFor(prop: string, now: number): number | null {
@@ -379,9 +371,6 @@ class Live {
     return throttleWait(this.throttleFor(prop), this.flushedAt.get(prop), now)
   }
 
-  /**
-   * How long until the first dirty prop may go out, or null when none may.
-   */
   protected shortestWait(): number | null {
     const now = Date.now()
 
@@ -392,10 +381,6 @@ class Live {
     return waits.length > 0 ? Math.min(...waits) : null
   }
 
-  /**
-   * Flush every dirty prop whose throttle has expired and that no request in
-   * flight already claims, then reschedule for whatever had to stay behind.
-   */
   protected attemptFlush(): void {
     if (this.isPaused()) {
       return

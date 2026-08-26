@@ -4,9 +4,6 @@ import { echo as resolveEcho, echoIsConfigured } from '@laravel/echo-vue'
 
 export type { EchoOptions }
 
-/**
- * Delivers live prop updates over the Echo instance `configureEcho()` from
- * `@laravel/echo-vue` set up.
- */
+/** Delivers live prop updates over the Echo instance `configureEcho()` from `@laravel/echo-vue` set up. */
 export const echo = (options: EchoOptions = {}): LiveOptions =>
   echoLive({ echo: resolveEcho as () => EchoInstance, echoIsConfigured }, options)

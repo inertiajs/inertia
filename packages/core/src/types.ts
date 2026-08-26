@@ -60,8 +60,8 @@ export type SocketIdResolver = () => string | null | undefined
 export type LiveChannelType = 'public' | 'private' | 'presence' | 'encrypted-private'
 
 /**
- * A channel a live prop listens on. Names arrive unprefixed, applying any
- * broadcaster specific prefix is up to the transport.
+ * Names arrive unprefixed, applying any broadcaster specific prefix is up to
+ * the transport.
  */
 export type LiveChannel = {
   name: string
@@ -69,9 +69,8 @@ export type LiveChannel = {
 }
 
 /**
- * A channel paired with only the events that broadcast on it. This stays paired
- * instead of being flattened so the client does not subscribe to a cross
- * product of unrelated channels and events.
+ * Channels stay paired with their events instead of being flattened so the
+ * client does not subscribe to a cross product of unrelated channels and events.
  */
 export type LiveListener = {
   channel: LiveChannel
@@ -86,24 +85,20 @@ export type LiveProp = {
 export type LiveEventHandler = (payload: unknown) => void
 
 /**
- * The seam between the live engine and a broadcaster. A transport turns a
- * channel and event name into a subscription and hands the payload back.
+ * The seam between the live engine and a broadcaster.
  */
 export interface LiveTransport {
   /**
-   * Subscribe to one channel and event, returning a function that unsubscribes.
    * Avoid throwing for anything recoverable: this runs during a page swap, so
    * an error takes the swap with it.
    */
   subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
 
-  /** Optional. Lets Inertia send the socket id, so `toOthers()` works. */
   socketId?: SocketIdResolver
 
   /**
-   * Optional. Report whether the broadcaster is connected. Inertia refreshes
-   * every live prop once a dropped connection returns, so a transport never
-   * has to distinguish the ways in which it is not connected.
+   * Inertia refreshes every live prop once a dropped connection returns, so a
+   * transport never has to distinguish the ways in which it is not connected.
    */
   onStatusChange?(callback: (connected: boolean) => void): VoidFunction
 }
@@ -121,7 +116,6 @@ export type LiveOption = LiveTransport | LiveOptions
  * their app options rather than living on the shared ones.
  */
 export type LiveAppOption = {
-  /** Configure live prop updates. Use `echo()` from the adapter for Laravel Echo. */
   live?: LiveOption
 }
 

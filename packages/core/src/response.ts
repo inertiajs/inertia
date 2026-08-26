@@ -484,8 +484,9 @@ export class Response {
   }
 
   /**
-   * Preserve existing validation errors across async visits that should not clear
-   * the error bag, even when the server shares an empty one.
+   * The Laravel adapter shares validation errors via Inertia::always(), so responses
+   * always include errors, even when empty. InfiniteScroll, WhenVisible and deferred
+   * prop loading are async and should practically never reset them.
    */
   protected shouldPreserveErrors(pageResponse: Page): boolean {
     if (!this.requestParams.all().preserveErrors) {

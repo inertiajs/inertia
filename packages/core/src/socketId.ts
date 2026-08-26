@@ -21,16 +21,12 @@ http.onRequest((config) => {
 
 export const socketId = {
   /**
-   * Register the callback that resolves the current websocket connection id.
    * Pass `null` to stop sending the socket id along with requests.
    */
   resolveUsing(callback: SocketIdResolver | null): void {
     resolver = callback
   },
 
-  /**
-   * Resolve the current websocket connection id, if there is one.
-   */
   resolve(): string | null {
     return resolver?.() || null
   },

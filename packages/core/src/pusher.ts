@@ -1,18 +1,14 @@
 import { createLiveChannelTracker, liveChannelName } from './liveChannel'
 import { LiveOptions, LiveTransport } from './types'
 
-/**
- * The slice of a Pusher channel a live transport needs.
- */
 export interface PusherChannel {
   bind(event: string, handler: (payload: unknown) => void): unknown
   unbind(event: string, handler: (payload: unknown) => void): unknown
 }
 
 /**
- * The slice of a Pusher client a live transport needs. Kept structural so any
- * client speaking the Pusher protocol satisfies it, and so core needs no
- * dependency on `pusher-js` itself.
+ * Kept structural so any client speaking the Pusher protocol satisfies it, and
+ * so core needs no dependency on `pusher-js` itself.
  */
 export interface PusherClient {
   subscribe(name: string): PusherChannel
@@ -26,18 +22,14 @@ export interface PusherClient {
 }
 
 export type PusherOptions = {
-  /**
-   * The Pusher client to deliver updates over. Configuring it, including channel
-   * authorization, stays with the application.
-   */
   client: PusherClient
   throttle?: number
   pauseWhenHidden?: boolean
 }
 
 /**
- * Delivers live prop updates over a client speaking the Pusher protocol, which
- * covers Reverb, Soketi and Ably as well as Pusher itself.
+ * Covers Reverb, Soketi and Ably as well as Pusher itself, since they all speak
+ * the Pusher protocol.
  */
 export const pusher = ({ client, ...options }: PusherOptions): LiveOptions => {
   const channels = createLiveChannelTracker()

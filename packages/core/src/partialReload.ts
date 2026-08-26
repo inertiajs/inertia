@@ -31,8 +31,7 @@ export const partialReloadRequestsSomeProps = (visit: VisitFilter, props: string
 }
 
 /**
- * Determine if a visit refreshes a prop path, using the server's partial reload
- * rules plus `reset` paths requested with `only`.
+ * Uses the server's partial reload rules plus `reset` paths requested with `only`.
  */
 export const visitRefreshesProp = (visit: RefreshFilter, prop: string): boolean => {
   const only = visit.only.concat(visit.reset)

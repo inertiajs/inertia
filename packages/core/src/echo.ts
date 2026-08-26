@@ -8,9 +8,8 @@ import { LiveChannel, LiveChannelType, LiveOptions, LiveTransport } from './type
 export type EchoConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
 
 /**
- * The slice of a Laravel Echo instance a live transport needs. Kept structural
- * so every `@laravel/echo-*` package satisfies it without core depending on any
- * of them.
+ * Kept structural so every `@laravel/echo-*` package satisfies it without core
+ * depending on any of them.
  */
 export interface EchoInstance {
   channel(name: string): EchoChannel
@@ -30,15 +29,10 @@ export interface EchoChannel {
 }
 
 export type EchoTransportConfig = {
-  /** Resolves the Echo instance, e.g. `echo` from `@laravel/echo-vue`. */
   echo: () => EchoInstance
-  /** Reports whether `configureEcho()` has run yet. */
   echoIsConfigured: () => boolean
 }
 
-/**
- * Map live channel types to their Echo subscription methods.
- */
 const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) => EchoChannel> = {
   public: (echo, name) => echo.channel(name),
   private: (echo, name) => echo.private(name),
@@ -59,8 +53,8 @@ const formatEvent = (event: string): string => {
 }
 
 /**
- * Delivers live prop updates over Laravel Echo, resolving the configured Echo
- * instance on each use so `configureEcho()` swaps are respected.
+ * Resolves the configured Echo instance on each use, so `configureEcho()` swaps
+ * are respected.
  */
 export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
   const channels = createLiveChannelTracker()
@@ -140,18 +134,13 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 export type EchoOptions = {
   throttle?: number
   pauseWhenHidden?: boolean
-
-  /**
-   * Resolve the Echo instance yourself, instead of the one `configureEcho()`
-   * set up.
-   */
   resolve?: () => EchoInstance
 }
 
 /**
- * Delivers live prop updates over Laravel Echo. An adapter supplies the
- * bindings for its own `@laravel/echo-*` package. Resolving the instance
- * yourself replaces them, and counts as configured by definition.
+ * An adapter supplies the bindings for its own `@laravel/echo-*` package.
+ * Resolving the instance yourself replaces them, and counts as configured by
+ * definition.
  */
 export const echoLive = (
   { echo, echoIsConfigured }: EchoTransportConfig,
