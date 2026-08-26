@@ -1,5 +1,11 @@
 import { createLiveChannelTracker, liveChannelName } from './liveChannel'
-import { LiveChannel, LiveChannelType, LiveConnectionStatus, LiveTransport } from './types'
+import { LiveChannel, LiveChannelType, LiveOptions, LiveTransport } from './types'
+
+/**
+ * Mirrors Laravel Echo's own `ConnectionStatus` so `EchoInstance` matches
+ * structurally, without core depending on `laravel-echo`.
+ */
+export type EchoConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
 
 /**
  * The slice of a Laravel Echo instance a live transport needs. Kept structural
@@ -14,7 +20,7 @@ export interface EchoInstance {
   leaveChannel(name: string): void
   socketId(): string | null | undefined
   connector: {
-    onConnectionChange(callback: (status: LiveConnectionStatus) => void): VoidFunction
+    onConnectionChange(callback: (status: EchoConnectionStatus) => void): VoidFunction
   }
 }
 
@@ -59,7 +65,7 @@ const formatEvent = (event: string): string => {
 export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
   const channels = createLiveChannelTracker()
 
-  let statusCallback: ((status: LiveConnectionStatus) => void) | null = null
+  let statusCallback: ((connected: boolean) => void) | null = null
   let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
 
   const resolve = (): EchoInstance => {
@@ -83,8 +89,8 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
     watch = {
       instance,
-      stop: instance.connector.onConnectionChange((status: LiveConnectionStatus) => {
-        statusCallback?.(status)
+      stop: instance.connector.onConnectionChange((status: EchoConnectionStatus) => {
+        statusCallback?.(status === 'connected')
       }),
     }
   }
@@ -130,3 +136,30 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
     },
   }
 }
+
+export type EchoOptions = {
+  throttle?: number
+  pauseWhenHidden?: boolean
+
+  /**
+   * Resolve the Echo instance yourself, instead of the one `configureEcho()`
+   * set up.
+   */
+  resolve?: () => EchoInstance
+}
+
+/**
+ * Delivers live prop updates over Laravel Echo. An adapter supplies the
+ * bindings for its own `@laravel/echo-*` package. Resolving the instance
+ * yourself replaces them, and counts as configured by definition.
+ */
+export const echoLive = (
+  { echo, echoIsConfigured }: EchoTransportConfig,
+  { resolve, ...options }: EchoOptions = {},
+): LiveOptions => ({
+  transport: createEchoTransport({
+    echo: resolve ?? echo,
+    echoIsConfigured: resolve ? () => true : echoIsConfigured,
+  }),
+  ...options,
+})

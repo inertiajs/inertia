@@ -122,19 +122,14 @@ class Live {
       }
     })
 
-    // This callback owns connection state. `connected` keeps repeated statuses
-    // idempotent, and `hasConnected` separates reconnects from the first connect.
-    let connected = false
+    let wasConnected = false
     let hasConnected = false
 
-    this.transport.onStatusChange?.((status) => {
-      const reconnected = status === 'connected' && hasConnected && !connected
+    this.transport.onStatusChange?.((connected) => {
+      const reconnected = connected && !wasConnected && hasConnected
 
-      connected = status === 'connected'
-
-      if (connected) {
-        hasConnected = true
-      }
+      wasConnected = connected
+      hasConnected ||= connected
 
       if (reconnected) {
         // Events that fired while the connection was down never arrived, so
@@ -254,22 +249,21 @@ class Live {
     let received = false
 
     props.forEach((prop) => {
-      if (!(prop in values)) {
-        this.markDirty(prop)
+      // A request already claims this prop and read the database after the
+      // broadcast did, so let the reload win and drop the value.
+      const usable = prop in values && !propRefreshes.isRefreshing(prop)
+
+      if (usable) {
+        // A value supersedes a reload this prop was still queued for
+        this.dirty.delete(prop)
+        this.incoming.set(prop, values[prop])
+        received = true
+
         return
       }
 
-      if (propRefreshes.isRefreshing(prop)) {
-        // A request already claims this prop and read the database after the
-        // broadcast did, so let the reload win and drop the value.
-        this.markDirty(prop)
-        return
-      }
-
-      // A value supersedes a reload this prop was still queued for
-      this.dirty.delete(prop)
-      this.incoming.set(prop, values[prop])
-      received = true
+      this.incoming.delete(prop)
+      this.markDirty(prop)
     })
 
     this.scheduleFlush()

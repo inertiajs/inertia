@@ -1,3 +1,4 @@
+import type { LiveEventDetails } from '@inertiajs/core'
 import { Link, router } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -23,7 +24,7 @@ export default ({
   socketIdHeader: string | null
 }) => {
   const [events, setEvents] = useState(0)
-  const [lastEvent, setLastEvent] = useState('none')
+  const [lastEvent, setLastEvent] = useState<LiveEventDetails | null>(null)
   const [cancel, setCancel] = useState(false)
   const [subscriptions, setSubscriptions] = useState<string[]>([])
 
@@ -39,15 +40,7 @@ export default ({
     return router.on('live', (event) => {
       setEvents((count) => count + 1)
 
-      setLastEvent(
-        [
-          event.detail.channel.type,
-          event.detail.channel.name,
-          event.detail.event,
-          event.detail.props.join('|'),
-          JSON.stringify(event.detail.payload),
-        ].join(' '),
-      )
+      setLastEvent(event.detail)
 
       if (cancelRef.current) {
         return false
@@ -93,8 +86,17 @@ export default ({
         <dt>events</dt>
         <dd id="events">{events}</dd>
 
+        <dt>last channel</dt>
+        <dd id="last-channel">{lastEvent ? `${lastEvent.channel.type}:${lastEvent.channel.name}` : 'none'}</dd>
+
         <dt>last event</dt>
-        <dd id="last-event">{lastEvent}</dd>
+        <dd id="last-event">{lastEvent?.event ?? 'none'}</dd>
+
+        <dt>last props</dt>
+        <dd id="last-props">{lastEvent?.props.join(', ') ?? 'none'}</dd>
+
+        <dt>last payload</dt>
+        <dd id="last-payload">{lastEvent ? JSON.stringify(lastEvent.payload) : 'none'}</dd>
 
         <dt>subscriptions</dt>
         <dd id="subscriptions">{subscriptions.join(', ') || 'none'}</dd>
@@ -104,7 +106,7 @@ export default ({
       </dl>
 
       <button onClick={showSubscriptions}>Show Subscriptions</button>
-      <button onClick={() => setCancel((value) => !value)}>Toggle Cancel</button>
+      <button onClick={() => setCancel((value) => !value)}>Toggle Cancel: {String(cancel)}</button>
       <button onClick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
       <Link href="/socket-id">Leave</Link>

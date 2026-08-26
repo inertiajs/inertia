@@ -65,9 +65,7 @@ export const pusher = ({ client, ...options }: PusherOptions): LiveOptions => {
     socketId: () => client.connection.socket_id ?? null,
 
     onStatusChange(callback) {
-      // Only `connected` is acted on, so every other state collapses
-      const handler = ({ current }: { current: string }) =>
-        callback(current === 'connected' ? 'connected' : 'disconnected')
+      const handler = ({ current }: { current: string }) => callback(current === 'connected')
 
       client.connection.bind('state_change', handler)
 

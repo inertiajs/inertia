@@ -1,4 +1,4 @@
-import type { LiveChannel, LiveConnectionStatus, LiveEventHandler, LiveTransport } from '@inertiajs/core'
+import type { LiveChannel, LiveEventHandler, LiveTransport } from '@inertiajs/core'
 
 type FakeLiveSubscription = {
   channel: LiveChannel
@@ -8,7 +8,7 @@ type FakeLiveSubscription = {
 
 export type FakeLiveTransportControls = {
   emit(channel: string, event: string, payload?: unknown): void
-  status(status: LiveConnectionStatus): void
+  status(connected: boolean): void
   subscriptions(): string[]
 }
 
@@ -21,7 +21,7 @@ export const fakeLiveTransport = ({
   socketId = 'fake-socket-id',
 }: { socketId?: string | null } = {}): LiveTransport => {
   const subscriptions = new Set<FakeLiveSubscription>()
-  const statusCallbacks = new Set<(status: LiveConnectionStatus) => void>()
+  const statusCallbacks = new Set<(connected: boolean) => void>()
 
   if (typeof window !== 'undefined') {
     window.__inertiaLive = {
@@ -33,8 +33,8 @@ export const fakeLiveTransport = ({
         })
       },
 
-      status(status) {
-        statusCallbacks.forEach((callback) => callback(status))
+      status(connected) {
+        statusCallbacks.forEach((callback) => callback(connected))
       },
 
       subscriptions() {

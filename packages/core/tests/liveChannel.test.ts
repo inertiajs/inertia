@@ -24,14 +24,17 @@ describe('liveChannelName', () => {
 describe('createLiveChannelTracker', () => {
   const tracker = () => createLiveChannelTracker()
 
-  it('reports the first listener on a channel and the last one off it', () => {
+  it('reports the last listener off a channel, not the ones before it', () => {
     const channels = tracker()
 
-    expect(channels.acquire(channel('private'))).toBe(true)
-    expect(channels.acquire(channel('private'))).toBe(false)
+    channels.acquire(channel('private'))
+    channels.acquire(channel('private'))
 
     expect(channels.release(channel('private'))).toBe(false)
+    expect(channels.hasAny()).toBe(true)
+
     expect(channels.release(channel('private'))).toBe(true)
+    expect(channels.hasAny()).toBe(false)
   })
 
   it('counts a public channel separately from a private one of the same name', () => {

@@ -1,6 +1,6 @@
 import { propRefreshes } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
-import { onDestroy, onMount } from 'svelte'
+import { onDestroy } from 'svelte'
 import page from './page.svelte'
 
 export interface InertiaProp<T> {
@@ -10,28 +10,17 @@ export interface InertiaProp<T> {
 }
 
 export default function useProp<T = unknown>(name: string): InertiaProp<T> {
-  let loading = $state(false)
+  let loading = $state(propRefreshes.isRefreshing(name))
 
   const value = $derived(get(page.props, name) as T | undefined)
-
-  let unsubscribe: (() => void) | null = null
 
   const sync = () => {
     loading = propRefreshes.isRefreshing(name)
   }
 
-  onMount(() => {
-    sync()
-
-    unsubscribe = propRefreshes.onChange(sync)
-  })
-
-  onDestroy(() => {
-    if (unsubscribe) {
-      unsubscribe()
-      unsubscribe = null
-    }
-  })
+  if (typeof window !== 'undefined') {
+    onDestroy(propRefreshes.onChange(sync))
+  }
 
   return {
     get value() {

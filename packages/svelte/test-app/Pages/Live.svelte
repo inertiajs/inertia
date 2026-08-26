@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { LiveEventDetails } from '@inertiajs/core'
   import { inertia, router } from '@inertiajs/svelte'
   import { onDestroy, onMount } from 'svelte'
 
@@ -25,7 +26,7 @@
   } = $props()
 
   let events = $state(0)
-  let lastEvent = $state('none')
+  let lastEvent = $state<LiveEventDetails | null>(null)
   let cancel = $state(false)
   let subscriptions = $state<string[]>([])
 
@@ -41,13 +42,7 @@
     stopListening = router.on('live', (event) => {
       events++
 
-      lastEvent = [
-        event.detail.channel.type,
-        event.detail.channel.name,
-        event.detail.event,
-        event.detail.props.join('|'),
-        JSON.stringify(event.detail.payload),
-      ].join(' ')
+      lastEvent = event.detail
 
       if (cancel) {
         return false
@@ -98,8 +93,17 @@
     <dt>events</dt>
     <dd id="events">{events}</dd>
 
+    <dt>last channel</dt>
+    <dd id="last-channel">{lastEvent ? `${lastEvent.channel.type}:${lastEvent.channel.name}` : 'none'}</dd>
+
     <dt>last event</dt>
-    <dd id="last-event">{lastEvent}</dd>
+    <dd id="last-event">{lastEvent?.event ?? 'none'}</dd>
+
+    <dt>last props</dt>
+    <dd id="last-props">{lastEvent?.props.join(', ') ?? 'none'}</dd>
+
+    <dt>last payload</dt>
+    <dd id="last-payload">{lastEvent ? JSON.stringify(lastEvent.payload) : 'none'}</dd>
 
     <dt>subscriptions</dt>
     <dd id="subscriptions">{subscriptions.join(', ') || 'none'}</dd>
@@ -109,7 +113,7 @@
   </dl>
 
   <button onclick={showSubscriptions}>Show Subscriptions</button>
-  <button onclick={() => (cancel = !cancel)}>Toggle Cancel</button>
+  <button onclick={() => (cancel = !cancel)}>Toggle Cancel: {cancel}</button>
   <button onclick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
   <a href="/socket-id" use:inertia>Leave</a>

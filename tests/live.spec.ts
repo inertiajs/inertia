@@ -48,7 +48,10 @@ test.describe('Live props', () => {
     await emit(page, 'orders.1', ORDER_EVENT, { id: 1 })
 
     await expect(page.locator('#events')).toHaveText('1')
-    await expect(page.locator('#last-event')).toHaveText(`private orders.1 ${ORDER_EVENT} order|stats {"id":1}`)
+    await expect(page.locator('#last-channel')).toHaveText('private:orders.1')
+    await expect(page.locator('#last-event')).toHaveText(ORDER_EVENT)
+    await expect(page.locator('#last-props')).toHaveText('order, stats')
+    await expect(page.locator('#last-payload')).toHaveText('{"id":1}')
 
     await response
 
@@ -228,6 +231,7 @@ test.describe('Live props', () => {
     requests.listen(page)
 
     await page.getByRole('button', { name: 'Toggle Cancel' }).click()
+    await expect(page.getByRole('button', { name: 'Toggle Cancel' })).toHaveText('Toggle Cancel: true')
 
     const order = await page.locator('#order').textContent()
 
@@ -239,6 +243,7 @@ test.describe('Live props', () => {
     await expect(page.locator('#order')).toHaveText(order!)
 
     await page.getByRole('button', { name: 'Toggle Cancel' }).click()
+    await expect(page.getByRole('button', { name: 'Toggle Cancel' })).toHaveText('Toggle Cancel: false')
 
     const response = page.waitForResponse('**/live')
     await emit(page, 'orders.1', ORDER_EVENT)
@@ -379,11 +384,11 @@ test.describe('Live props', () => {
     const order = await page.locator('#order').textContent()
     const feed = await page.locator('#feed').textContent()
 
-    await page.evaluate(() => window.__inertiaLive.status('connected'))
-    await page.evaluate(() => window.__inertiaLive.status('disconnected'))
+    await page.evaluate(() => window.__inertiaLive.status(true))
+    await page.evaluate(() => window.__inertiaLive.status(false))
 
     const response = page.waitForResponse('**/live')
-    await page.evaluate(() => window.__inertiaLive.status('connected'))
+    await page.evaluate(() => window.__inertiaLive.status(true))
     await response
 
     await expect(page.locator('#order')).not.toHaveText(order!)
@@ -391,7 +396,7 @@ test.describe('Live props', () => {
 
     // A transport may repeat a status it is already in, which is not a reconnect
     requests.listen(page)
-    await page.evaluate(() => window.__inertiaLive.status('connected'))
+    await page.evaluate(() => window.__inertiaLive.status(true))
     await page.waitForTimeout(300)
 
     expect(liveRequests()).toBe(0)
@@ -412,8 +417,8 @@ test.describe('Live props', () => {
     await expect(page.locator('#stats')).toHaveText('stats-from-payload')
 
     await expect(page.locator('#events')).toHaveText('1')
-    await expect(page.locator('#last-event')).toHaveText(
-      `private orders.1 ${ORDER_EVENT} order|stats {"__inertia":{"props":{"order":"order-from-payload","stats":"stats-from-payload"}}}`,
+    await expect(page.locator('#last-payload')).toHaveText(
+      '{"__inertia":{"props":{"order":"order-from-payload","stats":"stats-from-payload"}}}',
     )
 
     await page.waitForTimeout(300)
@@ -559,8 +564,8 @@ test.describe('Live props', () => {
     const order = await page.locator('#order').textContent()
     const feed = await page.locator('#feed').textContent()
 
-    await page.evaluate(() => window.__inertiaLive.status('connecting'))
-    await page.evaluate(() => window.__inertiaLive.status('connected'))
+    await page.evaluate(() => window.__inertiaLive.status(false))
+    await page.evaluate(() => window.__inertiaLive.status(true))
     await page.waitForTimeout(300)
 
     expect(liveRequests()).toBe(0)

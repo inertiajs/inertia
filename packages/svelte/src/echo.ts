@@ -1,26 +1,12 @@
 import type { LiveOptions } from '@inertiajs/core'
-import { createEchoTransport, type EchoInstance } from '@inertiajs/core/echo'
+import { echoLive, type EchoInstance, type EchoOptions } from '@inertiajs/core/echo'
 import { echo as resolveEcho, echoIsConfigured } from '@laravel/echo-svelte'
 
-export type EchoOptions = {
-  throttle?: number
-  pauseWhenHidden?: boolean
-
-  /**
-   * Resolve the Echo instance yourself, instead of the one `configureEcho()`
-   * from `@laravel/echo-svelte` set up.
-   */
-  resolve?: () => EchoInstance
-}
+export type { EchoOptions }
 
 /**
- * Delivers live prop updates over the Echo instance `configureEcho()` set up.
+ * Delivers live prop updates over the Echo instance `configureEcho()` from
+ * `@laravel/echo-svelte` set up.
  */
-export const echo = ({ resolve, ...options }: EchoOptions = {}): LiveOptions => {
-  const transport = createEchoTransport({
-    echo: resolve ?? (resolveEcho as () => EchoInstance),
-    echoIsConfigured: resolve ? () => true : echoIsConfigured,
-  })
-
-  return { transport, ...options }
-}
+export const echo = (options: EchoOptions = {}): LiveOptions =>
+  echoLive({ echo: resolveEcho as () => EchoInstance, echoIsConfigured }, options)

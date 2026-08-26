@@ -223,6 +223,32 @@ describe('live prop payloads', () => {
     expect(live.reloaded()).toEqual(['order'])
   })
 
+  it('drops a value it has buffered when a request claims the prop before the write lands', async () => {
+    const live = await setup({ order: listeners(orders, 'OrderUpdated') })
+
+    live.emit(orders, 'OrderUpdated', {
+      __inertia: { props: { order: { id: 1, total: '99.00' } } },
+    })
+
+    live.startRefreshing(['order'])
+
+    live.emit(orders, 'OrderUpdated', {
+      __inertia: { props: { order: { id: 1, total: '150.00' } } },
+    })
+
+    await live.settle()
+
+    expect(live.props().order).toEqual({ id: 1, total: '1.00' })
+    expect(live.writes()).toBe(0)
+    expect(live.requests()).toHaveLength(0)
+
+    live.stopRefreshing(['order'])
+
+    await live.settle()
+
+    expect(live.reloaded()).toEqual(['order'])
+  })
+
   it('reloads the props of the subscription the payload left out', async () => {
     const live = await setup({
       order: { listeners: [{ channel: orders, events: ['OrderUpdated'] }] },

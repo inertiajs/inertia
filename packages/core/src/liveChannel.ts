@@ -29,14 +29,10 @@ export const createLiveChannelTracker = () => {
 
   return {
     /**
-     * Register a listener. Returns true when it is the first on the channel.
+     * Register a listener on a channel.
      */
-    acquire(channel: LiveChannel): boolean {
-      const count = (counts.get(key(channel)) ?? 0) + 1
-
-      counts.set(key(channel), count)
-
-      return count === 1
+    acquire(channel: LiveChannel): void {
+      counts.set(key(channel), (counts.get(key(channel)) ?? 0) + 1)
     },
 
     /**

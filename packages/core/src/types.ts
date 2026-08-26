@@ -83,12 +83,6 @@ export type LiveProp = {
   throttle?: number
 }
 
-/**
- * Mirrors Laravel Echo's connection lifecycle statuses so transports can pass
- * broadcaster state through without collapsing transitional states.
- */
-export type LiveConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
-
 export type LiveEventHandler = (payload: unknown) => void
 
 /**
@@ -107,11 +101,11 @@ export interface LiveTransport {
   socketId?: SocketIdResolver
 
   /**
-   * Optional. Only `'connected'` is acted on, to refresh every live prop after
-   * a dropped connection returns. Every other status simply means "not
-   * connected", so reporting them precisely is never required.
+   * Optional. Report whether the broadcaster is connected. Inertia refreshes
+   * every live prop once a dropped connection returns, so a transport never
+   * has to distinguish the ways in which it is not connected.
    */
-  onStatusChange?(callback: (status: LiveConnectionStatus) => void): VoidFunction
+  onStatusChange?(callback: (connected: boolean) => void): VoidFunction
 }
 
 export type LiveOptions = {

@@ -107,16 +107,16 @@ describe('pusher', () => {
     expect(pusher({ client: fake.client }).transport.socketId!()).toBeNull()
   })
 
-  it('reports connected, and collapses every other state to disconnected', () => {
-    const statuses: string[] = []
-    const stop = pusher({ client: fake.client }).transport.onStatusChange!((status) => statuses.push(status))
+  it('reports whether the connection is up', () => {
+    const statuses: boolean[] = []
+    const stop = pusher({ client: fake.client }).transport.onStatusChange!((connected) => statuses.push(connected))
 
     fake.changeState('connecting')
     fake.changeState('connected')
     fake.changeState('unavailable')
     fake.changeState('failed')
 
-    expect(statuses).toEqual(['disconnected', 'connected', 'disconnected', 'disconnected'])
+    expect(statuses).toEqual([false, true, false, false])
 
     stop()
     expect(fake.isWatchingState()).toBe(false)

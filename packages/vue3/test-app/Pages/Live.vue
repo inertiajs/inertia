@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LiveEventDetails } from '@inertiajs/core'
 import { Link, router } from '@inertiajs/vue3'
 import { onMounted, onUnmounted, ref } from 'vue'
 
@@ -15,7 +16,7 @@ defineProps<{
 }>()
 
 const events = ref(0)
-const lastEvent = ref('none')
+const lastEvent = ref<LiveEventDetails | null>(null)
 const cancel = ref(false)
 const subscriptions = ref<string[]>([])
 
@@ -31,13 +32,7 @@ onMounted(() => {
   stopListening = router.on('live', (event) => {
     events.value++
 
-    lastEvent.value = [
-      event.detail.channel.type,
-      event.detail.channel.name,
-      event.detail.event,
-      event.detail.props.join('|'),
-      JSON.stringify(event.detail.payload),
-    ].join(' ')
+    lastEvent.value = event.detail
 
     if (cancel.value) {
       return false
@@ -89,8 +84,17 @@ onUnmounted(() => {
       <dt>events</dt>
       <dd id="events">{{ events }}</dd>
 
+      <dt>last channel</dt>
+      <dd id="last-channel">{{ lastEvent ? `${lastEvent.channel.type}:${lastEvent.channel.name}` : 'none' }}</dd>
+
       <dt>last event</dt>
-      <dd id="last-event">{{ lastEvent }}</dd>
+      <dd id="last-event">{{ lastEvent?.event ?? 'none' }}</dd>
+
+      <dt>last props</dt>
+      <dd id="last-props">{{ lastEvent?.props.join(', ') ?? 'none' }}</dd>
+
+      <dt>last payload</dt>
+      <dd id="last-payload">{{ lastEvent ? JSON.stringify(lastEvent.payload) : 'none' }}</dd>
 
       <dt>subscriptions</dt>
       <dd id="subscriptions">{{ subscriptions.join(', ') || 'none' }}</dd>
@@ -100,7 +104,7 @@ onUnmounted(() => {
     </dl>
 
     <button @click="showSubscriptions">Show Subscriptions</button>
-    <button @click="cancel = !cancel">Toggle Cancel</button>
+    <button @click="cancel = !cancel">Toggle Cancel: {{ cancel }}</button>
     <button @click="router.reload({ only: ['plain'] })">Reload Plain</button>
 
     <Link href="/socket-id">Leave</Link>
