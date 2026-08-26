@@ -169,7 +169,10 @@ export default ({
           <button className="rounded bg-slate-800 px-4 py-2 text-white" onClick={() => trigger('/live/burst')}>
             Burst of 8
           </button>
-          <button className="rounded border border-slate-300 px-4 py-2" onClick={() => router.live.refresh('order')}>
+          <button
+            className="rounded border border-slate-300 px-4 py-2"
+            onClick={() => router.reload({ only: ['order'] })}
+          >
             Refresh order
           </button>
           <button className="rounded border border-slate-300 px-4 py-2" onClick={() => trigger('/live/reset')}>

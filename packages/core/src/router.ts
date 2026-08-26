@@ -6,7 +6,6 @@ import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
-import { live } from './live'
 import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils'
 import { page as currentPage } from './page'
 import { polls } from './polls'
@@ -67,13 +66,6 @@ export class Router {
   protected clientVisitQueue = new Queue<Promise<void>>()
 
   protected pendingOptimisticCallback: OptimisticCallback | undefined = undefined
-
-  /**
-   * Controls for the props the server marked as live.
-   */
-  public readonly live = {
-    refresh: (prop: string): void => live.refresh(prop),
-  }
 
   public init<ComponentType = Component>({
     initialPage,

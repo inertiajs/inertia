@@ -30,24 +30,6 @@ const setHidden = (page: Page, hidden: boolean) =>
     document.dispatchEvent(new Event('visibilitychange'))
   }, hidden)
 
-// Every adapter exports `router`, so the live controls are reachable even where
-// no transport is wired. They have to stay inert there.
-test.describe('Live props without a transport', () => {
-  test('it ignores the live controls when no transport is configured', async ({ page }) => {
-    pageLoads.watch(page)
-    await page.goto('/socket-id')
-    requests.listen(page)
-
-    await page.evaluate(() => {
-      window.testing.Inertia.live.refresh('socketIdHeader')
-    })
-
-    await page.waitForTimeout(300)
-
-    expect(requests.requests).toHaveLength(0)
-  })
-})
-
 test.describe('Live props', () => {
   test('it subscribes to the live props the server sent and reloads the ones an event feeds', async ({ page }) => {
     pageLoads.watch(page)
@@ -342,38 +324,6 @@ test.describe('Live props', () => {
     await response
 
     await expect(page.locator('#order')).not.toHaveText(order!)
-  })
-
-  test('it refreshes a prop on demand, ignoring its throttle', async ({ page }) => {
-    pageLoads.watch(page)
-    await page.goto('/live')
-
-    requests.listen(page)
-
-    // Seed the 5s-throttle prop, so the refresh has a real window to ignore
-    const seededThrottled = page.waitForResponse('**/live')
-    await emit(page, 'throttled', THROTTLED_EVENT)
-    await seededThrottled
-
-    // Seed order too, then dirty it again, so it is mid-throttle and must not be
-    // swept along by another prop's refresh
-    const seededOrder = page.waitForResponse('**/live')
-    await emit(page, 'orders.1', ORDER_EVENT)
-    await seededOrder
-
-    const throttled = await page.locator('#throttled').textContent()
-    const order = await page.locator('#order').textContent()
-
-    await emit(page, 'orders.1', ORDER_EVENT)
-
-    const response = page.waitForResponse('**/live', { timeout: 1500 })
-    await page.getByRole('button', { name: 'Refresh Throttled' }).click()
-    const resolved = await response
-
-    expect(resolved.request().headers()['x-inertia-partial-data']).toBe('throttled')
-
-    await expect(page.locator('#throttled')).not.toHaveText(throttled!)
-    await expect(page.locator('#order')).toHaveText(order!)
   })
 
   test('it keeps the subscriptions of props a partial reload did not refresh', async ({ page }) => {

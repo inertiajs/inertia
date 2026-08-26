@@ -152,7 +152,7 @@
       Broadcast both events
     </button>
     <button class="rounded bg-slate-800 px-4 py-2 text-white" onclick={() => trigger('/live/burst')}>Burst of 8</button>
-    <button class="rounded border border-slate-300 px-4 py-2" onclick={() => router.live.refresh('order')}>
+    <button class="rounded border border-slate-300 px-4 py-2" onclick={() => router.reload({ only: ['order'] })}>
       Refresh order
     </button>
     <button class="rounded border border-slate-300 px-4 py-2" onclick={() => trigger('/live/reset')}>Reset</button>

@@ -110,8 +110,6 @@
 
   <button onclick={showSubscriptions}>Show Subscriptions</button>
   <button onclick={() => (cancel = !cancel)}>Toggle Cancel</button>
-  <button onclick={() => router.live.refresh('order')}>Refresh Order</button>
-  <button onclick={() => router.live.refresh('throttled')}>Refresh Throttled</button>
   <button onclick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
   <a href="/socket-id" use:inertia>Leave</a>

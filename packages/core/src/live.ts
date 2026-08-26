@@ -157,18 +157,6 @@ class Live {
     return this.pauseWhenHidden && visibility.isHidden()
   }
 
-  /**
-   * Reload a live prop right away, ignoring the throttle.
-   */
-  public refresh(prop: string): void {
-    if (!this.transport) {
-      return
-    }
-
-    this.markDirty(prop, { force: true })
-    this.scheduleFlush()
-  }
-
   protected sync(page: Page): void {
     const transport = this.transport
 

@@ -101,8 +101,6 @@ onUnmounted(() => {
 
     <button @click="showSubscriptions">Show Subscriptions</button>
     <button @click="cancel = !cancel">Toggle Cancel</button>
-    <button @click="router.live.refresh('order')">Refresh Order</button>
-    <button @click="router.live.refresh('throttled')">Refresh Throttled</button>
     <button @click="router.reload({ only: ['plain'] })">Reload Plain</button>
 
     <Link href="/socket-id">Leave</Link>

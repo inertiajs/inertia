@@ -105,8 +105,6 @@ export default ({
 
       <button onClick={showSubscriptions}>Show Subscriptions</button>
       <button onClick={() => setCancel((value) => !value)}>Toggle Cancel</button>
-      <button onClick={() => router.live.refresh('order')}>Refresh Order</button>
-      <button onClick={() => router.live.refresh('throttled')}>Refresh Throttled</button>
       <button onClick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
       <Link href="/socket-id">Leave</Link>

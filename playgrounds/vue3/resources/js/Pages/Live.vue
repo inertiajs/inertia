@@ -144,7 +144,7 @@ onUnmounted(() => {
         Broadcast both events
       </button>
       <button class="rounded bg-slate-800 px-4 py-2 text-white" @click="trigger('/live/burst')">Burst of 8</button>
-      <button class="rounded border border-slate-300 px-4 py-2" @click="router.live.refresh('order')">
+      <button class="rounded border border-slate-300 px-4 py-2" @click="router.reload({ only: ['order'] })">
         Refresh order
       </button>
       <button class="rounded border border-slate-300 px-4 py-2" @click="trigger('/live/reset')">Reset</button>
