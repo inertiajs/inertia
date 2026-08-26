@@ -31,6 +31,7 @@ const builds = [
   { entryPoints: ['src/server.ts'], format: 'esm', outfile: 'dist/server.js', platform: 'node' },
   { entryPoints: ['src/ssrErrors.ts'], format: 'esm', outfile: 'dist/ssrErrors.js', platform: 'node' },
   { entryPoints: ['src/echo.ts'], format: 'esm', outfile: 'dist/echo.js', platform: 'browser' },
+  { entryPoints: ['src/pusher.ts'], format: 'esm', outfile: 'dist/pusher.js', platform: 'browser' },
 ]
 
 builds.forEach(async (build) => {

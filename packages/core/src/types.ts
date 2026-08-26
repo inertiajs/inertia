@@ -96,8 +96,21 @@ export type LiveEventHandler = (payload: unknown) => void
  * channel and event name into a subscription and hands the payload back.
  */
 export interface LiveTransport {
+  /**
+   * Subscribe to one channel and event, returning a function that unsubscribes.
+   * Avoid throwing for anything recoverable: this runs during a page swap, so
+   * an error takes the swap with it.
+   */
   subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
+
+  /** Optional. Lets Inertia send the socket id, so `toOthers()` works. */
   socketId?: SocketIdResolver
+
+  /**
+   * Optional. Only `'connected'` is acted on, to refresh every live prop after
+   * a dropped connection returns. Every other status simply means "not
+   * connected", so reporting them precisely is never required.
+   */
   onStatusChange?(callback: (status: LiveConnectionStatus) => void): VoidFunction
 }
 

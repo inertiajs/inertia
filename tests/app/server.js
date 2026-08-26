@@ -3252,10 +3252,9 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
-// useProp loading state. Partial reloads are deliberately slow so the loading flag
-// is observable, and an explicit `delay` lets a test overlap two requests for the
-// same prop. Props are filtered by the partial headers so an untouched prop keeps
-// its value, which is what proves loading is tracked per prop.
+// useProp loading state. Reloads are deliberately slow so the loading flag is
+// observable, and `delay` lets a test overlap two requests for the same prop.
+// Props are filtered by the partial headers, so an untouched prop keeps its value.
 app.get('/use-prop', (req, res) => {
   const isPartial = !!req.headers['x-inertia-partial-component']
   const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)

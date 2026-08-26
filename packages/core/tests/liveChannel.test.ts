@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { liveChannelName } from '../src/liveChannel'
+import { createLiveChannelTracker, liveChannelName } from '../src/liveChannel'
 import type { LiveChannel } from '../src/types'
 
 const channel = (type: LiveChannel['type'], name = 'orders.1'): LiveChannel => ({ name, type })
@@ -18,5 +18,37 @@ describe('liveChannelName', () => {
 
   it('falls back to no prefix for a type it does not know', () => {
     expect(liveChannelName({ name: 'orders.1', type: 'shouted' } as unknown as LiveChannel)).toBe('orders.1')
+  })
+})
+
+describe('createLiveChannelTracker', () => {
+  const tracker = () => createLiveChannelTracker()
+
+  it('reports the first listener on a channel and the last one off it', () => {
+    const channels = tracker()
+
+    expect(channels.acquire(channel('private'))).toBe(true)
+    expect(channels.acquire(channel('private'))).toBe(false)
+
+    expect(channels.release(channel('private'))).toBe(false)
+    expect(channels.release(channel('private'))).toBe(true)
+  })
+
+  it('counts a public channel separately from a private one of the same name', () => {
+    const channels = tracker()
+
+    channels.acquire(channel('public', 'private-orders.1'))
+    channels.acquire(channel('private', 'orders.1'))
+
+    // Both are stored as `private-orders.1` by the broadcaster, so counting by
+    // name alone would release one while the other still has a listener
+    expect(channels.release(channel('public', 'private-orders.1'))).toBe(true)
+    expect(channels.hasAny()).toBe(true)
+    expect(channels.release(channel('private', 'orders.1'))).toBe(true)
+    expect(channels.hasAny()).toBe(false)
+  })
+
+  it('treats releasing an unknown channel as the last one out', () => {
+    expect(tracker().release(channel('private'))).toBe(true)
   })
 })

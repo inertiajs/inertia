@@ -26,7 +26,7 @@ export {
 } from './layout'
 /** @internal Not part of the public API. May change or be removed without notice. */
 export { configureLive } from './live'
-export { liveChannelName } from './liveChannel'
+export { createLiveChannelTracker, liveChannelName } from './liveChannel'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { isPathOrSubPath, partialReloadRequestsProp, partialReloadRequestsSomeProps } from './partialReload'
 export { propRefreshes } from './propRefreshes'
