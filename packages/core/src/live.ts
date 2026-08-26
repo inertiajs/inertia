@@ -1,6 +1,8 @@
+import { toPath } from 'es-toolkit/compat'
 import { router } from '.'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
+import { setPathPreservingIdentity } from './objectUtils'
 import { page as currentPage } from './page'
 import { propRefreshes } from './propRefreshes'
 import { socketId } from './socketId'
@@ -36,8 +38,36 @@ type Subscription = {
 
 const subscriptionKey = (channel: LiveChannel, event: string): string => `${channel.type}:${channel.name}::${event}`
 
+/**
+ * The page a buffered value belongs to. Compared the way `pendingDeferredProps`
+ * compares its own, since a partial reload replaces the page object without
+ * changing which page it is.
+ */
+const pageKey = (page: Page): string => `${page.component}::${page.url}`
+
 const isTransport = (live: LiveOption): live is LiveTransport => {
   return typeof (live as LiveTransport).subscribe === 'function'
+}
+
+/**
+ * The envelope a broadcast nests prop values under. Everything else on the
+ * payload belongs to the application.
+ */
+type LivePayload = {
+  __inertia?: {
+    props?: Record<string, unknown>
+  }
+}
+
+/**
+ * The prop values a broadcast carried, keyed by prop dot path. A payload that
+ * carries none, or that isn't an object at all, reads as an empty set, which
+ * leaves every prop of the subscription to reload as it always has.
+ */
+const propValues = (payload: unknown): Record<string, unknown> => {
+  const props = (payload as LivePayload | null | undefined)?.__inertia?.props
+
+  return props && typeof props === 'object' ? props : {}
 }
 
 /**
@@ -49,13 +79,15 @@ class Live {
   protected transport: LiveTransport | null = null
   protected throttle = DEFAULT_THROTTLE
   protected pauseWhenHidden = true
-  protected paused = false
   protected liveProps: Record<string, LiveProp> = {}
   protected subscriptions = new Map<string, Subscription>()
   protected unsubscribers = new Map<string, VoidFunction>()
   protected dirty = new Set<string>()
   protected flushedAt = new Map<string, number>()
   protected pending: { at: number; timeoutId: number } | null = null
+  protected incoming = new Map<string, unknown>()
+  protected incomingPage: string | null = null
+  protected pendingWrite: number | null = null
 
   /**
    * Wire up a transport and adopt its socket id resolver.
@@ -118,31 +150,11 @@ class Live {
   }
 
   /**
-   * Stop reloading props until `resume()` is called, remembering events that
-   * arrive while paused. Without a transport, there is nothing to pause.
+   * Whether reloads should hold off. A hidden tab is not worth a request, while
+   * a value a broadcast already delivered is free to apply either way.
    */
-  public pause(): void {
-    if (!this.transport) {
-      return
-    }
-
-    this.paused = true
-
-    this.clearTimeout()
-  }
-
-  public resume(): void {
-    if (!this.transport) {
-      return
-    }
-
-    this.paused = false
-
-    this.scheduleFlush()
-  }
-
   protected isPaused(): boolean {
-    return this.paused || (this.pauseWhenHidden && visibility.isHidden())
+    return this.pauseWhenHidden && visibility.isHidden()
   }
 
   /**
@@ -212,6 +224,20 @@ class Live {
         this.dirty.delete(prop)
       }
     })
+
+    // Values are collected for the page they arrived on. A page swap leaves
+    // them meaningless, even where the new page happens to declare the same
+    // prop, so they go rather than land on data they never described.
+    if (this.incomingPage !== pageKey(page)) {
+      this.incoming.clear()
+      this.incomingPage = pageKey(page)
+    }
+
+    this.incoming.forEach((_value, prop) => {
+      if (!(prop in this.liveProps)) {
+        this.incoming.delete(prop)
+      }
+    })
   }
 
   protected handleEvent(key: string, payload: unknown): void {
@@ -234,9 +260,77 @@ class Live {
       return
     }
 
-    props.forEach((prop) => this.markDirty(prop))
+    // The manifest is the whitelist. Only the props this subscription feeds can
+    // be written, so a payload can never reach a prop the event has no say over.
+    const values = propValues(payload)
+    let received = false
+
+    props.forEach((prop) => {
+      if (!(prop in values)) {
+        this.markDirty(prop)
+        return
+      }
+
+      if (propRefreshes.isRefreshing(prop)) {
+        // A request already claims this prop and read the database after the
+        // broadcast did, so let the reload win and drop the value.
+        this.markDirty(prop)
+        return
+      }
+
+      // A value supersedes a reload this prop was still queued for
+      this.dirty.delete(prop)
+      this.incoming.set(prop, values[prop])
+      received = true
+    })
 
     this.scheduleFlush()
+
+    if (received) {
+      this.scheduleWrite()
+    }
+  }
+
+  /**
+   * Coalesce the values collected so far into one page write. Every write
+   * replaces the history entry, and one per event trips the browser's rate
+   * limit, so a burst of events becomes a single write.
+   */
+  protected scheduleWrite(): void {
+    if (this.pendingWrite !== null || typeof window === 'undefined') {
+      return
+    }
+
+    this.pendingWrite = window.setTimeout(() => {
+      this.pendingWrite = null
+      this.write()
+    }, COLLECT_WINDOW)
+  }
+
+  protected write(): void {
+    const values = Array.from(this.incoming.entries())
+
+    this.incoming.clear()
+
+    // `sync()` prunes values whose prop left the manifest, so a burst can be
+    // emptied out before it ever gets written
+    if (values.length === 0) {
+      return
+    }
+
+    // Ancestors first. `setPathPreservingIdentity` rebuilds every container
+    // along the path, so writing `order` after `order.total` would rebuild
+    // `order` from what the payload carried and lose the narrower write.
+    // Sorting is stable, so paths that do not overlap keep the order the
+    // manifest lists them in.
+    values.sort(([a], [b]) => toPath(a).length - toPath(b).length)
+
+    router.replace({
+      preserveScroll: true,
+      preserveState: true,
+      preserveFlash: true,
+      props: (props) => values.reduce((carry, [path, value]) => setPathPreservingIdentity(carry, path, value), props),
+    })
   }
 
   /**

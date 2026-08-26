@@ -20,7 +20,7 @@
     notes: string
     multi: string
     plain: string
-    account: { balance: string }
+    account: { balance: string; currency: string }
     socketIdHeader: string | null
   } = $props()
 
@@ -89,6 +89,9 @@
     <dt>account.balance</dt>
     <dd id="account-balance">{account.balance}</dd>
 
+    <dt>account.currency</dt>
+    <dd id="account-currency">{account.currency}</dd>
+
     <dt>socket id header</dt>
     <dd id="socket-id-header">{socketIdHeader ?? 'none'}</dd>
 
@@ -107,8 +110,6 @@
 
   <button onclick={showSubscriptions}>Show Subscriptions</button>
   <button onclick={() => (cancel = !cancel)}>Toggle Cancel</button>
-  <button onclick={() => router.live.pause()}>Pause</button>
-  <button onclick={() => router.live.resume()}>Resume</button>
   <button onclick={() => router.live.refresh('order')}>Refresh Order</button>
   <button onclick={() => router.live.refresh('throttled')}>Refresh Throttled</button>
   <button onclick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>

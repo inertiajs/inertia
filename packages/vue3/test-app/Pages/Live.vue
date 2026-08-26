@@ -10,7 +10,7 @@ defineProps<{
   notes: string
   multi: string
   plain: string
-  account: { balance: string }
+  account: { balance: string; currency: string }
   socketIdHeader: string | null
 }>()
 
@@ -80,6 +80,9 @@ onUnmounted(() => {
       <dt>account.balance</dt>
       <dd id="account-balance">{{ account.balance }}</dd>
 
+      <dt>account.currency</dt>
+      <dd id="account-currency">{{ account.currency }}</dd>
+
       <dt>socket id header</dt>
       <dd id="socket-id-header">{{ socketIdHeader ?? 'none' }}</dd>
 
@@ -98,8 +101,6 @@ onUnmounted(() => {
 
     <button @click="showSubscriptions">Show Subscriptions</button>
     <button @click="cancel = !cancel">Toggle Cancel</button>
-    <button @click="router.live.pause()">Pause</button>
-    <button @click="router.live.resume()">Resume</button>
     <button @click="router.live.refresh('order')">Refresh Order</button>
     <button @click="router.live.refresh('throttled')">Refresh Throttled</button>
     <button @click="router.reload({ only: ['plain'] })">Reload Plain</button>

@@ -40,6 +40,10 @@
     "./echo": {
       "types": "./types/echo.d.ts",
       "import": "./dist/echo.js"
+    },
+    "./pusher": {
+      "types": "./types/pusher.d.ts",
+      "import": "./dist/pusher.js"
     }
   },
   "typesVersions": {
@@ -52,6 +56,9 @@
       ],
       "echo": [
         "types/echo.d.ts"
+      ],
+      "pusher": [
+        "types/pusher.d.ts"
       ]
     }
   },

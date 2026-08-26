@@ -206,13 +206,9 @@ class CurrentPage {
   }
 
   /**
-   * Replace the whole page object and announce it. Everything that reacts to
-   * the page changing hangs off this, so a swap has to come through here.
-   *
-   * The partial mutations below deliberately do not, since they only touch
-   * props, flash or history state. `merge()` is the exception: it takes a
-   * `Partial<Page>` and `history.replaceState` passes a whole page through it,
-   * so it can change structural metadata without anything being told.
+   * Replace the whole page object and announce it. The partial mutations below
+   * deliberately do not, except `merge()`, which takes a `Partial<Page>` and is
+   * handed a whole page by `history.replaceState`.
    */
   protected assignPage(page: Page): void {
     this.page = page

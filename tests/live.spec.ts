@@ -39,8 +39,6 @@ test.describe('Live props without a transport', () => {
     requests.listen(page)
 
     await page.evaluate(() => {
-      window.testing.Inertia.live.pause()
-      window.testing.Inertia.live.resume()
       window.testing.Inertia.live.refresh('socketIdHeader')
     })
 
@@ -346,26 +344,6 @@ test.describe('Live props', () => {
     await expect(page.locator('#order')).not.toHaveText(order!)
   })
 
-  test('it holds events while paused and flushes them on resume', async ({ page }) => {
-    pageLoads.watch(page)
-    await page.goto('/live')
-    requests.listen(page)
-
-    await page.getByRole('button', { name: 'Pause' }).click()
-
-    const order = await page.locator('#order').textContent()
-
-    await emit(page, 'orders.1', ORDER_EVENT)
-    await page.waitForTimeout(300)
-    expect(liveRequests()).toBe(0)
-
-    const response = page.waitForResponse('**/live')
-    await page.getByRole('button', { name: 'Resume' }).click()
-    await response
-
-    await expect(page.locator('#order')).not.toHaveText(order!)
-  })
-
   test('it refreshes a prop on demand, ignoring its throttle', async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/live')
@@ -467,6 +445,160 @@ test.describe('Live props', () => {
     await page.waitForTimeout(300)
 
     expect(liveRequests()).toBe(0)
+  })
+
+  test('it writes the values a broadcast carried instead of reloading the props', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+    requests.listen(page)
+
+    const plain = await page.locator('#plain').textContent()
+
+    await emit(page, 'orders.1', ORDER_EVENT, {
+      __inertia: { props: { order: 'order-from-payload', stats: 'stats-from-payload' } },
+    })
+
+    await expect(page.locator('#order')).toHaveText('order-from-payload')
+    await expect(page.locator('#stats')).toHaveText('stats-from-payload')
+
+    await expect(page.locator('#events')).toHaveText('1')
+    await expect(page.locator('#last-event')).toHaveText(
+      `private orders.1 ${ORDER_EVENT} order|stats {"__inertia":{"props":{"order":"order-from-payload","stats":"stats-from-payload"}}}`,
+    )
+
+    await page.waitForTimeout(300)
+
+    expect(liveRequests()).toBe(0)
+    await expect(page.locator('#plain')).toHaveText(plain!)
+  })
+
+  test('it reloads the props of the subscription the payload left out', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+    requests.listen(page)
+
+    const stats = await page.locator('#stats').textContent()
+
+    const response = page.waitForResponse('**/live')
+    await emit(page, 'orders.1', ORDER_EVENT, { __inertia: { props: { order: 'order-from-payload' } } })
+
+    await expect(page.locator('#order')).toHaveText('order-from-payload')
+
+    const resolved = await response
+
+    expect(resolved.request().headers()['x-inertia-partial-data']).toBe('stats')
+
+    await expect(page.locator('#stats')).not.toHaveText(stats!)
+    await expect(page.locator('#order')).toHaveText('order-from-payload')
+
+    expect(liveRequests()).toBe(1)
+  })
+
+  test('it writes a nested value by its dot path without touching its siblings', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+    requests.listen(page)
+
+    const currency = await page.locator('#account-currency').textContent()
+    const order = await page.locator('#order').textContent()
+
+    await emit(page, 'accounts.1', BALANCE_EVENT, {
+      __inertia: { props: { 'account.balance': 'balance-from-payload' } },
+    })
+
+    await expect(page.locator('#account-balance')).toHaveText('balance-from-payload')
+
+    await page.waitForTimeout(300)
+
+    expect(liveRequests()).toBe(0)
+    await expect(page.locator('#account-currency')).toHaveText(currency!)
+    await expect(page.locator('#order')).toHaveText(order!)
+  })
+
+  test('it reloads when an event carries prop values outside the envelope', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+    requests.listen(page)
+
+    const order = await page.locator('#order').textContent()
+
+    const response = page.waitForResponse('**/live')
+    await emit(page, 'orders.1', ORDER_EVENT, { order: 'order-from-payload', stats: 'stats-from-payload' })
+    const resolved = await response
+
+    expect(resolved.request().headers()['x-inertia-partial-data']).toBe('order,stats')
+
+    await expect(page.locator('#order')).not.toHaveText('order-from-payload')
+    await expect(page.locator('#order')).not.toHaveText(order!)
+    await expect(page.locator('#stats')).not.toHaveText('stats-from-payload')
+  })
+
+  test('it ignores a payload key the subscription that delivered it does not feed', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+    requests.listen(page)
+
+    const notes = await page.locator('#notes').textContent()
+    const plain = await page.locator('#plain').textContent()
+    const stats = await page.locator('#stats').textContent()
+
+    const response = page.waitForResponse('**/live')
+    await emit(page, 'orders.1', ORDER_EVENT, {
+      __inertia: {
+        props: {
+          order: 'order-from-payload',
+          notes: 'notes-from-payload',
+          plain: 'plain-from-payload',
+        },
+      },
+    })
+
+    await expect(page.locator('#order')).toHaveText('order-from-payload')
+
+    const resolved = await response
+
+    expect(resolved.request().headers()['x-inertia-partial-data']).toBe('stats')
+
+    await expect(page.locator('#stats')).not.toHaveText(stats!)
+    await expect(page.locator('#notes')).toHaveText(notes!)
+    await expect(page.locator('#plain')).toHaveText(plain!)
+
+    expect(liveRequests()).toBe(1)
+  })
+
+  test('it discards a value for a prop a request already claims and reloads it instead', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live?delay=1000')
+    requests.listen(page)
+
+    const order = await page.locator('#order').textContent()
+
+    const started = page.waitForRequest('**/live**')
+    const inFlight = page.waitForResponse('**/live**')
+
+    await emit(page, 'orders.1', ORDER_EVENT)
+
+    // The payload has to arrive while the reload is still out, which is the
+    // only state in which the reload gets to win
+    await started
+    await emit(page, 'orders.1', ORDER_EVENT, { __inertia: { props: { order: 'order-from-payload' } } })
+
+    await expect(page.locator('#events')).toHaveText('2')
+    await expect(page.locator('#order')).toHaveText(order!)
+
+    await inFlight
+
+    await expect(page.locator('#order')).not.toHaveText(order!)
+    await expect(page.locator('#order')).not.toHaveText('order-from-payload')
+
+    const reloaded = await page.locator('#order').textContent()
+
+    const resolved = await page.waitForResponse('**/live**')
+
+    expect(resolved.request().headers()['x-inertia-partial-data']).toBe('order,stats')
+
+    await expect(page.locator('#order')).not.toHaveText(reloaded!)
+    await expect(page.locator('#order')).not.toHaveText('order-from-payload')
   })
 
   test('it does not reload live props when the transport connects for the first time', async ({ page }) => {

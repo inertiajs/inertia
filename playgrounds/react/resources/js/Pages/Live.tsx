@@ -1,31 +1,29 @@
-import { Head, router, usePage, useProp } from '@inertiajs/react'
+import { Head, router, useHttp, useProp } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
+
+type LivePayload = { __inertia?: { props?: Record<string, unknown> } }
 
 export default ({
   order,
   stats,
   activity,
   renderedAt,
-  triggeredAt,
   socketIdHeader,
 }: {
   order: { id: number; reference: string; status: string; total: number; updated_at: string }
   stats: { orders: number; revenue: number }
   activity: { at: string; message: string }[]
   renderedAt: string
-  triggeredAt: string
   socketIdHeader: string | null
 }) => {
-  const page = usePage()
-
   const orderProp = useProp('order')
   const activityProp = useProp('activity')
 
+  const [triggeredAt, setTriggeredAt] = useState('never')
   const [reloads, setReloads] = useState(0)
   const [events, setEvents] = useState(0)
   const [lastRequest, setLastRequest] = useState('none')
   const [log, setLog] = useState<{ id: number; line: string }[]>([])
-  const [paused, setPaused] = useState(false)
 
   const logId = useRef(0)
 
@@ -34,30 +32,24 @@ export default ({
   const note = (message: string) =>
     setLog((entries) => [{ id: ++logId.current, line: `${stamp()} ${message}` }, ...entries].slice(0, 12))
 
-  // The trigger buttons ask for a prop no broadcast feeds, so anything that
-  // changes in the live sections below came from Reverb and nothing else
-  const trigger = (url: string) => router.post(url, {}, { only: ['triggeredAt'], preserveScroll: true })
+  // A plain HTTP call rather than a visit, so it never touches the page. Every
+  // Inertia request the demo makes from here on is a live reload and nothing else
+  const triggers = useHttp<Record<string, never>, { triggeredAt: string }>({})
 
-  const togglePause = () => {
-    setPaused((value) => {
-      const next = !value
-
-      next ? router.live.pause() : router.live.resume()
-      note(next ? 'Paused live updates' : 'Resumed live updates')
-
-      return next
+  const trigger = (url: string) =>
+    triggers.post(url).then((response) => {
+      setTriggeredAt(response.triggeredAt)
     })
-  }
-
-  // The listeners are registered once, so the manifest is read through a ref
-  const manifest = useRef(page.liveProps)
-  manifest.current = page.liveProps
 
   useEffect(() => {
     const stopListeners = [
       router.on('live', (event) => {
         setEvents((count) => count + 1)
-        note(`event ${event.detail.event.split('\\').pop()} to [${event.detail.props.join(', ')}]`)
+
+        const carried = Object.keys((event.detail.payload as LivePayload)?.__inertia?.props ?? {})
+        const how = carried.length > 0 ? `carrying [${carried.join(', ')}]` : 'carrying nothing'
+
+        note(`event ${event.detail.event.split('\\').pop()} to [${event.detail.props.join(', ')}] ${how}`)
       }),
       router.on('start', (event) => {
         const { only, reset, prefetch } = event.detail.visit
@@ -66,16 +58,6 @@ export default ({
         // A full page load asks for nothing in particular, and a prefetch is
         // aimed at another page, so neither is a live reload
         if (prefetch || requested.length === 0) {
-          return
-        }
-
-        // The trigger buttons issue their own partial request for `triggeredAt`.
-        // Counting it here is what made the demo look like it reloaded twice, so
-        // only a request asking purely for live props counts as a live reload
-        const isLiveReload = requested.every((prop) => prop in (manifest.current ?? {}))
-
-        if (!isLiveReload) {
-          note(`demo request only=[${requested.join(', ')}]`)
           return
         }
 
@@ -167,6 +149,12 @@ export default ({
             Broadcast to everyone
           </button>
           <button
+            className="rounded bg-indigo-700 px-4 py-2 text-white"
+            onClick={() => trigger('/live/order-with-payload')}
+          >
+            Advance order (payload, no reload)
+          </button>
+          <button
             className="rounded bg-emerald-700 px-4 py-2 text-white"
             onClick={() => trigger('/live/order-to-others')}
           >
@@ -180,9 +168,6 @@ export default ({
           </button>
           <button className="rounded bg-slate-800 px-4 py-2 text-white" onClick={() => trigger('/live/burst')}>
             Burst of 8
-          </button>
-          <button className="rounded border border-slate-300 px-4 py-2" onClick={togglePause}>
-            {paused ? 'Resume' : 'Pause'}
           </button>
           <button className="rounded border border-slate-300 px-4 py-2" onClick={() => router.live.refresh('order')}>
             Refresh order

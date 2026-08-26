@@ -1,4 +1,4 @@
-import { liveChannelName } from './liveChannel'
+import { createLiveChannelTracker, liveChannelName } from './liveChannel'
 import { LiveChannel, LiveChannelType, LiveConnectionStatus, LiveTransport } from './types'
 
 /**
@@ -45,12 +45,6 @@ const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) =>
 const subscriberFor = (channel: LiveChannel) => subscribers[channel.type] ?? subscribers.public
 
 /**
- * Refcount by type and name so public `private-*` channels stay distinct from
- * private channels with the same stored name.
- */
-const channelKey = (channel: LiveChannel): string => `${channel.type}:${channel.name}`
-
-/**
  * Laravel already sends the broadcast name. Prefix literal names with `.` so
  * Echo does not apply the app namespace.
  */
@@ -63,7 +57,7 @@ const formatEvent = (event: string): string => {
  * instance on each use so `configureEcho()` swaps are respected.
  */
 export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
-  const listeners = new Map<string, number>()
+  const channels = createLiveChannelTracker()
 
   let statusCallback: ((status: LiveConnectionStatus) => void) | null = null
   let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
@@ -97,31 +91,25 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
   return {
     subscribe(channel, event, handler) {
-      const key = channelKey(channel)
       const name = formatEvent(event)
       const instance = resolve()
 
+      // Echo joins on demand, so there is nothing to do when this is the first
+      // listener. Leaving is another matter.
       subscriberFor(channel)(instance, channel.name).listen(name, handler)
       watchConnection(instance)
-
-      listeners.set(key, (listeners.get(key) ?? 0) + 1)
+      channels.acquire(channel)
 
       return () => {
         const current = resolve()
 
         subscriberFor(channel)(current, channel.name).stopListening(name, handler)
 
-        const remaining = (listeners.get(key) ?? 1) - 1
-
-        if (remaining > 0) {
-          listeners.set(key, remaining)
-          return
-        }
-
         // Unbinding the callback leaves the channel itself subscribed, so the
         // last listener has to leave it as well
-        listeners.delete(key)
-        current.leaveChannel(liveChannelName(channel))
+        if (channels.release(channel)) {
+          current.leaveChannel(liveChannelName(channel))
+        }
       }
     },
 
@@ -130,7 +118,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
     onStatusChange(callback) {
       statusCallback = callback
 
-      if (listeners.size > 0) {
+      if (channels.hasAny()) {
         watchConnection(resolve())
       }
 

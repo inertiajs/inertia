@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\ActivityLogged;
+use App\Events\OrderPushed;
 use App\Events\OrderUpdated;
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\Todo;
@@ -574,11 +575,12 @@ Route::get('/live', function () {
     }
 
     return Inertia::render('Live', [
-        'order' => Inertia::live(fn () => LiveDemo::order(), on: new OrderUpdated),
-        'stats' => Inertia::live(fn () => LiveDemo::stats(), on: new OrderUpdated),
+        // Both events feed these props. [OrderUpdated] carries nothing, so the
+        // page reloads them; [OrderPushed] carries their values, so it does not
+        'order' => Inertia::live(fn () => LiveDemo::order(), on: [new OrderUpdated, new OrderPushed]),
+        'stats' => Inertia::live(fn () => LiveDemo::stats(), on: [new OrderUpdated, new OrderPushed]),
         'activity' => Inertia::live(fn () => LiveDemo::activity(), on: new ActivityLogged, throttle: 4000),
         'renderedAt' => now()->format('H:i:s'),
-        'triggeredAt' => now()->format('H:i:s'),
         'socketIdHeader' => Inertia::always(fn () => request()->header('X-Socket-Id')),
     ]);
 });
@@ -588,7 +590,15 @@ Route::post('/live/order', function () {
 
     broadcast(new OrderUpdated);
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
+});
+
+Route::post('/live/order-with-payload', function () {
+    LiveDemo::advanceOrder('payload');
+
+    broadcast(new OrderPushed);
+
+    return ['triggeredAt' => now()->format('H:i:s')];
 });
 
 Route::post('/live/order-to-others', function () {
@@ -596,7 +606,7 @@ Route::post('/live/order-to-others', function () {
 
     broadcast(new OrderUpdated)->toOthers();
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
 });
 
 Route::post('/live/activity', function () {
@@ -604,7 +614,7 @@ Route::post('/live/activity', function () {
 
     broadcast(new ActivityLogged);
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
 });
 
 Route::post('/live/both', function () {
@@ -614,7 +624,7 @@ Route::post('/live/both', function () {
     broadcast(new OrderUpdated);
     broadcast(new ActivityLogged);
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
 });
 
 Route::post('/live/burst', function () {
@@ -626,7 +636,7 @@ Route::post('/live/burst', function () {
         usleep(150_000);
     }
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
 });
 
 Route::post('/live/reset', function () {
@@ -635,5 +645,5 @@ Route::post('/live/reset', function () {
     broadcast(new OrderUpdated);
     broadcast(new ActivityLogged);
 
-    return back();
+    return ['triggeredAt' => now()->format('H:i:s')];
 });

@@ -19,7 +19,7 @@ export default ({
   notes: string
   multi: string
   plain: string
-  account: { balance: string }
+  account: { balance: string; currency: string }
   socketIdHeader: string | null
 }) => {
   const [events, setEvents] = useState(0)
@@ -84,6 +84,9 @@ export default ({
         <dt>account.balance</dt>
         <dd id="account-balance">{account.balance}</dd>
 
+        <dt>account.currency</dt>
+        <dd id="account-currency">{account.currency}</dd>
+
         <dt>socket id header</dt>
         <dd id="socket-id-header">{socketIdHeader ?? 'none'}</dd>
 
@@ -102,8 +105,6 @@ export default ({
 
       <button onClick={showSubscriptions}>Show Subscriptions</button>
       <button onClick={() => setCancel((value) => !value)}>Toggle Cancel</button>
-      <button onClick={() => router.live.pause()}>Pause</button>
-      <button onClick={() => router.live.resume()}>Resume</button>
       <button onClick={() => router.live.refresh('order')}>Refresh Order</button>
       <button onClick={() => router.live.refresh('throttled')}>Refresh Throttled</button>
       <button onClick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>

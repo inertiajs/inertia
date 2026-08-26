@@ -3252,10 +3252,9 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
-// useProp loading state. Partial reloads are deliberately slow so the loading flag
-// is observable, and an explicit `delay` lets a test overlap two requests for the
-// same prop. Props are filtered by the partial headers so an untouched prop keeps
-// its value, which is what proves loading is tracked per prop.
+// useProp loading state. Reloads are deliberately slow so the loading flag is
+// observable, and `delay` lets a test overlap two requests for the same prop.
+// Props are filtered by the partial headers, so an untouched prop keeps its value.
 app.get('/use-prop', (req, res) => {
   const isPartial = !!req.headers['x-inertia-partial-component']
   const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
@@ -3381,23 +3380,29 @@ app.get('/live', (req, res) => {
   const wants = (prop) => requested.length === 0 || requested.includes(prop)
   const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
 
-  inertia.render(req, res, {
-    component: 'Live',
-    props: {
-      order: value('order'),
-      stats: value('stats'),
-      feed: value('feed'),
-      throttled: value('throttled'),
-      notes: value('notes'),
-      multi: value('multi'),
-      plain: value('plain'),
-      account: { balance: value('balance') },
-    },
-    alwaysProps: {
-      socketIdHeader: req.headers['x-socket-id'] ?? null,
-    },
-    liveProps: Object.fromEntries(Object.entries(liveProps).filter(([prop]) => wants(prop))),
-  })
+  // Only reloads are slowed, so `delay` holds a partial in flight long enough
+  // for a broadcast to arrive for a prop that request already claims
+  const delay = requested.length > 0 ? parseInt(req.query.delay || '0', 10) : 0
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Live',
+      props: {
+        order: value('order'),
+        stats: value('stats'),
+        feed: value('feed'),
+        throttled: value('throttled'),
+        notes: value('notes'),
+        multi: value('multi'),
+        plain: value('plain'),
+        account: { balance: value('balance'), currency: value('currency') },
+      },
+      alwaysProps: {
+        socketIdHeader: req.headers['x-socket-id'] ?? null,
+      },
+      liveProps: Object.fromEntries(Object.entries(liveProps).filter(([prop]) => wants(prop))),
+    })
+  }, delay)
 })
 
 // Live props over the Echo transport. Every channel type is represented, and two
