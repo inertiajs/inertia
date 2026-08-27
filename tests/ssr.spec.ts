@@ -35,6 +35,24 @@ test.describe('SSR', () => {
     })
   })
 
+  test('renders big integers on the server and hydrates them without a mismatch', async ({ page }) => {
+    const response = await page.request.get('/ssr/bigint')
+    const html = await response.text()
+
+    expect(html).toMatch(/big:.*900719925474099988/)
+    expect(html).toContain('{"$bigint":"900719925474099988"}')
+
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/bigint')
+
+    await expect(page.getByTestId('big')).toHaveText('big: 900719925474099988')
+    await expect(page.getByTestId('big-type')).toHaveText('type: bigint')
+    await expect(page.getByTestId('nested')).toHaveText('nested: 900719925474099988,2')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
   test('embeds page data in a script element', async ({ page }) => {
     const response = await page.request.get('/ssr/page-with-script-element')
     const html = await response.text()

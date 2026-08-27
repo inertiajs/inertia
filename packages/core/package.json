@@ -36,6 +36,10 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
+    },
+    "./json": {
+      "types": "./types/json.d.ts",
+      "import": "./dist/json.js"
     }
   },
   "typesVersions": {

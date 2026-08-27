@@ -21,6 +21,8 @@ function renderToPort(port, pageData) {
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(postData),
+          // Mirrors the Laravel adapter, which only sends this when the config is enabled
+          'X-Inertia-Preserve-Big-Integers': 'true',
         },
       },
       (res) => {

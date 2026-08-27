@@ -11,6 +11,7 @@
     "sourceMap": true,
     "strict": true,
     "module": "ESNext",
+    "target": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler",
     "paths": {

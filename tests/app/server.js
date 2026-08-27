@@ -66,6 +66,16 @@ app.get('/ssr/page1', (req, res) =>
   }),
 )
 
+app.get('/ssr/bigint', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/BigInt',
+    props: {
+      big: 900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+    },
+  }),
+)
+
 app.get('/ssr/page2', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/Page2',
@@ -179,6 +189,59 @@ app.get('/ssr/infinite-scroll', (req, res) => {
 })
 
 // createInertiaApp (unified) test routes
+app.get('/bigint', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 900719925474099988n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+  }),
+)
+
+app.get('/bigint/reload', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 100,
+      big: 123456789012345678n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+  }),
+)
+
+app.get('/bigint/collision', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+  }),
+)
+
+app.post('/bigint/echo', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: inertia.decodeBigInts(req.body).value,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+  }),
+)
+
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {
     component: 'Home',
