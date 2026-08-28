@@ -672,8 +672,6 @@ test('fires the navigate event with cached set to true when a prefetched respons
 })
 
 test('does not prefetch a link that was clicked before the hover delay elapsed', async ({ page }) => {
-  test.skip(process.env.PACKAGE !== 'react', 'React-only test')
-
   await page.goto('prefetch/3')
   await page.waitForLoadState('networkidle')
 
