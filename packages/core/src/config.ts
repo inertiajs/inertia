@@ -76,7 +76,7 @@ export const config = new Config<InertiaAppConfig>({
     forceIndicesArrayFormatInFormData: true,
     withAllErrors: false,
     preventNavigationWhenDirty: false,
-    unsavedChangesMessage: 'Changes you made may not be saved.',
+    unsavedChangesMessage: 'You have unsaved changes. Are you sure you want to navigate away?',
   },
   prefetch: {
     cacheFor: 30_000,
