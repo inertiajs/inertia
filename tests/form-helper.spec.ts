@@ -444,6 +444,79 @@ test.describe('Form Helper', () => {
     })
   })
 
+  test.describe('Prevent navigation when dirty', () => {
+    test.beforeEach(async ({ page }) => {
+      pageLoads.watch(page)
+      await page.goto('/form-helper/prevent-navigation-when-dirty')
+    })
+
+    test('does not navigate when the user dismisses the confirmation dialog', async ({ page }) => {
+      await page.fill('#name', 'changed')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+
+      page.once('dialog', (dialog) => {
+        expect(dialog.type()).toBe('confirm')
+        dialog.dismiss()
+      })
+
+      await page.locator('#navigate-away').click()
+
+      await expect(page).toHaveURL(/\/form-helper\/prevent-navigation-when-dirty$/)
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+    })
+
+    test('navigates when the user accepts the confirmation dialog', async ({ page }) => {
+      await page.fill('#name', 'changed')
+      await expect(page.locator('#dirty-status')).toHaveText('Form is dirty')
+
+      page.once('dialog', (dialog) => dialog.accept())
+
+      await page.locator('#navigate-away').click()
+
+      await expect(page).toHaveURL(/\/form-helper\/data$/)
+    })
+
+    test('does not prompt when submitting a dirty form', async ({ page }) => {
+      let dialogShown = false
+
+      page.on('dialog', () => {
+        dialogShown = true
+      })
+
+      await page.fill('#name', 'changed')
+      await page.getByRole('button', { name: 'Submit form', exact: true }).click()
+
+      await expect(page).toHaveURL(/\/form-helper\/prevent-navigation-when-dirty$/)
+      expect(dialogShown).toBe(false)
+    })
+
+    test('does not navigate from the Form component when the user dismisses the dialog', async ({ page }) => {
+      await page.fill('#form-title', 'changed')
+      await expect(page.locator('#form-component-dirty-status')).toHaveText('Form component is dirty')
+
+      page.once('dialog', (dialog) => dialog.dismiss())
+
+      await page.locator('#navigate-away-from-form').click()
+
+      await expect(page).toHaveURL(/\/form-helper\/prevent-navigation-when-dirty$/)
+      await expect(page.locator('#form-component-dirty-status')).toHaveText('Form component is dirty')
+    })
+
+    test('does not prompt when submitting a dirty Form component', async ({ page }) => {
+      let dialogShown = false
+
+      page.on('dialog', () => {
+        dialogShown = true
+      })
+
+      await page.fill('#form-title', 'changed')
+      await page.getByRole('button', { name: 'Submit guarded form', exact: true }).click()
+
+      await expect(page).toHaveURL(/\/form-helper\/prevent-navigation-when-dirty$/)
+      expect(dialogShown).toBe(false)
+    })
+  })
+
   test.describe('Data', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)

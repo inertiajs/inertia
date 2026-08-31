@@ -9,6 +9,7 @@ import {
   UseFormTransformCallback,
   UseFormUtils,
   UseFormWithPrecognitionArguments,
+  dirtyFormGuard,
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
@@ -61,6 +62,7 @@ export interface FormStateProps<TForm extends object> {
     (errors: FormDataErrors<TForm>): void
   }
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => FormStateWithPrecognition<TForm>
+  preventNavigationWhenDirty: (message?: string) => FormState<TForm>
 }
 
 export interface FormStateValidationProps<TForm extends object> {
@@ -111,6 +113,8 @@ export interface UseFormStateReturn<TForm extends object> {
   resetBeforeSubmit: () => void
   finishProcessing: () => void
   withAllErrors: { enabled: () => boolean; enable: () => void }
+  isSubmittingRef: React.MutableRefObject<boolean>
+  preventNavigationWhenDirty: { enabled: () => boolean; enable: (message?: string) => void; message: () => string | undefined }
 }
 
 export default function useFormState<TForm extends object>(
@@ -145,12 +149,34 @@ export default function useFormState<TForm extends object>(
   const [validFields, setValidFields] = useState<string[]>([])
   const withAllErrorsRef = useRef<boolean | null>(null)
   const withAllErrorsEnabled = () => withAllErrorsRef.current ?? config.get('form.withAllErrors')
+  const preventNavigationWhenDirtyRef = useRef<{ enabled: boolean; message?: string } | null>(null)
+  const preventNavigationWhenDirtyEnabled = () =>
+    preventNavigationWhenDirtyRef.current?.enabled ?? config.get('form.preventNavigationWhenDirty')
+  const isSubmittingRef = useRef(false)
+  const [preventNavigationVersion, setPreventNavigationVersion] = useState(0)
 
   const dataRef = useRef(data)
+  const defaultsRef = useRef(defaults)
 
   useEffect(() => {
     dataRef.current = data
   })
+
+  useEffect(() => {
+    defaultsRef.current = defaults
+  })
+
+  useEffect(() => {
+    if (!preventNavigationWhenDirtyEnabled()) {
+      return
+    }
+
+    return dirtyFormGuard.register({
+      isDirty: () => !isEqual(dataRef.current, defaultsRef.current),
+      isSubmitting: () => isSubmittingRef.current,
+      message: preventNavigationWhenDirtyRef.current?.message,
+    })
+  }, [preventNavigationVersion, defaults])
 
   useEffect(() => {
     isMounted.current = true
@@ -358,6 +384,11 @@ export default function useFormState<TForm extends object>(
     setError,
     clearErrors,
     resetAndClearErrors,
+    preventNavigationWhenDirty: (message?: string) => {
+      preventNavigationWhenDirtyRef.current = { enabled: true, message }
+      setPreventNavigationVersion((version) => version + 1)
+      return form
+    },
   } as FormState<TForm>
 
   const validate = (field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) => {
@@ -475,6 +506,15 @@ export default function useFormState<TForm extends object>(
       enable: () => {
         withAllErrorsRef.current = true
       },
+    },
+    isSubmittingRef,
+    preventNavigationWhenDirty: {
+      enabled: preventNavigationWhenDirtyEnabled,
+      enable: (message?: string) => {
+        preventNavigationWhenDirtyRef.current = { enabled: true, message }
+        setPreventNavigationVersion((version) => version + 1)
+      },
+      message: () => preventNavigationWhenDirtyRef.current?.message,
     },
   }
 }

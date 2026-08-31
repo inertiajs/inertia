@@ -9,7 +9,7 @@ import type {
   UseFormTransformCallback,
   UseFormWithPrecognitionArguments,
 } from '@inertiajs/core'
-import { router, UseFormUtils } from '@inertiajs/core'
+import { router, UseFormUtils, dirtyFormGuard } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
@@ -42,6 +42,7 @@ export interface FormStateProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
+  preventNavigationWhenDirty(message?: string): this
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => FormStateWithPrecognition<TForm>
 }
 
@@ -99,6 +100,8 @@ export interface UseFormStateReturn<TForm extends object> {
   resetBeforeSubmit: () => void
   finishProcessing: () => void
   withAllErrors: { enabled: () => boolean; enable: () => void }
+  setSubmitting: (value: boolean) => void
+  preventNavigationWhenDirty: { enabled: () => boolean; enable: (message?: string) => void; message: () => string | undefined }
 }
 
 export default function useFormState<TForm extends object>(
@@ -119,6 +122,12 @@ export default function useFormState<TForm extends object>(
   let validatorRef: Validator | null = null
   let withAllErrors: boolean | null = null
   const withAllErrorsEnabled = () => withAllErrors ?? config.get('form.withAllErrors')
+  let preventNavigationWhenDirtyEnabled: boolean | null = null
+  let preventNavigationMessage: string | undefined
+  const preventNavigationEnabled = () =>
+    preventNavigationWhenDirtyEnabled ?? config.get('form.preventNavigationWhenDirty')
+  let isSubmitting = false
+  let preventNavigationVersion = $state(0)
   let precognitionEndpoint = initialPrecognitionEndpoint ?? null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | null = null
   let defaultsCalledInOnSuccess = false
@@ -258,6 +267,12 @@ export default function useFormState<TForm extends object>(
     },
     transform(callback: TransformCallback<TForm>) {
       transform = callback
+      return this
+    },
+    preventNavigationWhenDirty(message?: string) {
+      preventNavigationWhenDirtyEnabled = true
+      preventNavigationMessage = message
+      preventNavigationVersion++
       return this
     },
     defaults(fieldOrFields?: FormDataKeys<TForm> | Partial<TForm>, maybeValue?: unknown) {
@@ -402,6 +417,20 @@ export default function useFormState<TForm extends object>(
     form.withPrecognition(precognitionEndpoint)
   }
 
+  $effect(() => {
+    preventNavigationVersion
+
+    if (!preventNavigationEnabled()) {
+      return
+    }
+
+    return dirtyFormGuard.register({
+      isDirty: () => form.isDirty,
+      isSubmitting: () => isSubmitting,
+      message: preventNavigationMessage,
+    })
+  })
+
   return {
     form: form as FormState<TForm> & InternalRememberState<TForm>,
     setDefaults: (newDefaults: TForm) => {
@@ -444,6 +473,18 @@ export default function useFormState<TForm extends object>(
       enable: () => {
         withAllErrors = true
       },
+    },
+    setSubmitting: (value: boolean) => {
+      isSubmitting = value
+    },
+    preventNavigationWhenDirty: {
+      enabled: preventNavigationEnabled,
+      enable: (message?: string) => {
+        preventNavigationWhenDirtyEnabled = true
+        preventNavigationMessage = message
+        preventNavigationVersion++
+      },
+      message: () => preventNavigationMessage,
     },
   }
 }

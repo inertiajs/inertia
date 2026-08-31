@@ -1,5 +1,6 @@
 import {
   config,
+  dirtyFormGuard,
   FormComponentProps,
   FormComponentRef,
   FormComponentResetSymbol,
@@ -72,6 +73,8 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       onSubmitComplete = noop,
       disableWhileProcessing = false,
       cancelOnUnmount = false,
+      preventNavigationWhenDirty = null,
+      unsavedChangesMessage,
       resetOnError = false,
       resetOnSuccess = false,
       setDefaultsOnSuccess = false,
@@ -127,10 +130,28 @@ const Form = forwardRef<FormComponentRef, FormProps>(
     }, [component, instant, action])
 
     const [isDirty, setIsDirty] = useState(false)
+    const isDirtyRef = useRef(isDirty)
+    isDirtyRef.current = isDirty
+    const isSubmittingRef = useRef(false)
     const defaultData = useRef<FormData>(new FormData())
 
     const cancelOnUnmountRef = useRef(cancelOnUnmount)
     cancelOnUnmountRef.current = cancelOnUnmount
+
+    const preventNavigationEnabled =
+      preventNavigationWhenDirty ?? config.get('form.preventNavigationWhenDirty')
+
+    useEffect(() => {
+      if (!preventNavigationEnabled) {
+        return
+      }
+
+      return dirtyFormGuard.register({
+        isDirty: () => isDirtyRef.current,
+        isSubmitting: () => isSubmittingRef.current,
+        message: unsavedChangesMessage,
+      })
+    }, [preventNavigationEnabled, unsavedChangesMessage])
 
     const getFormData = (submitter?: FormSubmitter): FormData =>
       formElement.current ? new FormData(formElement.current, submitter) : new FormData()
@@ -240,10 +261,18 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         component: resolvedComponent,
         optimistic: optimistic ? (pageProps) => optimistic(pageProps, data) : undefined,
         onCancelToken,
-        onBefore,
+        onBefore: (visit) => {
+          isSubmittingRef.current = true
+
+          return onBefore(visit)
+        },
         onStart,
         onProgress,
-        onFinish,
+        onFinish: (visit) => {
+          isSubmittingRef.current = false
+
+          return onFinish(visit)
+        },
         onCancel,
         onSuccess: async (...args) => {
           const result = await onSuccess(...args)

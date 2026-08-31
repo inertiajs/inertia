@@ -589,6 +589,9 @@ app.post('/form-helper/effect-count', (req, res) =>
 
 app.post('/form-helper/dirty', (req, res) => res.redirect(303, '/form-helper/dirty'))
 app.post('/form-helper/dirty/redirect-back', (req, res) => res.redirect(303, '/form-helper/dirty'))
+app.post('/form-helper/prevent-navigation-when-dirty', (req, res) =>
+  res.redirect(303, '/form-helper/prevent-navigation-when-dirty'),
+)
 
 app.post('/form-helper/errors', (req, res) =>
   inertia.render(req, res, {

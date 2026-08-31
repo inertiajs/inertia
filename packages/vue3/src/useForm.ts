@@ -74,6 +74,7 @@ export interface InertiaFormProps<TForm extends object> {
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   optimistic<TProps>(callback: OptimisticCallback<TProps>): this
+  preventNavigationWhenDirty(message?: string): this
   withPrecognition(...args: UseFormWithPrecognitionArguments): InertiaPrecognitiveForm<TForm>
 }
 
@@ -156,6 +157,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setRememberExcludeKeys,
     resetBeforeSubmit,
     finishProcessing,
+    setSubmitting,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -185,6 +187,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancelToken?.(token)
         },
         onBefore: (visit) => {
+          setSubmitting(true)
           resetBeforeSubmit()
 
           return options.onBefore?.(visit)
@@ -220,6 +223,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancel?.()
         },
         onFinish: (visit) => {
+          setSubmitting(false)
           finishProcessing()
           cancelToken = null
 

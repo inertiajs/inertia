@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    dirtyFormGuard,
     formDataToObject,
     FormComponentResetSymbol,
     resetFormFields,
@@ -52,6 +53,8 @@
     validationTimeout?: FormComponentProps['validationTimeout']
     optimistic?: FormComponentProps['optimistic']
     withAllErrors?: FormComponentProps['withAllErrors']
+    preventNavigationWhenDirty?: FormComponentProps['preventNavigationWhenDirty']
+    unsavedChangesMessage?: FormComponentProps['unsavedChangesMessage']
     component?: FormComponentProps['component']
     instant?: FormComponentProps['instant']
     children?: import('svelte').Snippet<[FormComponentSlotProps]>
@@ -86,6 +89,8 @@
     validationTimeout = 1500,
     optimistic,
     withAllErrors = null,
+    preventNavigationWhenDirty = null,
+    unsavedChangesMessage,
     component = undefined,
     instant = false,
     children,
@@ -109,7 +114,12 @@
 
   let formElement: HTMLFormElement = $state(null!)
   let isDirty = $state(false)
+  let isSubmitting = false
   let defaultData: FormData = new FormData()
+
+  const preventNavigationEnabled = $derived(
+    preventNavigationWhenDirty ?? config.get('form.preventNavigationWhenDirty'),
+  )
 
   const _method = $derived(isUrlMethodPair(action) ? action.method : ((method ?? 'get').toLowerCase() as Method))
   const _action = $derived(isUrlMethodPair(action) ? action.url : (action as string))
@@ -171,10 +181,18 @@
       component: resolvedComponent,
       optimistic: optimistic ? (pageProps) => optimistic(pageProps, data) : undefined,
       onCancelToken,
-      onBefore,
+      onBefore: (visit) => {
+        isSubmitting = true
+
+        return onBefore(visit)
+      },
       onStart,
       onProgress,
-      onFinish,
+      onFinish: (visit) => {
+        isSubmitting = false
+
+        return onFinish(visit)
+      },
       onCancel,
       onSuccess: async (...args) => {
         const result = await onSuccess?.(...args)
@@ -292,6 +310,18 @@
         form.cancel()
       }
     }
+  })
+
+  $effect(() => {
+    if (!preventNavigationEnabled) {
+      return
+    }
+
+    return dirtyFormGuard.register({
+      isDirty: () => isDirty,
+      isSubmitting: () => isSubmitting,
+      message: unsavedChangesMessage,
+    })
   })
 
   $effect(() => {

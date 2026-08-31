@@ -676,6 +676,8 @@ export type InertiaAppConfig = {
     recentlySuccessfulDuration: number
     forceIndicesArrayFormatInFormData: boolean
     withAllErrors: boolean
+    preventNavigationWhenDirty: boolean
+    unsavedChangesMessage: string
   }
   prefetch: {
     cacheFor: CacheForOption | CacheForOption[]
@@ -825,6 +827,8 @@ export type FormComponentProps<TForm = Record<string, FormDataConvertible>> = Pa
   validateFiles?: boolean
   validationTimeout?: number
   withAllErrors?: boolean | null
+  preventNavigationWhenDirty?: boolean | null
+  unsavedChangesMessage?: string
 }
 
 export type FormComponentMethods<TForm extends object = Record<string, any>> = {

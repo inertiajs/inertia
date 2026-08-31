@@ -10,6 +10,7 @@ import {
   UseFormTransformCallback,
   UseFormUtils,
   UseFormWithPrecognitionArguments,
+  dirtyFormGuard,
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
@@ -21,7 +22,7 @@ import {
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { reactive, watch } from 'vue'
+import { onMounted, onUnmounted, reactive, watch } from 'vue'
 import { config } from '.'
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
@@ -46,6 +47,7 @@ export interface FormStateProps<TForm extends object> {
   resetAndClearErrors<K extends FormDataKeys<TForm>>(...fields: K[]): this
   setError<K extends FormDataKeys<TForm>>(field: K, value: ErrorValue): this
   setError(errors: FormDataErrors<TForm>): this
+  preventNavigationWhenDirty(message?: string): this
   withPrecognition(...args: UseFormWithPrecognitionArguments): this & FormStateValidationProps<TForm>
 }
 
@@ -102,6 +104,8 @@ export interface UseFormStateReturn<TForm extends object> {
   resetBeforeSubmit: () => void
   finishProcessing: () => void
   withAllErrors: { enabled: () => boolean; enable: () => void }
+  setSubmitting: (value: boolean) => void
+  preventNavigationWhenDirty: { enabled: () => boolean; enable: (message?: string) => void; message: () => string | undefined }
 }
 
 export default function useFormState<TForm extends object>(
@@ -123,6 +127,12 @@ export default function useFormState<TForm extends object>(
   let validatorRef: Validator | null = null
   let withAllErrors: boolean | null = null
   const withAllErrorsEnabled = () => withAllErrors ?? config.get('form.withAllErrors')
+  let preventNavigationWhenDirtyEnabled: boolean | null = null
+  let preventNavigationMessage: string | undefined
+  const preventNavigationEnabled = () =>
+    preventNavigationWhenDirtyEnabled ?? config.get('form.preventNavigationWhenDirty')
+  let isSubmitting = false
+  let unregisterDirtyFormGuard: VoidFunction | null = null
   let recentlySuccessfulTimeoutId: ReturnType<typeof setTimeout> | undefined
   let defaultsCalledInOnSuccess = false
   let rememberExcludeKeys: FormDataKeys<TForm>[] = []
@@ -136,6 +146,10 @@ export default function useFormState<TForm extends object>(
     progress: null as Progress | null,
     wasSuccessful: false,
     recentlySuccessful: false,
+
+    preventNavigationWhenDirty(_message?: string) {
+      return this
+    },
 
     withPrecognition(...args: UseFormWithPrecognitionArguments): FormStateWithPrecognition<TForm> {
       precognitionEndpoint = UseFormUtils.createWayfinderCallback(...args)
@@ -357,6 +371,29 @@ export default function useFormState<TForm extends object>(
 
   const typedForm = form as any as FormState<TForm> & InternalRememberState<TForm>
 
+  const setupDirtyFormGuard = () => {
+    unregisterDirtyFormGuard?.()
+    unregisterDirtyFormGuard = null
+
+    if (!preventNavigationEnabled()) {
+      return
+    }
+
+    unregisterDirtyFormGuard = dirtyFormGuard.register({
+      isDirty: () => typedForm.isDirty,
+      isSubmitting: () => isSubmitting,
+      message: preventNavigationMessage,
+    })
+  }
+
+  typedForm.preventNavigationWhenDirty = function (message?: string) {
+    preventNavigationWhenDirtyEnabled = true
+    preventNavigationMessage = message
+    setupDirtyFormGuard()
+
+    return this
+  }
+
   // Set restored errors if any
   if (restored?.errors) {
     typedForm.setError(restored.errors as FormDataErrors<TForm>)
@@ -391,6 +428,14 @@ export default function useFormState<TForm extends object>(
   if (precognitionEndpoint) {
     typedForm.withPrecognition(precognitionEndpoint)
   }
+
+  onMounted(() => {
+    setupDirtyFormGuard()
+  })
+
+  onUnmounted(() => {
+    unregisterDirtyFormGuard?.()
+  })
 
   return {
     form: typedForm,
@@ -430,6 +475,18 @@ export default function useFormState<TForm extends object>(
       enable: () => {
         withAllErrors = true
       },
+    },
+    setSubmitting: (value: boolean) => {
+      isSubmitting = value
+    },
+    preventNavigationWhenDirty: {
+      enabled: preventNavigationEnabled,
+      enable: (message?: string) => {
+        preventNavigationWhenDirtyEnabled = true
+        preventNavigationMessage = message
+        setupDirtyFormGuard()
+      },
+      message: () => preventNavigationMessage,
     },
   }
 }

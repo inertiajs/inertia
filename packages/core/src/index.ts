@@ -5,6 +5,7 @@ export { UseFormUtils } from './useFormUtils'
 
 export { axiosAdapter } from './axiosHttpClient'
 export { config } from './config'
+export { dirtyFormGuard } from './dirtyFormGuard'
 export { getInitialPageFromDOM, getScrollableParent } from './domUtils'
 export { hasFiles } from './files'
 export { objectToFormData } from './formData'

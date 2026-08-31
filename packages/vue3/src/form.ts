@@ -1,5 +1,6 @@
 import {
   config,
+  dirtyFormGuard,
   Errors,
   FormComponentProps,
   FormComponentRef,
@@ -154,6 +155,14 @@ const Form = defineComponent({
       type: Boolean as PropType<FormComponentProps['withAllErrors']>,
       default: null,
     },
+    preventNavigationWhenDirty: {
+      type: Boolean as PropType<FormComponentProps['preventNavigationWhenDirty']>,
+      default: null,
+    },
+    unsavedChangesMessage: {
+      type: String as PropType<FormComponentProps['unsavedChangesMessage']>,
+      default: undefined,
+    },
     component: {
       type: String as PropType<FormComponentProps['component']>,
       default: null,
@@ -204,6 +213,27 @@ const Form = defineComponent({
 
     // Can't use computed because FormData is not reactive
     const isDirty = ref(false)
+    let isSubmitting = false
+    let unregisterDirtyFormGuard: VoidFunction | null = null
+
+    const preventNavigationEnabled = computed(
+      () => props.preventNavigationWhenDirty ?? config.get('form.preventNavigationWhenDirty'),
+    )
+
+    const setupDirtyFormGuard = () => {
+      unregisterDirtyFormGuard?.()
+      unregisterDirtyFormGuard = null
+
+      if (!preventNavigationEnabled.value) {
+        return
+      }
+
+      unregisterDirtyFormGuard = dirtyFormGuard.register({
+        isDirty: () => isDirty.value,
+        isSubmitting: () => isSubmitting,
+        message: props.unsavedChangesMessage,
+      })
+    }
 
     const defaultData = ref(new FormData())
 
@@ -219,12 +249,16 @@ const Form = defineComponent({
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
     onMounted(() => {
+      setupDirtyFormGuard()
       defaultData.value = getFormData()
 
       form.defaults(getData())
 
       formEvents.forEach((e) => formElement.value.addEventListener(e, onFormUpdate))
     })
+
+    watch(preventNavigationEnabled, setupDirtyFormGuard)
+    watch(() => props.unsavedChangesMessage, setupDirtyFormGuard)
 
     watch(
       () => props.validateFiles,
@@ -237,6 +271,7 @@ const Form = defineComponent({
     )
 
     onBeforeUnmount(() => {
+      unregisterDirtyFormGuard?.()
       formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate))
 
       if (props.cancelOnUnmount) {
@@ -291,10 +326,18 @@ const Form = defineComponent({
         component: resolvedComponent.value,
         optimistic: props.optimistic ? (pageProps) => props.optimistic!(pageProps, data) : undefined,
         onCancelToken: props.onCancelToken,
-        onBefore: props.onBefore,
+        onBefore: (visit) => {
+          isSubmitting = true
+
+          return props.onBefore?.(visit)
+        },
         onStart: props.onStart,
         onProgress: props.onProgress,
-        onFinish: props.onFinish,
+        onFinish: (visit) => {
+          isSubmitting = false
+
+          return props.onFinish?.(visit)
+        },
         onCancel: props.onCancel,
         onSuccess: async (...args) => {
           const result = await props.onSuccess?.(...args)

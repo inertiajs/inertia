@@ -64,6 +64,7 @@ export interface InertiaFormProps<TForm extends Record<string, any>> {
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => InertiaFormProps<TForm>
   optimistic: <TProps>(callback: OptimisticCallback<TProps>) => InertiaFormProps<TForm>
+  preventNavigationWhenDirty: (message?: string) => InertiaFormProps<TForm>
   withPrecognition: (...args: UseFormWithPrecognitionArguments) => InertiaPrecognitiveFormProps<TForm>
 }
 
@@ -145,6 +146,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     defaultsCalledInOnSuccessRef,
     resetBeforeSubmit,
     finishProcessing,
+    isSubmittingRef,
   } = useFormState<TForm>({
     data,
     precognitionEndpoint,
@@ -166,6 +168,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancelToken?.(token)
         },
         onBefore: (visit) => {
+          isSubmittingRef.current = true
           resetBeforeSubmit()
 
           return options.onBefore?.(visit)
@@ -208,6 +211,8 @@ export default function useForm<TForm extends FormDataType<TForm>>(
           return options.onCancel?.()
         },
         onFinish: (visit) => {
+          isSubmittingRef.current = false
+
           if (isMounted.current) {
             finishProcessing()
           }
