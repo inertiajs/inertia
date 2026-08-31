@@ -133,6 +133,19 @@ Route::get('/form', function () {
     return inertia('Form');
 });
 
+Route::get('/form/prevent-navigation-when-dirty', function () {
+    return inertia('PreventNavigationWhenDirty');
+});
+
+Route::post('/form/prevent-navigation-when-dirty', function () {
+    request()->validate([
+        'name' => ['nullable', 'string', 'max:255'],
+        'title' => ['nullable', 'string', 'max:255'],
+    ]);
+
+    return back();
+});
+
 Route::post('/user', function () {
     return inertia('User', [
         'user' => request()->validate([

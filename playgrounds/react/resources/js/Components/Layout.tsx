@@ -19,6 +19,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         <Link href="/form" className="hover:underline" prefetch={['mount', 'click']} stale-after="1m">
           useForm
         </Link>
+        <Link href="/form/prevent-navigation-when-dirty" className="hover:underline">
+          Unsaved Changes
+        </Link>
         <Link href="/form-component" className="hover:underline">
           {'<Form>'}
         </Link>

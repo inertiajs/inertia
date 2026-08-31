@@ -12,6 +12,7 @@
   <a href="/users" use:inertia class="hover:underline">Users</a>
   <a href="/article" use:inertia class="hover:underline">Article</a>
   <a href="/form" use:inertia class="hover:underline">useForm</a>
+  <a href="/form/prevent-navigation-when-dirty" use:inertia class="hover:underline">Unsaved Changes</a>
   <a href="/form-component" use:inertia class="hover:underline">{'<Form>'}</a>
   <a href="/form-component/precognition" use:inertia class="hover:underline">Precognition</a>
   <a href="/photo-grid" use:inertia class="hover:underline">Photo Grid</a>
