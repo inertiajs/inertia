@@ -21,7 +21,7 @@ import {
   ValidationConfig,
   Validator,
 } from 'laravel-precognition'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { config } from '.'
 
 export type SetDataByObject<TForm> = (data: Partial<TForm>) => void
@@ -166,7 +166,7 @@ export default function useFormState<TForm extends object>(
     defaultsRef.current = defaults
   })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!preventNavigationWhenDirtyEnabled()) {
       return
     }
@@ -176,7 +176,7 @@ export default function useFormState<TForm extends object>(
       isSubmitting: () => isSubmittingRef.current,
       message: preventNavigationWhenDirtyRef.current?.message,
     })
-  }, [preventNavigationVersion, defaults])
+  }, [preventNavigationVersion])
 
   useEffect(() => {
     isMounted.current = true
@@ -386,7 +386,7 @@ export default function useFormState<TForm extends object>(
     resetAndClearErrors,
     preventNavigationWhenDirty: (message?: string) => {
       preventNavigationWhenDirtyRef.current = { enabled: true, message }
-      setPreventNavigationVersion((version) => version + 1)
+
       return form
     },
   } as FormState<TForm>
