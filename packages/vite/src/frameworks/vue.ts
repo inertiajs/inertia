@@ -21,11 +21,11 @@
  * import createServer from '@inertiajs/vue3/server'
  * import { renderToString } from 'vue/server-renderer'
  *
- * const render = await createInertiaApp({
+ * const renderPromise = createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * const renderPage = (page) => render(page, renderToString)
+ * const renderPage = async (page) => (await renderPromise)(page, renderToString)
  *
  * // Only start server in production
  * if (import.meta.env.PROD) {
@@ -50,15 +50,22 @@ export const config: FrameworkConfig = {
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.env.PROD to skip the standalone server in dev mode
+  // The configure call is awaited per render rather than at the top level, which keeps
+  // the generated bundle free of top-level await and therefore compilable to CommonJS
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/vue3/server'
 import { renderToString } from 'vue/server-renderer'
 
-const render = await ${configureCall}
+const renderPromise = ${configureCall}
 
-const renderPage = (page) => render(page, renderToString)
+const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
 if (import.meta.env.PROD) {
+  renderPromise.catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
+
   createServer(renderPage${options})
 }
 
