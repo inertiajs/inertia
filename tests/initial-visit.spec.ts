@@ -47,3 +47,19 @@ test('it handles back/forward navigation between Inertia and non-Inertia pages c
   )
   expect(inertiaRequests.length).toBe(0)
 })
+
+test('it preserves URL changes made via the History API while the page is mounting', async ({ page }) => {
+  await page.goto('/url-on-mount')
+
+  // The page adds `?step=1` via history.replaceState during mount, before
+  // Inertia's queued initial history write flushes. `#settled` appears once
+  // the initial visit has completed (on `inertia:navigate`).
+  await expect(page.locator('#settled')).toBeVisible()
+
+  // The query param must survive Inertia's initial history write...
+  await expect(page).toHaveURL('/url-on-mount?step=1')
+  await expect(page.locator('.search')).toHaveText('?step=1')
+
+  // ...and the initial page must not push an extra history entry.
+  await expect(page.locator('.history-delta')).toHaveText('0')
+})

@@ -163,7 +163,11 @@ class History {
     return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
 
-  public replaceState(page: Page, cb: (() => void) | null = null): void {
+  public replaceState(
+    page: Page,
+    cb: (() => void) | null = null,
+    { preserveCurrentUrl = false }: { preserveCurrentUrl?: boolean } = {},
+  ): void {
     if (isEqual(this.current, page)) {
       cb && cb()
       return
@@ -189,7 +193,14 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
+        //
+        // With `preserveCurrentUrl` the write only stores the page state on the
+        // existing entry: omitting the URL keeps whatever is in the address bar by
+        // the time this queued write flushes, so URL changes made via the History
+        // API while the page was mounting (query params added by the app or a
+        // third-party library) are not reverted to the server-provided URL.
+        const doReplace = () =>
+          this.doReplaceState({ page: data }, preserveCurrentUrl ? undefined : page.url).then(() => cb?.())
 
         if (isChromeIOS) {
           return new Promise((resolve) => {

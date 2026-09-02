@@ -96,13 +96,17 @@ class CurrentPage {
       const isServer = typeof window === 'undefined'
       const location = !isServer ? window.location : new URL(page.url)
       const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
-      replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
+      // The initial render must always replace: the browser already has an
+      // entry for the requested URL, so pushing would add a duplicate one.
+      replace = replace || initialRender || isSameUrlWithoutHash(hrefToUrl(page.url), location)
 
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
 
       return new Promise<void>((resolve) =>
-        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
+        replace
+          ? history.replaceState(pageForHistory, resolve, { preserveCurrentUrl: initialRender })
+          : history.pushState(pageForHistory, resolve),
       ).then(() => {
         const isNewComponent = !this.isTheSame(page)
 
