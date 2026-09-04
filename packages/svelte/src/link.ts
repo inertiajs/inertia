@@ -63,19 +63,25 @@ function link(
   let baseParams: VisitOptions
   let visitParams: VisitOptions
 
+  const handleClick = (event: MouseEvent) => {
+    if (shouldIntercept(event)) {
+      event.preventDefault()
+      router.visit(href, visitParams)
+    }
+  }
+
   const regularEvents: ActionEventHandlers = {
-    click: (event: MouseEvent) => {
-      if (shouldIntercept(event)) {
-        event.preventDefault()
-        router.visit(href, visitParams)
-      }
-    },
+    click: handleClick,
   }
 
   const prefetchHoverEvents: ActionEventHandlers = {
     mouseenter: () => (hoverTimeout = setTimeout(() => prefetch(), config.get('prefetch.hoverDelay'))),
     mouseleave: () => clearTimeout(hoverTimeout),
-    click: regularEvents.click,
+    click: (event: MouseEvent) => {
+      clearTimeout(hoverTimeout)
+
+      handleClick(event)
+    },
   }
 
   const prefetchClickEvents: ActionEventHandlers = {

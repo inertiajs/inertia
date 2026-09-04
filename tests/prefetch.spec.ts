@@ -671,6 +671,30 @@ test('fires the navigate event with cached set to true when a prefetched respons
   expect(consoleMessages.messages).toContain('false')
 })
 
+test('does not prefetch a link that was clicked before the hover delay elapsed', async ({ page }) => {
+  await page.goto('prefetch/3')
+  await page.waitForLoadState('networkidle')
+
+  // Hold the visit back so the hover delay elapses while the old URL is still current
+  await page.route('**/prefetch/1', async (route) => {
+    if (route.request().headers().purpose !== 'prefetch') {
+      await new Promise((resolve) => setTimeout(resolve, 200))
+    }
+
+    await route.continue()
+  })
+
+  requests.listen(page)
+  await page.getByRole('link', { name: 'On Hover (Default)' }).click()
+  await isPrefetchPage(page, 1)
+
+  const prefetchRequests = requests.requests.filter(
+    (request) => request.url().includes('/prefetch/1') && request.headers().purpose === 'prefetch',
+  )
+
+  expect(prefetchRequests.length).toBe(0)
+})
+
 test('can use prefetched requests with preserveState', async ({ page }) => {
   await page.goto('/prefetch/preserve-state')
 
