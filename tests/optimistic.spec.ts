@@ -127,9 +127,9 @@ test.describe('Optimistic', () => {
     await page.locator('#reset-likes-btn').click()
     await expect(page.locator('#likes-count')).toContainText('Likes: 0')
 
-    // Server responds with likes=5 (slow) and likes=3 (fast)
-    await page.locator('#like-controlled-slow-btn').click()
+    // Server responds with likes=3 (fast) and likes=5 (slow)
     await page.locator('#like-controlled-fast-btn').click()
+    await page.locator('#like-controlled-slow-btn').click()
 
     await expect(page.locator('#likes-count')).toContainText('Likes: 2')
 
@@ -157,6 +157,27 @@ test.describe('Optimistic', () => {
     await page.waitForTimeout(300)
     await expect(page.locator('#likes-count')).toContainText('Likes: 1')
 
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 5')
+  })
+
+  test('it applies the last server response when a newer optimistic request errored first', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    await page.locator('#like-controlled-slow-btn').click()
+    await page.locator('#like-error-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    // The newer request errors and rolls back, leaving the older pending +1 replayed
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 1')
+
+    // The newer request never wrote anything, so the older response is still the
+    // freshest server state and should reconcile
     await page.waitForTimeout(800)
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
   })
