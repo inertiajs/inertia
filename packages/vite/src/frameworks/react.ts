@@ -21,11 +21,11 @@
  * import createServer from '@inertiajs/react/server'
  * import { renderToString } from 'react-dom/server'
  *
- * const render = await createInertiaApp({
+ * const renderPromise = createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * createServer((page) => render(page, renderToString))
+ * createServer(async (page) => (await renderPromise)(page, renderToString))
  * ```
  *
  * In development, it exports the render function directly for the Vite dev server.
@@ -46,13 +46,17 @@ export const config: FrameworkConfig = {
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.env.PROD to skip the standalone server in dev mode
+  // Awaited per render, not at the top level, so the bundle can compile to CommonJS
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/react/server'
 import { renderToString } from 'react-dom/server'
 
-const render = await ${configureCall}
+const renderPromise = ${configureCall}
 
-const renderPage = (page) => render(page, renderToString)
+// Reported per render by the SSR server, so it must not go unhandled here
+renderPromise.catch(() => {})
+
+const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
 if (import.meta.env.PROD) {
   createServer(renderPage${options})
