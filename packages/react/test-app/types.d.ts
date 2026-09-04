@@ -26,6 +26,8 @@ declare global {
     _inertia_content_layout_id: string | undefined
     _plugin_global_props: object
     resolverReceivedPage: Page | null
+    _inertia_client_only_fallback_renders: number | undefined
+    _inertia_client_only_child_mounts: number | undefined
   }
 
   interface ImportMeta {

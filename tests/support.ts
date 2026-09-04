@@ -112,3 +112,42 @@ export const waitForFragmentScroll = async (page: Page) => {
   // Give time for the scroll animation to complete
   await page.waitForTimeout(200)
 }
+
+export const clientOnlyProbe = {
+  async reset(page: Page) {
+    await page.evaluate(() => {
+      window._inertia_client_only_fallback_renders = 0
+      window._inertia_client_only_child_mounts = 0
+    })
+  },
+
+  async fallbackRenders(page: Page) {
+    return page.evaluate(() => window._inertia_client_only_fallback_renders)
+  },
+
+  async childMounts(page: Page) {
+    return page.evaluate(() => window._inertia_client_only_child_mounts)
+  },
+
+  // Asserts the ClientOnly content is showing, the fallback is gone from the DOM, and
+  // the fallback was rendered exactly `expectedFallbackRenders` times (0 unless this is
+  // the genuine SSR hydration pass, where it's rendered exactly once).
+  async expectRendered(page: Page, expectedText: string, expectedFallbackRenders = 0) {
+    await expect(page.getByTestId('client-only-content')).toHaveText(expectedText)
+    await expect(page.getByTestId('client-only-fallback')).toHaveCount(0)
+    expect(await this.fallbackRenders(page)).toBe(expectedFallbackRenders)
+  },
+}
+
+// Clicks a link that navigates away, waits for the destination to actually land, then
+// goes back -- waiting first avoids racing goBack() against the pending visit, which
+// can confuse the resulting history state.
+export const clickLinkAndGoBack = async (
+  page: Page,
+  linkTestId: string,
+  waitForDestination: () => Promise<unknown>,
+) => {
+  await page.getByTestId(linkTestId).click()
+  await waitForDestination()
+  await page.goBack()
+}
