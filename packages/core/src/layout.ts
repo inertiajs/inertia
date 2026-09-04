@@ -16,24 +16,37 @@ export type LayoutCallbackReturn<C> =
   | Record<string, C | [C, Record<string, unknown>?] | { component: C; props?: Record<string, unknown> }>
   | Partial<LayoutProps>
 
+export interface SetLayoutProps {
+  (props: Partial<LayoutProps>, layerId?: string): void
+  <K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>, layerId?: string): void
+  <T = never>(props: Partial<NoInfer<T>>, layerId?: string): void
+  <T = never>(name: string, props: Partial<NoInfer<T>>, layerId?: string): void
+}
+
+export interface LayoutSlot {
+  shared: Record<string, unknown>
+  named: Record<string, Record<string, unknown>>
+}
+
 export interface LayoutPropsStore {
-  set(props: Partial<LayoutProps>): void
-  setFor<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
-  get(): { shared: Record<string, unknown>; named: Record<string, Record<string, unknown>> }
+  set: SetLayoutProps
+  get(): LayoutSlot
+  getForLayer(layerId: string): LayoutSlot
+  layerIds(): string[]
   reset(): void
+  retainLayers(ids: string[]): void
   subscribe(callback: () => void): () => void
 }
 
+export const emptyLayoutSlot: LayoutSlot = { shared: {}, named: {} }
+
 export function createLayoutPropsStore(): LayoutPropsStore {
-  let shared: Record<string, unknown> = {}
-  let named: Record<string, Record<string, unknown>> = {}
-  let snapshot = { shared, named }
+  // Every tier's props under one key. '' is the base.
+  const slots = new Map<string, LayoutSlot>()
   const listeners = new Set<() => void>()
   let pendingNotify = false
 
-  const updateSnapshot = () => {
-    snapshot = { shared, named }
-  }
+  const slotOf = (tier: string): LayoutSlot => slots.get(tier) ?? emptyLayoutSlot
 
   const notify = () => {
     if (pendingNotify) {
@@ -47,45 +60,54 @@ export function createLayoutPropsStore(): LayoutPropsStore {
     })
   }
 
+  const drop = (tiers: string[]) => {
+    // Not some(), which would stop at the first tier it took away.
+    if (tiers.filter((tier) => slots.delete(tier)).length > 0) {
+      notify()
+    }
+  }
+
+  // Without a name the layer takes second place, so the props are whichever argument is not it.
+  const set = (
+    nameOrProps: string | Record<string, unknown>,
+    propsOrLayerId?: Record<string, unknown> | string,
+    layerId?: string,
+  ): void => {
+    const name = typeof nameOrProps === 'string' ? nameOrProps : null
+    const props = (name ? propsOrLayerId : nameOrProps) as Record<string, unknown>
+    const tier = (typeof propsOrLayerId === 'string' ? propsOrLayerId : layerId) ?? ''
+
+    const current = slotOf(tier)
+    const into = name ? (current.named[name] ?? {}) : current.shared
+    const merged = { ...into, ...props }
+
+    if (isEqual(into, merged)) {
+      return
+    }
+
+    slots.set(tier, name ? { ...current, named: { ...current.named, [name]: merged } } : { ...current, shared: merged })
+    notify()
+  }
+
   return {
-    set(props) {
-      const merged = { ...shared, ...props }
+    set: set as SetLayoutProps,
 
-      if (isEqual(shared, merged)) {
-        return
-      }
+    get: () => slotOf(''),
 
-      shared = merged
-      updateSnapshot()
-      notify()
-    },
+    getForLayer: (layerId) => slotOf(layerId),
 
-    setFor(name, props) {
-      const current = named[name] || {}
-      const merged = { ...current, ...props }
+    layerIds: () => Array.from(slots.keys()).filter((tier) => tier !== ''),
 
-      if (isEqual(current, merged)) {
-        return
-      }
+    reset: () => drop(['']),
 
-      named = { ...named, [name]: merged }
-      updateSnapshot()
-      notify()
-    },
-
-    reset() {
-      shared = {}
-      named = {}
-      updateSnapshot()
-      notify()
+    retainLayers(ids) {
+      drop(Array.from(slots.keys()).filter((tier) => tier !== '' && !ids.includes(tier)))
     },
 
     subscribe(callback) {
       listeners.add(callback)
       return () => listeners.delete(callback)
     },
-
-    get: () => snapshot,
   }
 }
 

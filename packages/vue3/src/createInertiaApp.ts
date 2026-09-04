@@ -8,16 +8,19 @@ import {
   getInitialPageFromDOM,
   http as httpModule,
   InertiaAppSSRResponse,
+  LoadingOption,
+  normalizeLoading,
   Page,
   PageProps,
+  resolveInitialPage,
   router,
   setupProgress,
   SharedPageProps,
 } from '@inertiajs/core'
-import { createApp, createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
+import { Component, createApp, createSSRApp, DefineComponent, h, isVNode, Plugin, App as VueApp } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
 import { config } from './index'
-import { VueInertiaAppConfig } from './types'
+import { LayerComponent, VueInertiaAppConfig } from './types'
 
 type ComponentResolver = (
   name: string,
@@ -43,6 +46,8 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   void,
   VueInertiaAppConfig
 > & {
+  layer?: LayerComponent
+  loading?: LoadingOption<Component>
   withApp?: never
 }
 
@@ -54,6 +59,8 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   VueInertiaAppConfig
 > & {
   render: (app: VueApp) => Promise<string>
+  layer?: LayerComponent
+  loading?: LoadingOption<Component>
   withApp?: never
 }
 
@@ -68,6 +75,8 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
 > & {
   page?: Page<SharedProps>
   render?: undefined
+  layer?: LayerComponent
+  loading?: LoadingOption<Component>
 } & (
     | { setup?: undefined; withApp?: VueWithApp<SharedProps> }
     | { setup: (options: SetupOptions<HTMLElement | null, SharedProps>) => VueApp | void; withApp?: never }
@@ -102,6 +111,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    layer,
+    loading,
     serverHead,
     withApp,
     dev = !!import.meta.env?.DEV,
@@ -129,21 +140,30 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   const resolveComponent = (name: string, page?: Page) =>
     Promise.resolve(resolve!(name, page)).then((module) => module.default || module)
 
+  const resolveLoading = normalizeLoading<DefineComponent>(loading, { rendered: isVNode })
+
   // SSR render function factory - when on server without page/render, return a render function
   // This is used by the Vite plugin's SSR transform
   if (isServer && !page && !render) {
     return async (page: Page<SharedProps>, renderToString: RenderToString) => {
       let head: string[] = []
 
-      const initialComponent = await resolveComponent(page.component, page)
+      const {
+        page: initialPage,
+        component: initialComponent,
+        layers: initialLayers,
+      } = await resolveInitialPage(page, resolveComponent, resolveLoading)
 
       const props: InertiaAppProps<SharedProps> = {
-        initialPage: page,
+        initialPage,
         initialComponent,
+        initialLayers,
         resolveComponent,
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
+        layer,
+        resolveLoading,
         serverHead,
       }
 
@@ -172,21 +192,24 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+  const initialResponse = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
 
   let head: string[] = []
 
   const vueApp = await Promise.all([
-    resolveComponent(initialPage.component, initialPage),
+    resolveInitialPage(initialResponse, resolveComponent, resolveLoading),
     router.decryptHistory().catch(() => {}),
-  ]).then(([initialComponent]) => {
+  ]).then(([{ page: initialPage, component: initialComponent, layers: initialLayers }]) => {
     const props: InertiaAppProps<SharedProps> = {
       initialPage,
       initialComponent,
+      initialLayers,
       resolveComponent,
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
+      layer,
+      resolveLoading,
       serverHead,
     }
 
@@ -238,7 +261,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && vueApp) {
     const html = await render(vueApp)
-    const body = buildSSRBody(id, initialPage, html)
+    const body = buildSSRBody(id, initialResponse, html)
 
     return { head, body }
   }

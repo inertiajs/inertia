@@ -14,6 +14,7 @@ import {
 } from '@inertiajs/core'
 import { createElement, ElementType, forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { config } from '.'
+import { useLayerId } from './useLayer'
 
 const noop = () => undefined
 
@@ -65,6 +66,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
     },
     ref,
   ) => {
+    const layerId = useLayerId()
     const [inFlightCount, setInFlightCount] = useState(0)
     const hoverTimeout = useRef<number>(undefined)
 
@@ -103,6 +105,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
 
     const baseParams = useMemo<VisitOptions>(
       () => ({
+        layerId,
         data: _data,
         method: _method,
         preserveScroll,
@@ -117,6 +120,7 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         pageProps,
       }),
       [
+        layerId,
         _data,
         _method,
         preserveScroll,

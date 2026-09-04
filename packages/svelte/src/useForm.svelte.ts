@@ -162,6 +162,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setRememberExcludeKeys,
     resetBeforeSubmit,
     finishProcessing,
+    layerId,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -179,6 +180,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     const transformedData = getTransform()(form.data()) as RequestPayload
 
     const _options: Omit<VisitOptions, 'method'> = {
+      layerId,
       ...options,
       onCancelToken: (token: CancelToken) => {
         cancelToken = token

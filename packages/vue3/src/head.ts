@@ -1,6 +1,7 @@
 import { escape } from 'es-toolkit/compat'
-import { defineComponent, DefineComponent, onBeforeUnmount, VNode } from 'vue'
+import { defineComponent, DefineComponent, inject, onBeforeUnmount, VNode } from 'vue'
 import { headManager } from './app'
+import { layerIdKey } from './useLayer'
 
 export type InertiaHead = DefineComponent<{
   title?: string
@@ -147,7 +148,8 @@ const Head: InertiaHead = defineComponent({
     },
   },
   setup(props, { slots }) {
-    const provider = headManager.createProvider()
+    const layerId = inject(layerIdKey, undefined)
+    const provider = headManager.createProvider(layerId)
 
     onBeforeUnmount(() => {
       provider.disconnect()

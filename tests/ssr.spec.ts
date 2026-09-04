@@ -305,3 +305,114 @@ test.describe('SSR Auto Transform', () => {
     })
   })
 })
+
+test.describe('SSR layers', () => {
+  test('it renders a cold layer inside its shell, over a base that is not there', async ({ page }) => {
+    const response = await page.request.get('/ssr/layer')
+    const html = await response.text()
+
+    expect(html).toContain('<dialog open')
+    expect(html).toContain('data-layer-index="0"')
+    expect(html).toContain('SSR layer')
+    expect(html).not.toContain('SSR layer base')
+  })
+
+  test('it renders a cold layer server head from the layer, not from the blank base beneath it', async ({ page }) => {
+    const response = await page.request.get('/ssr/layer-head')
+    const html = await response.text()
+
+    expect(html).toContain('<title data-inertia="server-head-0">Layer Head SSR</title>')
+    expect(html).toContain('<meta data-inertia="server-head-1" name="description" content="Layer head description">')
+  })
+
+  test('it renders a layer that remembers state, which the server has no history to write to', async ({ page }) => {
+    const response = await page.request.get('/ssr/layer')
+
+    expect(response.status()).toBe(200)
+    expect(await response.text()).toContain('data-testid="ssr-layer-note"')
+  })
+
+  test('it hands the client the layer response untouched, so the client walks the chain itself', async ({ page }) => {
+    const response = await page.request.get('/ssr/layer')
+    const html = await response.text()
+    const embedded = html.match(/<script data-page="app" type="application\/json">(.*?)<\/script>/)![1]
+
+    expect(JSON.parse(embedded.replace(/\\\//g, '/'))).toMatchObject({
+      component: 'SSR/Layer',
+      layer: { key: 'ssr-layer', base: '/ssr/layer-base' },
+    })
+  })
+
+  test('it renders the loading placeholder into the document beneath a cold layer', async ({ page }) => {
+    const response = await page.request.get('/ssr/layer-loading')
+    const html = await response.text()
+
+    expect(html).toContain('SSR layer')
+    expect(html).toContain('SSR loading placeholder')
+  })
+
+  test('the placeholder hydrates in place, and the walk replaces it with the base', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layer-loading', { waitUntil: 'commit' })
+
+    await expect(page.locator('#loading-base')).toBeVisible()
+    await expect(page.getByTestId('ssr-layer-base')).toBeVisible()
+    await expect(page.locator('#loading-base')).toHaveCount(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('it renders a cold layer from the auto-transformed SSR entry too', async ({ page }) => {
+    const response = await page.request.get('/ssr-auto/layer')
+    const html = await response.text()
+
+    expect(html).toContain('<dialog open')
+    expect(html).toContain('data-layer-index="0"')
+    expect(html).toContain('SSR layer')
+  })
+
+  test('a cold layer url renders an open dialog that hydration upgrades to modal without throwing', async ({
+    page,
+  }) => {
+    const response = await page.request.get('/ssr/layer')
+    const html = await response.text()
+    expect(html).toContain('<dialog open')
+
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/layer')
+
+    await expect(page.locator('dialog[data-layer-index="0"]')).toBeVisible()
+    await expect(page.evaluate(() => document.querySelector('dialog')?.matches(':modal'))).resolves.toBe(true)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
+  test('it hydrates the layer it rendered rather than discarding and rebuilding it', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.addInitScript(() => {
+      const holdsTheLayer = (node: Node) =>
+        node instanceof Element &&
+        (node.matches('[data-testid="ssr-layer"]') || !!node.querySelector('[data-testid="ssr-layer"]'))
+
+      window.serverRenderedLayerWasRemoved = false
+
+      new MutationObserver((records) => {
+        records.forEach((record) => {
+          record.removedNodes.forEach((node) => {
+            window.serverRenderedLayerWasRemoved ||= holdsTheLayer(node)
+          })
+        })
+      }).observe(document, { childList: true, subtree: true })
+    })
+
+    await page.goto('/ssr/layer')
+
+    await expect(page.getByTestId('ssr-layer')).toBeVisible()
+    await expect(page.getByTestId('ssr-layer-base')).toBeVisible()
+    await expect(page.locator('[data-layer-index]')).toHaveCount(1)
+
+    expect(await page.evaluate(() => window.serverRenderedLayerWasRemoved)).toBe(false)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})

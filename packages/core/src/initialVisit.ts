@@ -1,8 +1,10 @@
 import { eventHandler } from './eventHandler'
 import { fireFlashEvent, fireNavigateEvent } from './events'
 import { history } from './history'
+import { missingBase } from './layers'
 import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
+import { walkTo } from './response'
 import { Scroll } from './scroll'
 import { SessionStorage } from './sessionStorage'
 import { LocationVisit, Page } from './types'
@@ -36,7 +38,8 @@ export class InitialVisit {
       .then((data) => {
         const visitId = uid()
 
-        currentPage.set(data, { preserveScroll: true, preserveState: true, visitId }).then(() => {
+        // A restore never adds an entry, not even where the stack it brings back opens layers.
+        currentPage.set(data, { replace: true, preserveScroll: true, preserveState: true, visitId }).then(() => {
           Scroll.restore(scrollRegions)
           fireNavigateEvent(currentPage.get(), { visitId })
         })
@@ -60,10 +63,6 @@ export class InitialVisit {
 
     SessionStorage.remove(SessionStorage.locationVisitKey)
 
-    if (typeof window !== 'undefined') {
-      currentPage.setUrlHash(window.location.hash)
-    }
-
     history
       .decrypt(currentPage.get())
       .then(() => {
@@ -72,20 +71,13 @@ export class InitialVisit {
         const scrollRegions = history.getScrollRegions()
         currentPage.remember(rememberedState)
 
-        currentPage
-          .set(currentPage.get(), {
-            preserveScroll: locationVisit.preserveScroll,
-            preserveState: true,
-            initialRender: true,
-            visitId,
-          })
-          .then(() => {
-            if (locationVisit.preserveScroll) {
-              Scroll.restore(scrollRegions)
-            }
+        this.setInitialPage({ preserveScroll: locationVisit.preserveScroll, visitId }).then(() => {
+          if (locationVisit.preserveScroll) {
+            Scroll.restore(scrollRegions)
+          }
 
-            this.fireInitialEvents(visitId)
-          })
+          this.fireInitialEvents(visitId)
+        })
       })
       .catch(() => {
         eventHandler.onMissingHistoryItem()
@@ -95,23 +87,34 @@ export class InitialVisit {
   }
 
   protected static handleDefault(): void {
-    if (typeof window !== 'undefined') {
-      currentPage.setUrlHash(window.location.hash)
-    }
-
     const visitId = uid()
 
-    currentPage
-      .set(currentPage.get(), { preserveScroll: true, preserveState: true, initialRender: true, visitId })
-      .then(() => {
-        if (navigationType.isReload()) {
-          Scroll.restore(history.getScrollRegions())
-        } else {
-          Scroll.scrollToAnchor()
-        }
+    this.setInitialPage({ preserveScroll: true, visitId }).then(() => {
+      if (navigationType.isReload()) {
+        Scroll.restore(history.getScrollRegions())
+      } else {
+        Scroll.scrollToAnchor()
+      }
 
-        this.fireInitialEvents(visitId)
-      })
+      this.fireInitialEvents(visitId)
+    })
+  }
+
+  protected static setInitialPage({
+    preserveScroll,
+    visitId,
+  }: {
+    preserveScroll?: boolean
+    visitId: string
+  }): Promise<void> {
+    const page = currentPage.get()
+    const base = missingBase(page)
+
+    return currentPage.set(page, { preserveScroll, preserveState: true, initialRender: true, visitId }).then(() => {
+      if (base !== undefined && typeof window !== 'undefined') {
+        walkTo(base)
+      }
+    })
   }
 
   protected static fireInitialEvents(visitId: string): void {

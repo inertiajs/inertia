@@ -1,4 +1,4 @@
-import { createLayoutPropsStore, type LayoutProps, type NamedLayoutProps } from '@inertiajs/core'
+import { createLayoutPropsStore, type LayoutSlot } from '@inertiajs/core'
 
 const store = createLayoutPropsStore()
 
@@ -7,27 +7,33 @@ export const storeState = $state({
   named: {} as Record<string, Record<string, unknown>>,
 })
 
+export const layerState = $state<Record<string, LayoutSlot>>({})
+
 store.subscribe(() => {
   const snapshot = store.get()
   storeState.shared = snapshot.shared
   storeState.named = snapshot.named
+
+  const known = new Set(store.layerIds())
+  for (const id of known) {
+    layerState[id] = store.getForLayer(id)
+  }
+  for (const id of Object.keys(layerState)) {
+    if (!known.has(id)) {
+      delete layerState[id]
+    }
+  }
 })
 
-export function setLayoutProps(props: Partial<LayoutProps>): void
-export function setLayoutProps<K extends keyof NamedLayoutProps>(name: K, props: Partial<NamedLayoutProps[K]>): void
-export function setLayoutProps<T = never>(props: Partial<NoInfer<T>>): void
-export function setLayoutProps<T = never>(name: string, props: Partial<NoInfer<T>>): void
-export function setLayoutProps(nameOrProps: string | Record<string, unknown>, props?: Record<string, unknown>): void {
-  if (typeof nameOrProps === 'string') {
-    store.setFor(nameOrProps, props!)
-  } else {
-    store.set(nameOrProps)
-  }
-}
+export const setLayoutProps = store.set
 
 export function resetLayoutProps(): void {
   store.reset()
   const snapshot = store.get()
   storeState.shared = snapshot.shared
   storeState.named = snapshot.named
+}
+
+export function retainLayerLayoutProps(ids: string[]): void {
+  store.retainLayers(ids)
 }

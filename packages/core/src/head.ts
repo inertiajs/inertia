@@ -1,5 +1,6 @@
 import debounce from './debounce'
-import type { HeadManager, HeadManagerOnUpdateCallback, Page, ServerHeadOption } from './types'
+import { topPageOf } from './layers'
+import type { HeadManager, HeadManagerOnUpdateCallback, LayerState, Page, ServerHeadOption } from './types'
 
 const serverHeadProviderId = 'server'
 
@@ -17,8 +18,11 @@ export function resolveServerHead(page: Page, serverHead?: ServerHeadOption): st
     return []
   }
 
+  // The top layer's head wins, exactly as a <Head> in a layer does.
+  const headPage = topPageOf(page)
+
   const elements =
-    typeof serverHead === 'function' ? serverHead(page) : page.props[serverHead === true ? 'head' : serverHead]
+    typeof serverHead === 'function' ? serverHead(headPage) : headPage.props[serverHead === true ? 'head' : serverHead]
 
   if (!Array.isArray(elements)) {
     return []
@@ -96,15 +100,18 @@ export default function createHeadManager(
   titleCallback: (title: string) => string,
   onUpdate: HeadManagerOnUpdateCallback,
   initialServerHead: Array<string> = [],
+  stack: () => LayerState[] = () => [],
 ): HeadManager {
   const states: Record<string, Array<string>> = initialServerHead.length
     ? { [serverHeadProviderId]: initialServerHead }
     : {}
+  const providers: Record<string, string | undefined> = {}
   let lastProviderId = 0
 
-  function connect(): string {
+  function connect(layerId?: string): string {
     const id = (lastProviderId += 1)
     states[id] = []
+    providers[id] = layerId
     return id.toString()
   }
 
@@ -114,12 +121,14 @@ export default function createHeadManager(
     }
 
     delete states[id]
+    delete providers[id]
     commit()
   }
 
-  function reconnect(id: string): void {
+  function reconnect(id: string, layerId?: string): void {
     if (Object.keys(states).indexOf(id) === -1) {
       states[id] = []
+      providers[id] = layerId
     }
   }
 
@@ -144,8 +153,15 @@ export default function createHeadManager(
   function collect(): Array<string> {
     const title = titleCallback('')
     const serverHead = states[serverHeadProviderId] || []
+
+    const open = stack()
+    // Ordered by the stack, so the top layer's title wins. A provider naming no layer ranks below
+    // every layer, which is where the base belongs.
+    const rankOf = (id: string): number => open.findIndex((layer) => layer.id === providers[id])
+
     const providerHead = Object.keys(states)
       .filter((id) => id !== serverHeadProviderId)
+      .sort((a, b) => rankOf(a) - rankOf(b))
       .flatMap((id) => states[id])
 
     const defaults: Record<string, string> = {
@@ -187,11 +203,11 @@ export default function createHeadManager(
   return {
     forceUpdate: commit,
     updateServerHead,
-    createProvider: function () {
-      const id = connect()
+    createProvider: function (layerId?: string) {
+      const id = connect(layerId)
 
       return {
-        reconnect: () => reconnect(id),
+        reconnect: () => reconnect(id, layerId),
         update: (elements) => update(id, elements),
         disconnect: () => disconnect(id),
       }

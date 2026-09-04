@@ -1,6 +1,7 @@
 import { hrefToUrl, router, urlHasProtocol, urlToString } from '..'
 import debounce from '../debounce'
 import { getElementsInViewportFromCollection } from '../domUtils'
+import { tierOf } from '../layers'
 import { page as currentPage } from './../page'
 import Queue from './../queue'
 import { getPageFromElement } from './elements'
@@ -8,9 +9,9 @@ import { getPageFromElement } from './elements'
 // Shared queue among all instances to ensure URL updates are processed sequentially
 const queue = new Queue<Promise<void>>()
 
-let initialUrl: URL | null
-let payloadUrl: URL | null
-let initialUrlWasAbsolute: boolean | null = null
+// The url each tier is accumulating pages into, until the queue drains and writes it. Keyed by
+// tier, so a layer paginating never accumulates into the page beneath it nor writes that url.
+const syncing = new Map<string, { initial: URL; payload: URL; absolute: boolean }>()
 
 /**
  * As users scroll through infinite content, this system updates the URL to reflect
@@ -18,30 +19,39 @@ let initialUrlWasAbsolute: boolean | null = null
  * so that the URL reflects whichever page has the most visible items.
  */
 export const useInfiniteScrollQueryString = (options: {
+  layerId?: string
   getPageName: () => string
   getItemsElement: () => HTMLElement
   shouldPreserveUrl: () => boolean
 }) => {
   let enabled = true
 
+  const tier = options.layerId ?? ''
+
   const queuePageUpdate = (page: string) => {
     queue
       .add(() => {
         return new Promise((resolve) => {
           if (!enabled) {
-            initialUrl = payloadUrl = null
+            syncing.delete(tier)
             return resolve()
           }
 
-          if (!initialUrl || !payloadUrl) {
-            const currentPageUrl = currentPage.get().url
-            initialUrl = hrefToUrl(currentPageUrl)
-            payloadUrl = hrefToUrl(currentPageUrl)
-            initialUrlWasAbsolute = urlHasProtocol(currentPageUrl)
+          let sync = syncing.get(tier)
+
+          if (!sync) {
+            const tierUrl = tierOf(currentPage.get(), options.layerId).url
+
+            if (tierUrl === null) {
+              return resolve()
+            }
+
+            sync = { initial: hrefToUrl(tierUrl), payload: hrefToUrl(tierUrl), absolute: urlHasProtocol(tierUrl) }
+            syncing.set(tier, sync)
           }
 
           const pageName = options.getPageName()
-          const searchParams = payloadUrl.searchParams
+          const searchParams = sync.payload.searchParams
 
           // Clean URLs: don't show ?page=1 in the URL, just remove the parameter entirely
           if (page === '1') {
@@ -54,22 +64,19 @@ export const useInfiniteScrollQueryString = (options: {
         })
       })
       .finally(() => {
-        if (
-          enabled &&
-          initialUrl &&
-          payloadUrl &&
-          initialUrl.href !== payloadUrl.href &&
-          initialUrlWasAbsolute !== null
-        ) {
+        const sync = syncing.get(tier)
+
+        if (enabled && sync && sync.initial.href !== sync.payload.href) {
           // Update URL without triggering a page reload or affecting scroll position
           router.replace({
-            url: urlToString(payloadUrl, initialUrlWasAbsolute),
+            url: urlToString(sync.payload, sync.absolute),
+            layerId: options.layerId,
             preserveScroll: true,
             preserveState: true,
           })
         }
 
-        initialUrl = payloadUrl = initialUrlWasAbsolute = null
+        syncing.delete(tier)
       })
   }
 

@@ -1,39 +1,66 @@
 <script module lang="ts">
-  import { type Page, type PageProps } from '@inertiajs/core'
-  import type { ComponentResolver, ResolvedComponent } from '../types'
+  import { type LoadingResolver, type Page, type PageProps, type ResolvedLayer } from '@inertiajs/core'
+  import type { ComponentResolver, LayerComponent, ResolvedComponent } from '../types'
 
   export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
-    initialComponent: ResolvedComponent
+    initialComponent?: ResolvedComponent
     initialPage: Page<SharedProps>
+    initialLayers?: ResolvedLayer<ResolvedComponent>[]
     resolveComponent: ComponentResolver
+    resolveLoading?: LoadingResolver
     defaultLayout?: (name: string, page: Page) => unknown
+    layer?: LayerComponent
   }
 </script>
 
 <script lang="ts">
-  import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
+  import {
+    emptyLayoutSlot,
+    isPropsObjectOrCallback,
+    isPropsObject,
+    layerShellProps,
+    layerTransitionName,
+    layoutPageOf,
+    normalizeLayouts,
+  } from '@inertiajs/core'
+  import type { LayoutSlot } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import type { Component } from 'svelte'
-  import { resetLayoutProps, storeState } from '../layoutProps.svelte'
+  import { layerState, resetLayoutProps, retainLayerLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutType, LayoutResolver } from '../types'
+  import Layer from './Layer.svelte'
+  import LayerPageContext from './LayerPageContext.svelte'
   import Render, { h, type RenderProps } from './Render.svelte'
 
   interface Props {
-    initialComponent: InertiaAppProps['initialComponent']
+    initialComponent?: InertiaAppProps['initialComponent']
     initialPage: InertiaAppProps['initialPage']
+    initialLayers?: InertiaAppProps['initialLayers']
     resolveComponent: InertiaAppProps['resolveComponent']
+    resolveLoading?: InertiaAppProps['resolveLoading']
     defaultLayout?: InertiaAppProps['defaultLayout']
+    layer?: InertiaAppProps['layer']
   }
 
-  const { initialComponent, initialPage, resolveComponent, defaultLayout }: Props = $props()
+  const {
+    initialComponent,
+    initialPage,
+    initialLayers,
+    resolveComponent,
+    resolveLoading,
+    defaultLayout,
+    layer: LayerComponent = Layer,
+  }: Props = $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
   // svelte-ignore state_referenced_locally
   let page = $state({ ...initialPage, flash: initialPage.flash ?? {} })
-  let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, key))
+  // svelte-ignore state_referenced_locally
+  let layers = $state<ResolvedLayer<ResolvedComponent>[]>(initialLayers ?? [])
+  let renderProps = $derived.by<RenderProps | null>(() => (component ? resolveRenderProps(component, page, key) : null))
 
   // Synchronous initialization so the global page store is populated during SSR
   // ($effect.pre does not run during Svelte 5 SSR)
@@ -52,18 +79,23 @@
     router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
+      resolveLoading,
       swapComponent: async (args) => {
         // Explicitly sync the global page store before swapping components,
         // ensuring the page store is up-to-date when the new component's
         // script block runs (necessary for async: true).
         setPage(args.page)
-        component = args.component
-        page = args.page
-        key = args.preserveState ? key : Date.now()
 
         if (!args.preserveState) {
           resetLayoutProps()
         }
+
+        retainLayerLayoutProps((args.layers ?? []).map((layer) => layer.id))
+
+        component = args.component
+        page = args.page
+        layers = args.layers ?? []
+        key = args.preserveState ? key : Date.now()
       },
       onFlash: (flash) => {
         page = { ...page, flash }
@@ -96,7 +128,16 @@
     )
   }
 
-  function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
+  const baseLayoutProps = () => (isServer ? emptyLayoutSlot : { shared: storeState.shared, named: storeState.named })
+  const layerLayoutProps = (layerId: string) => () =>
+    isServer ? emptyLayoutSlot : (layerState[layerId] ?? emptyLayoutSlot)
+
+  function resolveRenderProps(
+    component: ResolvedComponent,
+    page: Page,
+    key: number | null = null,
+    dynamicProps: () => LayoutSlot = baseLayoutProps,
+  ): RenderProps {
     const child = h(component.default, page.props, [], key)
 
     if (component.layout && isRenderFunction(component.layout)) {
@@ -128,7 +169,15 @@
     }
 
     return effectiveLayout
-      ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout && !callbackProps, callbackProps)
+      ? resolveLayout(
+          effectiveLayout,
+          child,
+          page.props,
+          key,
+          !!component.layout && !callbackProps,
+          callbackProps,
+          dynamicProps,
+        )
       : child
   }
 
@@ -139,6 +188,7 @@
     key: number | null,
     isFromPage: boolean = true,
     callbackProps: Record<string, unknown> | null = null,
+    dynamicProps: () => LayoutSlot = baseLayoutProps,
   ): RenderProps {
     if (isFromPage && isRenderFunction(layout)) {
       return (layout as LayoutResolver)(h, child)
@@ -151,7 +201,7 @@
     }
 
     if (layouts.length > 0) {
-      const dynamicProps = isServer ? { shared: {}, named: {} } : { shared: storeState.shared, named: storeState.named }
+      const slot = dynamicProps()
 
       return layouts.reduceRight((child, layout) => {
         return {
@@ -160,8 +210,8 @@
             {
               ...pageProps,
               ...layout.props,
-              ...dynamicProps.shared,
-              ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
+              ...slot.shared,
+              ...(layout.name ? slot.named[layout.name] || {} : {}),
             },
             [child],
             key,
@@ -173,6 +223,20 @@
 
     return child
   }
+
+  function wrapLayerLayout(layer: ResolvedLayer<ResolvedComponent>): RenderProps {
+    return resolveRenderProps(layer.component, layoutPageOf(layer), layer.renderKey, layerLayoutProps(layer.id))
+  }
 </script>
 
-<Render {...renderProps} />
+<!-- The stack starts on the same line as the page. A line break between them renders as a
+     whitespace text node, which every app would then carry whether it uses layers or not. -->
+{#if renderProps}<Render {...renderProps} />{/if}{#each layers as layer, index (layer.id)}
+  <LayerPageContext page={layer.page} layerId={layer.id}>
+    <LayerComponent {...layerShellProps(layer, index, layers.length)}>
+      <div data-layer-id={layer.id} style:view-transition-name={layerTransitionName(layer.id)}>
+        <Render {...wrapLayerLayout(layer)} />
+      </div>
+    </LayerComponent>
+  </LayerPageContext>
+{/each}
