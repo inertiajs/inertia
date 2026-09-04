@@ -53,10 +53,8 @@ export const config: FrameworkConfig = {
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.env.PROD to skip the standalone server in dev mode
-  // Note: Svelte uses a different variable name (ssr) and render function import
-  // The configure call is awaited per render instead of at the top level, which keeps the
-  // generated bundle free of top-level await and therefore compilable to CommonJS. A rejection
-  // is handled so it never takes the server down, and surfaces per render instead
+  // Note: Svelte uses a different variable name (ssrPromise) and render function import
+  // Awaited per render, not at the top level, so the bundle can compile to CommonJS
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/svelte/server'
 import { render } from 'svelte/server'

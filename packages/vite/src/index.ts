@@ -55,6 +55,7 @@ export interface InertiaPluginOptions {
    *     ssr: (configureCall, options) => `
    *       import createServer from '@inertiajs/solid/server'
    *       const renderPromise = ${configureCall}
+   *       renderPromise.catch(() => {})
    *       createServer(async (page) => (await renderPromise)(page)${options})
    *     `,
    *   }

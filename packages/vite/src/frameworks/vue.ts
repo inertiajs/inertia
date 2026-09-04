@@ -52,9 +52,7 @@ export const config: FrameworkConfig = {
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.env.PROD to skip the standalone server in dev mode
-  // The configure call is awaited per render instead of at the top level, which keeps the
-  // generated bundle free of top-level await and therefore compilable to CommonJS. A rejection
-  // is handled so it never takes the server down, and surfaces per render instead
+  // Awaited per render, not at the top level, so the bundle can compile to CommonJS
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/vue3/server'
 import { renderToString } from 'vue/server-renderer'
