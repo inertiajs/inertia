@@ -38,7 +38,7 @@ describe('router.layer: the routed handle', () => {
     expect(typeof handle.close).toBe('function')
   })
 
-  it('composes a warm layer under the id the handle was minted with, and close() dismisses it', async () => {
+  it('composes a warm layer under the id the handle was created with, and close() dismisses it', async () => {
     await hold(pageWith())
     respondWith(editLayer())
 
@@ -86,16 +86,16 @@ describe('router.layer: the routed handle', () => {
     expect(registryRead(layer.id)).toBe(handle)
   })
 
-  it('re-keys the handle when the stack takes the id it was minted with, and close() still works', async () => {
+  it('re-keys the handle when the stack takes the id it was created with, and close() still works', async () => {
     await hold(pageWith())
     const answer = holding()
 
     const handle = router.layer('http://localhost/users/5/edit')
     await vi.waitFor(() => expect(answer()).not.toBeNull())
-    const minted = handle.id
+    const created = handle.id
 
     await currentPage.set(
-      composeLayer(currentPage.get(), pageWith({ component: 'Teams/Show', layer: { key: 'Teams/Show' } }), minted),
+      composeLayer(currentPage.get(), pageWith({ component: 'Teams/Show', layer: { key: 'Teams/Show' } }), created),
       { preservesBase: true },
     )
 
@@ -104,7 +104,7 @@ describe('router.layer: the routed handle', () => {
     await vi.waitFor(() => expect(currentPage.get().layers).toHaveLength(2))
 
     const [taken, composed] = currentPage.get().layers!
-    expect(composed.id).not.toBe(minted)
+    expect(composed.id).not.toBe(created)
     expect(composed.id).toBe(handle.id)
     expect(registryRead(composed.id)).toBe(handle)
 
@@ -1927,7 +1927,7 @@ describe('closing a layer', () => {
       expect(go).toHaveBeenCalledWith(-2)
     })
 
-    it('keeps the exits already reported when a close widens to a lower layer', async () => {
+    it('keeps the exits already reported when a close extends to a lower layer', async () => {
       openOver(pageWith(), { url: '/a', entries: 1 }, { url: '/b', entries: 1 }, { url: '/c', entries: 1 })
       standing('/c')
       const go = vi.spyOn(window.history, 'go')

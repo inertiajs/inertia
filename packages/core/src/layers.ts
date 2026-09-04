@@ -34,7 +34,6 @@ export const tierOf = (page: Page, id: string | undefined): Layer => layerAt(pag
 export const mapLayers = (page: Page, fn: (layer: LayerState) => LayerState): Page =>
   page.layers ? { ...page, layers: page.layers.map(fn) } : page
 
-// Writes fields onto one tier: the layer the id names, or the page itself when it names none.
 export const withTier = (page: Page, id: string | undefined, fields: Partial<LayerState>): Page =>
   id === undefined
     ? ({ ...page, ...fields } as Page)
@@ -63,11 +62,7 @@ export const layerKeyOf = (response: Page): string => response.layer?.key || res
 
 export const layerBaseOf = (response: Page): string | undefined => response.layer?.base
 
-export const promoteLayer = (response: Page): Page => {
-  const { layers, layer, ...page } = response
-
-  return page as Page
-}
+export const promoteLayer = (response: Page): Page => omit(response, ['layers', 'layer']) as Page
 
 // A layer composes only while the base it was dispatched from is still the one on screen.
 export const capturedBaseIsValid = ({
@@ -131,7 +126,7 @@ const stackFields = [
 
 const tierState = (layer: LayerState): Layer => omit(layer, stackFields)
 
-// What a visit carries into its landing, the id being the one `router.layer()` minted.
+// What a visit carries into its landing, the id being the one `router.layer()` created.
 export interface CarriedLayer {
   base: Page
   layerId?: string
@@ -148,66 +143,90 @@ const claimedPlaceholder = (base: Page, id: string | undefined, claims?: boolean
 
 const composedLayerId = (base: Page, response: Page, { layerId, opening, claims }: CarriedLayer): string => {
   const open = openLayerFor(base, response, layerId) ?? claimedPlaceholder(base, layerId, claims)
-  const mints = opening && layerId !== undefined
+  const opensNew = opening && layerId !== undefined
   const taken = layersOf(base).some((layer) => layer.id === layerId)
 
-  const id = open ? open.id : mints && !taken ? layerId : nextLayerId(base)
+  const id = open ? open.id : opensNew && !taken ? layerId : nextLayerId(base)
 
-  if (mints && id !== layerId) {
+  if (opensNew && id !== layerId) {
     registryRekey(layerId, id)
   }
 
   return id
 }
 
-export const composeLayer = (
-  base: Page,
-  response: Page,
+interface ComposeOptions {
+  url?: string | null
+  standalone?: boolean
+  owner?: string | null
+  local?: boolean
+  preservesUrl?: boolean
+  remount?: boolean
+  claims?: boolean
+}
+
+// Everything the response says about the layer. A rewrite takes the response's word for all of it,
+// which is what makes it a rewrite rather than a second layer under the same key.
+const layerFromResponse = (response: Page, url: string | null) => ({
+  key: layerKeyOf(response),
+  base: layerBaseOf(response) ?? null,
+  component: response.component,
+  props: response.props,
+  url,
+  encryptHistory: response.encryptHistory ?? false,
+  deferredProps: response.deferredProps ?? {},
+  initialDeferredProps: response.initialDeferredProps ?? response.deferredProps,
+  rescuedProps: response.rescuedProps ?? [],
+  flash: response.flash ?? {},
+  onceProps: response.onceProps ?? {},
+  scrollProps: response.scrollProps ?? {},
+})
+
+// A rewrite carries its stack fields over, since none of them are the response's to change; an open
+// takes what the call asked for.
+const layerOnTheStack = (rewrites: LayerState | undefined, id: string, options: ComposeOptions) =>
+  rewrites ? rewritesTheStack(rewrites, options) : opensOnTheStack(id, options)
+
+// A rewrite carries its place on the stack over: the response has no say in any of it, and only a
+// visit that asked for a remount takes the component away.
+const rewritesTheStack = (rewrites: LayerState, { owner = null, local = false, remount = false }: ComposeOptions) => ({
+  id: rewrites.id,
+  renderKey: remount ? nextRenderKey() : rewrites.renderKey,
+  standalone: rewrites.standalone,
+  entries: rewrites.entries,
+  // A layer that opened without an owner, a cold one say, takes the one rewriting it.
+  owner: rewrites.owner ?? owner,
+  ...(local ? { local: true } : {}),
+  // Decided when the layer opened: a later partial or poll must not move the address onto it.
+  ...(rewrites.preservesUrl ? { preservesUrl: true } : {}),
+})
+
+// An open starts fresh: it stands where the call put it, and has no entries yet.
+const opensOnTheStack = (
   id: string,
-  {
-    url = response.url,
-    standalone = false,
-    owner = null,
-    local = false,
-    preservesUrl = false,
-    remount = false,
-    claims = false,
-  }: {
-    url?: string | null
-    standalone?: boolean
-    owner?: string | null
-    local?: boolean
-    preservesUrl?: boolean
-    remount?: boolean
-    claims?: boolean
-  } = {},
-): Page => {
+  { standalone = false, owner = null, local = false, preservesUrl = false }: ComposeOptions,
+) => ({
+  id,
+  renderKey: nextRenderKey(),
+  standalone,
+  entries: 0,
+  owner,
+  ...(local ? { local: true } : {}),
+  ...(preservesUrl ? { preservesUrl: true } : {}),
+})
+
+// The layer an open or a rewrite lands on, if it is a rewrite: a standalone or local layer is always
+// a new one, so neither ever looks for a layer to rewrite.
+const layerRewrittenBy = (base: Page, response: Page, id: string, { standalone, local, claims }: ComposeOptions) =>
+  standalone || local ? undefined : (openLayerFor(base, response, id) ?? claimedPlaceholder(base, id, claims))
+
+export const composeLayer = (base: Page, response: Page, id: string, options: ComposeOptions = {}): Page => {
   const layers = layersOf(base)
-  const rewrites =
-    standalone || local ? undefined : (openLayerFor(base, response, id) ?? claimedPlaceholder(base, id, claims))
-  // Settled when the layer opened: a later partial or poll must not move the address onto it.
-  const preserves = rewrites ? rewrites.preservesUrl : preservesUrl
+  const rewrites = layerRewrittenBy(base, response, id, options)
 
   const layer: LayerState = {
-    id: rewrites?.id ?? id,
-    key: layerKeyOf(response),
-    renderKey: rewrites && !remount ? rewrites.renderKey : nextRenderKey(),
-    component: response.component,
-    props: response.props,
-    url,
-    base: layerBaseOf(response) ?? null,
-    encryptHistory: response.encryptHistory ?? false,
-    standalone: rewrites?.standalone ?? standalone,
-    entries: rewrites?.entries ?? 0,
-    owner: rewrites?.owner ?? owner,
-    deferredProps: response.deferredProps ?? {},
-    initialDeferredProps: response.initialDeferredProps ?? response.deferredProps,
-    rescuedProps: response.rescuedProps ?? [],
-    flash: response.flash ?? {},
-    onceProps: response.onceProps ?? {},
-    scrollProps: response.scrollProps ?? {},
-    ...(local ? { local: true } : {}),
-    ...(preserves ? { preservesUrl: true } : {}),
+    ...layerOnTheStack(rewrites, id, options),
+    ...layerFromResponse(response, options.url === undefined ? response.url : options.url),
   }
 
   return {
@@ -262,7 +281,7 @@ export const promoteDeepestLayer = (page: Page): Page => {
     return page
   }
 
-  const { layers, ...base } = page
+  const base = omit(page, ['layers'])
 
   const promoted = {
     ...base,
@@ -303,7 +322,6 @@ const addressLayer = (page: Page): LayerState | undefined =>
 
 export const addressOf = (page: Page): string => addressLayer(page)?.url ?? page.url
 
-// The tier the address belongs to, which is the page itself when no layer owns it.
 export const addressTierOf = (page: Page): Layer => addressLayer(page) ?? page
 
 // A hash belongs on the url the address is read from: on the base it never reaches the address bar.
@@ -385,7 +403,6 @@ export const entriesToUnwind = (page: Page, id: string): number => {
   return index === -1 ? 0 : page.layers!.slice(index).reduce((entries, layer) => entries + layer.entries, 0)
 }
 
-// The entries the dropped layers owned fall to the layer beneath them.
 const absorbLayersAbove = (page: Page, id: string): Page => {
   const layers = layersOf(page)
   const index = layers.findIndex((layer) => layer.id === id)
@@ -539,7 +556,7 @@ export const registryClose = (id: string): void => {
   layerRegistry.delete(id)
 }
 
-// Moves handles onto the id the layer actually composed under. Left where they were minted, they
+// Moves handles onto the id the layer composed under. Left where they were created, they
 // would answer for a layer that never opened.
 const registryRekey = (from: string, to: string): void => {
   const moving = layerRegistry.get(from)
@@ -553,10 +570,10 @@ const registryRekey = (from: string, to: string): void => {
   layerRegistry.delete(from)
 }
 
-export const layerHandleFor = (id: string, mint: (id: string) => LayerHandle): LayerHandle => {
+export const layerHandleFor = (id: string, create: (id: string) => LayerHandle): LayerHandle => {
   if (typeof window === 'undefined') {
     // Nothing emits or closes during a render, so the handle is spent with the render that asks.
-    return mint(id)
+    return create(id)
   }
 
   const existing = registryRead(id)
@@ -565,7 +582,7 @@ export const layerHandleFor = (id: string, mint: (id: string) => LayerHandle): L
     return existing
   }
 
-  const handle = mint(id)
+  const handle = create(id)
 
   registryWrite(id, handle)
 
@@ -683,7 +700,7 @@ class LayerClosing {
       return this.closing?.settled ?? Promise.resolve()
     }
 
-    // Widening restates which layers are owed, not what they have reported.
+    // A wider pending set only changes which layers are owed, not what they have reported.
     this.pending = layers.slice(index).map((layer) => ({
       id: layer.id,
       reported: this.pending.find((marked) => marked.id === layer.id)?.reported ?? false,
@@ -733,22 +750,15 @@ class LayerClosing {
     return this.remove(closed, options, closing).finally(() => closing?.settle())
   }
 
-  protected remove(
-    closed: string[],
-    { programmatic = false, refresh, absorbed = false }: CloseOptions = {},
-    closing?: Deferred | null,
-  ): Promise<void> {
+  protected remove(closed: string[], options: CloseOptions = {}, closing?: Deferred | null): Promise<void> {
     const layer = layerAt(currentPage.get(), closed[0])
 
     if (!layer) {
       return Promise.resolve()
     }
 
-    if (absorbed) {
-      // Nothing steps back: the caller pushes its own entry in front of the ones these layers own.
-      currentPage.merge(withoutRemembered(absorbLayersAbove(currentPage.get(), closed[0]), closed))
-      currentPage.dropLayerOptimisticState(closed)
-      closed.forEach(registryClose)
+    if (options.absorbed) {
+      this.absorb(closed)
 
       return Promise.resolve()
     }
@@ -761,61 +771,84 @@ class LayerClosing {
     // restore. That entry is the one the user arrived on, so the page beneath it is a step of its
     // own: only a layer that never got an entry writes over the one it is being closed out of.
     const writesTheEntry = layer.standalone || entries === 0
-    const replaces = entries === 0 && !layer.standalone
 
     const land = () =>
       currentPage.set(closeLayer(currentPage.get(), layer.id), {
-        replace: replaces,
+        replace: entries === 0 && !layer.standalone,
         preserveScroll: true,
         preserveState: true,
         preservesBase: true,
       })
 
-    let removal: Promise<void>
+    return this.takeOffTheStack(layer.id, land, entries, writesTheEntry).then(() =>
+      this.afterRemoval(closed, { ...options, writesTheEntry }, closing),
+    )
+  }
 
-    if (entries > 0) {
-      removal = this.beginUnwind(land, writesTheEntry)
-      history.back(entries)
+  // Nothing steps back: the caller pushes its own entry in front of the ones these layers own.
+  protected absorb(closed: string[]): void {
+    currentPage.merge(withoutRemembered(absorbLayersAbove(currentPage.get(), closed[0]), closed))
+    currentPage.dropLayerOptimisticState(closed)
+    closed.forEach(registryClose)
+  }
 
-      if (writesTheEntry) {
-        removal = removal.then(async () => {
-          // Unless the wait ran out and already landed it.
-          if (layerAt(currentPage.get(), layer.id)) {
-            await land()
-          }
-        })
-      }
-    } else {
-      removal = land()
+  // Steps back over the entries the layer owned, then installs the page beneath it.
+  protected takeOffTheStack(
+    id: string,
+    land: () => Promise<void>,
+    entries: number,
+    writesTheEntry: boolean,
+  ): Promise<void> {
+    if (entries === 0) {
+      return land()
     }
 
-    return removal.then(async () => {
-      // Off the screen, which is what a close means. The refresh beneath it is a follow-up.
-      closing?.settle()
+    const unwound = this.beginUnwind(land, writesTheEntry)
 
-      // A layer with no url of its own has nothing to re-ask for, so the base beneath it answers.
-      const landedOn = layersOf(currentPage.get()).at(-1)
-      const refreshed = landedOn?.url ? landedOn : undefined
-      // Unless what it would re-ask for is a blank the walk has yet to fill in, which the recovery
-      // is already fetching. A walk that landed leaves a base like any other, stale and worth asking.
-      const recovering = refreshed === undefined && currentPage.get().component === ''
+    history.back(entries)
 
-      if (programmatic && refresh && !recovering) {
-        await refresh(refreshed?.url ?? currentPage.get().url, refreshed?.id)
+    if (!writesTheEntry) {
+      return unwound
+    }
+
+    return unwound.then(async () => {
+      // Unless the wait ran out and already landed it.
+      if (layerAt(currentPage.get(), id)) {
+        await land()
       }
-
-      currentPage.merge(withoutRemembered(currentPage.get(), closed))
-
-      if (writesTheEntry) {
-        history.replaceState(currentPage.getWithoutFlashData())
-      }
-
-      // Rolling the layer's optimistic back would write its keys into the base's props.
-      currentPage.dropLayerOptimisticState(closed)
-
-      this.removing = []
-      closed.forEach(registryClose)
     })
+  }
+
+  // Off the screen, which is what a close means. The refresh beneath it is a follow-up.
+  protected async afterRemoval(
+    closed: string[],
+    { programmatic = false, refresh, writesTheEntry }: CloseOptions & { writesTheEntry: boolean },
+    closing?: Deferred | null,
+  ): Promise<void> {
+    closing?.settle()
+
+    // A layer with no url of its own has nothing to re-ask for, so the base beneath it answers.
+    const landedOn = layersOf(currentPage.get()).at(-1)
+    const refreshed = landedOn?.url ? landedOn : undefined
+    // Unless what it would re-ask for is a blank the walk has yet to fill in, which the recovery
+    // is already fetching. A walk that landed leaves a base like any other, stale and worth asking.
+    const recovering = refreshed === undefined && currentPage.get().component === ''
+
+    if (programmatic && refresh && !recovering) {
+      await refresh(refreshed?.url ?? currentPage.get().url, refreshed?.id)
+    }
+
+    currentPage.merge(withoutRemembered(currentPage.get(), closed))
+
+    if (writesTheEntry) {
+      history.replaceState(currentPage.getWithoutFlashData())
+    }
+
+    // Rolling the layer's optimistic back would write its keys into the base's props.
+    currentPage.dropLayerOptimisticState(closed)
+
+    this.removing = []
+    closed.forEach(registryClose)
   }
 
   protected beginUnwind(land: () => Promise<void>, landsItself: boolean): Promise<void> {
@@ -904,7 +937,7 @@ class LayerClosing {
       return page
     }
 
-    const { layers, ...beneath } = page
+    const beneath = omit(page, ['layers'])
     const kept = layersOf(page).filter((layer) => !this.isClosing(layer.id))
 
     return kept.length > 0 ? { ...beneath, layers: kept } : (beneath as Page)
@@ -1050,7 +1083,7 @@ export const normalizeLoading = <ComponentType>(
     try {
       resolved = await (loading as (url: string, page: Page) => unknown)(url, page)
     } catch {
-      // A component, not a resolver: it choked on the arguments.
+      // A component, not a resolver: it threw on the arguments.
       return normalize(loading)
     }
 

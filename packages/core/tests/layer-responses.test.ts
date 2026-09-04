@@ -228,7 +228,7 @@ describe('base id', () => {
 
   const set = (page: Page, options?: Parameters<typeof currentPage.set>[1]) => currentPage.set(page, options)
 
-  it('is minted for the base it is given', () => {
+  it('is created for the base it is given', () => {
     initWith(pageWith())
 
     expect(currentPage.id()).toBeTruthy()
@@ -2317,7 +2317,7 @@ describe('an instant visit that opens a layer or is made from one', () => {
     expect(page.layers![0].owner).toBe(currentPage.id())
   })
 
-  it('lands the response on the placeholder an open put up, under the id it minted', async () => {
+  it('lands the response on the placeholder an open put up, under the id it created', async () => {
     await hold(pageWith())
     const answer = holding()
 

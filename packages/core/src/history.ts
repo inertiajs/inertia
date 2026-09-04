@@ -230,7 +230,7 @@ class History {
   }
 
   // Steps back over the entries a closing stack stands on, behind the writes queued ahead of it:
-  // under encryption those are genuinely async, and stepping early would cross the wrong entry.
+  // under encryption those are async, and stepping early would cross the wrong entry.
   public back(entries: number): void {
     queue.add(() => Promise.resolve().then(() => window.history.go(-entries)))
   }

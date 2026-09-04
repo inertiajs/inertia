@@ -115,7 +115,7 @@ const isNativelyCloneable = (value: object): boolean =>
   (typeof Blob !== 'undefined' && value instanceof Blob)
 
 // Produces a value structuredClone() accepts. Functions and symbols are dropped
-// from objects, and become null in arrays so indices survive.
+// from objects, and become null in arrays so indices are preserved.
 export const toStructuredCloneable = <T>(value: T): T => {
   const seen = new WeakMap<object, unknown>()
 

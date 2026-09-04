@@ -487,7 +487,7 @@ describe('resolveInitialPage', () => {
     expect(page.layers!.map((layer) => layer.key)).toEqual(['Users/Edit'])
   })
 
-  it('never consults the loading resolver for an ordinary page', async () => {
+  it('never calls the loading resolver for an ordinary page', async () => {
     const resolveLoading = () => {
       throw new Error('consulted')
     }

@@ -33,6 +33,7 @@ import {
   PageResolver,
   ResolvedLayer,
   RouterInitParams,
+  ScrollRegion,
   Visit,
 } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
@@ -49,7 +50,7 @@ const tiersOf = (page: Page): [string, Layer][] => [
 const pendingDeferred = new Map<string, Pick<Layer, 'deferredProps' | 'component' | 'url'>>()
 
 // A write aimed at one tier carries every other tier along untouched, groups and all, so only the
-// groups a write actually brings are recorded. The document's own page brings its own.
+// groups a write brings are recorded. The document's own page brings its own.
 const recordDeferredProps = (page: Page, onScreen?: Page): void => {
   const carried = new Map(onScreen ? tiersOf(onScreen).map(([key, tier]) => [key, tier.deferredProps]) : [])
 
@@ -94,6 +95,25 @@ const announceDeferredProps = (page: Page): void => {
 let baseSequence = 0
 
 const nextBaseId = (): string => `base-${++baseSequence}`
+
+interface SetOptions {
+  replace?: boolean
+  preserveScroll?: boolean
+  preserveState?: boolean
+  viewTransition?: Visit['viewTransition']
+  cached?: boolean
+  initialRender?: boolean
+  preservesBase?: boolean
+  visitId?: string
+}
+
+// What `write` settled on its way to installing the page: whether the entry was taken over, and the
+// scroll it read off the document before the swap tore the regions down.
+interface InstallOptions extends SetOptions {
+  replace: boolean
+  scrollRegions: ScrollRegion[]
+  scrollRegionLayers?: (string | null)[]
+}
 
 class CurrentPage {
   protected page!: Page
@@ -146,28 +166,9 @@ class CurrentPage {
     return this
   }
 
-  public set(
-    page: Page,
-    {
-      replace = false,
-      preserveScroll = false,
-      preserveState = false,
-      viewTransition = false,
-      cached = false,
-      initialRender = false,
-      preservesBase = false,
-      visitId,
-    }: {
-      replace?: boolean
-      preserveScroll?: boolean
-      preserveState?: boolean
-      viewTransition?: Visit['viewTransition']
-      cached?: boolean
-      initialRender?: boolean
-      preservesBase?: boolean
-      visitId?: string
-    } = {},
-  ): Promise<void> {
+  public set(page: Page, options: SetOptions = {}): Promise<void> {
+    const { initialRender = false, preservesBase = false } = options
+
     if (Object.keys(page.deferredProps || {}).length && page.initialDeferredProps === undefined) {
       // Preserve original deferred props for back button handling
       page.initialDeferredProps = page.deferredProps
@@ -198,97 +199,129 @@ class CurrentPage {
         return
       }
 
-      if (!preservesBase && this.takesBaseAway(page, preserveState)) {
-        registryClose(this.baseId)
-        this.baseId = nextBaseId()
-      }
-
-      page = withLiveOwners(page, this.baseId)
-
-      layerClosing.release(page)
-
-      page.rememberedState ??= {}
-
-      const isServer = typeof window === 'undefined'
-      const location = !isServer ? window.location : new URL(page.url)
-      const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
-      const scrollRegionLayers = !isServer && preserveScroll ? Scroll.getScrollRegionLayers() : undefined
-      // A layer open is a step of its own, so it pushes even where the address has not moved.
-      const opensLayer = layersOf(page).some((layer) => !layer.standalone && !layerAt(this.page, layer.id))
-
-      replace = replace || (!opensLayer && isSameUrlWithoutHash(hrefToUrl(addressOf(page)), location))
-
-      if (!replace && !history.preserveUrl) {
-        page = recordHistoryEntry(page)
-      }
-
-      // Clear flash data from the page object, we don't want it when navigating back/forward...
-      const pageForHistory = withoutFlash(page)
-
-      return new Promise<void>((resolve) =>
-        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
-      ).then(() => {
-        if (this.historyEntryDropped) {
-          this.historyEntryDropped = false
-          page = dropHistoryEntry(page)
-        }
-
-        const isNewComponent = !this.isTheSame(page)
-
-        if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
-          // Don't use view transition if the page stays the same and there are (new) errors...
-          viewTransition = false
-        }
-
-        this.page = page
-        this.cleared = false
-
-        if (this.hasOnceProps()) {
-          prefetchedRequests.updateCachedOncePropsFromCurrentPage()
-        }
-
-        if (isNewComponent) {
-          this.fireEventsFor('newComponent')
-        }
-
-        if (this.isFirstPageLoad) {
-          this.fireEventsFor('firstLoad')
-        }
-
-        this.isFirstPageLoad = false
-
-        if (this.historyQuotaExceeded) {
-          // If we exceeded the history quota, don't attempt to swap the
-          // component as we're performing a full page reload instead.
-          this.historyQuotaExceeded = false
-          return
-        }
-
-        return this.swap({
-          component,
-          layers,
-          page,
-          preserveState,
-          viewTransition,
-          initialRender,
-        }).then(() => {
-          if (preserveScroll) {
-            // Scroll regions must be explicitly restored since the DOM elements are destroyed
-            // and recreated during the component 'swap'. Document scroll is naturally
-            // preserved as the document element itself persists across navigations.
-            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions, scrollRegionLayers))
-          } else {
-            Scroll.reset()
-          }
-
-          announceDeferredProps(page)
-
-          if (!replace) {
-            fireNavigateEvent(page, { cached, visitId })
-          }
-        })
-      })
+      return this.write(page, component, layers, options)
     })
+  }
+
+  // Writes the page's history entry, then installs it. The entry goes first, so anything reading the
+  // address while the components swap in sees the one they are landing on.
+  protected write(
+    page: Page,
+    component: Component | undefined,
+    layers: ResolvedLayer[] | undefined,
+    options: SetOptions,
+  ): Promise<void> {
+    const { preserveScroll = false, preserveState = false, preservesBase = false } = options
+
+    if (!preservesBase && this.takesBaseAway(page, preserveState)) {
+      registryClose(this.baseId)
+      this.baseId = nextBaseId()
+    }
+
+    page = withLiveOwners(page, this.baseId)
+
+    layerClosing.release(page)
+
+    page.rememberedState ??= {}
+
+    const isServer = typeof window === 'undefined'
+    const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
+    const scrollRegionLayers = !isServer && preserveScroll ? Scroll.getScrollRegionLayers() : undefined
+    const replace = this.takesOverTheEntry(page, options.replace ?? false, isServer)
+
+    if (!replace && !history.preserveUrl) {
+      page = recordHistoryEntry(page)
+    }
+
+    // Clear flash data from the page object, we don't want it when navigating back/forward...
+    const pageForHistory = withoutFlash(page)
+
+    return new Promise<void>((resolve) =>
+      replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
+    ).then(() => this.install(page, component, layers, { ...options, replace, scrollRegions, scrollRegionLayers }))
+  }
+
+  // Whether the write takes over the entry on screen rather than pushing one of its own.
+  protected takesOverTheEntry(page: Page, replace: boolean, isServer: boolean): boolean {
+    if (replace) {
+      return true
+    }
+
+    // A layer open is a step of its own, so it pushes even where the address has not moved.
+    if (layersOf(page).some((layer) => !layer.standalone && !layerAt(this.page, layer.id))) {
+      return false
+    }
+
+    return isSameUrlWithoutHash(hrefToUrl(addressOf(page)), !isServer ? window.location : new URL(page.url))
+  }
+
+  // The entry is written, so this is now the page on screen: it is announced, and then handed to the
+  // adapter to render.
+  protected install(
+    page: Page,
+    component: Component | undefined,
+    layers: ResolvedLayer[] | undefined,
+    { preserveState = false, viewTransition = false, initialRender = false, ...options }: InstallOptions,
+  ): Promise<void> | void {
+    if (this.historyEntryDropped) {
+      this.historyEntryDropped = false
+      page = dropHistoryEntry(page)
+    }
+
+    const isNewComponent = !this.isTheSame(page)
+
+    if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
+      // Don't use view transition if the page stays the same and there are (new) errors...
+      viewTransition = false
+    }
+
+    this.page = page
+    this.cleared = false
+
+    if (this.hasOnceProps()) {
+      prefetchedRequests.updateCachedOncePropsFromCurrentPage()
+    }
+
+    if (isNewComponent) {
+      this.fireEventsFor('newComponent')
+    }
+
+    if (this.isFirstPageLoad) {
+      this.fireEventsFor('firstLoad')
+    }
+
+    this.isFirstPageLoad = false
+
+    if (this.historyQuotaExceeded) {
+      // If we exceeded the history quota, don't attempt to swap the
+      // component as we're performing a full page reload instead.
+      this.historyQuotaExceeded = false
+      return
+    }
+
+    return this.swap({ component, layers, page, preserveState, viewTransition, initialRender }).then(() =>
+      this.afterSwap(page, options),
+    )
+  }
+
+  protected afterSwap(
+    page: Page,
+    { preserveScroll = false, scrollRegions, scrollRegionLayers, replace, cached = false, visitId }: InstallOptions,
+  ): void {
+    if (preserveScroll) {
+      // Scroll regions must be explicitly restored since the DOM elements are destroyed
+      // and recreated during the component 'swap'. Document scroll is naturally
+      // preserved as the document element itself persists across navigations.
+      window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions, scrollRegionLayers))
+    } else {
+      Scroll.reset()
+    }
+
+    announceDeferredProps(page)
+
+    if (!replace) {
+      fireNavigateEvent(page, { cached, visitId })
+    }
   }
 
   public setQuietly(

@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual } from 'es-toolkit'
+import { cloneDeep, isEqual, omit } from 'es-toolkit'
 import { get, set } from 'es-toolkit/compat'
 import { progress, router } from '.'
 import { config } from './config'
@@ -46,6 +46,7 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
+  InternalActiveVisit,
   Layer,
   LayerState,
   LocalLayer,
@@ -89,6 +90,12 @@ const asyncRequests = new RequestStream({
 })
 
 const clientVisits = new Queue<Promise<void>>()
+
+// What a client-side visit contributes to the page it writes, which is the visit minus its callbacks.
+type ClientVisitPageParams<TProps> = Omit<
+  ClientSideVisitOptions<TProps>,
+  'viewTransition' | 'onError' | 'onFinish' | 'onFlash' | 'onSuccess' | 'layerId'
+>
 
 export class Router {
   protected syncRequestStream = syncRequests
@@ -365,7 +372,7 @@ export class Router {
     this.dispatchVisit(href, { ...options, layerId: options.layerId ?? this.layerId })
   }
 
-  // `visit` with the tier already settled: a reload that dropped its layer keeps it dropped.
+  // `visit` with the tier already decided: a reload that dropped its layer keeps it dropped.
   protected dispatchVisit<T extends RequestPayload = RequestPayload>(
     href: string | URL | UrlMethodPair,
     options: VisitOptions<T> = {},
@@ -393,30 +400,7 @@ export class Router {
 
     const capturedBase = this.captureBase()
 
-    const currentPageUrl = hrefToUrl(currentPage.get().url)
-    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
-
-    const targetedLayer = layerAt(currentPage.get(), visit.layerId)
-    const tierUrl = targetedLayer?.url ? hrefToUrl(targetedLayer.url) : currentPageUrl
-
-    // For partial reloads, only compare the base URL (origin + pathname) to allow
-    // concurrent requests with different query params to the same page
-    const isSamePage = isPartialReload
-      ? isSameUrlWithoutQueryOrHash(visit.url, tierUrl)
-      : isSameUrlWithoutHash(visit.url, tierUrl)
-
-    if (!isSamePage) {
-      // Cancel in-flight requests aimed at the page we're navigating away from
-      // (deferred props, partial reloads, plain reloads), but leave prefetches,
-      // optimistic requests, and background async visits to other pages untouched
-      this.asyncRequestStream.cancelInFlight(
-        (request) =>
-          !request.isPrefetch() &&
-          !request.isOptimistic() &&
-          (request.layerId ?? null) === (visit.layerId ?? null) &&
-          isSameUrlWithoutQueryOrHash(request.getUrl(), tierUrl),
-      )
-    }
+    this.cancelStaleRequests(visit)
 
     // Interrupt in-flight requests before taking the optimistic snapshot
     // so that any previous optimistic state is restored first
@@ -433,49 +417,102 @@ export class Router {
       Scroll.save()
     }
 
-    const requestParams: PendingVisit & VisitCallbacks & { fabricatedLayer?: boolean } = {
+    const requestParams: InternalActiveVisit = {
       ...visit,
       ...events,
     }
 
-    const sendRequest = () => {
-      const prefetched = prefetchedRequests.get(requestParams)
+    const sendRequest = () => this.sendVisitRequest(requestParams, capturedBase, !!options.optimistic)
 
-      if (prefetched) {
-        progress.reveal(prefetched.inFlight)
-        prefetchedRequests.use(prefetched, requestParams, capturedBase)
-      } else {
-        progress.reveal(true)
-        const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-        requestStream.send(
-          Request.create(requestParams, currentPage.get(), capturedBase, { optimistic: !!options.optimistic }),
-        )
-      }
-    }
-
-    if (Array.isArray(visit.component)) {
-      console.error(
-        `The "component" prop received an array of components (${visit.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
-      )
-      visit.component = null
-    }
-
-    if (visit.component) {
-      Promise.all([history.processQueue(), layerClosing.unwindSettled()]).then(() => {
-        this.performInstantSwap(visit).then((fabricatedLayer) => {
-          requestParams.preserveScroll = true
-          requestParams.preserveState = true
-          requestParams.replace = true
-          requestParams.viewTransition = false
-          requestParams.fabricatedLayer = fabricatedLayer
-          sendRequest()
-        })
-      })
+    if (this.instantComponent(visit)) {
+      this.swapInstantlyThenSend(visit, requestParams, sendRequest)
     } else {
       sendRequest()
     }
 
     return true
+  }
+
+  // Cancel in-flight requests aimed at the page we're navigating away from (deferred props, partial
+  // reloads, plain reloads), but leave prefetches, optimistic requests, and background async visits
+  // to other pages untouched.
+  protected cancelStaleRequests(visit: PendingVisit): void {
+    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
+
+    const targetedLayer = layerAt(currentPage.get(), visit.layerId)
+    const tierUrl = targetedLayer?.url ? hrefToUrl(targetedLayer.url) : hrefToUrl(currentPage.get().url)
+
+    // For partial reloads, only compare the base URL (origin + pathname) to allow
+    // concurrent requests with different query params to the same page
+    const isSamePage = isPartialReload
+      ? isSameUrlWithoutQueryOrHash(visit.url, tierUrl)
+      : isSameUrlWithoutHash(visit.url, tierUrl)
+
+    if (isSamePage) {
+      return
+    }
+
+    this.asyncRequestStream.cancelInFlight(
+      (request) =>
+        !request.isPrefetch() &&
+        !request.isOptimistic() &&
+        (request.layerId ?? null) === (visit.layerId ?? null) &&
+        isSameUrlWithoutQueryOrHash(request.getUrl(), tierUrl),
+    )
+  }
+
+  protected sendVisitRequest(
+    requestParams: InternalActiveVisit,
+    capturedBase: BaseSnapshot,
+    optimistic: boolean,
+  ): void {
+    const prefetched = prefetchedRequests.get(requestParams)
+
+    if (prefetched) {
+      progress.reveal(prefetched.inFlight)
+      prefetchedRequests.use(prefetched, requestParams, capturedBase)
+
+      return
+    }
+
+    progress.reveal(true)
+
+    const requestStream = requestParams.async ? this.asyncRequestStream : this.syncRequestStream
+
+    requestStream.send(Request.create(requestParams, currentPage.get(), capturedBase, { optimistic }))
+  }
+
+  // The component an instant visit fabricates its page from, if it named one it can use. An array is
+  // what a lazily-imported component resolves to, and nothing here can say which of them was meant.
+  protected instantComponent(visit: PendingVisit): string | null {
+    if (!Array.isArray(visit.component)) {
+      return visit.component
+    }
+
+    console.error(
+      `The "component" prop received an array of components (${visit.component.join(', ')}), but only a single component string is supported for instant visits. Pass an explicit component name instead.`,
+    )
+
+    return null
+  }
+
+  // The fabricated page goes up first, and the request that replaces it must not scroll, remount, or
+  // push an entry of its own: the swap it is landing on top of already did all three.
+  protected swapInstantlyThenSend(
+    visit: PendingVisit,
+    requestParams: InternalActiveVisit,
+    send: () => void,
+  ): void {
+    Promise.all([history.processQueue(), layerClosing.unwindSettled()]).then(() => {
+      this.performInstantSwap(visit).then((fabricatedLayer) => {
+        requestParams.preserveScroll = true
+        requestParams.preserveState = true
+        requestParams.replace = true
+        requestParams.viewTransition = false
+        requestParams.fabricatedLayer = fabricatedLayer
+        send()
+      })
+    })
   }
 
   public getCached(
@@ -542,7 +579,7 @@ export class Router {
 
     this.asyncRequestStream.interruptInFlight()
 
-    const requestParams: PendingVisit & VisitCallbacks & { fabricatedLayer?: boolean } = {
+    const requestParams: InternalActiveVisit = {
       ...visit,
       ...events,
     }
@@ -736,53 +773,17 @@ export class Router {
     const targetedLayer = layerAt(current, params.layerId)
     const tier = tierOf(current, params.layerId)
 
-    const onceProps =
-      typeof params.props === 'function'
-        ? Object.fromEntries(
-            Object.values(tier.onceProps ?? {}).map((onceProp) => [onceProp.prop, get(tier.props, onceProp.prop)]),
-          )
-        : {}
+    const { props, flash } = this.clientVisitState(params, tier)
+    const { viewTransition, onFinish } = params
+    const pageParams = omit(params, ['viewTransition', 'onError', 'onFinish', 'onFlash', 'onSuccess', 'layerId'])
 
-    const props =
-      typeof params.props === 'function'
-        ? params.props(tier.props as TProps, onceProps as Partial<TProps>)
-        : (params.props ?? tier.props)
-
-    const flash = typeof params.flash === 'function' ? params.flash(tier.flash) : params.flash
-
-    const { viewTransition, onError, onFinish, onFlash, onSuccess, layerId: _layerId, ...pageParams } = params
-
-    let page: Page
-    let preservesBase: boolean
-
-    if (targetedLayer) {
-      // Resolved against the layer's own page, so `preserveState: 'errors'` reads the layer's bag.
-      const keepsState = RequestParams.resolvePreserveOption(
-        params.preserveState ?? false,
-        layerPageOf(current, targetedLayer),
-      )
-
-      page = withTier(current, targetedLayer.id, {
-        ...(pageParams.component !== undefined && { component: pageParams.component }),
-        ...(pageParams.url !== undefined && { url: pageParams.url }),
-        ...(pageParams.encryptHistory !== undefined && { encryptHistory: pageParams.encryptHistory }),
-        ...(keepsState ? {} : { renderKey: nextRenderKey() }),
-        flash: flash ?? {},
-        props: props as Page['props'],
-      })
-      preservesBase = true
-    } else {
-      preservesBase = replace && params.component === undefined
-
-      const { layers, ...withoutStack } = current
-
-      page = {
-        ...(preservesBase ? current : withoutStack),
-        ...pageParams,
-        flash: flash ?? {},
-        props: props as Page['props'],
-      }
-    }
+    const { page, preservesBase } = this.clientVisitPage(current, targetedLayer, {
+      pageParams,
+      props: props as Page['props'],
+      flash: flash ?? {},
+      preserveState: params.preserveState ?? false,
+      replace,
+    })
 
     const tierPage = targetedLayer ? layerPageOf(current, targetedLayer) : page
 
@@ -802,31 +803,99 @@ export class Router {
         viewTransition,
         visitId,
       })
-      .then(() => {
-        fireClientVisitEvent(currentPage.get(), { replace, visitId })
-
-        const current = currentPage.get()
-        const announcedLayer = layerAt(current, params.layerId)
-        const currentFlash = announcedLayer ? (announcedLayer.flash ?? {}) : current.flash
-
-        if (Object.keys(currentFlash).length > 0) {
-          fireFlashEvent(currentFlash)
-          onFlash?.(currentFlash)
-        }
-
-        const errors = ((announcedLayer ? announcedLayer.props.errors || {} : current.props.errors) || {}) as Errors &
-          ErrorBag
-
-        if (Object.keys(errors).length === 0) {
-          onSuccess?.(currentPage.get())
-          return
-        }
-
-        const scopedErrors = params.errorBag ? errors[params.errorBag || ''] || {} : errors
-
-        onError?.(scopedErrors)
-      })
+      .then(() => this.announceClientVisit(params, { replace, visitId }))
       .finally(() => onFinish?.(params))
+  }
+
+  // The props and flash the write installs: either given outright, or built from what the tier holds.
+  protected clientVisitState<TProps>(
+    params: ClientSideVisitOptions<TProps>,
+    tier: Layer,
+  ): { props: PageProps | TProps; flash: FlashData | undefined } {
+    const flash = typeof params.flash === 'function' ? params.flash(tier.flash) : params.flash
+
+    if (typeof params.props !== 'function') {
+      return { props: params.props ?? tier.props, flash }
+    }
+
+    // The callback is handed the tier's once props alongside its own, so it can build on values it
+    // is not being sent again.
+    const onceProps = Object.fromEntries(
+      Object.values(tier.onceProps ?? {}).map((onceProp) => [onceProp.prop, get(tier.props, onceProp.prop)]),
+    )
+
+    return { props: params.props(tier.props as TProps, onceProps as Partial<TProps>), flash }
+  }
+
+  // A write aimed at a layer rewrites that layer and leaves the page beneath it standing. One aimed
+  // at the page replaces it, and takes the stack with it unless it is only rewriting what is there.
+  protected clientVisitPage<TProps>(
+    current: Page,
+    targetedLayer: LayerState | undefined,
+    {
+      pageParams,
+      props,
+      flash,
+      preserveState,
+      replace,
+    }: {
+      pageParams: ClientVisitPageParams<TProps>
+      props: Page['props']
+      flash: FlashData
+      preserveState: Visit['preserveState']
+      replace: boolean
+    },
+  ): { page: Page; preservesBase: boolean } {
+    if (targetedLayer) {
+      // Resolved against the layer's own page, so `preserveState: 'errors'` reads the layer's bag.
+      const keepsState = RequestParams.resolvePreserveOption(preserveState, layerPageOf(current, targetedLayer))
+
+      return {
+        page: withTier(current, targetedLayer.id, {
+          ...(pageParams.component !== undefined && { component: pageParams.component }),
+          ...(pageParams.url !== undefined && { url: pageParams.url }),
+          ...(pageParams.encryptHistory !== undefined && { encryptHistory: pageParams.encryptHistory }),
+          ...(keepsState ? {} : { renderKey: nextRenderKey() }),
+          flash,
+          props,
+        }),
+        preservesBase: true,
+      }
+    }
+
+    const preservesBase = replace && pageParams.component === undefined
+
+    return {
+      page: { ...(preservesBase ? current : omit(current, ['layers'])), ...pageParams, flash, props },
+      preservesBase,
+    }
+  }
+
+  // What the write landed on, told to whoever asked: its flash, then its errors or its success.
+  protected announceClientVisit<TProps>(
+    params: ClientSideVisitOptions<TProps>,
+    { replace, visitId }: { replace: boolean; visitId: string },
+  ): void {
+    fireClientVisitEvent(currentPage.get(), { replace, visitId })
+
+    const current = currentPage.get()
+    const tier = tierOf(current, params.layerId)
+    const currentFlash = tier.flash
+
+    if (Object.keys(currentFlash).length > 0) {
+      fireFlashEvent(currentFlash)
+      params.onFlash?.(currentFlash)
+    }
+
+    const errors = (tier.props.errors || {}) as Errors & ErrorBag
+
+    if (Object.keys(errors).length === 0) {
+      params.onSuccess?.(currentPage.get())
+
+      return
+    }
+
+    params.onError?.(params.errorBag ? errors[params.errorBag || ''] || {} : errors)
   }
 
   protected captureBase(): BaseSnapshot {
@@ -921,7 +990,7 @@ export class Router {
   }
 
   // A visit that is opening a layer puts its placeholder up as a layer, leaving the page it opens
-  // on where it is. Keyed by the id the open minted, which the response then claims it under.
+  // on where it is. Keyed by the id the open created, which the response then claims it under.
   protected openLayerInstantly(current: Page, visit: PendingVisit, props: Page['props'], url: string): Promise<void> {
     const placeholder = {
       component: visit.component!,

@@ -1,4 +1,4 @@
-import { isEqual } from 'es-toolkit'
+import { isEqual, omit } from 'es-toolkit'
 import { get, set } from 'es-toolkit/compat'
 import { router } from '.'
 import dialog from './dialog'
@@ -15,6 +15,7 @@ import { history } from './history'
 import { interceptors } from './interceptors'
 import {
   CarriedLayer,
+  LayerLanding,
   addressOf,
   addressTierOf,
   capturedBaseIsValid,
@@ -287,6 +288,19 @@ function mergePropsInto(pageResponse: Page, currentProps: PageProps, nestedProps
   pageResponse.props = { ...currentProps, ...pageResponse.props }
 }
 
+// Where a response lands and what the write that installs it has to preserve. Resolved up front so
+// the flags are decided in one place rather than read back out of the page as it is being built.
+interface LandingDecision {
+  base: Page
+  composesAsLayer: boolean
+  walksBeneath: boolean
+  keepsStack: boolean
+  refreshesBase: boolean
+  carriedReturn: boolean
+  handedBackTo: LayerState | undefined
+  carried: CarriedLayer
+}
+
 export class Response {
   protected wasPrefetched = false
   protected processed = false
@@ -452,7 +466,7 @@ export class Response {
 
     if (this.isInertiaRedirect()) {
       // The layer target is dropped, so a redirected layer reload lands as a base navigation.
-      const { layerId, layerOwner, ...params } = this.requestParams.all()
+      const params = omit(this.requestParams.all(), ['layerId', 'layerOwner'])
 
       router.visit(this.getHeader('x-inertia-redirect'), {
         ...params,
@@ -581,6 +595,33 @@ export class Response {
 
     pageResponse.url = history.preserveUrl ? currentPage.get().url : responseUrl
 
+    const decision = await this.resolveLanding(pageResponse, responseUrl)
+
+    const landing = landLayerResponse({
+      base: decision.base,
+      response: pageResponse,
+      responseUrl,
+      composesAsLayer: decision.composesAsLayer,
+      walksBeneath: decision.walksBeneath,
+      // The layer's own component is kept only when the visit asked for it, as the base's is.
+      remount: !this.requestParams.all().preserveState,
+      carried: decision.carried,
+      preserveUrl: history.preserveUrl,
+      keepsStack: decision.keepsStack,
+    })
+
+    if (decision.handedBackTo) {
+      this.handErrorsBack(landing, pageResponse, decision.handedBackTo)
+    }
+
+    await this.writeLanding(landing, decision)
+
+    return landing.landedOn
+  }
+
+  // Which base the response composes onto and what the landing does with it. Closing the stack down
+  // to the layer being answered happens here, so the base returned is the one the landing sees.
+  protected async resolveLanding(pageResponse: Page, responseUrl: string): Promise<LandingDecision> {
     let base = currentPage.get()
     const isLayer = isLayerResponse(pageResponse)
     const walksBeneath = this.requestParams.isWalkRequest()
@@ -597,50 +638,69 @@ export class Response {
     const carry = interstitialCarryFor(responseUrl)
     const composesAsLayer =
       !walksBeneath && isLayer && (carry !== undefined || this.hasValidCapturedBase(pageResponse, responseUrl, base))
-    const carriedReturn = composesAsLayer && carry !== undefined
 
     if (composesAsLayer) {
-      // A link four layers deep can name a layer that is not the top one, so the stack closes down
-      // to it before the response lands. A refresh in place names no level: a poll or a deferred
-      // group filling in under an open layer leaves that layer where it is. Neither does a form
-      // handed back to a layer standing above the address it was submitted from.
-      if (!this.refreshesInPlace() && handedBackTo === undefined) {
-        await layerClosing.closeAbove(openLayerFor(base, pageResponse, this.requestParams.all().layerId)?.id)
-
-        base = currentPage.get()
-      }
-
-      const open = openLayerFor(base, pageResponse, this.requestParams.all().layerId)
-
-      if (open && this.requestParams.isPartial() && open.component === pageResponse.component) {
-        this.mergeIntoTier(pageResponse, open)
-      }
+      base = await this.closeLayersAbove(pageResponse, base, handedBackTo)
+      this.mergeIntoOpenLayer(pageResponse, base)
     }
 
-    const landing = landLayerResponse({
+    return {
       base,
-      response: pageResponse,
-      responseUrl,
       composesAsLayer,
       walksBeneath,
-      // The layer's own component is kept only when the visit asked for it, as the base's is.
-      remount: !this.requestParams.all().preserveState,
-      carried: carry?.layer ?? this.carriedLayer(base),
-      preserveUrl: history.preserveUrl,
       keepsStack,
-    })
+      refreshesBase,
+      carriedReturn: composesAsLayer && carry !== undefined,
+      handedBackTo,
+      carried: carry?.layer ?? this.carriedLayer(base),
+    }
+  }
 
-    if (handedBackTo) {
-      const landedOn = tierOf(landing.page, landing.landedOn)
-
-      landing.page = withTier(
-        withTier(landing.page, landing.landedOn, { props: { ...landedOn.props, errors: {} }, flash: {} }),
-        handedBackTo.id,
-        { props: { ...handedBackTo.props, errors: pageResponse.props.errors }, flash: landedOn.flash },
-      )
-      landing.landedOn = handedBackTo.id
+  // A link four layers deep can name a layer that is not the top one, so the stack closes down to it
+  // before the response lands. A refresh in place names no level: a poll or a deferred group filling
+  // in under an open layer leaves that layer where it is. Neither does a form handed back to a layer
+  // standing above the address it was submitted from.
+  protected async closeLayersAbove(
+    pageResponse: Page,
+    base: Page,
+    handedBackTo: LayerState | undefined,
+  ): Promise<Page> {
+    if (this.refreshesInPlace() || handedBackTo !== undefined) {
+      return base
     }
 
+    await layerClosing.closeAbove(openLayerFor(base, pageResponse, this.requestParams.all().layerId)?.id)
+
+    return currentPage.get()
+  }
+
+  // A partial answering a layer that is already open rewrites that layer where it stands, so what it
+  // left out is taken from the props the layer is holding rather than dropped.
+  protected mergeIntoOpenLayer(pageResponse: Page, base: Page): void {
+    const open = openLayerFor(base, pageResponse, this.requestParams.all().layerId)
+
+    if (open && this.requestParams.isPartial() && open.component === pageResponse.component) {
+      this.mergeIntoTier(pageResponse, open)
+    }
+  }
+
+  // The errors belong to the tier that submitted, not to the one the response landed on, so they are
+  // moved back onto it along with the flash the landing carried.
+  protected handErrorsBack(landing: LayerLanding, pageResponse: Page, handedBackTo: LayerState): void {
+    const landedOn = tierOf(landing.page, landing.landedOn)
+
+    landing.page = withTier(
+      withTier(landing.page, landing.landedOn, { props: { ...landedOn.props, errors: {} }, flash: {} }),
+      handedBackTo.id,
+      { props: { ...handedBackTo.props, errors: pageResponse.props.errors }, flash: landedOn.flash },
+    )
+    landing.landedOn = handedBackTo.id
+  }
+
+  protected async writeLanding(
+    landing: LayerLanding,
+    { composesAsLayer, walksBeneath, refreshesBase, carriedReturn, handedBackTo }: LandingDecision,
+  ): Promise<void> {
     const page = landing.page
     const landsOverTheStack = composesAsLayer || handedBackTo !== undefined
 
@@ -680,8 +740,6 @@ export class Response {
         walkTo(base)
       }
     }
-
-    return landing.landedOn
   }
 
   // A marked non-layer response is a prompt the user will return from, so the base it was dispatched

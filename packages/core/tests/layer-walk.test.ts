@@ -1292,7 +1292,7 @@ describe('the walk a cold layer sends for the base beneath it', () => {
       expect(state.page.layers).toBeUndefined()
     })
 
-    it('mints the same layer id on every initial page, so the server and client agree', async () => {
+    it('creates the same layer id on every initial page, so the server and client agree', async () => {
       answering({})
 
       const first = await resolveInitialPage(

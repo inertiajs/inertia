@@ -1589,7 +1589,7 @@ test('closing a cold-opened layer refreshes the base the walk fetched beneath it
   await expect(page.locator('#likes')).toHaveText('1')
 })
 
-test('a write issued alongside a close still lands when it outlives the unwind', async ({ page }) => {
+test('a write issued alongside a close still lands when it runs longer than the unwind', async ({ page }) => {
   await page.goto('/layers/base')
   await expect(page.locator('#likes')).toHaveText('0')
 
@@ -2181,7 +2181,7 @@ test('closing the layer while the base component is still importing still leaves
   await expect(page.locator('#loading-base')).toHaveCount(0)
 })
 
-test('a layer opened over a page on screen never consults the loading resolver', async ({ page }) => {
+test('a layer opened over a page on screen never calls the loading resolver', async ({ page }) => {
   await page.goto('/layers/loading/base')
   await expect(page.getByText('Base page')).toBeVisible()
 
@@ -2192,7 +2192,7 @@ test('a layer opened over a page on screen never consults the loading resolver',
   expect(await page.evaluate(() => window.loadingResolved)).toBeUndefined()
 })
 
-test('an ordinary navigation never consults the loading resolver, not even before the app initialises', async ({
+test('an ordinary navigation never calls the loading resolver, not even before the app initialises', async ({
   page,
 }) => {
   await page.goto('/layers/loading/base')
