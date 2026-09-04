@@ -253,14 +253,23 @@ class CurrentPage {
 
     const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
 
+    // The browser skips this transition when a newer one supersedes it, when the tab goes hidden
+    // mid-flight, or when the swap times out, always rejecting with a DOMException. That's
+    // expected, so swallow it and let a failing swap reject as it normally would.
+    const ignoreSkippedTransition = (promise: Promise<unknown>) => {
+      promise.catch((error) => {
+        if (!(error instanceof DOMException)) {
+          throw error
+        }
+      })
+    }
+
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
 
-      // A newer transition, or the tab going hidden mid-flight, aborts this one,
-      // rejecting these promises. That's expected, so swallow it to avoid an unhandled rejection.
-      transitionResult.ready.catch(() => {})
-      transitionResult.finished.catch(() => {})
-      transitionResult.updateCallbackDone.catch(() => {})
+      ignoreSkippedTransition(transitionResult.ready)
+      ignoreSkippedTransition(transitionResult.finished)
+      ignoreSkippedTransition(transitionResult.updateCallbackDone)
 
       viewTransitionCallback(transitionResult)
     })
