@@ -45,14 +45,12 @@ createInertiaApp({ resolve: (name) => name })`
 
         const ssrPromise = createInertiaApp({ resolve: (name) => name })
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        ssrPromise.catch(() => {})
+
         const renderPage = async (page) => (await ssrPromise)(page, render)
 
         if (import.meta.env.PROD) {
-          ssrPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -71,14 +69,12 @@ createInertiaApp({})`
 
         const renderPromise = createInertiaApp({})
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -97,14 +93,12 @@ createInertiaApp({})`
 
         const renderPromise = createInertiaApp({})
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -123,14 +117,12 @@ createInertiaApp({})`
 
         const ssrPromise = createInertiaApp({})
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        ssrPromise.catch(() => {})
+
         const renderPage = async (page) => (await ssrPromise)(page, render)
 
         if (import.meta.env.PROD) {
-          ssrPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage, {"port":13715,"host":"127.0.0.1","cluster":true})
         }
 
@@ -169,14 +161,12 @@ initializeTheme()`
             progress: { color: '#4B5563' },
         })
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -256,14 +246,12 @@ void createInertiaApp({ resolve: (name) => name })`
 
         const renderPromise = createInertiaApp({ resolve: (name) => name })
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -282,14 +270,12 @@ void createInertiaApp({ resolve: (name) => name }).catch(console.error)`
 
         const renderPromise = createInertiaApp({ resolve: (name) => name })
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
@@ -308,14 +294,12 @@ createInertiaApp({ resolve: (name) => name }).catch(console.error)`
 
         const renderPromise = createInertiaApp({ resolve: (name) => name })
 
+        // Reported per render by the SSR server, so it must not go unhandled here
+        renderPromise.catch(() => {})
+
         const renderPage = async (page) => (await renderPromise)(page, renderToString)
 
         if (import.meta.env.PROD) {
-          renderPromise.catch((error) => {
-            console.error(error)
-            process.exit(1)
-          })
-
           createServer(renderPage)
         }
 
