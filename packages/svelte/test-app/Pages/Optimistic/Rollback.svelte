@@ -16,14 +16,14 @@
 
   const toggleFavorite = (
     contact: Contact,
-    { delay = 500, error = false }: { delay?: number; error?: boolean } = {},
+    { delay = 500, error = false, hold = 0 }: { delay?: number; error?: boolean; hold?: number } = {},
   ) => {
     router
       .optimistic<{ contacts: Contact[] }>((props) => ({
         contacts: props.contacts.map((c) => (c.id === contact.id ? { ...c, is_favorite: !c.is_favorite } : c)),
       }))
       .post(
-        `/optimistic/rollback/toggle/${contact.id}?delay=${delay}&error=${error ? '1' : '0'}`,
+        `/optimistic/rollback/toggle/${contact.id}?delay=${delay}&error=${error ? '1' : '0'}&hold=${hold}`,
         {},
         { preserveScroll: true },
       )
@@ -49,6 +49,7 @@
         <button class="toggle-slow-error-btn" onclick={() => toggleFavorite(contact, { delay: 1000, error: true })}
           >Toggle (Slow Error)</button
         >
+        <button class="toggle-held-btn" onclick={() => toggleFavorite(contact, { hold: 1000 })}>Toggle (Held)</button>
       </div>
     {/each}
   </div>

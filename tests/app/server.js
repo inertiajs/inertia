@@ -3474,7 +3474,31 @@ app.get('/optimistic/rollback', (req, res) => {
 
 app.post('/optimistic/rollback/toggle/:id', (req, res) => {
   const delay = parseInt(req.query.delay || '500')
+  const hold = parseInt(req.query.hold || '0')
   const simulateError = req.query.error === '1'
+
+  if (hold > 0) {
+    // Commit the write and snapshot the props right away, but hold the
+    // response on the wire so it lands after later requests have settled
+    const session = getOptimisticSession(req)
+    const contact = session.contacts.find((c) => c.id === parseInt(req.params.id))
+
+    if (contact) {
+      contact.is_favorite = !contact.is_favorite
+    }
+
+    const contacts = session.contacts.map((c) => ({ ...c }))
+
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'Optimistic/Rollback',
+        url: '/optimistic/rollback',
+        props: { contacts },
+      })
+    }, hold)
+
+    return
+  }
 
   setTimeout(() => {
     if (simulateError) {

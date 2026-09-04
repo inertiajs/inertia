@@ -31,10 +31,16 @@ export class Response {
     protected requestParams: RequestParams,
     protected response: HttpResponse,
     protected originatingPage: Page,
+    protected optimisticId: number | null = null,
   ) {}
 
-  public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
-    return new Response(params, response, originatingPage)
+  public static create(
+    params: RequestParams,
+    response: HttpResponse,
+    originatingPage: Page,
+    optimisticId: number | null = null,
+  ): Response {
+    return new Response(params, response, originatingPage, optimisticId)
   }
 
   public isProcessed(): boolean {
@@ -319,7 +325,7 @@ export class Response {
   }
 
   protected preserveOptimisticProps(pageResponse: Page): void {
-    if (!router.hasPendingOptimistic()) {
+    if (!this.shouldPreserveOptimisticProps()) {
       return
     }
 
@@ -329,6 +335,16 @@ export class Response {
         pageResponse.props[key] = currentPage.get().props[key]
       }
     }
+  }
+
+  protected shouldPreserveOptimisticProps(): boolean {
+    if (router.hasPendingOptimistic()) {
+      return true
+    }
+
+    // An optimistic request that started later has already been confirmed, so these
+    // props were read before that write and would roll it back on screen
+    return this.optimisticId !== null && currentPage.hasSettledOptimisticAfter(this.optimisticId)
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
