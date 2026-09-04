@@ -1,3 +1,5 @@
+import { parseJson } from './json'
+
 const elementInViewport = (el: HTMLElement) => {
   if (el.offsetParent === null) {
     // Element is not participating in layout (e.g., display: none)
@@ -154,7 +156,7 @@ export const getInitialPageFromDOM = <T>(id: string): T | null => {
   const scriptEl = document.querySelector(`script[data-page="${id}"][type="application/json"]`)
 
   if (scriptEl?.textContent) {
-    return JSON.parse(scriptEl.textContent)
+    return parseJson(scriptEl.textContent)
   }
 
   return null

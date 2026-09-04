@@ -3,6 +3,7 @@
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\Todo;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
@@ -550,3 +551,30 @@ Route::get('/ssr-debug', fn () => inertia('SsrDebug'));
 Route::get('/ssr-debug/window', fn () => inertia('SsrDebug/WindowError'));
 Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
 Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));
+
+Route::get('/big-integers', function () {
+    return inertia('BigIntegers', [
+        'safe' => 42,
+        'big' => 900719925474099988,
+        'negative' => -900719925474099988,
+        'maximum' => PHP_INT_MAX,
+        'boundary' => 9007199254740991,
+        'order' => [
+            'id' => 1234567890123456789,
+            'lines' => [
+                ['sku' => 'A-1', 'reference' => 900719925474099988],
+                ['sku' => 'B-2', 'reference' => 900719925474099989],
+            ],
+        ],
+        'wrapped' => (object) ['id' => 900719925474099988],
+    ]);
+});
+
+Route::post('/big-integers/echo', function (Request $request) {
+    $received = $request->input('id');
+
+    return Inertia::flash([
+        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
+        'type' => get_debug_type($received),
+    ])->back();
+});

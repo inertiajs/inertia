@@ -623,3 +623,30 @@ Route::get('/ssr-debug/document', fn () => inertia('SsrDebug/DocumentError'));
 Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageError'));
 Route::get('/ssr-debug/render', fn () => inertia('SsrDebug/RenderError'));
 Route::get('/ssr-debug/non-existent', fn () => inertia('SsrDebug/NonExistentComponent'));
+
+Route::get('/big-integers', function () {
+    return inertia('BigIntegers', [
+        'safe' => 42,
+        'big' => 900719925474099988,
+        'negative' => -900719925474099988,
+        'maximum' => PHP_INT_MAX,
+        'boundary' => 9007199254740991,
+        'order' => [
+            'id' => 1234567890123456789,
+            'lines' => [
+                ['sku' => 'A-1', 'reference' => 900719925474099988],
+                ['sku' => 'B-2', 'reference' => 900719925474099989],
+            ],
+        ],
+        'wrapped' => (object) ['id' => 900719925474099988],
+    ]);
+});
+
+Route::post('/big-integers/echo', function (Request $request) {
+    $received = $request->input('id');
+
+    return Inertia::flash([
+        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
+        'type' => get_debug_type($received),
+    ])->back();
+});

@@ -204,6 +204,37 @@ describe('SSR', () => {
       )
     })
 
+    it('revives big integer markers when the server adapter says the page has them', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+      const render = vi.fn().mockResolvedValue({ head: [], body: '' })
+
+      server.ssrLoadModule.mockResolvedValue({ default: render })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const body = JSON.stringify({ component: 'Test', props: { id: { $bigint: '900719925474099988' } } })
+
+      await middleware(
+        createMockRequest('POST', body, { 'x-inertia-preserve-big-integers': 'true' }),
+        createMockResponse(),
+        vi.fn(),
+      )
+
+      expect(render).toHaveBeenCalledWith(expect.objectContaining({ props: { id: 900719925474099988n } }))
+
+      await middleware(createMockRequest('POST', body), createMockResponse(), vi.fn())
+
+      expect(render).toHaveBeenLastCalledWith(
+        expect.objectContaining({ props: { id: { $bigint: '900719925474099988' } } }),
+      )
+    })
+
     it('returns 500 when module does not export render function', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
@@ -992,12 +1023,13 @@ function createMockServer(
   } as unknown as ViteDevServer
 }
 
-function createMockRequest(method: string, body: string) {
+function createMockRequest(method: string, body: string, headers: Record<string, string> = {}) {
   let dataCallback: (chunk: string) => void
   let endCallback: () => void
 
   return {
     method,
+    headers,
     on: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
       if (event === 'data') {
         dataCallback = callback

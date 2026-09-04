@@ -1,9 +1,10 @@
 import { config } from './config'
+import { stringifyJson } from './json'
 
 export default {
   createIframeAndPage(html: Record<string, unknown> | string): { iframe: HTMLIFrameElement; page: HTMLElement } {
     if (typeof html === 'object') {
-      html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${JSON.stringify(
+      html = `All Inertia requests must receive a valid Inertia response, however a plain JSON response was received.<hr>${stringifyJson(
         html,
       )}`
     }

@@ -12,6 +12,7 @@ export { formDataToObject } from './formObject'
 export { default as createHeadManager, resolveServerHead } from './head'
 export { http } from './http'
 export { HttpCancelledError, HttpError, HttpNetworkError, HttpResponseError } from './httpErrors'
+export { parseJson, stringifyJson } from './json'
 export { default as useInfiniteScroll } from './infiniteScroll'
 /** @internal Not part of the public API. May change or be removed without notice. */
 export { exposeInterceptors, interceptors } from './interceptors'

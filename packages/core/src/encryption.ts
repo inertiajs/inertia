@@ -1,3 +1,4 @@
+import { parseJson, stringifyJson } from './json'
 import { SessionStorage } from './sessionStorage'
 
 export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
@@ -46,7 +47,7 @@ const encryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
   }
 
   const textEncoder = new TextEncoder()
-  const str = JSON.stringify(data)
+  const str = stringifyJson(data)
   const encoded = new Uint8Array(str.length * 3)
 
   const result = textEncoder.encodeInto(str, encoded)
@@ -77,7 +78,7 @@ const decryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
     data,
   )
 
-  return JSON.parse(new TextDecoder().decode(decrypted))
+  return parseJson(new TextDecoder().decode(decrypted))
 }
 
 const getIv = (): BufferSource => {

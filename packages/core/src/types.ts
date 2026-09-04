@@ -106,7 +106,7 @@ export type NamedLayoutProps = InertiaConfigFor<'namedLayoutProps'>
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
+export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | bigint | null | undefined
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
@@ -683,6 +683,7 @@ export type InertiaAppConfig = {
   }
   nonce?: string
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
+  preserveBigIntegers: boolean
 }
 
 export interface LinkComponentBaseProps extends Partial<

@@ -1,7 +1,10 @@
 import type { AxiosInstance, AxiosProgressEvent } from 'axios'
+import { config as appConfig } from './config'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
+import { containsBigInt, stringifyJson } from './json'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+import { isRawRequestBody } from './xhrHttpClient'
 
 /**
  * Normalize Axios headers to a simple string record with lowercase keys
@@ -117,11 +120,28 @@ export class AxiosHttpClient implements HttpClient {
       headers['Content-Type'] = false
     }
 
+    let data = config.data
+
+    if (
+      appConfig.get('preserveBigIntegers') &&
+      data !== null &&
+      data !== undefined &&
+      typeof data === 'object' &&
+      !isRawRequestBody(data) &&
+      containsBigInt(data)
+    ) {
+      data = stringifyJson(data)
+
+      if (!hasContentTypeHeader(config.headers)) {
+        headers['Content-Type'] = 'application/json'
+      }
+    }
+
     try {
       const response = await axios({
         method: config.method,
         url: config.url,
-        data: config.data,
+        data,
         params: config.params,
         headers: headers as Record<string, string>,
         signal: config.signal,

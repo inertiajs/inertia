@@ -44,6 +44,8 @@ function append(form: FormData, key: string, value: FormDataConvertible, format:
     return form.append(key, value)
   } else if (typeof value === 'number') {
     return form.append(key, `${value}`)
+  } else if (typeof value === 'bigint') {
+    return form.append(key, value.toString())
   } else if (value === null || value === undefined) {
     return form.append(key, '')
   }

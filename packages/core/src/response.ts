@@ -13,6 +13,7 @@ import {
 } from './events'
 import { history } from './history'
 import { interceptors } from './interceptors'
+import { parseJson } from './json'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -274,7 +275,7 @@ export class Response {
     }
 
     try {
-      return JSON.parse(response)
+      return parseJson(response)
     } catch (error) {
       return response
     }
