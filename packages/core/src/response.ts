@@ -344,7 +344,7 @@ export class Response {
 
     // An optimistic request that started later has already been confirmed, so these
     // props were read before that write and would roll it back on screen
-    return this.optimisticId !== null && currentPage.hasSettledOptimisticAfter(this.optimisticId)
+    return this.optimisticId !== null && currentPage.hasConfirmedOptimisticAfter(this.optimisticId)
   }
 
   protected preserveEqualProps(pageResponse: Page): void {

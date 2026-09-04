@@ -836,7 +836,7 @@ export class Router {
     const originalOnSuccess = events.onSuccess
     events.onSuccess = (page) => {
       shouldRestore = false
-      currentPage.markOptimisticSettled(id)
+      currentPage.markOptimisticConfirmed(id)
 
       return originalOnSuccess(page)
     }

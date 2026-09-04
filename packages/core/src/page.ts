@@ -25,7 +25,7 @@ class CurrentPage {
   protected optimisticBaseline: Partial<Page['props']> = {}
   protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
   protected optimisticCounter = 0
-  protected settledOptimisticId = 0
+  protected confirmedOptimisticId = 0
 
   public init<ComponentType = Component>({
     initialPage,
@@ -284,12 +284,12 @@ class CurrentPage {
     return ++this.optimisticCounter
   }
 
-  public markOptimisticSettled(id: number): void {
-    this.settledOptimisticId = Math.max(this.settledOptimisticId, id)
+  public markOptimisticConfirmed(id: number): void {
+    this.confirmedOptimisticId = Math.max(this.confirmedOptimisticId, id)
   }
 
-  public hasSettledOptimisticAfter(id: number): boolean {
-    return this.settledOptimisticId > id
+  public hasConfirmedOptimisticAfter(id: number): boolean {
+    return this.confirmedOptimisticId > id
   }
 
   public setBaseline(key: string, value: unknown): void {
@@ -353,7 +353,7 @@ class CurrentPage {
   public clearOptimisticState(): void {
     this.optimisticBaseline = {}
     this.pendingOptimistics = []
-    this.settledOptimisticId = 0
+    this.confirmedOptimisticId = 0
   }
 
   public isTheSame(page: Page): boolean {
