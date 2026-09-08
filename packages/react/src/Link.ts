@@ -247,7 +247,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
       },
-      onClick: regularEvents.onClick,
+      onClick: (event: React.MouseEvent) => {
+        clearTimeout(hoverTimeout.current)
+
+        regularEvents.onClick(event)
+      },
     }
 
     const prefetchClickEvents = {

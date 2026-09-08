@@ -306,7 +306,11 @@ const Link: InertiaLink = defineComponent({
       onMouseleave: () => {
         clearTimeout(hoverTimeout.value)
       },
-      onClick: regularEvents.onClick,
+      onClick: (event: MouseEvent) => {
+        clearTimeout(hoverTimeout.value)
+
+        regularEvents.onClick(event)
+      },
     }
 
     const prefetchClickEvents = {
