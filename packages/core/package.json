@@ -78,6 +78,6 @@
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   }
 }
