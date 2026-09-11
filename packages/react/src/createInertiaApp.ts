@@ -125,7 +125,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         createElement('script', {
           'data-page': id,
           type: 'application/json',
-          dangerouslySetInnerHTML: { __html: JSON.stringify(initialPage).replace(/\//g, '\\/').replace(/</g, '\\u003c') },
+          dangerouslySetInnerHTML: {
+            __html: JSON.stringify(initialPage).replace(/\//g, '\\/').replace(/</g, '\\u003c'),
+          },
         }),
         createElement('div', { id }, reactApp as ReactElement),
       )
