@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.27...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.28...2.x)
 
 - Nothing yet
+
+## [v2.3.28](https://github.com/inertiajs/inertia/compare/v2.3.27...v2.3.28) - 2026-09-11
+
+### What's Changed
+
+* Bump the github-actions group across 1 directory with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3168
+* Bump actions/cache from 5.0.5 to 6.1.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3182
+* Bump stefanzweifel/git-auto-commit-action from 7.1.0 to 7.2.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3193
+* Bump the github-actions group across 1 directory with 3 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3212
+* [2.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3228
+* [2.x] Fix React dropping the restored page on `back_forward` visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3226
+* [2.x] Guard Form getFormData against a missing form element by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3227
+* [2.x] Escape `<` in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3256
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.27...v2.3.28
 
 ## [v2.3.27](https://github.com/inertiajs/inertia/compare/v2.3.26...v2.3.27) - 2026-06-25
 
