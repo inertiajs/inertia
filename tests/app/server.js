@@ -79,7 +79,7 @@ app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
     props: {
-      message: 'Hello from script element! Escape </script>.',
+      message: 'Hello from script element! Escape </script> and <!--<script>.',
     },
   }),
 )
