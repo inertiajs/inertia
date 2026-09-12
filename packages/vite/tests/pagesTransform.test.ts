@@ -3,7 +3,7 @@ import { defaultFrameworks } from '../src/frameworks/index'
 import { transformPageResolution } from '../src/pagesTransform'
 
 const transformFull = (code: string) => transformPageResolution(code, defaultFrameworks)
-const transform = (code: string) => transformFull(code)?.code ?? null
+const transform = (code: string) => transformFull(code)?.code.toString() ?? null
 
 describe('Pages Transform', () => {
   describe('returns null when no transform needed', () => {
