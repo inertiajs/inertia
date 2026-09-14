@@ -54,6 +54,49 @@ app.get('/non-inertia/download', (req, res) => {
   res.status(200).send(`query:${query}`)
 })
 
+app.get('/external-navigation/ready', (req, res) => res.json({ ready: true }))
+
+app.post('/external-navigation/:report/redirect', (req, res) => inertia.location(res, '/external-navigation/2'))
+
+app.post('/external-navigation/:report/destination', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ExternalNavigation/Report',
+    url: '/external-navigation/2',
+    props: { report: '2', total: 200, errors: {} },
+    flash: { toast: { type: 'success', message: 'Ordinary response saved' } },
+  }),
+)
+
+app.get('/external-navigation/scroll', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ScrollContainer', 40, false, 15, 'index-external.html'),
+)
+
+app.all('/external-navigation/:report', (req, res) => {
+  const partial = req.get('X-Inertia-Partial-Data')?.split(',') || []
+  const report = req.params.report
+  const saved = req.method === 'POST' && !!req.body.name
+  const data = {
+    component: 'ExternalNavigation/Report',
+    props: {
+      report,
+      total: saved ? 150 : Number(report) * 100 + (partial.includes('total') ? 1 : 0),
+      errors: req.method === 'POST' && !saved ? { name: 'The name field is required.' } : {},
+      ...(partial.includes('details') && { details: `Details for report ${report}` }),
+      ...(partial.includes('optional') && { optional: `Summary for report ${report}` }),
+      head: [`<title data-inertia="external-report">Report ${report} head</title>`],
+    },
+    flash: saved ? { toast: { type: 'success', message: 'Report saved' } } : {},
+    ...(!req.get('X-Inertia-Partial-Component') && { deferredProps: { details: ['details'] } }),
+  }
+
+  if (report === 'suspended' || report === 'failed') {
+    data.component = 'ExternalNavigation/Suspended'
+    data.props.fail = report === 'failed'
+  }
+
+  inertia.render(req, res, data, req.query.native ? 'index.html' : 'index-external.html')
+})
+
 // SSR test routes (only rendered with SSR when SSR=true)
 app.get('/ssr/page1', (req, res) =>
   inertia.renderSSR(req, res, {
@@ -2179,7 +2222,15 @@ app.post('/form-component/optimistic', upload.none(), (req, res) => {
   }, 500)
 })
 
-function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = false, perPage = 15) {
+function renderInfiniteScroll(
+  req,
+  res,
+  component,
+  total = 40,
+  orderByDesc = false,
+  perPage = 15,
+  template = 'index.html',
+) {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']
   const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
@@ -2187,12 +2238,17 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
 
   setTimeout(
     () =>
-      inertia.render(req, res, {
-        component,
-        props: { users: paginated },
-        [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
-        scrollProps: { users: scrollProp },
-      }),
+      inertia.render(
+        req,
+        res,
+        {
+          component,
+          props: { users: paginated },
+          [shouldAppend ? 'mergeProps' : 'prependProps']: ['users.data'],
+          scrollProps: { users: scrollProp },
+        },
+        template,
+      ),
     partialReload ? 250 : 0,
   )
 }
