@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import { type Page, type PageProps } from '@inertiajs/core'
+  import { type ExternalNavigationOptions, type Page, type PageProps, type ServerHeadOption } from '@inertiajs/core'
   import type { ComponentResolver, ResolvedComponent } from '../types'
 
   export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
@@ -7,13 +7,21 @@
     initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
     defaultLayout?: (name: string, page: Page) => unknown
+    serverHead?: ServerHeadOption
+    externalNavigation?: ExternalNavigationOptions
   }
 </script>
 
 <script lang="ts">
-  import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
-  import { router } from '@inertiajs/core'
-  import type { Component } from 'svelte'
+  import {
+    createHeadManager,
+    isPropsObjectOrCallback,
+    isPropsObject,
+    normalizeLayouts,
+    resolveServerHead,
+    router,
+  } from '@inertiajs/core'
+  import { onDestroy, type Component } from 'svelte'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutType, LayoutResolver } from '../types'
@@ -24,9 +32,12 @@
     initialPage: InertiaAppProps['initialPage']
     resolveComponent: InertiaAppProps['resolveComponent']
     defaultLayout?: InertiaAppProps['defaultLayout']
+    serverHead?: InertiaAppProps['serverHead']
+    externalNavigation?: InertiaAppProps['externalNavigation']
   }
 
-  const { initialComponent, initialPage, resolveComponent, defaultLayout }: Props = $props()
+  const { initialComponent, initialPage, resolveComponent, defaultLayout, serverHead, externalNavigation }: Props =
+    $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
@@ -49,9 +60,15 @@
 
   if (!isServer) {
     // svelte-ignore state_referenced_locally
-    router.init<ResolvedComponent>({
+    if (externalNavigation) {
+      resetLayoutProps()
+    }
+
+    // svelte-ignore state_referenced_locally
+    const disposeRouter = router.init<ResolvedComponent>({
       initialPage,
       resolveComponent,
+      externalNavigation,
       swapComponent: async (args) => {
         // Explicitly sync the global page store before swapping components,
         // ensuring the page store is up-to-date when the new component's
@@ -69,6 +86,35 @@
         page = { ...page, flash }
       },
     })
+
+    // Mount options stay fixed for this app's lifetime.
+    // svelte-ignore state_referenced_locally
+    const serverHeadManager =
+      externalNavigation && serverHead
+        ? createHeadManager(
+            false,
+            (title) => title,
+            () => {},
+            resolveServerHead(initialPage, serverHead),
+          )
+        : null
+
+    const syncServerHead = (event: { detail: { page: Page } }) => {
+      serverHeadManager?.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+    }
+
+    const removeNavigateListener = serverHeadManager ? router.on('navigate', syncServerHead) : () => {}
+    const removeClientVisitListener = serverHeadManager ? router.on('clientVisit', syncServerHead) : () => {}
+
+    // svelte-ignore state_referenced_locally
+    if (externalNavigation) {
+      onDestroy(() => {
+        serverHeadManager?.dispose()
+        disposeRouter()
+        removeNavigateListener()
+        removeClientVisitListener()
+      })
+    }
   }
 
   function isComponent(value: unknown): value is Component {
