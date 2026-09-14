@@ -654,6 +654,7 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   updateServerHead: (elements?: string[]) => void
+  dispose: () => void
   createProvider: () => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
