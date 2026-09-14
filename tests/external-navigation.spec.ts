@@ -165,21 +165,21 @@ test('does not let a released component resolution overwrite a replacement mount
 
   await expect(page.getByText('Details for report 1', { exact: true })).toBeVisible()
 
-  const resolving = page.waitForRequest('**/external-navigation/ready')
+  const componentRequest = page.waitForRequest('**/external-navigation/ready')
 
   await page.evaluate(() =>
     window.testing.Inertia.replace({ props: (props) => ({ ...props, waitForComponent: true }) }),
   )
-  await resolving
+  await componentRequest
 
   await page.getByRole('button', { name: 'Open second report' }).click()
 
   await expect(page.getByRole('heading', { name: 'Report 2', exact: true })).toBeVisible()
 
-  const resolved = page.waitForResponse('**/external-navigation/ready')
+  const componentResponse = page.waitForResponse('**/external-navigation/ready')
 
   releaseResponse()
-  await resolved
+  await componentResponse
 
   await page.getByRole('button', { name: 'Refresh total' }).click()
 
@@ -254,10 +254,12 @@ test('does not restart an outgoing poll in a replacement mount', async ({ page }
       50,
       () => {
         document.body.dataset.polled = 'true'
+
         return { only: ['total'] }
       },
       { autoStart: false },
     )
+
     document.addEventListener('restart-poll', () => poll.start(), { once: true })
   })
 
@@ -266,6 +268,7 @@ test('does not restart an outgoing poll in a replacement mount', async ({ page }
   await expect(page.getByText('Details for report 2', { exact: true })).toBeVisible()
 
   const requests: string[] = []
+
   page.on('request', (request) => requests.push(request.url()))
   await page.evaluate(() => document.dispatchEvent(new Event('restart-poll')))
   await page.waitForTimeout(300)
@@ -351,18 +354,20 @@ test('preserves an item position when prepending inside a scroll container', asy
     await route.fulfill({ response })
   })
 
-  const loading = page.waitForRequest('**/external-navigation/scroll?page=1')
+  const previousPageRequest = page.waitForRequest('**/external-navigation/scroll?page=1')
 
   await container.evaluate((element) => element.scrollTo(0, 0))
-  await loading
+  await previousPageRequest
 
-  const reference = page.locator('[data-user-id="16"]')
-  const top = await reference.evaluate((element) => element.getBoundingClientRect().top)
+  const referenceItem = page.locator('[data-user-id="16"]')
+  const initialTop = await referenceItem.evaluate((element) => element.getBoundingClientRect().top)
 
   releaseResponse()
 
   await expect(page.locator('[data-user-id="1"]')).toBeAttached()
-  await expect.poll(() => reference.evaluate((element) => element.getBoundingClientRect().top)).toBeCloseTo(top, 0)
+  await expect
+    .poll(() => referenceItem.evaluate((element) => element.getBoundingClientRect().top))
+    .toBeCloseTo(initialTop, 0)
   expect(await page.evaluate(() => window.scrollY)).toBe(100)
   await expect(page).toHaveURL('/external-navigation/scroll?page=3')
   expect(await page.evaluate(() => history.state)).toEqual({ host: true })
@@ -450,6 +455,7 @@ test.describe('React rendering', () => {
 
   test('disposes the router when its resolver closes the scope during initialization', async ({ page }) => {
     const requests: string[] = []
+
     page.on('request', (request) => {
       if (request.headers()['x-inertia']) {
         requests.push(request.url())

@@ -51,6 +51,7 @@ class PrefetchedRequests {
             this.removeFromInFlight(params)
             params.onCancel()
           }
+
           reject()
         },
         onError: (error) => {
@@ -59,6 +60,7 @@ class PrefetchedRequests {
             this.removeFromInFlight(params)
             params.onError(error)
           }
+
           reject()
         },
         onPrefetching(visitParams) {
@@ -78,6 +80,7 @@ class PrefetchedRequests {
           if (navigation.isCurrent(generation)) {
             prefetchedRequests.removeFromInFlight(params)
           }
+
           reject(error)
         },
       })
@@ -319,6 +322,7 @@ class PrefetchedRequests {
 
   public updateCachedOncePropsFromCurrentPage(): void {
     const generation = navigation.generation
+
     this.cached.forEach((prefetched) => {
       prefetched.response.then((response) => {
         if (!navigation.isCurrent(generation)) {

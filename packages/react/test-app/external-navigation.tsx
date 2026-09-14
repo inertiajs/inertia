@@ -31,12 +31,15 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
       disposeDuringResolution?.()
 
       const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.tsx', { eager: true })
+
       if (page?.props.waitForComponent) {
         await fetch('/external-navigation/ready')
       }
+
       return pages[`./Pages/${name}.tsx`]
     },
   }
+
   const withApp = (app: ReactNode) => (
     <StrictMode>
       <ErrorBoundary>
@@ -47,6 +50,7 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
 
   if (new URLSearchParams(location.search).has('custom')) {
     let unmount = () => {}
+
     await createInertiaApp({
       ...options,
       setup({ el, App, props, dispose }) {
@@ -65,16 +69,20 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
             dispose?.()
           }
         }
+
         root.render(withApp(<App {...props} />))
       },
     })
+
     return { dispose: unmount }
   }
 
   const app = await createInertiaApp({ ...options, withApp })
+
   if (typeof app === 'function') {
     throw new Error('Expected a browser mount')
   }
+
   return app
 })
 

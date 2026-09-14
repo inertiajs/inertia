@@ -13,8 +13,10 @@ export class InitialVisit {
   public static handle(): void {
     if (navigation.external) {
       this.handleDefault()
+
       return
     }
+
     this.clearRememberedStateOnReload()
 
     const scenarios = [this.handleBackForward, this.handleLocation, this.handleDefault]
@@ -101,6 +103,7 @@ export class InitialVisit {
 
   protected static handleDefault(): void {
     const generation = navigation.generation
+
     if (typeof window !== 'undefined') {
       currentPage.setUrlHash(window.location.hash)
     }
@@ -113,10 +116,13 @@ export class InitialVisit {
         if (!navigation.isCurrent(generation)) {
           return
         }
+
         if (navigation.external) {
           this.fireInitialEvents(visitId)
+
           return
         }
+
         if (navigationType.isReload()) {
           Scroll.restore(history.getScrollRegions())
         } else {

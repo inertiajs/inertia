@@ -110,19 +110,21 @@ export default function App<SharedProps extends PageProps = PageProps>({
 
   const pageRef = useRef(current.page)
   pageRef.current = current.page
+
   if (externalRouterScope) {
     externalRouterScope.page = current.page
   }
 
   const headManager = useMemo(() => {
-    const create = () =>
+    const createAppHeadManager = () =>
       createHeadManager(
         typeof window === 'undefined',
         (title: string) => (titleCallback ? titleCallback(title, externalRouterScope?.page ?? pageRef.current) : title),
         onHeadUpdate || (() => {}),
         resolveServerHead(initialPage, serverHead),
       )
-    return externalRouterScope ? externalRouterScope.getHeadManager(create) : create()
+
+    return externalRouterScope ? externalRouterScope.getHeadManager(createAppHeadManager) : createAppHeadManager()
   }, [])
 
   const initializeRouter = () => {
@@ -130,7 +132,9 @@ export default function App<SharedProps extends PageProps = PageProps>({
       if (!externalRouterScope) {
         throw new Error('External navigation requires createInertiaApp() to own the router lifecycle.')
       }
+
       externalRouterScope.initialize({ initialPage, resolveComponent: resolveComponent!, externalNavigation })
+
       return
     }
 

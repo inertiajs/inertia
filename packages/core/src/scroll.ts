@@ -11,6 +11,7 @@ export class Scroll {
     if (navigation.external || !navigation.active) {
       return
     }
+
     history.saveScrollPositions(this.getScrollRegions())
   }
 
@@ -38,6 +39,7 @@ export class Scroll {
     if (navigation.external || !navigation.active) {
       return
     }
+
     const anchorHash = isServer ? null : window.location.hash
 
     if (!anchorHash) {

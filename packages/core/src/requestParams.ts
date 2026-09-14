@@ -160,19 +160,24 @@ export class RequestParams {
 
   public setPreserveOptions(page: Page) {
     const generation = navigation.generation
+
     this.params.preserveScroll = RequestParams.resolvePreserveOption(this.params.preserveScroll, page)
+
     if (!navigation.isCurrent(generation)) {
       return
     }
+
     this.params.preserveState = RequestParams.resolvePreserveOption(this.params.preserveState, page)
   }
 
   public runCallbacks() {
     const generation = navigation.generation
+
     for (const { name, args } of this.callbacks) {
       if (!navigation.isCurrent(generation)) {
         return
       }
+
       // @ts-ignore
       this.params[name](...args)
     }

@@ -199,6 +199,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const externalRouterScope = !isServer && externalNavigation ? createExternalRouterScope() : undefined
   let unmount: VoidFunction | undefined
+
   const dispose = () => {
     try {
       unmount?.()
@@ -260,6 +261,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     })
     .catch((exception) => {
       dispose()
+
       throw exception
     })
 

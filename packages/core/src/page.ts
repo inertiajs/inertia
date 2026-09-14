@@ -26,7 +26,7 @@ class CurrentPage {
   protected optimisticBaseline: Partial<Page['props']> = {}
   protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
   protected optimisticCounter = 0
-  protected disposeQuota: VoidFunction = () => {}
+  protected removeHistoryQuotaExceededListener: VoidFunction = () => {}
 
   public init<ComponentType = Component>({
     initialPage,
@@ -39,7 +39,7 @@ class CurrentPage {
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
 
-    this.disposeQuota = eventHandler.on('historyQuotaExceeded', () => {
+    this.removeHistoryQuotaExceededListener = eventHandler.on('historyQuotaExceeded', () => {
       this.historyQuotaExceeded = true
     })
 
@@ -54,7 +54,7 @@ class CurrentPage {
     this.historyQuotaExceeded = false
     this.listeners = []
     this.clearOptimisticState()
-    this.disposeQuota()
+    this.removeHistoryQuotaExceededListener()
   }
 
   public set(
@@ -137,6 +137,7 @@ class CurrentPage {
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
+
           if (componentId !== this.componentId) {
             return
           }
@@ -144,6 +145,7 @@ class CurrentPage {
 
         if (this.isFirstPageLoad) {
           this.fireEventsFor('firstLoad')
+
           if (componentId !== this.componentId) {
             return
           }
@@ -251,6 +253,7 @@ class CurrentPage {
   public setPropsQuietly(props: Page['props']): Promise<unknown> {
     const generation = navigation.generation
     const componentId = this.componentId
+
     if (!navigation.isCurrent(generation)) {
       return Promise.resolve()
     }
@@ -296,6 +299,7 @@ class CurrentPage {
   }): Promise<unknown> {
     const generation = navigation.generation
     const componentId = this.componentId
+
     const doSwap = () => {
       if (!navigation.isCurrent(generation) || componentId !== this.componentId) {
         return Promise.resolve()
@@ -369,6 +373,7 @@ class CurrentPage {
 
     for (const { callback } of this.pendingOptimistics) {
       const result = callback(cloneDeep(props))
+
       if (!navigation.isCurrent(generation)) {
         return {}
       }

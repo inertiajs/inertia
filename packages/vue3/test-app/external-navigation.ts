@@ -13,15 +13,18 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
     externalNavigation: host,
     resolve: async (name: string, page?: Page) => {
       const pages = import.meta.glob<DefineComponent>('./Pages/**/*.vue', { eager: true })
+
       if (page?.props.waitForComponent) {
         await fetch('/external-navigation/ready')
       }
+
       return pages[`./Pages/${name}.vue`]
     },
   }
 
   if (new URLSearchParams(location.search).has('custom')) {
     let unmount = () => {}
+
     await createInertiaApp({
       ...options,
       setup({ el, App, props, plugin }) {
@@ -30,13 +33,16 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
         app.mount(el)
       },
     })
+
     return { dispose: unmount }
   }
 
   const app = await createInertiaApp(options)
+
   if (typeof app === 'function') {
     throw new Error('Expected a browser mount')
   }
+
   return app
 })
 

@@ -13,15 +13,18 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
     externalNavigation: host,
     resolve: async (name: string, page?: Page) => {
       const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
+
       if (page?.props.waitForComponent) {
         await fetch('/external-navigation/ready')
       }
+
       return pages[`./Pages/${name}.svelte`] as ResolvedComponent
     },
   }
 
   if (new URLSearchParams(location.search).has('custom')) {
     let dispose = async () => {}
+
     await createInertiaApp({
       ...options,
       setup({ el, App, props }) {
@@ -29,13 +32,16 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
         dispose = () => unmount(app)
       },
     })
+
     return { dispose }
   }
 
   const app = await createInertiaApp(options)
+
   if (typeof app === 'function') {
     throw new Error('Expected a browser mount')
   }
+
   return app
 })
 

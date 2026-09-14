@@ -64,25 +64,32 @@ export class Request {
 
       this.cancel({ cancelled: true })
     })
+
     if (!navigation.isCurrent(this.navigationGeneration)) {
       return this.finish()
     }
 
     fireStartEvent(this.requestParams.all())
+
     if (!navigation.isCurrent(this.navigationGeneration)) {
       return this.finish()
     }
+
     this.requestParams.onStart()
+
     if (!navigation.isCurrent(this.navigationGeneration)) {
       return this.finish()
     }
 
     if (this.requestParams.all().prefetch) {
       this.requestParams.onPrefetching()
+
       if (!navigation.isCurrent(this.navigationGeneration)) {
         return this.finish()
       }
+
       firePrefetchingEvent(this.requestParams.all())
+
       if (!navigation.isCurrent(this.navigationGeneration)) {
         return this.finish()
       }
@@ -106,6 +113,7 @@ export class Request {
 
     if (!navigation.isCurrent(this.navigationGeneration)) {
       this.finish()
+
       return
     }
 
@@ -116,6 +124,7 @@ export class Request {
         if (!navigation.isCurrent(this.navigationGeneration)) {
           return
         }
+
         this.response = Response.create(this.requestParams, response, this.page, this.navigationGeneration)
 
         return this.response.handle()
@@ -126,6 +135,7 @@ export class Request {
           if (!navigation.isCurrent(this.navigationGeneration)) {
             return
           }
+
           this.response = Response.create(this.requestParams, error.response, this.page, this.navigationGeneration)
 
           return this.response.handle()
@@ -207,11 +217,14 @@ export class Request {
     if (!navigation.isCurrent(this.navigationGeneration)) {
       return
     }
+
     if (this.requestParams.data() instanceof FormData) {
       fireProgressEvent(progress)
+
       if (!navigation.isCurrent(this.navigationGeneration)) {
         return
       }
+
       this.requestParams.all().onProgress(progress)
     }
   }

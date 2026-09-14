@@ -92,6 +92,7 @@ export class Router {
       maxConcurrent: Infinity,
       interruptible: false,
     }))
+
     this.clientVisitQueue = new Queue<Promise<void>>()
 
     if (externalNavigation) {
@@ -109,17 +110,20 @@ export class Router {
 
     const disposeEvents = eventHandler.init(!!externalNavigation)
 
-    const disposeMissingHistory = eventHandler.on('missingHistoryItem', () => {
+    const removeMissingHistoryItemListener = eventHandler.on('missingHistoryItem', () => {
       if (typeof window !== 'undefined') {
         this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
       }
     })
 
-    const disposeDeferred = eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
-      this.loadDeferredProps(deferredProps)
-    })
+    const removeLoadDeferredPropsListener = eventHandler.on(
+      'loadDeferredProps',
+      (deferredProps: Page['deferredProps']) => {
+        this.loadDeferredProps(deferredProps)
+      },
+    )
 
-    const disposeQuota = eventHandler.on('historyQuotaExceeded', (url) => {
+    const removeHistoryQuotaExceededListener = eventHandler.on('historyQuotaExceeded', (url) => {
       window.location.href = url
     })
 
@@ -134,9 +138,9 @@ export class Router {
       prefetchedRequests.dispose()
       currentPage.destroy()
       disposeEvents()
-      disposeMissingHistory()
-      disposeDeferred()
-      disposeQuota()
+      removeMissingHistoryItemListener()
+      removeLoadDeferredPropsListener()
+      removeHistoryQuotaExceededListener()
       asyncRequestStream.cancelInFlight()
       syncRequestStream.cancelInFlight()
     })
@@ -269,6 +273,7 @@ export class Router {
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     const syncRequestStream = this.syncRequestStream
     const asyncRequestStream = this.asyncRequestStream
+
     if (async) {
       asyncRequestStream.cancelInFlight({ prefetch })
     }
@@ -358,6 +363,7 @@ export class Router {
       !visit.reset.length
     ) {
       navigation.external.navigate(visit.url.href)
+
       return
     }
 
@@ -380,6 +386,7 @@ export class Router {
           !request.isOptimistic() &&
           isSameUrlWithoutQueryOrHash(request.getUrl(), currentPageUrl),
       )
+
       if (!navigation.isCurrent(generation)) {
         return
       }
@@ -389,6 +396,7 @@ export class Router {
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+
       if (!navigation.isCurrent(generation)) {
         return
       }
@@ -396,6 +404,7 @@ export class Router {
 
     if (options.optimistic) {
       this.applyOptimisticUpdate(options.optimistic, events)
+
       if (!navigation.isCurrent(generation)) {
         return
       }
@@ -677,18 +686,21 @@ export class Router {
     { replace = false }: { replace?: boolean } = {},
   ): void {
     const generation = navigation.generation
+
     this.clientVisitQueue.add(() => {
       if (!navigation.isCurrent(generation)) {
         return Promise.resolve()
       }
 
       const current = currentPage.get()
+
       if (
         navigation.external &&
         ((params.url && hrefToUrl(params.url).href !== hrefToUrl(current.url).href) ||
           (params.component && params.component !== current.component))
       ) {
         navigation.external.navigate(hrefToUrl(params.url || current.url).href)
+
         return Promise.resolve()
       }
 
@@ -717,11 +729,13 @@ export class Router {
       typeof params.props === 'function'
         ? params.props(current.props as TProps, onceProps as Partial<TProps>)
         : (params.props ?? current.props)
+
     if (!navigation.isCurrent(generation)) {
       return Promise.resolve()
     }
 
     const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
+
     if (!navigation.isCurrent(generation)) {
       return Promise.resolve()
     }
@@ -736,9 +750,11 @@ export class Router {
     }
 
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+
     if (!navigation.isCurrent(generation)) {
       return Promise.resolve()
     }
+
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     const visitId = this.createVisitId()
@@ -1017,6 +1033,7 @@ export class Router {
 
       if (shouldRestore && currentPage.get().component === component) {
         const replayedProps = currentPage.replayOptimistics()
+
         if (!navigation.isCurrent(generation)) {
           return originalOnFinish(visit)
         }

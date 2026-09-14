@@ -18,6 +18,7 @@
     details?: string
     optional?: string
   } = $props()
+
   const form = useForm('report', { name: '' })
 </script>
 
