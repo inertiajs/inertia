@@ -1,5 +1,6 @@
 import { requestAnimationFrame } from './domUtils'
 import { history } from './history'
+import { navigation } from './navigation'
 import { ScrollRegion } from './types'
 
 const isServer = typeof window === 'undefined'
@@ -7,6 +8,9 @@ const isFirefox = !isServer && /Firefox/i.test(window.navigator.userAgent)
 
 export class Scroll {
   public static save(): void {
+    if (navigation.external || !navigation.active) {
+      return
+    }
     history.saveScrollPositions(this.getScrollRegions())
   }
 
@@ -31,6 +35,9 @@ export class Scroll {
   }
 
   public static reset(): void {
+    if (navigation.external || !navigation.active) {
+      return
+    }
     const anchorHash = isServer ? null : window.location.hash
 
     if (!anchorHash) {

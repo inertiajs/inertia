@@ -3,6 +3,7 @@ import { get, set } from 'es-toolkit/compat'
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { navigation } from './navigation'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
 import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
@@ -25,6 +26,7 @@ class CurrentPage {
   protected optimisticBaseline: Partial<Page['props']> = {}
   protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
   protected optimisticCounter = 0
+  protected disposeQuota: VoidFunction = () => {}
 
   public init<ComponentType = Component>({
     initialPage,
@@ -37,11 +39,22 @@ class CurrentPage {
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
 
-    eventHandler.on('historyQuotaExceeded', () => {
+    this.disposeQuota = eventHandler.on('historyQuotaExceeded', () => {
       this.historyQuotaExceeded = true
     })
 
     return this
+  }
+
+  public destroy(): void {
+    this.componentId = {}
+    this.cleared = true
+    this.isFirstPageLoad = true
+    this.pendingDeferredProps = null
+    this.historyQuotaExceeded = false
+    this.listeners = []
+    this.clearOptimisticState()
+    this.disposeQuota()
   }
 
   public set(
@@ -104,6 +117,10 @@ class CurrentPage {
       return new Promise<void>((resolve) =>
         replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
       ).then(() => {
+        if (componentId !== this.componentId) {
+          return
+        }
+
         const isNewComponent = !this.isTheSame(page)
 
         if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
@@ -120,10 +137,16 @@ class CurrentPage {
 
         if (isNewComponent) {
           this.fireEventsFor('newComponent')
+          if (componentId !== this.componentId) {
+            return
+          }
         }
 
         if (this.isFirstPageLoad) {
           this.fireEventsFor('firstLoad')
+          if (componentId !== this.componentId) {
+            return
+          }
         }
 
         this.isFirstPageLoad = false
@@ -142,24 +165,33 @@ class CurrentPage {
           viewTransition,
           initialRender,
         }).then(() => {
-          if (preserveScroll) {
+          if (componentId !== this.componentId) {
+            return
+          }
+
+          if (!navigation.external && preserveScroll) {
             // Scroll regions must be explicitly restored since the DOM elements are destroyed
             // and recreated during the component 'swap'. Document scroll is naturally
             // preserved as the document element itself persists across navigations.
             window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
-          } else {
+          } else if (!navigation.external) {
             Scroll.reset()
           }
 
+          const pendingDeferredProps = this.pendingDeferredProps
+          this.pendingDeferredProps = null
+
           if (
-            this.pendingDeferredProps &&
-            this.pendingDeferredProps.component === page.component &&
-            this.pendingDeferredProps.url === page.url
+            pendingDeferredProps &&
+            pendingDeferredProps.component === page.component &&
+            pendingDeferredProps.url === page.url
           ) {
-            eventHandler.fireInternalEvent('loadDeferredProps', this.pendingDeferredProps.deferredProps)
+            eventHandler.fireInternalEvent('loadDeferredProps', pendingDeferredProps.deferredProps)
           }
 
-          this.pendingDeferredProps = null
+          if (componentId !== this.componentId) {
+            return
+          }
 
           if (!replace) {
             fireNavigateEvent(page, { cached, visitId })
@@ -177,7 +209,14 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
+    const generation = navigation.generation
+    const componentId = this.componentId
+
     return this.resolve(page.component, page).then((component) => {
+      if (!navigation.isCurrent(generation) || componentId !== this.componentId) {
+        return
+      }
+
       this.page = page
       this.cleared = false
       history.setCurrent(page)
@@ -210,9 +249,19 @@ class CurrentPage {
   }
 
   public setPropsQuietly(props: Page['props']): Promise<unknown> {
+    const generation = navigation.generation
+    const componentId = this.componentId
+    if (!navigation.isCurrent(generation)) {
+      return Promise.resolve()
+    }
+
     this.page = { ...this.page, props }
 
     return this.resolve(this.page.component, this.page).then((component) => {
+      if (!navigation.isCurrent(generation) || componentId !== this.componentId) {
+        return
+      }
+
       return this.swap({ component, page: this.page, preserveState: true, viewTransition: false })
     })
   }
@@ -245,7 +294,15 @@ class CurrentPage {
     viewTransition: Visit['viewTransition']
     initialRender?: boolean
   }): Promise<unknown> {
-    const doSwap = () => this.swapComponent({ component, page, preserveState, initialRender })
+    const generation = navigation.generation
+    const componentId = this.componentId
+    const doSwap = () => {
+      if (!navigation.isCurrent(generation) || componentId !== this.componentId) {
+        return Promise.resolve()
+      }
+
+      return this.swapComponent({ component, page, preserveState, initialRender })
+    }
 
     if (!viewTransition || !document?.startViewTransition || document.visibilityState === 'hidden') {
       return doSwap()
@@ -297,6 +354,7 @@ class CurrentPage {
   }
 
   public replayOptimistics(): Partial<Page['props']> {
+    const generation = navigation.generation
     const baselineKeys = Object.keys(this.optimisticBaseline)
 
     if (baselineKeys.length === 0) {
@@ -311,6 +369,9 @@ class CurrentPage {
 
     for (const { callback } of this.pendingOptimistics) {
       const result = callback(cloneDeep(props))
+      if (!navigation.isCurrent(generation)) {
+        return {}
+      }
 
       if (result) {
         Object.assign(props, result)

@@ -1,6 +1,7 @@
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { eventHandler } from './eventHandler'
+import { navigation } from './navigation'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -18,7 +19,19 @@ class History {
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
+  public reset(): void {
+    this.current = {}
+    this.initialState = null
+    this.preserveUrl = false
+  }
+
   public remember(data: unknown, key: string): void {
+    if (navigation.external?.remember) {
+      navigation.external.remember(data, key)
+
+      return
+    }
+
     this.replaceState({
       ...currentPage.getWithoutFlashData(),
       rememberedState: {
@@ -29,6 +42,10 @@ class History {
   }
 
   public restore(key: string): unknown {
+    if (navigation.external?.restore) {
+      return navigation.external.restore(key)
+    }
+
     if (!isServer) {
       return this.current[this.rememberedState]?.[key] !== undefined
         ? this.current[this.rememberedState]?.[key]
@@ -37,6 +54,13 @@ class History {
   }
 
   public pushState(page: Page, cb: (() => void) | null = null): void {
+    if (navigation.external) {
+      this.current = page
+      cb?.()
+
+      return
+    }
+
     if (isServer) {
       return
     }
@@ -174,6 +198,13 @@ class History {
     const { flash, ...pageWithoutFlash } = page
     currentPage.merge(pageWithoutFlash)
 
+    if (navigation.external) {
+      this.current = page
+      cb?.()
+
+      return
+    }
+
     if (isServer) {
       return
     }
@@ -292,6 +323,10 @@ class History {
   }
 
   public clear() {
+    if (navigation.external) {
+      return
+    }
+
     SessionStorage.remove(historySessionStorageKeys.key)
     SessionStorage.remove(historySessionStorageKeys.iv)
   }
@@ -307,10 +342,6 @@ class History {
   public getAllState(): Page {
     return this.current as Page
   }
-}
-
-if (typeof window !== 'undefined' && window.history.scrollRestoration) {
-  window.history.scrollRestoration = 'manual'
 }
 
 export const history = new History()

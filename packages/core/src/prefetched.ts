@@ -1,5 +1,6 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
+import { navigation } from './navigation'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -26,6 +27,7 @@ class PrefetchedRequests {
     sendFunc: (params: InternalActiveVisit) => void,
     { cacheFor, cacheTags }: PrefetchOptions,
   ) {
+    const generation = navigation.generation
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -44,30 +46,46 @@ class PrefetchedRequests {
       sendFunc({
         ...params,
         onCancel: () => {
-          this.remove(params)
-          params.onCancel()
+          if (navigation.isCurrent(generation)) {
+            this.remove(params)
+            this.removeFromInFlight(params)
+            params.onCancel()
+          }
           reject()
         },
         onError: (error) => {
-          this.remove(params)
-          params.onError(error)
+          if (navigation.isCurrent(generation)) {
+            this.remove(params)
+            this.removeFromInFlight(params)
+            params.onError(error)
+          }
           reject()
         },
         onPrefetching(visitParams) {
-          params.onPrefetching(visitParams)
+          if (navigation.isCurrent(generation)) {
+            params.onPrefetching(visitParams)
+          }
         },
         onPrefetched(response, visit) {
-          params.onPrefetched(response, visit)
+          if (navigation.isCurrent(generation)) {
+            params.onPrefetched(response, visit)
+          }
         },
         onPrefetchResponse(response) {
           resolve(response)
         },
         onPrefetchError(error) {
-          prefetchedRequests.removeFromInFlight(params)
+          if (navigation.isCurrent(generation)) {
+            prefetchedRequests.removeFromInFlight(params)
+          }
           reject(error)
         },
       })
     }).then((response) => {
+      if (!navigation.isCurrent(generation)) {
+        return response
+      }
+
       this.remove(params)
 
       const pageResponse = response.getPageResponse()
@@ -97,6 +115,13 @@ class PrefetchedRequests {
       return response
     })
 
+    // Cancellation may happen without a consumer awaiting this prefetch.
+    promise.catch(() => {})
+
+    if (!navigation.isCurrent(generation)) {
+      return promise
+    }
+
     this.inFlightRequests.push({
       params: { ...params },
       response: promise,
@@ -113,6 +138,12 @@ class PrefetchedRequests {
       clearTimeout(removalTimer.timer)
     })
     this.removalTimers = []
+  }
+
+  public dispose(): void {
+    this.removeAll()
+    this.inFlightRequests = []
+    this.currentUseId = null
   }
 
   public removeByTags(tags: string[]): void {
@@ -189,6 +220,7 @@ class PrefetchedRequests {
   }
 
   public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
+    const generation = navigation.generation
     const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
     this.currentUseId = id
@@ -198,21 +230,24 @@ class PrefetchedRequests {
       cached: true,
     }
 
-    return prefetched.response.then((response) => {
-      if (this.currentUseId !== id) {
-        // They've since gone on to `use` a different request,
-        // so we should ignore this one
-        return
-      }
+    return prefetched.response.then(
+      (response) => {
+        if (!navigation.isCurrent(generation) || this.currentUseId !== id) {
+          // They've since gone on to `use` a different request,
+          // so we should ignore this one
+          return
+        }
 
-      response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
+        response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
-      // If this was a one-time cache, remove it
-      // (generally a prefetch="click" request with no specified cache value)
-      this.removeSingleUseItems(params)
+        // If this was a one-time cache, remove it
+        // (generally a prefetch="click" request with no specified cache value)
+        this.removeSingleUseItems(params)
 
-      return response.handle()
-    })
+        return response.handle()
+      },
+      () => {},
+    )
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {
@@ -283,8 +318,13 @@ class PrefetchedRequests {
   }
 
   public updateCachedOncePropsFromCurrentPage(): void {
+    const generation = navigation.generation
     this.cached.forEach((prefetched) => {
       prefetched.response.then((response) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         const pageResponse = response.getPageResponse()
 
         currentPage.mergeOncePropsIntoResponse(pageResponse, { force: true })

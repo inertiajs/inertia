@@ -1,6 +1,7 @@
 import { eventHandler } from './eventHandler'
 import { fireFlashEvent, fireNavigateEvent } from './events'
 import { history } from './history'
+import { navigation } from './navigation'
 import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
@@ -10,6 +11,10 @@ import { uid } from './uid'
 
 export class InitialVisit {
   public static handle(): void {
+    if (navigation.external) {
+      this.handleDefault()
+      return
+    }
     this.clearRememberedStateOnReload()
 
     const scenarios = [this.handleBackForward, this.handleLocation, this.handleDefault]
@@ -95,6 +100,7 @@ export class InitialVisit {
   }
 
   protected static handleDefault(): void {
+    const generation = navigation.generation
     if (typeof window !== 'undefined') {
       currentPage.setUrlHash(window.location.hash)
     }
@@ -104,6 +110,13 @@ export class InitialVisit {
     currentPage
       .set(currentPage.get(), { preserveScroll: true, preserveState: true, initialRender: true, visitId })
       .then(() => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+        if (navigation.external) {
+          this.fireInitialEvents(visitId)
+          return
+        }
         if (navigationType.isReload()) {
           Scroll.restore(history.getScrollRegions())
         } else {
@@ -115,12 +128,17 @@ export class InitialVisit {
   }
 
   protected static fireInitialEvents(visitId: string): void {
+    const generation = navigation.generation
     const page = currentPage.get()
 
     fireNavigateEvent(page, { visitId })
 
     if (Object.keys(page.flash).length > 0) {
-      queueMicrotask(() => fireFlashEvent(page.flash))
+      queueMicrotask(() => {
+        if (navigation.isCurrent(generation)) {
+          fireFlashEvent(page.flash)
+        }
+      })
     }
   }
 }
