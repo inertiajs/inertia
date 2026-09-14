@@ -254,6 +254,7 @@ export class Response {
     }
 
     if (navigation.isCurrent(this.navigationGeneration)) {
+      this.requestParams.markAsFinished()
       navigation.external?.navigate(destination.url)
     }
   }
@@ -361,6 +362,7 @@ export class Response {
       }
 
       if (navigation.external && !versionChange) {
+        this.requestParams.markAsFinished()
         navigation.external.navigate(url.href)
 
         return

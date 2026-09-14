@@ -19,6 +19,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean
 window.testing = { Inertia: router }
 
 const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) => {
+  let disposeDuringResolution: VoidFunction | undefined
+
   const options = {
     page,
     dev: true,
@@ -26,6 +28,8 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
     title: (title: string, page: Page) => (page.props.titleSuffix ? `${title} - ${page.props.titleSuffix}` : title),
     externalNavigation: host,
     resolve: async (name: string, page?: Page) => {
+      disposeDuringResolution?.()
+
       const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.tsx', { eager: true })
       if (page?.props.waitForComponent) {
         await fetch('/external-navigation/ready')
@@ -46,6 +50,13 @@ const host: ReturnType<typeof createHost<Page>> = createHost<Page>(async (page) 
     await createInertiaApp({
       ...options,
       setup({ el, App, props, dispose }) {
+        if (new URLSearchParams(location.search).has('disposeDuringResolution')) {
+          disposeDuringResolution = () => {
+            dispose?.()
+            document.body.dataset.disposedDuringResolution = 'true'
+          }
+        }
+
         const root = createRoot(el)
         unmount = () => {
           try {

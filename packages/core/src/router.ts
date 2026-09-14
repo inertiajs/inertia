@@ -279,10 +279,20 @@ export class Router {
   }
 
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
+    const generation = navigation.generation
+
     return polls.add(
       interval,
       ({ onStart, onFinish }) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
+
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
 
         this.doReload({
           poll: true,

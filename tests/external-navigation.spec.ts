@@ -82,6 +82,36 @@ test('hands an ordinary POST destination to the host after response callbacks', 
   await expect(page.locator('body')).toHaveAttribute('data-navigation-order', 'flash,success,navigate,')
 })
 
+for (const destination of ['destination', 'redirect']) {
+  test(`completes a ${destination} request when the host disposes its mount`, async ({ page }) => {
+    await page.goto('/external-navigation/1')
+
+    await page.evaluate((destination) => {
+      window.testing.Inertia.post(
+        `/external-navigation/1/${destination}`,
+        {},
+        {
+          onCancel: () => {
+            document.body.dataset.cancelled = 'true'
+          },
+          onFinish: ({ completed, cancelled, interrupted }) => {
+            document.body.dataset.finished = JSON.stringify({ completed, cancelled, interrupted })
+            document.body.dataset.finishCount = String(Number(document.body.dataset.finishCount || 0) + 1)
+          },
+        },
+      )
+    }, destination)
+
+    await expect(page.getByRole('heading', { name: 'Report 2', exact: true })).toBeVisible()
+    await expect(page.locator('body')).not.toHaveAttribute('data-cancelled')
+    await expect(page.locator('body')).toHaveAttribute('data-finish-count', '1')
+    await expect(page.locator('body')).toHaveAttribute(
+      'data-finished',
+      JSON.stringify({ completed: true, cancelled: false, interrupted: false }),
+    )
+  })
+}
+
 test('hands the intercepted destination to the host exactly once', async ({ page }) => {
   await page.goto('/external-navigation/1')
 
@@ -213,6 +243,36 @@ for (const setup of ['automatic', 'custom']) {
     await expect(page.getByText('Total: 201', { exact: true })).toBeVisible()
   })
 }
+
+test('does not restart an outgoing poll in a replacement mount', async ({ page }) => {
+  await page.goto('/external-navigation/1')
+
+  await expect(page.getByText('Details for report 1', { exact: true })).toBeVisible()
+
+  await page.evaluate(() => {
+    const poll = window.testing.Inertia.poll(
+      50,
+      () => {
+        document.body.dataset.polled = 'true'
+        return { only: ['total'] }
+      },
+      { autoStart: false },
+    )
+    document.addEventListener('restart-poll', () => poll.start(), { once: true })
+  })
+
+  await page.getByRole('button', { name: 'Open second report' }).click()
+
+  await expect(page.getByText('Details for report 2', { exact: true })).toBeVisible()
+
+  const requests: string[] = []
+  page.on('request', (request) => requests.push(request.url()))
+  await page.evaluate(() => document.dispatchEvent(new Event('restart-poll')))
+  await page.waitForTimeout(300)
+
+  expect(requests).toEqual([])
+  await expect(page.locator('body')).not.toHaveAttribute('data-polled')
+})
 
 test('leaves an outgoing deferred request without overwriting the replacement page', async ({ page }) => {
   let releaseResponse!: () => void
@@ -387,6 +447,24 @@ test('retains native success callbacks when a background response no longer matc
 
 test.describe('React rendering', () => {
   test.skip(process.env.PACKAGE !== 'react', 'React render and effect lifecycle')
+
+  test('disposes the router when its resolver closes the scope during initialization', async ({ page }) => {
+    const requests: string[] = []
+    page.on('request', (request) => {
+      if (request.headers()['x-inertia']) {
+        requests.push(request.url())
+      }
+    })
+
+    await page.goto('/external-navigation/1?custom&disposeDuringResolution')
+
+    await expect(page.locator('body')).toHaveAttribute('data-disposed-during-resolution', 'true')
+
+    await page.evaluate(() => window.testing.Inertia.reload({ only: ['total'] }))
+    await page.waitForTimeout(300)
+
+    expect(requests).toEqual([])
+  })
 
   test('disposes a suspended custom mount before effects commit', async ({ page }) => {
     let releaseResponse!: () => void

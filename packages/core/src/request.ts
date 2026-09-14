@@ -190,6 +190,12 @@ export class Request {
       return
     }
 
+    if (this.requestParams.all().completed) {
+      this.finish()
+
+      return
+    }
+
     this.cancelToken.abort()
 
     this.requestParams.markAsCancelled({ cancelled, interrupted })

@@ -53,6 +53,10 @@ export function createExternalRouterScope() {
           }
         },
       })
+
+      if (disposed) {
+        disposeRouter()
+      }
     },
 
     attach(handler: PageHandler<ReactComponent>, flashHandler: (flash: Page['flash']) => void): VoidFunction {
