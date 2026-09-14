@@ -10,6 +10,7 @@ import {
   PageProps,
   resolveServerHead,
   router,
+  type ExternalNavigationOptions,
   type ServerHeadOption,
 } from '@inertiajs/core'
 import {
@@ -24,6 +25,7 @@ import {
   useSyncExternalStore,
 } from 'react'
 import { flushSync } from 'react-dom'
+import type { ExternalRouterScope } from './externalRouterScope'
 import HeadContext from './HeadContext'
 import { resetLayoutProps, store } from './layoutProps'
 import PageContext from './PageContext'
@@ -77,6 +79,8 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
   serverHead?: ServerHeadOption
+  externalNavigation?: ExternalNavigationOptions
+  externalRouterScope?: ExternalRouterScope
 }
 
 export type InertiaApp = FunctionComponent<InertiaAppProps>
@@ -95,6 +99,8 @@ export default function App<SharedProps extends PageProps = PageProps>({
   onHeadUpdate,
   defaultLayout,
   serverHead,
+  externalNavigation,
+  externalRouterScope,
 }: InertiaAppProps<SharedProps>) {
   const [current, setCurrent] = useState<CurrentPage>({
     component: initialComponent || null,
@@ -104,22 +110,38 @@ export default function App<SharedProps extends PageProps = PageProps>({
 
   const pageRef = useRef(current.page)
   pageRef.current = current.page
+  if (externalRouterScope) {
+    externalRouterScope.page = current.page
+  }
 
   const headManager = useMemo(() => {
-    return createHeadManager(
-      typeof window === 'undefined',
-      (title: string) => (titleCallback ? titleCallback(title, pageRef.current) : title),
-      onHeadUpdate || (() => {}),
-      resolveServerHead(initialPage, serverHead),
-    )
+    const create = () =>
+      createHeadManager(
+        typeof window === 'undefined',
+        (title: string) => (titleCallback ? titleCallback(title, externalRouterScope?.page ?? pageRef.current) : title),
+        onHeadUpdate || (() => {}),
+        resolveServerHead(initialPage, serverHead),
+      )
+    return externalRouterScope ? externalRouterScope.getHeadManager(create) : create()
   }, [])
 
-  const dynamicLayoutProps = useSyncExternalStore(store.subscribe, store.get, () => emptySnapshot)
+  const initializeRouter = () => {
+    if (externalNavigation && typeof window !== 'undefined') {
+      if (!externalRouterScope) {
+        throw new Error('External navigation requires createInertiaApp() to own the router lifecycle.')
+      }
+      externalRouterScope.initialize({ initialPage, resolveComponent: resolveComponent!, externalNavigation })
+      return
+    }
 
-  if (!routerIsInitialized) {
+    if (routerIsInitialized) {
+      return
+    }
+
     router.init<ReactComponent>({
       initialPage,
       resolveComponent: resolveComponent!,
+      externalNavigation,
       swapComponent: async (args) => swapComponent(args),
       onFlash: (flash) => {
         setCurrent((current) => ({
@@ -132,8 +154,14 @@ export default function App<SharedProps extends PageProps = PageProps>({
     routerIsInitialized = true
   }
 
+  initializeRouter()
+
+  const dynamicLayoutProps = useSyncExternalStore(store.subscribe, store.get, () => emptySnapshot)
+
   useEffect(() => {
-    swapComponent = async ({ component, page, preserveState, initialRender }: ReactPageHandlerArgs) => {
+    initializeRouter()
+
+    const handleSwap = async ({ component, page, preserveState, initialRender }: ReactPageHandlerArgs) => {
       if (initialRender) {
         // We block setting the current page on the initial page to
         // prevent the initial page from being re-rendered again.
@@ -153,11 +181,23 @@ export default function App<SharedProps extends PageProps = PageProps>({
       )
     }
 
+    const detach = externalRouterScope?.attach(handleSwap, (flash) => {
+      setCurrent((current) => ({ ...current, page: { ...current.page, flash } }))
+    })
+
+    if (!externalRouterScope) {
+      swapComponent = handleSwap
+    }
+
     // Replay the swap the dummy function above captured before we got here, if any.
-    if (pendingInitialSwap) {
+    if (!externalRouterScope && pendingInitialSwap) {
       const pending = pendingInitialSwap
       pendingInitialSwap = null
       swapComponent(pending)
+    }
+
+    if (externalRouterScope) {
+      return detach
     }
 
     const syncServerHead = (event: { detail: { page: Page } }) => {
@@ -172,6 +212,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
       removeClientVisitListener()
     }
   }, [])
+
+  useEffect(() => {
+    if (externalRouterScope) {
+      headManager.updateServerHead(resolveServerHead(current.page, serverHead))
+    }
+  }, [current.page])
 
   if (!current.component) {
     return createElement(
