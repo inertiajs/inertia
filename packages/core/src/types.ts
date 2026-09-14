@@ -635,7 +635,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupReturn,
   TAdditionalInertiaAppConfig,
 > extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
-  id?: undefined
+  id?: string
   page: Page<SharedProps>
   progress?: undefined
   render: unknown
