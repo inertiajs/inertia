@@ -5,6 +5,7 @@ import {
   HeadManagerTitleCallback,
   isPropsObject,
   isPropsObjectOrCallback,
+  markClientRendered,
   normalizeLayouts,
   Page,
   PageProps,
@@ -20,6 +21,7 @@ import {
   defineComponent,
   h,
   markRaw,
+  onMounted,
   Plugin,
   PropType,
   reactive,
@@ -141,6 +143,8 @@ const App: InertiaApp = defineComponent({
     )
 
     if (!isServer) {
+      onMounted(() => markClientRendered())
+
       router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,

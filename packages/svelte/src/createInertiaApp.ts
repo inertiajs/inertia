@@ -6,6 +6,7 @@ import {
   http as httpModule,
   resolveServerHead,
   router,
+  setHydrationBoot,
   setupProgress,
   type CreateInertiaAppOptions,
   type CreateInertiaAppOptionsForCSR,
@@ -189,6 +190,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   // CSR
   const target = document.getElementById(id)!
+  const isServerRendered = target.hasAttribute('data-server-rendered')
+
+  setHydrationBoot(isServerRendered)
 
   if (setup) {
     await setup({ el: target, App, props })
@@ -199,7 +203,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       withApp(context, { ssr: false, page: initialPage })
     }
 
-    if (target.hasAttribute('data-server-rendered')) {
+    if (isServerRendered) {
       hydrate(App, { target, props, context })
     } else {
       mount(App, { target, props, context })

@@ -27,6 +27,9 @@ export default ({ user, items, count }: { user: { name: string; email: string };
       <Link href="/ssr/page2" data-testid="navigate-link">
         Navigate to another page
       </Link>
+      <Link href="/ssr/client-only" data-testid="to-client-only-link">
+        Navigate to ClientOnly page
+      </Link>
     </div>
   )
 }

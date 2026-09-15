@@ -10,6 +10,8 @@ export { hasFiles } from './files'
 export { objectToFormData } from './formData'
 export { formDataToObject } from './formObject'
 export { default as createHeadManager, resolveServerHead } from './head'
+/** @internal Not part of the public API. May change or be removed without notice. */
+export { canRenderClientOnly, markClientRendered, setHydrationBoot } from './hydrationBoot'
 export { http } from './http'
 export { HttpCancelledError, HttpError, HttpNetworkError, HttpResponseError } from './httpErrors'
 export { default as useInfiniteScroll } from './infiniteScroll'

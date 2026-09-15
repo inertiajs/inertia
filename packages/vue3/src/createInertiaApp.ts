@@ -11,6 +11,7 @@ import {
   Page,
   PageProps,
   router,
+  setHydrationBoot,
   setupProgress,
   SharedPageProps,
 } from '@inertiajs/core'
@@ -200,6 +201,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
 
     const el = document.getElementById(id)!
+    const isServerRendered = el.hasAttribute('data-server-rendered')
+
+    setHydrationBoot(isServerRendered)
 
     if (setup) {
       return (setup as (options: SetupOptions<HTMLElement, SharedProps>) => void)({
@@ -211,7 +215,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
 
     // Default mounting when setup is not provided
-    if (el.hasAttribute('data-server-rendered')) {
+    if (isServerRendered) {
       const app = createSSRApp({ render: () => h(App, props) })
       app.use(plugin)
 
