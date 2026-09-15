@@ -36,7 +36,7 @@ export class InitialVisit {
       .then((data) => {
         const visitId = uid()
 
-        currentPage.set(data, { preserveScroll: true, preserveState: true, visitId }).then(() => {
+        currentPage.set(data, { replace: true, preserveScroll: true, preserveState: true, visitId }).then(() => {
           Scroll.restore(scrollRegions)
           fireNavigateEvent(currentPage.get(), { visitId })
         })
