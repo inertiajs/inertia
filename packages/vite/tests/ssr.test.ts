@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
@@ -448,6 +449,37 @@ describe('SSR', () => {
 
       const response = JSON.parse(res.end.mock.calls[0][0])
       expect(response.error).toContain('Invalid JSON in request body')
+    })
+
+    it('reassembles multi-byte UTF-8 characters split across chunk boundaries', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      let receivedPage: { component: string; props: { text: string } } | undefined
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockImplementation((page: { component: string; props: { text: string } }) => {
+          receivedPage = page
+          return Promise.resolve({ head: [], body: '<div id="app"></div>' })
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+
+      const body = Buffer.from(JSON.stringify({ component: 'Test', props: { text: '日本語のテスト' } }), 'utf8')
+      // Split inside "語" (a 3-byte UTF-8 sequence) so the chunk boundary lands mid-character.
+      const splitIndex = body.indexOf(Buffer.from('語', 'utf8')) + 1
+
+      const req = createMockRequestFromChunks('POST', [body.subarray(0, splitIndex), body.subarray(splitIndex)])
+
+      await middleware(req, createMockResponse(), vi.fn())
+
+      expect(receivedPage?.props.text).toBe('日本語のテスト')
     })
   })
 
@@ -948,6 +980,7 @@ function createMockRequest(method: string, body: string) {
 
   return {
     method,
+    setEncoding: vi.fn(),
     on: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
       if (event === 'data') {
         dataCallback = callback
@@ -958,6 +991,10 @@ function createMockRequest(method: string, body: string) {
       }
     }),
   }
+}
+
+function createMockRequestFromChunks(method: string, chunks: Buffer[]) {
+  return Object.assign(Readable.from(chunks, { objectMode: false }), { method })
 }
 
 function createMockResponse() {
