@@ -325,7 +325,7 @@ export class Response {
   }
 
   protected preserveOptimisticProps(pageResponse: Page): void {
-    if (!this.shouldPreserveOptimisticProps()) {
+    if (!router.hasPendingOptimistic() && !this.isStaleOptimisticResponse()) {
       return
     }
 
@@ -337,11 +337,7 @@ export class Response {
     }
   }
 
-  protected shouldPreserveOptimisticProps(): boolean {
-    if (router.hasPendingOptimistic()) {
-      return true
-    }
-
+  protected isStaleOptimisticResponse(): boolean {
     // An optimistic request that started later has already been confirmed, so these
     // props were read before that write and would roll it back on screen
     return this.optimisticId !== null && currentPage.hasConfirmedOptimisticAfter(this.optimisticId)

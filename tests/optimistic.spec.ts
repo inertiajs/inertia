@@ -141,6 +141,27 @@ test.describe('Optimistic', () => {
     await expect(page.locator('#likes-count')).toContainText('Likes: 5')
   })
 
+  test('it keeps the optimistic value when an older optimistic response lands last', async ({ page }) => {
+    pageLoads.watch(page)
+
+    await page.locator('#reset-likes-btn').click()
+    await expect(page.locator('#likes-count')).toContainText('Likes: 0')
+
+    // Server responds with likes=5 (slow) and likes=3 (fast)
+    await page.locator('#like-controlled-slow-btn').click()
+    await page.locator('#like-controlled-fast-btn').click()
+
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    await page.waitForTimeout(300)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+
+    // The slow response started first, so its likes=5 predates the fast request's write
+    // and is discarded. Both optimistic updates stay until the next navigation
+    await page.waitForTimeout(800)
+    await expect(page.locator('#likes-count')).toContainText('Likes: 2')
+  })
+
   test('it replays remaining pending optimistic updates when an earlier one errors', async ({ page }) => {
     pageLoads.watch(page)
 
