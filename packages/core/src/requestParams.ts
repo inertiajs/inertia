@@ -173,14 +173,14 @@ export class RequestParams {
   public runCallbacks() {
     const generation = navigation.generation
 
-    for (const { name, args } of this.callbacks) {
+    this.callbacks.forEach(({ name, args }) => {
       if (!navigation.isCurrent(generation)) {
         return
       }
 
       // @ts-ignore
       this.params[name](...args)
-    }
+    })
   }
 
   public merge(toMerge: Partial<ActiveVisit>) {

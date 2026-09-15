@@ -128,7 +128,11 @@ export default function App<SharedProps extends PageProps = PageProps>({
   }, [])
 
   const initializeRouter = () => {
-    if (externalNavigation && typeof window !== 'undefined') {
+    if (externalNavigation) {
+      if (typeof window === 'undefined') {
+        return
+      }
+
       if (!externalRouterScope) {
         throw new Error('External navigation requires createInertiaApp() to own the router lifecycle.')
       }

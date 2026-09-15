@@ -136,15 +136,18 @@ export class Response {
 
       const destination = this.getPageResponse()
       const sameComponent = destination.component === currentPage.get().component
-      const destinationUrl = hrefToUrl(destination.url)
+      const destinationUrl = new URL(this.pageUrl(destination), hrefToUrl(destination.url))
       const currentUrl = hrefToUrl(currentPage.get().url)
-      const sameUrl = isSameUrlWithoutHash(destinationUrl, currentUrl)
+      const sameUrl = destinationUrl.href === currentUrl.href
       const queryOnlyPartialReload =
         this.requestParams.all().method === 'get' &&
         this.requestParams.isPartial() &&
+        destinationUrl.hash === currentUrl.hash &&
         isSameUrlWithoutQueryOrHash(destinationUrl, currentUrl)
 
       if (!sameComponent || (!sameUrl && !queryOnlyPartialReload)) {
+        destination.url = destinationUrl.href
+
         return this.handleExternalNavigation(destination)
       }
     }

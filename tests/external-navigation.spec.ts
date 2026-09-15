@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { interceptors } from '../packages/core/src/interceptors'
+import type { InternalActiveVisit } from '../packages/core/src/types'
 
 test('loads deferred and optional props without changing host history', async ({ page }) => {
   await page.goto('/external-navigation/1')
@@ -116,7 +117,7 @@ test('hands the intercepted destination to the host exactly once', async ({ page
   await page.goto('/external-navigation/1')
 
   await page.evaluate(() => {
-    const registry = (window as Window & { __inertia_interceptors__: typeof interceptors }).__inertia_interceptors__
+    const registry = (window as Window & { __inertia_interceptors__?: typeof interceptors }).__inertia_interceptors__!
 
     registry.onVisitResponse((visit, response) => {
       if (!visit.url.pathname.endsWith('/destination')) {
@@ -136,6 +137,108 @@ test('hands the intercepted destination to the host exactly once', async ({ page
   await expect(page.locator('body')).toHaveAttribute('data-interceptions', '1')
   await expect(page.locator('body')).toHaveAttribute('data-navigation-order', 'flash,success,navigate,')
 })
+
+for (const { destination, preserveFragment, expectedUrl, method } of [
+  {
+    destination: '/external-navigation/2',
+    preserveFragment: true,
+    expectedUrl: '/external-navigation/2#receipt',
+    method: 'post',
+  },
+  {
+    destination: '/external-navigation/1#saved',
+    preserveFragment: false,
+    expectedUrl: '/external-navigation/1#saved',
+    method: 'post',
+  },
+  {
+    destination: '/external-navigation/1?summary=1#saved',
+    preserveFragment: false,
+    expectedUrl: '/external-navigation/1?summary=1#saved',
+    method: 'get',
+  },
+] as const) {
+  test(`hands the ${method} response destination ${expectedUrl} to the host`, async ({ page }) => {
+    await page.goto('/external-navigation/1')
+    await expect(page.getByText('Details for report 1', { exact: true })).toBeVisible()
+
+    await page.route(
+      '**/external-navigation/1',
+      async (route) => {
+        const response = await route.fetch()
+        const data = await response.json()
+
+        await route.fulfill({ response, json: { ...data, url: destination, preserveFragment } })
+      },
+      { times: 1 },
+    )
+
+    await page.evaluate((method) => {
+      window.testing.Inertia.visit('/external-navigation/1#receipt', {
+        method,
+        ...(method === 'get' ? { only: ['total'] } : { data: { name: 'Monthly revenue' } }),
+      })
+    }, method)
+
+    await expect(page).toHaveURL(expectedUrl)
+    expect(await page.evaluate(() => history.state)).toEqual({ host: true })
+  })
+}
+
+for (const stage of ['request', 'response'] as const) {
+  test(`stops the outgoing ${stage} interceptor chain when the host replaces its mount`, async ({ page }) => {
+    let releaseResponse!: () => void
+    const responseReleased = new Promise<void>((resolve) => (releaseResponse = resolve))
+
+    await page.route('**/external-navigation/ready', async (route) => {
+      await responseReleased
+      await route.fulfill({ json: { ready: true } })
+    })
+
+    await page.goto('/external-navigation/1')
+    await expect(page.getByText('Details for report 1', { exact: true })).toBeVisible()
+
+    const pendingInterceptor = page.waitForRequest('**/external-navigation/ready')
+
+    await page.evaluate((stage) => {
+      const registry = (window as Window & { __inertia_interceptors__?: typeof interceptors }).__inertia_interceptors__!
+      const register =
+        stage === 'request' ? registry.onVisitRequest.bind(registry) : registry.onVisitResponse.bind(registry)
+
+      register(async <T>(visit: InternalActiveVisit, value: T): Promise<T> => {
+        if (visit.url.pathname === '/external-navigation/1') {
+          await fetch('/external-navigation/ready')
+          document.body.dataset.interceptorResumed = 'true'
+        }
+
+        return value
+      })
+      register(<T>(visit: InternalActiveVisit, value: T): T => {
+        document.body.dataset.interceptedReport = visit.url.pathname
+
+        return value
+      })
+
+      window.testing.Inertia.reload({ only: ['total'] })
+    }, stage)
+    await pendingInterceptor
+
+    await page.getByRole('button', { name: 'Close report' }).click()
+    await expect(page.locator('#app')).toBeEmpty()
+
+    await page.getByRole('button', { name: 'Open second report' }).click()
+    await expect(page.getByText('Details for report 2', { exact: true })).toBeVisible()
+    await expect(page.locator('body')).toHaveAttribute('data-intercepted-report', '/external-navigation/2')
+
+    const completedInterceptor = page.waitForResponse('**/external-navigation/ready')
+
+    releaseResponse()
+    await completedInterceptor
+
+    await expect(page.locator('body')).toHaveAttribute('data-interceptor-resumed', 'true')
+    await expect(page.locator('body')).toHaveAttribute('data-intercepted-report', '/external-navigation/2')
+  })
+}
 
 test('keeps local props local when the host URL differs and delegates URL-changing pushes', async ({ page }) => {
   await page.goto('/external-navigation/1')
