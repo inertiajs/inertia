@@ -1,4 +1,4 @@
-import { StringDecoder } from 'node:string_decoder'
+import { Readable } from 'node:stream'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
@@ -471,16 +471,13 @@ describe('SSR', () => {
 
       const middleware = server.middlewares.use.mock.calls[0][1]
 
-      const payload = JSON.stringify({ component: 'Test', props: { text: '日本語のテスト' } })
-      const buffer = Buffer.from(payload, 'utf8')
-      // Split inside "語" (a 3-byte UTF-8 sequence) so a chunk boundary lands mid-character.
-      const splitIndex = buffer.indexOf(Buffer.from('語', 'utf8')) + 1
-      const chunks = [buffer.subarray(0, splitIndex), buffer.subarray(splitIndex)]
+      const body = Buffer.from(JSON.stringify({ component: 'Test', props: { text: '日本語のテスト' } }), 'utf8')
+      // Split inside "語" (a 3-byte UTF-8 sequence) so the chunk boundary lands mid-character.
+      const splitIndex = body.indexOf(Buffer.from('語', 'utf8')) + 1
 
-      const req = createMockRequestFromChunks('POST', chunks)
-      const res = createMockResponse()
+      const req = createMockRequestFromChunks('POST', [body.subarray(0, splitIndex), body.subarray(splitIndex)])
 
-      await middleware(req, res, vi.fn())
+      await middleware(req, createMockResponse(), vi.fn())
 
       expect(receivedPage?.props.text).toBe('日本語のテスト')
     })
@@ -1047,27 +1044,7 @@ function createMockRequest(method: string, body: string) {
 }
 
 function createMockRequestFromChunks(method: string, chunks: Buffer[]) {
-  let dataCallback: (chunk: Buffer | string) => void
-  let endCallback: () => void
-  // Emulate readable.setEncoding(): decode Buffers with a stateful decoder,
-  // as Node does, so multi-byte characters split across chunks stay intact.
-  let decoder: StringDecoder | undefined
-
-  return {
-    method,
-    setEncoding: vi.fn((encoding: BufferEncoding) => {
-      decoder = new StringDecoder(encoding)
-    }),
-    on: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
-      if (event === 'data') {
-        dataCallback = callback
-        chunks.forEach((chunk, i) => setTimeout(() => dataCallback(decoder ? decoder.write(chunk) : chunk), i))
-      } else if (event === 'end') {
-        endCallback = callback
-        setTimeout(() => endCallback(), chunks.length + 1)
-      }
-    }),
-  }
+  return Object.assign(Readable.from(chunks, { objectMode: false }), { method })
 }
 
 function createMockResponse() {

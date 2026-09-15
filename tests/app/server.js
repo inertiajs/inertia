@@ -121,6 +121,17 @@ app.get('/ssr/head-with-xss-title', (req, res) =>
   }),
 )
 
+app.get('/ssr/multibyte-body', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/MultiByteBody',
+    props: {
+      // Large enough that the JSON body sent to the SSR server spans many chunks,
+      // so a chunk boundary is guaranteed to land inside a multi-byte character
+      text: '日本語のテスト'.repeat(25000),
+    },
+  }),
+)
+
 app.get('/ssr/server-head', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/ServerHead',

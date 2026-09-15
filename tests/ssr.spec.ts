@@ -53,6 +53,14 @@ test.describe('SSR', () => {
     })
   })
 
+  test('renders multi-byte characters when the SSR request body spans multiple chunks', async ({ page }) => {
+    const response = await page.request.get('/ssr/multibyte-body')
+    const html = await response.text()
+
+    expect(html).not.toContain('\uFFFD')
+    expect(html).toMatch(/Characters:.*175000/)
+  })
+
   test.describe('client-side navigation', () => {
     test('navigates without full page reload after SSR', async ({ page }) => {
       pageLoads.watch(page)
