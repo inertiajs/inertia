@@ -808,13 +808,13 @@ describe('SSR', () => {
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
-      expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
-      expect(result).toContain('const render = await createInertiaApp')
-      expect(result).toContain('const renderPage = (page) => render(page, renderToString)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/vue3/server'")
+      expect(result?.code).toContain("import { renderToString } from 'vue/server-renderer'")
+      expect(result?.code).toContain('const render = await createInertiaApp')
+      expect(result?.code).toContain('const renderPage = (page) => render(page, renderToString)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
     })
 
     it('wraps createInertiaApp with server bootstrap for Svelte', () => {
@@ -829,12 +829,12 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
-      expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('const renderPage = (page) => ssr(page, render)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/svelte/server'")
+      expect(result?.code).toContain("import { render } from 'svelte/server'")
+      expect(result?.code).toContain('const renderPage = (page) => ssr(page, render)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
     })
 
     it('passes SSR config to server', () => {
@@ -849,7 +849,7 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
+      expect(result?.code).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
     })
 
     it('uses same transform for both dev and production', () => {
@@ -864,9 +864,9 @@ createInertiaApp({})`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('export default renderPage')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
     })
 
     it('does not apply SSR transform to client builds', () => {
