@@ -532,11 +532,25 @@ export type PollOptions = {
 
 export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit<VisitOptions<T>, 'method' | 'data'>
 
+export type ExternalNavigationOptions = {
+  /**
+   * The host owns URL, history, scroll and document navigation. Same-path GET
+   * partial reloads may use query parameters without changing the host URL.
+   * Redirect flash/error/success callbacks run before this handoff, but response
+   * props are not forwarded. Use a server location response when transient data
+   * must remain available to the destination's subsequent document request.
+   */
+  navigate: (url: string) => void
+  remember?: (data: unknown, key: string) => void
+  restore?: (key: string) => unknown
+}
+
 export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
   swapComponent: PageHandler<ComponentType>
   onFlash?: (flash: Page['flash']) => void
+  externalNavigation?: ExternalNavigationOptions
 }
 
 export type PendingVisitOptions = {
@@ -587,6 +601,7 @@ export type ProgressOptions = {
 
 interface BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   resolve: TComponentResolver
+  externalNavigation?: ExternalNavigationOptions
   pages?: PagesOption
   layout?: (name: string, page: Page) => unknown
   setup: (options: TSetupOptions) => TSetupReturn
@@ -620,7 +635,7 @@ export interface CreateInertiaAppOptionsForSSR<
   TSetupReturn,
   TAdditionalInertiaAppConfig,
 > extends BaseCreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
-  id?: undefined
+  id?: string
   page: Page<SharedProps>
   progress?: undefined
   render: unknown
@@ -636,6 +651,7 @@ export type ServerHeadOption = boolean | string | ServerHeadResolver
 
 export interface CreateInertiaAppOptions<TComponentResolver, TSetupOptions, TSetupReturn, TAdditionalInertiaAppConfig> {
   id?: string
+  externalNavigation?: ExternalNavigationOptions
   resolve?: TComponentResolver
   pages?: PagesOption
   layout?: (name: string, page: Page) => unknown
@@ -654,6 +670,7 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   updateServerHead: (elements?: string[]) => void
+  dispose: () => void
   createProvider: () => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback

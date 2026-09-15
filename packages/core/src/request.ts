@@ -9,6 +9,7 @@ import {
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
+import { navigation } from './navigation'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
@@ -22,6 +23,7 @@ export class Request {
   protected requestParams: RequestParams
   protected requestHasFinished = false
   protected optimistic: boolean
+  protected navigationGeneration = navigation.generation
 
   constructor(
     params: ActiveVisit,
@@ -63,12 +65,34 @@ export class Request {
       this.cancel({ cancelled: true })
     })
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return this.finish()
+    }
+
     fireStartEvent(this.requestParams.all())
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return this.finish()
+    }
+
     this.requestParams.onStart()
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return this.finish()
+    }
 
     if (this.requestParams.all().prefetch) {
       this.requestParams.onPrefetching()
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return this.finish()
+      }
+
       firePrefetchingEvent(this.requestParams.all())
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return this.finish()
+      }
     }
 
     // We capture this up here because the response
@@ -87,18 +111,32 @@ export class Request {
 
     const processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      this.finish()
+
+      return
+    }
+
     return http
       .getClient()
       .request(processedConfig)
       .then((response) => {
-        this.response = Response.create(this.requestParams, response, this.page)
+        if (!navigation.isCurrent(this.navigationGeneration)) {
+          return
+        }
+
+        this.response = Response.create(this.requestParams, response, this.page, this.navigationGeneration)
 
         return this.response.handle()
       })
       .catch((error) => {
         // Handle HTTP error responses (4xx/5xx)
         if (error instanceof HttpResponseError) {
-          this.response = Response.create(this.requestParams, error.response, this.page)
+          if (!navigation.isCurrent(this.navigationGeneration)) {
+            return
+          }
+
+          this.response = Response.create(this.requestParams, error.response, this.page, this.navigationGeneration)
 
           return this.response.handle()
         }
@@ -107,15 +145,18 @@ export class Request {
       })
       .catch((error) => {
         // Handle cancelled requests
-        if (error instanceof HttpCancelledError) {
+        if (error instanceof HttpCancelledError || !navigation.isCurrent(this.navigationGeneration)) {
           return
         }
 
-        if (this.requestParams.all().onNetworkError(error) === false) {
+        if (
+          this.requestParams.all().onNetworkError(error) === false ||
+          !navigation.isCurrent(this.navigationGeneration)
+        ) {
           return
         }
 
-        if (fireNetworkErrorEvent(error)) {
+        if (fireNetworkErrorEvent(error) && navigation.isCurrent(this.navigationGeneration)) {
           if (originallyPrefetch) {
             this.requestParams.onPrefetchError(error)
           }
@@ -159,6 +200,12 @@ export class Request {
       return
     }
 
+    if (this.requestParams.all().completed) {
+      this.finish()
+
+      return
+    }
+
     this.cancelToken.abort()
 
     this.requestParams.markAsCancelled({ cancelled, interrupted })
@@ -167,8 +214,17 @@ export class Request {
   }
 
   protected onProgress(progress: HttpProgressEvent): void {
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     if (this.requestParams.data() instanceof FormData) {
       fireProgressEvent(progress)
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
       this.requestParams.all().onProgress(progress)
     }
   }

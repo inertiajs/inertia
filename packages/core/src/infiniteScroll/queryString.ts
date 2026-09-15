@@ -1,6 +1,7 @@
 import { hrefToUrl, router, urlHasProtocol, urlToString } from '..'
 import debounce from '../debounce'
 import { getElementsInViewportFromCollection } from '../domUtils'
+import { navigation } from '../navigation'
 import { page as currentPage } from './../page'
 import Queue from './../queue'
 import { getPageFromElement } from './elements'
@@ -28,7 +29,7 @@ export const useInfiniteScrollQueryString = (options: {
     queue
       .add(() => {
         return new Promise((resolve) => {
-          if (!enabled) {
+          if (!enabled || navigation.external) {
             initialUrl = payloadUrl = null
             return resolve()
           }
@@ -56,6 +57,7 @@ export const useInfiniteScrollQueryString = (options: {
       .finally(() => {
         if (
           enabled &&
+          !navigation.external &&
           initialUrl &&
           payloadUrl &&
           initialUrl.href !== payloadUrl.href &&
@@ -77,7 +79,7 @@ export const useInfiniteScrollQueryString = (options: {
   const onItemIntersected = debounce((itemElement: HTMLElement) => {
     const itemsElement = options.getItemsElement()
 
-    if (!enabled || options.shouldPreserveUrl() || !itemElement || !itemsElement) {
+    if (!enabled || navigation.external || options.shouldPreserveUrl() || !itemElement || !itemsElement) {
       return
     }
 
