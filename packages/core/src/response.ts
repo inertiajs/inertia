@@ -13,15 +13,17 @@ import {
 } from './events'
 import { history } from './history'
 import { interceptors } from './interceptors'
+import { navigation } from './navigation'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
-import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash, setHashIfSameUrl } from './url'
 
-const queue = new Queue<Promise<boolean | void>>()
+let queue = new Queue<Promise<boolean | void>>()
+let queueGeneration = navigation.generation
 
 export class Response {
   protected wasPrefetched = false
@@ -31,10 +33,16 @@ export class Response {
     protected requestParams: RequestParams,
     protected response: HttpResponse,
     protected originatingPage: Page,
+    protected navigationGeneration = navigation.generation,
   ) {}
 
-  public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
-    return new Response(params, response, originatingPage)
+  public static create(
+    params: RequestParams,
+    response: HttpResponse,
+    originatingPage: Page,
+    generation = navigation.generation,
+  ): Response {
+    return new Response(params, response, originatingPage, generation)
   }
 
   public isProcessed(): boolean {
@@ -48,15 +56,33 @@ export class Response {
   }
 
   public async handle() {
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
+    if (queueGeneration !== this.navigationGeneration) {
+      queue = new Queue<Promise<boolean | void>>()
+      queueGeneration = this.navigationGeneration
+    }
+
     return queue.add(() => this.process())
   }
 
   public async process() {
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     if (this.requestParams.all().prefetch) {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
 
       this.requestParams.all().onPrefetched(this.response, this.requestParams.all())
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
       firePrefetchedEvent(this.response, this.requestParams.all())
 
       return Promise.resolve()
@@ -64,6 +90,10 @@ export class Response {
 
     this.requestParams.runCallbacks()
     this.processed = true
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -75,26 +105,75 @@ export class Response {
         data: this.getDataFromResponse(this.response.data),
       }
 
-      if (this.requestParams.all().onHttpException(response) === false) {
+      if (
+        this.requestParams.all().onHttpException(response) === false ||
+        !navigation.isCurrent(this.navigationGeneration)
+      ) {
         return
       }
 
-      if (!fireHttpExceptionEvent(response)) {
+      if (!fireHttpExceptionEvent(response) || !navigation.isCurrent(this.navigationGeneration)) {
         return
       }
     }
 
     await history.processQueue()
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
+    if (navigation.external) {
+      if (!this.shouldSetPage(this.getPageResponse())) {
+        return
+      }
+
+      this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
+      const destination = this.getPageResponse()
+      const sameComponent = destination.component === currentPage.get().component
+      const destinationUrl = new URL(this.pageUrl(destination), hrefToUrl(destination.url))
+      const currentUrl = hrefToUrl(currentPage.get().url)
+      const sameUrl = destinationUrl.href === currentUrl.href
+      const queryOnlyPartialReload =
+        this.requestParams.all().method === 'get' &&
+        this.requestParams.isPartial() &&
+        destinationUrl.hash === currentUrl.hash &&
+        isSameUrlWithoutQueryOrHash(destinationUrl, currentUrl)
+
+      if (!sameComponent || (!sameUrl && !queryOnlyPartialReload)) {
+        destination.url = destinationUrl.href
+
+        return this.handleExternalNavigation(destination)
+      }
+    }
+
     history.preserveUrl = this.requestParams.all().preserveUrl
 
     await this.setPage()
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
 
     const { flash } = currentPage.get()
 
     if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
       fireFlashEvent(flash)
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
       this.requestParams.all().onFlash(flash)
+    }
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
     }
 
     const errors = currentPage.get().props.errors || {}
@@ -103,6 +182,10 @@ export class Response {
       const scopedErrors = this.getScopedErrors(errors)
 
       fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
 
       return this.requestParams.all().onError(scopedErrors)
     }
@@ -117,9 +200,66 @@ export class Response {
 
     fireSuccessEvent(currentPage.get(), { visitId: this.requestParams.all().id })
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     await this.requestParams.all().onSuccess(currentPage.get())
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     history.preserveUrl = false
+  }
+
+  protected async handleExternalNavigation(destination: Page): Promise<void> {
+    if (Object.keys(destination.flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
+      fireFlashEvent(destination.flash)
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
+      this.requestParams.all().onFlash(destination.flash)
+    }
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
+    const errors = destination.props.errors || {}
+
+    if (Object.keys(errors).length > 0) {
+      const scopedErrors = this.getScopedErrors(errors)
+
+      fireErrorEvent(scopedErrors, { page: destination, visitId: this.requestParams.all().id })
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
+      await this.requestParams.all().onError(scopedErrors)
+    } else {
+      router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
+
+      if (!this.wasPrefetched) {
+        router.flush(destination.url)
+      }
+
+      fireSuccessEvent(destination, { visitId: this.requestParams.all().id })
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
+      await this.requestParams.all().onSuccess(destination)
+    }
+
+    if (navigation.isCurrent(this.navigationGeneration)) {
+      this.requestParams.markAsFinished()
+      navigation.external?.navigate(destination.url)
+    }
   }
 
   public mergeParams(params: ActiveVisit) {
@@ -161,11 +301,14 @@ export class Response {
       data: this.getDataFromResponse(this.response.data),
     }
 
-    if (this.requestParams.all().onHttpException(response) === false) {
+    if (
+      this.requestParams.all().onHttpException(response) === false ||
+      !navigation.isCurrent(this.navigationGeneration)
+    ) {
       return
     }
 
-    if (fireHttpExceptionEvent(response)) {
+    if (fireHttpExceptionEvent(response) && navigation.isCurrent(this.navigationGeneration)) {
       return dialog.show(response.data)
     }
   }
@@ -210,7 +353,7 @@ export class Response {
       const responseVersion = this.getHeader('x-inertia-version')
       const versionChange = !!responseVersion && responseVersion !== currentPage.get().version
 
-      if (!fireLocationEvent(url, versionChange)) {
+      if (!fireLocationEvent(url, versionChange) || !navigation.isCurrent(this.navigationGeneration)) {
         return
       }
 
@@ -218,6 +361,13 @@ export class Response {
       // force a full-page navigation the user never initiated. The next user-initiated visit
       // hits the same location response and reloads then.
       if (versionChange && this.requestParams.all().async) {
+        return
+      }
+
+      if (navigation.external && !versionChange) {
+        this.requestParams.markAsFinished()
+        navigation.external.navigate(url.href)
+
         return
       }
 
@@ -242,7 +392,13 @@ export class Response {
       return Promise.resolve()
     }
 
-    this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
+    if (!navigation.external) {
+      this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
+    }
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)
@@ -251,12 +407,29 @@ export class Response {
 
     await this.setRememberedState(pageResponse)
 
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
+    pageResponse.url = history.preserveUrl || navigation.external ? currentPage.get().url : this.pageUrl(pageResponse)
 
     this.requestParams.all().onBeforeUpdate(pageResponse)
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
+
     fireBeforeUpdateEvent(pageResponse)
+
+    if (!navigation.isCurrent(this.navigationGeneration)) {
+      return
+    }
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,

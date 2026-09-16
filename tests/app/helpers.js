@@ -62,7 +62,7 @@ const applyDefaultNonce = (req, html) => {
 
 module.exports = {
   package,
-  render: (req, res, data) => {
+  render: (req, res, data, template = 'index.html') => {
     data = buildPageData(req, data)
 
     if (data.component.startsWith('InfiniteScroll') && req.query.absolutePageUrl) {
@@ -87,7 +87,7 @@ module.exports = {
     }
 
     const html = fs
-      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index.html'))
+      .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist', template))
       .toString()
       .replace('{{ headAttribute }}', 'data-inertia')
       .replace("'{{ placeholder }}'", JSON.stringify(data))
