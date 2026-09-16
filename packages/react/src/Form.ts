@@ -68,6 +68,10 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      onBeforeUpdate = noop,
+      onHttpException = noop,
+      onNetworkError = noop,
+      onFlash = noop,
       onCancelToken = noop,
       onSubmitComplete = noop,
       disableWhileProcessing = false,
@@ -245,6 +249,10 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         onProgress,
         onFinish,
         onCancel,
+        onBeforeUpdate,
+        onHttpException,
+        onNetworkError,
+        onFlash,
         onSuccess: async (...args) => {
           const result = await onSuccess(...args)
           onSubmitComplete({

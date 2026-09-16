@@ -122,6 +122,22 @@ const Form = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
+    onBeforeUpdate: {
+      type: Function as PropType<FormComponentProps['onBeforeUpdate']>,
+      default: noop,
+    },
+    onHttpException: {
+      type: Function as PropType<FormComponentProps['onHttpException']>,
+      default: noop,
+    },
+    onNetworkError: {
+      type: Function as PropType<FormComponentProps['onNetworkError']>,
+      default: noop,
+    },
+    onFlash: {
+      type: Function as PropType<FormComponentProps['onFlash']>,
+      default: noop,
+    },
     onSubmitComplete: {
       type: Function as PropType<FormComponentProps['onSubmitComplete']>,
       default: noop,
@@ -296,6 +312,10 @@ const Form = defineComponent({
         onProgress: props.onProgress,
         onFinish: props.onFinish,
         onCancel: props.onCancel,
+        onBeforeUpdate: props.onBeforeUpdate,
+        onHttpException: props.onHttpException,
+        onNetworkError: props.onNetworkError,
+        onFlash: props.onFlash,
         onSuccess: async (...args) => {
           const result = await props.onSuccess?.(...args)
           props.onSubmitComplete?.(exposed)
