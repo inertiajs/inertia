@@ -18,6 +18,7 @@
 
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import remapping from '@jridgewell/remapping'
 import { glob } from 'tinyglobby'
 import type { Plugin, ViteDevServer } from 'vite'
 import { defaultFrameworks } from './frameworks/index'
@@ -139,14 +140,19 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
 
       let result = code
+      const maps: string[] = []
 
       if (!ssrDisabled && options?.ssr && findInertiaAppExport(result)) {
-        result =
-          wrapWithServerBootstrap(
-            result,
-            { port: ssr.port, host: ssr.host, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
-            frameworks,
-          ) ?? result
+        const ssrTransform = wrapWithServerBootstrap(
+          result,
+          { port: ssr.port, host: ssr.host, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
+          frameworks,
+        )
+
+        if (ssrTransform) {
+          result = ssrTransform.toString()
+          maps.push(ssrTransform.generateMap({ source: id, includeContent: true, hires: true }).toString())
+        }
       }
 
       const pageTransform = transformPageResolution(result, frameworks)
@@ -156,10 +162,11 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           warmupPageFiles(devServer, id, pageTransform.pageGlobs).catch(() => {})
         }
 
-        return pageTransform.code
+        result = pageTransform.code.toString()
+        maps.unshift(pageTransform.code.generateMap({ source: id, includeContent: true, hires: true }).toString())
       }
 
-      return result !== code ? result : null
+      return result !== code ? { code: result, map: remapping(maps, () => null).toString() } : null
     },
 
     configureServer(server) {

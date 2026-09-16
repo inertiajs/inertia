@@ -176,7 +176,8 @@ describe('pages property transform', () => {
 
 function transform(code: string): string | null {
   const plugin = inertia()
-  return plugin.transform!(code, 'app.ts') as string | null
+  const result = plugin.transform!(code, 'app.ts') as { code: string } | null
+  return result?.code ?? null
 }
 
 describe('page warmup', () => {
