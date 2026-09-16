@@ -1,11 +1,14 @@
-import { type LayoutCallbackReturn, type Page, type SharedPageProps } from '@inertiajs/core'
-import type { Component } from 'svelte'
+import { type LayerShellProps, type LayoutCallbackReturn, type Page, type SharedPageProps } from '@inertiajs/core'
+import type { Component, Snippet } from 'svelte'
+import type { HTMLAttributes } from 'svelte/elements'
 import type { RenderFunction, RenderProps } from './components/Render.svelte'
 
 export type ComponentResolver = (
   name: string,
   page?: Page<SharedPageProps>,
 ) => ResolvedComponent | Promise<ResolvedComponent>
+
+export type LayerComponent = Component<LayerShellProps & { children: Snippet } & HTMLAttributes<HTMLDialogElement>>
 
 export type LayoutResolver = (h: RenderFunction, page: RenderProps) => RenderProps
 

@@ -1,5 +1,6 @@
 import {
   createHeadManager,
+  type LayerShellProps,
   type LayoutCallbackReturn,
   Page,
   PageHandler,
@@ -12,6 +13,8 @@ import useForm from './useForm'
 
 export type VuePageHandlerArgs = Parameters<PageHandler<DefineComponent>>[0]
 export type VueInertiaAppConfig = {}
+
+export type LayerComponent = Component<LayerShellProps>
 
 export type LayoutCallback = (props: SharedPageProps) => LayoutCallbackReturn<Component>
 export type LayoutRenderFunction = (h: (component: Component, children: Component[]) => VNode, page: Component) => VNode

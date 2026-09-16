@@ -1,4 +1,7 @@
-import { ActiveVisit } from './types'
+import { reloadUrlOf } from './layers'
+import { page } from './page'
+import { ActiveVisit, PendingVisit } from './types'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash } from './url'
 
 type VisitFilter = Pick<ActiveVisit, 'only' | 'except'>
 
@@ -27,3 +30,14 @@ export const partialReloadRequestsProp = (visit: VisitFilter, prop: string): boo
 export const partialReloadRequestsSomeProps = (visit: VisitFilter, props: string[]): boolean => {
   return props.some((prop) => partialReloadRequestsProp(visit, prop))
 }
+
+// Two tiers can sit on the same url waiting on the same prop, so the tier has to match as well.
+export const partialReloadFillsDeferred = (
+  visit: PendingVisit,
+  layerId: string | undefined,
+  props: string[],
+): boolean =>
+  visit.preserveState === true &&
+  visit.layerId === layerId &&
+  isSameUrlWithoutQueryOrHash(visit.url, hrefToUrl(reloadUrlOf(page.get(), layerId, window.location.href))) &&
+  partialReloadRequestsSomeProps(visit, props)

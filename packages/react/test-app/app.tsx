@@ -1,11 +1,15 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
-import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
-import { createRoot } from 'react-dom/client'
+import { createInertiaApp, router, setLayoutProps, type ResolvedComponent } from '@inertiajs/react'
+import { createRoot, hydrateRoot } from 'react-dom/client'
+import AdminLayout from './Layouts/AdminLayout'
 import AppLayout from './Layouts/AppLayout'
 import DefaultLayout from './Layouts/DefaultLayout'
+import Layer from './Layouts/Layer'
+import LoadingBase from './Pages/Layers/LoadingBase'
+import LayerLoading from './Pages/SSR/LayerLoading'
 
-window.testing = { Inertia: router }
+window.testing = { Inertia: router, setLayoutProps }
 window.resolverReceivedPage = null as Page | null
 
 const params = new URLSearchParams(window.location.search)
@@ -39,10 +43,34 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
+    if (name === 'Layers/Slow') {
+      // Long enough for a test to supersede the layer visit while it is still resolving
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+
+    if (name === 'Layers/SlowImport') {
+      // Long enough for a dismissal to supersede a walk landing while its component resolves
+      await new Promise((resolve) => setTimeout(resolve, 700))
+    }
+
     return pages[`./Pages/${name}.tsx`]
   },
+  layer: Layer,
+  loading: (url, page) => {
+    window.loadingResolved = [url, ...(page.layers ?? []).map((layer) => layer.key)].join('|')
+
+    if (url.startsWith('/ssr/layer-loading-base')) {
+      return LayerLoading
+    }
+
+    return url.startsWith('/layers/loading') ? LoadingBase : undefined
+  },
   setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />)
+    if (el.hasAttribute('data-server-rendered')) {
+      hydrateRoot(el, <App {...props} />)
+    } else {
+      createRoot(el).render(<App {...props} />)
+    }
   },
   progress: {
     delay: 0,
@@ -58,6 +86,9 @@ createInertiaApp({
   }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
+  }),
+  ...(params.has('withUrlBasedLayout') && {
+    layout: (name: string, page) => (page.url?.startsWith('/layers/base') ? AdminLayout : DefaultLayout),
   }),
   ...(params.has('withAnonymousDefaultLayout') && {
     layout:
@@ -97,5 +128,8 @@ createInertiaApp({
   }),
   ...(params.has('withTitleCallback') && {
     title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
+  }),
+  ...(params.has('withLayersTitleCallback') && {
+    title: (title, page) => [title, page.props.suffix].filter(Boolean).join(' | '),
   }),
 })
