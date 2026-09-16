@@ -31,4 +31,5 @@
   <p data-testid="count">Count: {count}</p>
 
   <a href="/ssr/page2" use:inertia data-testid="navigate-link">Navigate to another page</a>
+  <a href="/ssr/client-only" use:inertia data-testid="to-client-only-link">Navigate to ClientOnly page</a>
 </div>
