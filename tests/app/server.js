@@ -1128,6 +1128,27 @@ app.get('/history/version/:pageNumber', (req, res) => {
   })
 })
 
+let historyVersionReloadDeploy = '1'
+
+app.get('/history-version-reload/deploy/:deploy', (req, res) => {
+  historyVersionReloadDeploy = req.params.deploy
+
+  res.json({ deploy: historyVersionReloadDeploy })
+})
+
+app.get('/history-version-reload', (req, res) => {
+  // Prevents the browser from serving this document from cache on a back navigation
+  res.header('Cache-Control', 'no-store')
+
+  inertia.render(req, res, {
+    component: 'HistoryVersionReload',
+    props: {
+      deploy: historyVersionReloadDeploy,
+    },
+    version: `deploy-${historyVersionReloadDeploy}`,
+  })
+})
+
 app.get('/history-quota/:pageNumber', (req, res) => {
   const pageNumber = parseInt(req.params.pageNumber)
   const size = 8 * 1024 * 1024 // 8 MB
