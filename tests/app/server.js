@@ -1137,7 +1137,7 @@ app.get('/history-version-reload/deploy/:deploy', (req, res) => {
 })
 
 app.get('/history-version-reload', (req, res) => {
-  // Keeps the browser from serving this document from its cache when you press back
+  // Prevents the browser from serving this document from cache on a back navigation
   res.header('Cache-Control', 'no-store')
 
   inertia.render(req, res, {
