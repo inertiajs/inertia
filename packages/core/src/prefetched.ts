@@ -1,5 +1,6 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
+import { HttpCancelledError } from './httpErrors'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -39,14 +40,17 @@ class PrefetchedRequests {
     }
 
     const [stale, prefetchExpiresIn] = this.extractStaleValues(cacheFor)
+    let cancelled = false
 
     const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
+          cancelled = true
           this.remove(params)
+          this.removeFromInFlight(params)
           params.onCancel()
-          reject()
+          reject(new HttpCancelledError())
         },
         onError: (error) => {
           this.remove(params)
@@ -97,14 +101,22 @@ class PrefetchedRequests {
       return response
     })
 
-    this.inFlightRequests.push({
-      params: { ...params },
-      response: promise,
-      staleTimestamp: null,
-      inFlight: true,
-    })
+    if (!cancelled) {
+      this.inFlightRequests.push({
+        params: { ...params },
+        response: promise,
+        staleTimestamp: null,
+        inFlight: true,
+      })
+    }
 
-    return promise
+    return promise.catch((error) => {
+      this.removeFromInFlight(params)
+
+      if (!(error instanceof HttpCancelledError)) {
+        throw error
+      }
+    })
   }
 
   public removeAll(): void {
@@ -131,7 +143,7 @@ class PrefetchedRequests {
 
   protected removeFromInFlight(params: ActiveVisit): void {
     this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-      return !this.paramsAreEqual(prefetching.params, params)
+      return prefetching.params.id !== params.id
     })
   }
 
@@ -198,21 +210,32 @@ class PrefetchedRequests {
       cached: true,
     }
 
-    return prefetched.response.then((response) => {
-      if (this.currentUseId !== id) {
-        // They've since gone on to `use` a different request,
-        // so we should ignore this one
-        return
-      }
+    return prefetched.response.then(
+      (response) => {
+        if (this.currentUseId !== id) {
+          // They've since gone on to `use` a different request,
+          // so we should ignore this one
+          return
+        }
 
-      response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
+        response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
-      // If this was a one-time cache, remove it
-      // (generally a prefetch="click" request with no specified cache value)
-      this.removeSingleUseItems(params)
+        // If this was a one-time cache, remove it
+        // (generally a prefetch="click" request with no specified cache value)
+        this.removeSingleUseItems(params)
 
-      return response.handle()
-    })
+        return response.handle()
+      },
+      (error) => {
+        if (!(error instanceof HttpCancelledError)) {
+          throw error
+        }
+
+        consumedParams.onCancel()
+        consumedParams.cancelled = true
+        consumedParams.onFinish(consumedParams)
+      },
+    )
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {
