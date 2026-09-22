@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "3.6.1",
+  "version": "3.7.1",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/kit": "^2.70.1",
+    "@sveltejs/kit": "^2.70.2",
     "@sveltejs/package": "^2.5.7",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "axios": "^1.17.0",

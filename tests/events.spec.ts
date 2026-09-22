@@ -567,6 +567,29 @@ test.describe('Events', () => {
       // Global events should not have fired
       await expect(globalMessages).toHaveLength(0)
     })
+
+    test('gets fired when a non-Inertia response is received (link)', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event Link', 'non-inertia', 'button')
+
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException', 1)
+
+      await expect(messages[0]).toBe('linkOnHttpException')
+      await expect(messages[1]).toBe(200)
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:httpException', true)
+    })
+
+    test('can prevent the default behavior from the link callback', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:httpException')
+      await clickAndWaitForResponse(page, 'HTTP Exception Event Link (Prevent)', 'non-inertia', 'button')
+
+      const messages = await waitForMessages(page, 1)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:httpException')
+
+      await expect(messages[0]).toBe('linkOnHttpException')
+      await expect(globalMessages).toHaveLength(0)
+    })
   })
 
   test.describe('httpException with Inertia error page response', () => {
@@ -630,6 +653,42 @@ test.describe('Events', () => {
 
       // Local Event Callback fires
       await expect(messages[0]).toBe('onNetworkError')
+    })
+
+    test('gets fired when an unexpected situation occurs (link)', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:networkError', true)
+      await page.getByRole('button', { exact: true, name: 'Network Error Event Link' }).click()
+
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:networkError', 1)
+
+      await expect(messages[0]).toBe('linkOnNetworkError')
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:networkError', true)
+    })
+
+    test('can prevent the default behavior from the link callback', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:networkError', true)
+      await page.getByRole('button', { exact: true, name: 'Network Error Event Link (Prevent)' }).click()
+
+      const messages = await waitForMessages(page, 1)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:networkError')
+
+      await expect(messages[0]).toBe('linkOnNetworkError')
+      await expect(globalMessages).toHaveLength(0)
+    })
+  })
+
+  test.describe('flash', () => {
+    test('fires with the flash data from the response (link)', async ({ page }) => {
+      await listenForGlobalMessages(page, 'inertia:flash')
+      await clickAndWaitForResponse(page, 'Flash Event Link', 'events/flash', 'button')
+
+      const messages = await waitForMessages(page, 2)
+      const globalMessages = await waitForGlobalMessages(page, 'inertia:flash', 1)
+
+      await expect(messages[0]).toBe('linkOnFlash')
+      await expect(messages[1]).toEqual({ foo: 'bar' })
+      await assertIsGlobalEvent(globalMessages[0], 'inertia:flash', false)
     })
   })
 

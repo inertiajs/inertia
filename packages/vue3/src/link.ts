@@ -110,6 +110,18 @@ const Link: InertiaLink = defineComponent({
       type: Function as PropType<InertiaLinkProps['onSuccess']>,
       default: noop,
     },
+    onHttpException: {
+      type: Function as PropType<InertiaLinkProps['onHttpException']>,
+      default: noop,
+    },
+    onNetworkError: {
+      type: Function as PropType<InertiaLinkProps['onNetworkError']>,
+      default: noop,
+    },
+    onFlash: {
+      type: Function as PropType<InertiaLinkProps['onFlash']>,
+      default: noop,
+    },
     onError: {
       type: Function as PropType<InertiaLinkProps['onError']>,
       default: noop,
@@ -271,6 +283,9 @@ const Link: InertiaLink = defineComponent({
       onCancel: props.onCancel,
       onSuccess: props.onSuccess,
       onError: props.onError,
+      onHttpException: props.onHttpException,
+      onNetworkError: props.onNetworkError,
+      onFlash: props.onFlash,
     }))
 
     const prefetch = () => {
@@ -306,7 +321,11 @@ const Link: InertiaLink = defineComponent({
       onMouseleave: () => {
         clearTimeout(hoverTimeout.value)
       },
-      onClick: regularEvents.onClick,
+      onClick: (event: MouseEvent) => {
+        clearTimeout(hoverTimeout.value)
+
+        regularEvents.onClick(event)
+      },
     }
 
     const prefetchClickEvents = {

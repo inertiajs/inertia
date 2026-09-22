@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePoll } from '@inertiajs/vue3'
 
-const { start, stop } = usePoll(
+const { start, stop, polling } = usePoll(
   500,
   {
     only: ['custom_prop'],
@@ -18,4 +18,5 @@ const { start, stop } = usePoll(
 <template>
   <button @click="start">Start</button>
   <button @click="stop">Stop</button>
+  <div>Polling: {{ polling ? 'yes' : 'no' }}</div>
 </template>

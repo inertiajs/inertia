@@ -24,8 +24,15 @@
  *   import createServer from '@inertiajs/vue3/server'
  *   import { renderToString } from 'vue/server-renderer'
  *
- *   const render = await ${configureCall}
- *   const renderPage = (page) => render(page, renderToString)
+ *   const renderPromise = ${configureCall}
+ *
+ *   renderPromise.catch((error) => console.error(error))
+ *
+ *   const renderPage = async (page) => {
+ *     const render = await renderPromise
+ *
+ *     return render(page, renderToString)
+ *   }
  *
  *   if (import.meta.env.PROD) {
  *     createServer(renderPage${options})

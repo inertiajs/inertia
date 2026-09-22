@@ -41,16 +41,27 @@ test.describe('SSR', () => {
 
     expect(html).toContain('data-page="app"')
     expect(html).toContain('<script data-page="app" type="application/json">')
-    expect(html).toContain('Hello from script element! Escape <\\/script>.')
+    expect(html).toContain('Hello from script element! Escape \\u003c\\/script> and \\u003c!--\\u003cscript>.')
 
     await page.goto('/ssr/page-with-script-element')
+
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page With Script Element')
+
     const scriptContent = await page.locator('script[data-page="app"]').textContent()
     expect(JSON.parse(scriptContent || '')).toMatchObject({
       component: 'SSR/PageWithScriptElement',
       props: {
-        message: 'Hello from script element! Escape </script>.',
+        message: 'Hello from script element! Escape </script> and <!--<script>.',
       },
     })
+  })
+
+  test('renders multi-byte characters when the SSR request body spans multiple chunks', async ({ page }) => {
+    const response = await page.request.get('/ssr/multibyte-body')
+    const html = await response.text()
+
+    expect(html).not.toContain('\uFFFD')
+    expect(html).toMatch(/Characters:.*175000/)
   })
 
   test.describe('client-side navigation', () => {

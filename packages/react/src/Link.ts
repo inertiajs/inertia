@@ -52,6 +52,9 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onCancel = noop,
       onSuccess = noop,
       onError = noop,
+      onHttpException = noop,
+      onNetworkError = noop,
+      onFlash = noop,
       onPrefetching = noop,
       onPrefetched = noop,
       prefetch = false,
@@ -150,6 +153,9 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         onCancel,
         onSuccess,
         onError,
+        onHttpException,
+        onNetworkError,
+        onFlash,
       }),
       [
         baseParams,
@@ -162,6 +168,9 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
         onCancel,
         onSuccess,
         onError,
+        onHttpException,
+        onNetworkError,
+        onFlash,
       ],
     )
 
@@ -247,7 +256,11 @@ const Link = forwardRef<unknown, InertiaLinkProps>(
       onMouseLeave: () => {
         clearTimeout(hoverTimeout.current)
       },
-      onClick: regularEvents.onClick,
+      onClick: (event: React.MouseEvent) => {
+        clearTimeout(hoverTimeout.current)
+
+        regularEvents.onClick(event)
+      },
     }
 
     const prefetchClickEvents = {

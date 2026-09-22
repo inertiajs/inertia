@@ -41,8 +41,12 @@
     onCancel?: FormComponentProps['onCancel']
     onSuccess?: FormComponentProps['onSuccess']
     onError?: FormComponentProps['onError']
+    onHttpException?: FormComponentProps['onHttpException']
+    onNetworkError?: FormComponentProps['onNetworkError']
+    onFlash?: FormComponentProps['onFlash']
     onSubmitComplete?: FormComponentProps['onSubmitComplete']
     disableWhileProcessing?: boolean
+    cancelOnUnmount?: FormComponentProps['cancelOnUnmount']
     invalidateCacheTags?: FormComponentProps['invalidateCacheTags']
     resetOnError?: FormComponentProps['resetOnError']
     resetOnSuccess?: FormComponentProps['resetOnSuccess']
@@ -74,8 +78,12 @@
     onCancel = noop,
     onSuccess = noop,
     onError = noop,
+    onHttpException = noop,
+    onNetworkError = noop,
+    onFlash = noop,
     onSubmitComplete = noop,
     disableWhileProcessing = false,
+    cancelOnUnmount = false,
     invalidateCacheTags = [],
     resetOnError = false,
     resetOnSuccess = false,
@@ -174,6 +182,9 @@
       onProgress,
       onFinish,
       onCancel,
+      onHttpException,
+      onNetworkError,
+      onFlash,
       onSuccess: async (...args) => {
         const result = await onSuccess?.(...args)
 
@@ -246,6 +257,10 @@
     isDirty = false
   }
 
+  export function cancel() {
+    form.cancel()
+  }
+
   export function validate(field?: string | NamedInputEvent | ValidationConfig, config?: ValidationConfig) {
     return form.validate(...UseFormUtils.mergeHeadersForValidation(field, config, headers!))
   }
@@ -281,6 +296,10 @@
 
     return () => {
       formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
+
+      if (cancelOnUnmount) {
+        form.cancel()
+      }
     }
   })
 
@@ -315,6 +334,7 @@
       setError,
       reset,
       submit,
+      cancel,
       defaults,
       getData,
       getFormData,
@@ -360,6 +380,7 @@
     setError,
     isDirty,
     submit,
+    cancel,
     defaults,
     reset,
     getData,
