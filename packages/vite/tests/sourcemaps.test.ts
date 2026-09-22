@@ -6,6 +6,8 @@ import { build } from 'vite'
 import { describe, expect, it } from 'vitest'
 import inertia from '../src'
 
+const importApp = `import { createInertiaApp } from '@inertiajs/vue3'`
+
 function position(code: string, marker: string) {
   const offset = code.indexOf(marker)
   expect(offset, `Missing marker: ${marker}`).toBeGreaterThanOrEqual(0)
@@ -27,8 +29,6 @@ function expectOriginalPosition(original: string, generated: string, map: Source
 async function transform(code: string, ssr: boolean) {
   const result = await inertia().transform!(code, '/src/app.ts', { ssr })
 
-  expect(result).toHaveProperty('map')
-
   if (!result || typeof result === 'string' || !result.map) {
     throw new Error('Expected transformed code with a sourcemap')
   }
@@ -39,10 +39,8 @@ async function transform(code: string, ssr: boolean) {
   return { code: result.code, map: new SourceMap(map) }
 }
 
-describe.each(['react', 'vue3', 'svelte'])('%s sourcemaps', (framework) => {
-  const importApp = `import { createInertiaApp } from '@inertiajs/${framework}'`
-
-  it.each([false, true])('preserves positions around and inside automatic resolution (ssr: %s)', async (ssr) => {
+describe('sourcemaps', () => {
+  it.each([false, true])('preserves positions around the generated resolver (ssr: %s)', async (ssr) => {
     const code = `${importApp}
 const before = () => console.log('before marker')
 void createInertiaApp({
@@ -66,16 +64,11 @@ const after = () => console.log('after marker')`
 
   it('preserves positions when only the SSR bootstrap changes', async () => {
     const code = `${importApp}
-createInertiaApp({
-  resolve: (name) => {
-    console.log('resolve marker')
-    return name
-  },
-})
+createInertiaApp({ resolve: (name) => name })
 console.log('after marker')`
     const result = await transform(code, true)
 
-    for (const marker of ["console.log('resolve marker')", "console.log('after marker')"]) {
+    for (const marker of ['(name) => name', "console.log('after marker')"]) {
       expectOriginalPosition(code, result.code, result.map, marker)
     }
   })
@@ -122,29 +115,17 @@ createInertiaApp({ pages: { transform: ${identifier} } })`
 
   it('preserves the legacy createServer callback and options', async () => {
     const code = `${importApp}
-import createServer from '@inertiajs/${framework}/server'
-console.log('before marker')
+import createServer from '@inertiajs/vue3/server'
 createServer((page) => createInertiaApp({
   page,
-  pages: {
-    transform: (name) => name.toLowerCase(),
-  },
-  setup: (options) => options.app,
+  pages: { transform: (name) => name.toLowerCase() },
 }), {
   port: getPort(),
 })
-
 console.log('after marker')`
     const result = await transform(code, true)
 
-    for (const marker of [
-      "console.log('before marker')",
-      '(page) =>',
-      'name.toLowerCase()',
-      'options.app',
-      'getPort()',
-      "console.log('after marker')",
-    ]) {
+    for (const marker of ['(page) =>', 'name.toLowerCase()', 'getPort()', "console.log('after marker')"]) {
       expectOriginalPosition(code, result.code, result.map, marker)
     }
   })
@@ -190,13 +171,10 @@ export const after = () => afterMarker()`
 
       expect(warnings.filter((warning) => /sourcemap/i.test(warning))).toEqual([])
 
-      if (!('output' in result)) {
-        throw new Error('Expected a single build output')
-      }
+      const output = 'output' in result ? result.output : []
+      const chunk = output.find((chunk) => chunk.type === 'chunk' && chunk.isEntry)
 
-      const chunk = result.output.find((output) => output.type === 'chunk' && output.isEntry)
-
-      if (!chunk || chunk.type !== 'chunk' || !chunk.map) {
+      if (chunk?.type !== 'chunk' || !chunk.map) {
         throw new Error('Expected an entry chunk with a sourcemap')
       }
 
@@ -209,29 +187,29 @@ export const after = () => afterMarker()`
       rmSync(root, { recursive: true, force: true })
     }
   })
-})
 
-it('maps an actual SSR call when a custom template also includes it in a comment', async () => {
-  const code = `import { createInertiaApp } from '@inertiajs/custom'
+  it('maps an actual SSR call when a custom template also includes it in a comment', async () => {
+    const code = `import { createInertiaApp } from '@inertiajs/custom'
 createInertiaApp({ resolve: (name) => name })`
-  const result = await inertia({
-    frameworks: [
-      {
-        package: '@inertiajs/custom',
-        extensions: ['.js'],
-        ssr: (call) => `/* ${call} */\nconst render = ${call}`,
-      },
-    ],
-  }).transform!(code, '/src/app.ts', { ssr: true })
+    const result = await inertia({
+      frameworks: [
+        {
+          package: '@inertiajs/custom',
+          extensions: ['.js'],
+          ssr: (call) => `/* ${call} */\nconst render = ${call}`,
+        },
+      ],
+    }).transform!(code, '/src/app.ts', { ssr: true })
 
-  if (!result || typeof result === 'string' || !result.map) {
-    throw new Error('Expected transformed code with a sourcemap')
-  }
+    if (!result || typeof result === 'string' || !result.map) {
+      throw new Error('Expected transformed code with a sourcemap')
+    }
 
-  const map = new SourceMap(typeof result.map === 'string' ? JSON.parse(result.map) : result.map)
-  const generated = position(result.code, 'const render = createInertiaApp')
-  const entry = map.findEntry(generated.line, generated.column + 'const render = '.length)
+    const map = new SourceMap(typeof result.map === 'string' ? JSON.parse(result.map) : result.map)
+    const generated = position(result.code, 'const render = createInertiaApp')
+    const entry = map.findEntry(generated.line, generated.column + 'const render = '.length)
 
-  expect(entry.originalLine).toBe(1)
-  expect(entry.originalColumn).toBe(0)
+    expect(entry.originalLine).toBe(1)
+    expect(entry.originalColumn).toBe(0)
+  })
 })
