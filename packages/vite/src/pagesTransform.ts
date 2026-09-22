@@ -38,7 +38,7 @@
 import type { Property } from 'estree'
 import MagicString from 'magic-string'
 import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStringArray } from './astUtils'
-import { replaceWithSource } from './sourceMap'
+import { replaceRange } from './sourceMap'
 import type { FrameworkConfig } from './types'
 
 export interface PageTransformResult {
@@ -120,15 +120,15 @@ function replacePages(
   const resolver = buildResolver(directories, extensions, extractDefault, eager, transform)
   const globs = directories.map((d) => buildGlob(d, extensions))
   const result = new MagicString(code)
-  replaceWithSource(
-    result,
-    property.start,
-    property.end,
-    resolver,
-    config.transform
-      ? { ...config.transform, offset: resolver.indexOf(RESOLVED_NAME_PREFIX) + RESOLVED_NAME_PREFIX.length }
-      : undefined,
-  )
+
+  if (config.transform && transform) {
+    const offset = resolver.indexOf(RESOLVED_NAME_PREFIX) + RESOLVED_NAME_PREFIX.length
+
+    replaceRange(result, property.start, config.transform.start, resolver.slice(0, offset))
+    replaceRange(result, config.transform.end, property.end, resolver.slice(offset + transform.length))
+  } else {
+    replaceRange(result, property.start, property.end, resolver)
+  }
 
   return {
     code: result,

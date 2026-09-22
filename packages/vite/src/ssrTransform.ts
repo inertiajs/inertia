@@ -8,7 +8,7 @@
 
 import MagicString from 'magic-string'
 import { type NodeWithPos, ParsedCode } from './astUtils'
-import { replaceWithSource } from './sourceMap'
+import { replaceRange } from './sourceMap'
 import type { FrameworkConfig, SSROptions } from './types'
 
 /**
@@ -60,13 +60,12 @@ export function wrapWithServerBootstrap(
       return ssrCode.slice(start, end) === configureCall
     }) as NodeWithPos<typeof call> | undefined
 
-    replaceWithSource(
-      result,
-      statement.start,
-      statement.end,
-      ssrCode,
-      generatedCall ? { start: call.start, end: call.end, offset: generatedCall.start } : undefined,
-    )
+    if (generatedCall) {
+      replaceRange(result, statement.start, call.start, ssrCode.slice(0, generatedCall.start))
+      replaceRange(result, call.end, statement.end, ssrCode.slice(generatedCall.end))
+    } else {
+      replaceRange(result, statement.start, statement.end, ssrCode)
+    }
 
     return result
   }

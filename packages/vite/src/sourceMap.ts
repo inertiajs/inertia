@@ -1,18 +1,13 @@
 import type MagicString from 'magic-string'
 
-/** Replace generated scaffolding while retaining the original positions of an embedded expression. */
-export function replaceWithSource(
-  code: MagicString,
-  start: number,
-  end: number,
-  replacement: string,
-  source?: { start: number; end: number; offset: number },
-): void {
-  if (!source) {
-    code.remove(start, end).appendLeft(start, replacement)
-    return
+/**
+ * Replace a range with generated code, keeping surrounding original positions intact.
+ * Accepts an empty range so generated code can be spliced around a preserved expression.
+ */
+export function replaceRange(code: MagicString, start: number, end: number, replacement: string): void {
+  if (start < end) {
+    code.remove(start, end)
   }
 
-  code.remove(start, source.start).appendLeft(source.start, replacement.slice(0, source.offset))
-  code.remove(source.end, end).appendRight(source.end, replacement.slice(source.offset + source.end - source.start))
+  code.appendLeft(start, replacement)
 }
