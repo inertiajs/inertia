@@ -775,6 +775,16 @@ export default () => {
         Success Event Link (delaying onFinish w/ Promise)
       </Link>
 
+      {/* Events: Flash */}
+      <Link
+        href="/events/flash"
+        method="post"
+        onFlash={(flash) => internalAlert('linkOnFlash', flash)}
+        className="link-flash"
+      >
+        Flash Event Link
+      </Link>
+
       {/* Events: HTTP Exception */}
       <a href="#" onClick={httpExceptionVisit} className="http-exception">
         HTTP Exception Event
@@ -793,6 +803,26 @@ export default () => {
         HTTP Exception Event (Inertia Response Prevent)
       </a>
 
+      <Link
+        href="/non-inertia"
+        method="post"
+        onHttpException={(response) => internalAlert('linkOnHttpException', response.status)}
+        className="link-http-exception"
+      >
+        HTTP Exception Event Link
+      </Link>
+      <Link
+        href="/non-inertia"
+        method="post"
+        onHttpException={() => {
+          internalAlert('linkOnHttpException')
+          return false
+        }}
+        className="link-http-exception-prevent"
+      >
+        HTTP Exception Event Link (Prevent)
+      </Link>
+
       {/* Events: Network Error */}
       <a href="#" onClick={networkErrorVisit} className="network-error">
         Network Error Event
@@ -800,6 +830,25 @@ export default () => {
       <a href="#" onClick={networkErrorPreventVisit} className="network-error-prevent">
         Network Error Event (Prevent)
       </a>
+      <Link
+        href="/disconnect"
+        method="post"
+        onNetworkError={(error) => internalAlert('linkOnNetworkError', error.message)}
+        className="link-network-error"
+      >
+        Network Error Event Link
+      </Link>
+      <Link
+        href="/disconnect"
+        method="post"
+        onNetworkError={() => {
+          internalAlert('linkOnNetworkError')
+          return false
+        }}
+        className="link-network-error-prevent"
+      >
+        Network Error Event Link (Prevent)
+      </Link>
 
       {/* Events: Finish */}
       <a href="#" onClick={finishVisit} className="finish">

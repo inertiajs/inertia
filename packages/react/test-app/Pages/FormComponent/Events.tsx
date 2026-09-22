@@ -1,29 +1,19 @@
 import { Form } from '@inertiajs/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export default () => {
   const [events, setEvents] = useState<string[]>([])
+  const [globalEvents, setGlobalEvents] = useState<string[]>([])
+  const [flashData, setFlashData] = useState('')
   const [cancelInOnBefore, setCancelInOnBefore] = useState(false)
-  const [shouldFail, setShouldFail] = useState(false)
-  const [shouldDelay, setShouldDelay] = useState(false)
+  const [preventErrorEvents, setPreventErrorEvents] = useState(false)
+  const [action, setAction] = useState('/form-component/events/success')
 
   const [cancelToken, setCancelToken] = useState<{ cancel: () => void } | null>(null)
 
   function log(eventName: string) {
     setEvents((previousEvents) => [...previousEvents, eventName])
   }
-
-  const action = useMemo(() => {
-    if (shouldFail) {
-      return '/form-component/events/errors'
-    }
-
-    if (shouldDelay) {
-      return '/form-component/events/delay'
-    }
-
-    return '/form-component/events/success'
-  }, [shouldFail, shouldDelay])
 
   const formEvents = useMemo(
     () => ({
@@ -41,12 +31,30 @@ export default () => {
       onCancel: () => log('onCancel'),
       onSuccess: () => log('onSuccess'),
       onError: () => log('onError'),
+      onHttpException: () => {
+        log('onHttpException')
+
+        if (preventErrorEvents) {
+          return false
+        }
+      },
+      onNetworkError: () => {
+        log('onNetworkError')
+
+        if (preventErrorEvents) {
+          return false
+        }
+      },
+      onFlash: (flash: Record<string, unknown>) => {
+        log('onFlash')
+        setFlashData(JSON.stringify(flash))
+      },
       onCancelToken: (token: { cancel: () => void }) => {
         log('onCancelToken')
         setCancelToken(token)
       },
     }),
-    [cancelInOnBefore],
+    [cancelInOnBefore, preventErrorEvents],
   )
 
   const cancelVisit = useCallback(() => {
@@ -56,6 +64,21 @@ export default () => {
     }
   }, [cancelToken])
 
+  useEffect(() => {
+    const logGlobalEvent = (name: string) => () => setGlobalEvents((previousEvents) => [...previousEvents, name])
+
+    const onHttpException = logGlobalEvent('httpException')
+    const onNetworkError = logGlobalEvent('networkError')
+
+    document.addEventListener('inertia:httpException', onHttpException)
+    document.addEventListener('inertia:networkError', onNetworkError)
+
+    return () => {
+      document.removeEventListener('inertia:httpException', onHttpException)
+      document.removeEventListener('inertia:networkError', onNetworkError)
+    }
+  }, [])
+
   return (
     <Form action={action} method="post" {...formEvents}>
       {({ processing, progress, wasSuccessful, recentlySuccessful, cancel }) => (
@@ -64,6 +87,14 @@ export default () => {
 
           <div>
             Events: <span id="events">{events.join(',')}</span>
+          </div>
+
+          <div>
+            Global events: <span id="global-events">{globalEvents.join(',')}</span>
+          </div>
+
+          <div>
+            Flash: <span id="flash">{flashData}</span>
           </div>
 
           <div>
@@ -93,11 +124,23 @@ export default () => {
             <button type="button" onClick={() => setCancelInOnBefore(true)}>
               Cancel in onBefore
             </button>
-            <button type="button" onClick={() => setShouldFail(true)}>
+            <button type="button" onClick={() => setAction('/form-component/events/errors')}>
               Fail Request
             </button>
-            <button type="button" onClick={() => setShouldDelay(true)}>
+            <button type="button" onClick={() => setAction('/form-component/events/delay')}>
               Should Delay
+            </button>
+            <button type="button" onClick={() => setAction('/form-component/events/flash')}>
+              Return Flash
+            </button>
+            <button type="button" onClick={() => setAction('/non-inertia')}>
+              Trigger HTTP Exception
+            </button>
+            <button type="button" onClick={() => setAction('/disconnect')}>
+              Trigger Network Error
+            </button>
+            <button type="button" onClick={() => setPreventErrorEvents(true)}>
+              Prevent Error Events
             </button>
             <button type="button" onClick={cancelVisit}>
               Cancel Visit
