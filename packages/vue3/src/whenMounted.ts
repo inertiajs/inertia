@@ -1,5 +1,5 @@
-import { defineComponent, Fragment, h, inject, onMounted, ref, type SlotsType } from 'vue'
-import { hydratedKey } from './hydration'
+import { defineComponent, Fragment, h, onMounted, ref, type SlotsType } from 'vue'
+import { injectHydrationContext } from './hydration'
 
 export default defineComponent({
   name: 'WhenMounted',
@@ -9,9 +9,8 @@ export default defineComponent({
   }>,
   setup(_, { slots }) {
     // The injected ref is false only during the initial hydration render, so the fallback shows
-    // there and the default slot shows everywhere else, remounts included. It's app-wide, so a
-    // subtree hydrating late inside <Suspense> renders the default slot on its first render.
-    const hydrated = inject(hydratedKey, null)
+    // there and the default slot shows everywhere else, remounts included
+    const hydrated = injectHydrationContext()
     const mounted = ref(hydrated?.value ?? false)
 
     onMounted(() => {

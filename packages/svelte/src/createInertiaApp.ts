@@ -16,7 +16,6 @@ import {
 } from '@inertiajs/core'
 import { hydrate, mount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
-import { setHydrationBoot } from './hydration'
 import { config } from './index'
 import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 
@@ -121,6 +120,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialComponent,
         resolveComponent,
         defaultLayout: layout,
+        isServerRendered: true,
       }
 
       let svelteApp: SvelteRenderResult
@@ -166,7 +166,15 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ])
 
-  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
+  const el = isServer ? null : document.getElementById(id)!
+
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage,
+    initialComponent,
+    resolveComponent,
+    defaultLayout: layout,
+    isServerRendered: isServer || el!.hasAttribute('data-server-rendered'),
+  }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
@@ -189,10 +197,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   // CSR
-  const target = document.getElementById(id)!
-  const isServerRendered = target.hasAttribute('data-server-rendered')
-
-  setHydrationBoot(isServerRendered)
+  const target = el!
+  const isServerRendered = props.isServerRendered!
 
   if (setup) {
     await setup({ el: target, App, props })

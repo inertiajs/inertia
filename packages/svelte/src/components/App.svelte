@@ -7,6 +7,7 @@
     initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
     defaultLayout?: (name: string, page: Page) => unknown
+    isServerRendered?: boolean
   }
 </script>
 
@@ -15,7 +16,7 @@
   import { router } from '@inertiajs/core'
   import { onMount } from 'svelte'
   import type { Component } from 'svelte'
-  import { isHydrating, setHydrationContext } from '../hydration'
+  import { setHydrationContext } from '../hydration'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutType, LayoutResolver } from '../types'
@@ -26,9 +27,10 @@
     initialPage: InertiaAppProps['initialPage']
     resolveComponent: InertiaAppProps['resolveComponent']
     defaultLayout?: InertiaAppProps['defaultLayout']
+    isServerRendered?: boolean
   }
 
-  const { initialComponent, initialPage, resolveComponent, defaultLayout }: Props = $props()
+  const { initialComponent, initialPage, resolveComponent, defaultLayout, isServerRendered = true }: Props = $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
@@ -50,7 +52,7 @@
   const isServer = typeof window === 'undefined'
 
   // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
-  const hydration = $state({ hydrated: !isHydrating() })
+  const hydration = $state({ hydrated: !isServerRendered })
   setHydrationContext(hydration)
 
   if (!isServer) {

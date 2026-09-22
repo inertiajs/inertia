@@ -1,14 +1,11 @@
-import type { InjectionKey, Ref } from 'vue'
+import { inject, provide, type InjectionKey, type Ref } from 'vue'
 
-// Defaults to true so an unannounced boot (the server, most importantly) renders the fallback
-let isHydrationBoot = true
+const HydrationContextKey: InjectionKey<Ref<boolean>> = Symbol('InertiaHydrationContext')
 
-export function setHydrationBoot(value: boolean): void {
-  isHydrationBoot = value
+export function provideHydrationContext(hydrated: Ref<boolean>): void {
+  provide(HydrationContextKey, hydrated)
 }
 
-export function isHydrating(): boolean {
-  return isHydrationBoot
+export function injectHydrationContext(): Ref<boolean> | null {
+  return inject(HydrationContextKey, null)
 }
-
-export const hydratedKey: InjectionKey<Ref<boolean>> = Symbol('inertia:hydrated')

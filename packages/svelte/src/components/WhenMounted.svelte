@@ -10,7 +10,7 @@
   let { children, fallback }: Props = $props()
 
   // The context is false only during the initial hydration render, so the fallback shows
-  // there and the children show everywhere else, remounts included.
+  // there and the children show everywhere else, remounts included
   const hydration = getHydrationContext()
 
   let mounted = $state(hydration?.hydrated ?? false)
