@@ -25,7 +25,15 @@
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * createServer(async (page) => (await renderPromise)(page, renderToString))
+ * renderPromise.catch((error) => console.error(error))
+ *
+ * const renderPage = async (page) => {
+ *   const render = await renderPromise
+ *
+ *   return render(page, renderToString)
+ * }
+ *
+ * createServer(renderPage)
  * ```
  *
  * In development, it exports the render function directly for the Vite dev server.
@@ -53,10 +61,14 @@ import { renderToString } from 'react-dom/server'
 
 const renderPromise = ${configureCall}
 
-// Reported per render by the SSR server, so it must not go unhandled here
-renderPromise.catch(() => {})
+// Logged here so it never goes unhandled, and reported again per render by the SSR server
+renderPromise.catch((error) => console.error(error))
 
-const renderPage = async (page) => (await renderPromise)(page, renderToString)
+const renderPage = async (page) => {
+  const render = await renderPromise
+
+  return render(page, renderToString)
+}
 
 if (import.meta.env.PROD) {
   createServer(renderPage${options})

@@ -25,9 +25,13 @@
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * ssrPromise.catch(() => {})
+ * ssrPromise.catch((error) => console.error(error))
  *
- * const renderPage = async (page) => (await ssrPromise)(page, render)
+ * const renderPage = async (page) => {
+ *   const ssr = await ssrPromise
+ *
+ *   return ssr(page, render)
+ * }
  *
  * // Only start server in production
  * if (import.meta.env.PROD) {
@@ -61,10 +65,14 @@ import { render } from 'svelte/server'
 
 const ssrPromise = ${configureCall}
 
-// Reported per render by the SSR server, so it must not go unhandled here
-ssrPromise.catch(() => {})
+// Logged here so it never goes unhandled, and reported again per render by the SSR server
+ssrPromise.catch((error) => console.error(error))
 
-const renderPage = async (page) => (await ssrPromise)(page, render)
+const renderPage = async (page) => {
+  const ssr = await ssrPromise
+
+  return ssr(page, render)
+}
 
 if (import.meta.env.PROD) {
   createServer(renderPage${options})

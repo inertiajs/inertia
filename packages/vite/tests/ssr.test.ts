@@ -825,7 +825,8 @@ createInertiaApp({ resolve: (name) => name })`
       expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
       expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
       expect(result).toContain('const renderPromise = createInertiaApp')
-      expect(result).toContain('const renderPage = async (page) => (await renderPromise)(page, renderToString)')
+      expect(result).toContain('const render = await renderPromise')
+      expect(result).toContain('return render(page, renderToString)')
       expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
@@ -845,7 +846,8 @@ createInertiaApp({ resolve: (name) => name })`
 
       expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
       expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('const renderPage = async (page) => (await ssrPromise)(page, render)')
+      expect(result).toContain('const ssr = await ssrPromise')
+      expect(result).toContain('return ssr(page, render)')
       expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
@@ -870,8 +872,9 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({ resolve: (name) => name })`
         const result = String(plugin.transform!(code, 'app.ts', { ssr: true }))
 
-        expect(result).not.toMatch(/=\s*await\s/)
-        expect(result).toContain(`${promise}.catch(() => {})`)
+        // Any `await` left at the start of a line would be a top-level await
+        expect(result).not.toMatch(/^\S.*\bawait\b/m)
+        expect(result).toContain(`${promise}.catch((error) => console.error(error))`)
 
         // A configure failure must surface per render instead of taking the server down
         expect(result).not.toContain('process.exit')

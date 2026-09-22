@@ -25,9 +25,13 @@
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * renderPromise.catch(() => {})
+ * renderPromise.catch((error) => console.error(error))
  *
- * const renderPage = async (page) => (await renderPromise)(page, renderToString)
+ * const renderPage = async (page) => {
+ *   const render = await renderPromise
+ *
+ *   return render(page, renderToString)
+ * }
  *
  * // Only start server in production
  * if (import.meta.env.PROD) {
@@ -59,10 +63,14 @@ import { renderToString } from 'vue/server-renderer'
 
 const renderPromise = ${configureCall}
 
-// Reported per render by the SSR server, so it must not go unhandled here
-renderPromise.catch(() => {})
+// Logged here so it never goes unhandled, and reported again per render by the SSR server
+renderPromise.catch((error) => console.error(error))
 
-const renderPage = async (page) => (await renderPromise)(page, renderToString)
+const renderPage = async (page) => {
+  const render = await renderPromise
+
+  return render(page, renderToString)
+}
 
 if (import.meta.env.PROD) {
   createServer(renderPage${options})

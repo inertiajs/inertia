@@ -26,9 +26,13 @@
  *
  *   const renderPromise = ${configureCall}
  *
- *   renderPromise.catch(() => {})
+ *   renderPromise.catch((error) => console.error(error))
  *
- *   const renderPage = async (page) => (await renderPromise)(page, renderToString)
+ *   const renderPage = async (page) => {
+ *     const render = await renderPromise
+ *
+ *     return render(page, renderToString)
+ *   }
  *
  *   if (import.meta.env.PROD) {
  *     createServer(renderPage${options})
