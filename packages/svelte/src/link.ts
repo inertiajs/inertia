@@ -34,6 +34,9 @@ type SelectedEventKeys =
   | 'cancel'
   | 'success'
   | 'error'
+  | 'httpException'
+  | 'networkError'
+  | 'flash'
   | 'prefetching'
   | 'prefetched'
 type SelectedGlobalEventsMap = Pick<GlobalEventsMap, SelectedEventKeys>
@@ -209,6 +212,9 @@ function link(
       onCancel: () => dispatchEvent('cancel'),
       onSuccess: (page) => dispatchEvent('success', { detail: { page } }),
       onError: (errors) => dispatchEvent('error', { detail: { errors } }),
+      onHttpException: (response) => dispatchEvent('httpException', { cancelable: true, detail: { response } }),
+      onNetworkError: (error) => dispatchEvent('networkError', { cancelable: true, detail: { error } }),
+      onFlash: (flash) => dispatchEvent('flash', { detail: { flash } }),
       onCancelToken: (token) => dispatchEvent('cancel-token', { detail: { token } }),
       onPrefetching: (visit) => dispatchEvent('prefetching', { detail: { visit } }),
       onPrefetched: (response, visit) => dispatchEvent('prefetched', { detail: { response, visit } }),

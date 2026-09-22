@@ -464,6 +464,20 @@ const networkErrorPreventVisit = () => {
   )
 }
 
+const linkHttpException = (response: { status: number }) => internalAlert('linkOnHttpException', response.status)
+
+const linkHttpExceptionPrevent = () => {
+  internalAlert('linkOnHttpException')
+  return false
+}
+
+const linkNetworkError = (error: Error) => internalAlert('linkOnNetworkError', error.message)
+
+const linkNetworkErrorPrevent = () => {
+  internalAlert('linkOnNetworkError')
+  return false
+}
+
 const navigateVisit = () => {
   router.on('navigate', (event) => {
     internalAlert('Inertia.on(navigate)')
@@ -711,6 +725,11 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >Success Event Link (delaying onFinish w/ Promise)</Link
     >
 
+    <!-- Events: Flash -->
+    <Link href="/events/flash" method="post" @flash="(flash) => internalAlert('linkOnFlash', flash)" class="link-flash"
+      >Flash Event Link</Link
+    >
+
     <!-- Events: HTTP Exception -->
     <a href="#" @click.prevent="httpExceptionVisit" class="http-exception">HTTP Exception Event</a>
     <a href="#" @click.prevent="httpExceptionPreventVisit" class="http-exception-prevent"
@@ -726,10 +745,27 @@ const callbackSuccessErrorPromise = (eventName: string) => {
       >HTTP Exception Event (Inertia Response Prevent)</a
     >
 
+    <Link href="/non-inertia" method="post" @http-exception="linkHttpException" class="link-http-exception"
+      >HTTP Exception Event Link</Link
+    >
+    <Link
+      href="/non-inertia"
+      method="post"
+      @http-exception="linkHttpExceptionPrevent"
+      class="link-http-exception-prevent"
+      >HTTP Exception Event Link (Prevent)</Link
+    >
+
     <!-- Events: Network Error -->
     <a href="#" @click.prevent="networkErrorVisit" class="network-error">Network Error Event</a>
     <a href="#" @click.prevent="networkErrorPreventVisit" class="network-error-prevent"
       >Network Error Event (Prevent)</a
+    >
+    <Link href="/disconnect" method="post" @network-error="linkNetworkError" class="link-network-error"
+      >Network Error Event Link</Link
+    >
+    <Link href="/disconnect" method="post" @network-error="linkNetworkErrorPrevent" class="link-network-error-prevent"
+      >Network Error Event Link (Prevent)</Link
     >
 
     <!-- Events: Finish -->
