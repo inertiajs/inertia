@@ -82,16 +82,16 @@ function isCSSRequest(url: string): boolean {
 }
 
 /**
- * The Laravel Vite plugin always sets a placeholder origin that it swaps for the real
- * dev server URL in its transform hook. Our link tags never pass through that hook,
- * so the placeholder would end up in the HTML as-is.
+ * Origins that plugins set as a sentinel and swap for the real dev server URL in their
+ * own transform hook. Our link tags never pass through that hook, so the placeholder
+ * would end up in the HTML as-is.
  */
-const LARAVEL_PLACEHOLDER_ORIGIN = 'http://__laravel_vite_placeholder__.test'
+const PLACEHOLDER_ORIGINS = ['http://__laravel_vite_placeholder__.test']
 
 function resolveDevServerOrigin(server: ViteDevServer): string {
   const origin = server.config.server.origin
 
-  if (origin && origin !== LARAVEL_PLACEHOLDER_ORIGIN) {
+  if (origin && !PLACEHOLDER_ORIGINS.includes(origin)) {
     return origin.replace(/\/$/, '')
   }
 
