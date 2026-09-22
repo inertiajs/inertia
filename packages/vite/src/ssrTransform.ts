@@ -77,16 +77,20 @@ export function wrapWithServerBootstrap(
     const lastArgument = args[args.length - 1]
     const result = new MagicString(code)
 
-    result.remove(statement.start, callback.start).appendLeft(callback.start, 'const renderPage = ')
-    result.appendLeft(
+    replaceRange(result, statement.start, callback.start, 'const renderPage = ')
+    replaceRange(
+      result,
+      callback.end,
       callback.end,
       `
 
 if (import.meta.env.PROD) {
   createServer(renderPage`,
     )
-    result.remove(lastArgument.end, statement.end).appendRight(
+    replaceRange(
+      result,
       lastArgument.end,
+      statement.end,
       `)
 }
 

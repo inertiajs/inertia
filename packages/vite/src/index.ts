@@ -23,6 +23,7 @@ import { glob } from 'tinyglobby'
 import type { Plugin, ViteDevServer } from 'vite'
 import { defaultFrameworks } from './frameworks/index'
 import { transformPageResolution } from './pagesTransform'
+import { generateMap } from './sourceMap'
 import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT, SSR_ENTRY_CANDIDATES } from './ssr'
 import { findInertiaAppExport, wrapWithServerBootstrap } from './ssrTransform'
 import type { FrameworkConfig } from './types'
@@ -146,7 +147,8 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
 
       let result = code
-      const maps: string[] = []
+      let ssrMap: string | undefined
+      let pagesMap: string | undefined
 
       if (!ssrDisabled && options?.ssr && findInertiaAppExport(result)) {
         const ssrTransform = wrapWithServerBootstrap(
@@ -157,7 +159,7 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
 
         if (ssrTransform) {
           result = ssrTransform.toString()
-          maps.push(ssrTransform.generateMap({ source: id, includeContent: true, hires: true }).toString())
+          ssrMap = generateMap(ssrTransform, id)
         }
       }
 
@@ -169,10 +171,17 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
         }
 
         result = pageTransform.code.toString()
-        maps.unshift(pageTransform.code.generateMap({ source: id, includeContent: true, hires: true }).toString())
+        pagesMap = generateMap(pageTransform.code, id)
       }
 
-      return result !== code ? { code: result, map: remapping(maps, () => null).toString() } : null
+      if (result === code) {
+        return null
+      }
+
+      // Ordered last transform first, which is what remapping composes from.
+      const maps = [pagesMap, ssrMap].filter((map) => map !== undefined)
+
+      return { code: result, map: remapping(maps, () => null).toString() }
     },
 
     configureServer(server) {

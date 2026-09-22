@@ -11,3 +11,8 @@ export function replaceRange(code: MagicString, start: number, end: number, repl
 
   code.appendLeft(start, replacement)
 }
+
+/** Generate a sourcemap tracing the splices back to the original file. */
+export function generateMap(code: MagicString, source: string): string {
+  return code.generateMap({ source, includeContent: true, hires: true }).toString()
+}
