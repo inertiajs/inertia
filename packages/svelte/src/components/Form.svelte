@@ -41,7 +41,6 @@
     onCancel?: FormComponentProps['onCancel']
     onSuccess?: FormComponentProps['onSuccess']
     onError?: FormComponentProps['onError']
-    onBeforeUpdate?: FormComponentProps['onBeforeUpdate']
     onHttpException?: FormComponentProps['onHttpException']
     onNetworkError?: FormComponentProps['onNetworkError']
     onFlash?: FormComponentProps['onFlash']
@@ -79,7 +78,6 @@
     onCancel = noop,
     onSuccess = noop,
     onError = noop,
-    onBeforeUpdate = noop,
     onHttpException = noop,
     onNetworkError = noop,
     onFlash = noop,
@@ -184,7 +182,6 @@
       onProgress,
       onFinish,
       onCancel,
-      onBeforeUpdate,
       onHttpException,
       onNetworkError,
       onFlash,

@@ -122,10 +122,6 @@ const Form = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
-    onBeforeUpdate: {
-      type: Function as PropType<FormComponentProps['onBeforeUpdate']>,
-      default: noop,
-    },
     onHttpException: {
       type: Function as PropType<FormComponentProps['onHttpException']>,
       default: noop,
@@ -312,7 +308,6 @@ const Form = defineComponent({
         onProgress: props.onProgress,
         onFinish: props.onFinish,
         onCancel: props.onCancel,
-        onBeforeUpdate: props.onBeforeUpdate,
         onHttpException: props.onHttpException,
         onNetworkError: props.onNetworkError,
         onFlash: props.onFlash,

@@ -977,6 +977,7 @@ app.get('/layout-props/callback-component-prop', (req, res) => inertia.render(re
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
+app.post('/events/flash', (req, res) => inertia.render(req, res, { component: 'Events', flash: { foo: 'bar' } }))
 
 app.get('/poll/overlap/:mode', (req, res) => {
   const mode = req.params.mode
@@ -2096,6 +2097,9 @@ app.post('/form-component/events/errors', async (req, res) =>
     component: 'FormComponent/Events',
     props: { errors: { field: 'Something went wrong' } },
   }),
+)
+app.post('/form-component/events/flash', async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/Events', flash: { message: 'Form was submitted' } }),
 )
 
 app.post('/form-component/progress', async (req, res) =>

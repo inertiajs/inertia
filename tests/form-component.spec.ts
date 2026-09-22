@@ -304,62 +304,6 @@ test.describe('Form Component', () => {
     })
   })
 
-  test.describe('Visit callbacks', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto('/form-component/callbacks')
-    })
-
-    for (const event of ['httpException', 'networkError']) {
-      for (const cancelErrors of [true, false]) {
-        test(`${event} receives the error and ${cancelErrors ? 'suppresses' : 'allows'} the global event`, async ({
-          page,
-        }) => {
-          await page.evaluate((event) => {
-            document.addEventListener(`inertia:${event}`, (event) => {
-              document.body.dataset.globalError = 'received'
-              event.preventDefault()
-            })
-          }, event)
-          await page.route('**/form-component/callbacks', (route) =>
-            event === 'httpException'
-              ? route.fulfill({ status: 500, contentType: 'text/plain', body: 'Server error' })
-              : route.abort('failed'),
-          )
-          await page.getByRole('checkbox', { name: 'Cancel errors' }).setChecked(cancelErrors)
-          await page.getByRole('button', { name: 'Submit' }).click()
-
-          await expect(page.locator('#events')).toHaveText(
-            `on${event[0].toUpperCase()}${event.slice(1)}:${event === 'httpException' ? '500' : 'true'}\nonFinish`,
-          )
-          await expect(page.locator('#processing')).toHaveText('false')
-          expect(await page.locator('body').getAttribute('data-global-error')).toBe(cancelErrors ? null : 'received')
-        })
-      }
-    }
-
-    test('passes the incoming page to onBeforeUpdate and flash data to onFlash', async ({ page }) => {
-      await page.route('**/form-component/callbacks', (route) =>
-        route.fulfill({
-          contentType: 'application/json',
-          headers: { 'X-Inertia': 'true' },
-          body: JSON.stringify({
-            component: 'FormComponent/Callbacks',
-            props: {},
-            url: '/form-component/callbacks',
-            version: null,
-            flash: { message: 'Saved' },
-          }),
-        }),
-      )
-      await page.getByRole('button', { name: 'Submit' }).click()
-
-      await expect(page.locator('#events')).toHaveText(
-        'onBeforeUpdate:FormComponent/Callbacks\nonFlash:{"message":"Saved"}\nonSuccess\nonFinish',
-      )
-      await expect(page.locator('#processing')).toHaveText('false')
-    })
-  })
-
   test.describe('Events and State', () => {
     test.beforeEach(async ({ page }) => {
       pageLoads.watch(page)
@@ -383,6 +327,48 @@ test.describe('Form Component', () => {
       await page.getByRole('button', { name: 'Submit' }).click()
 
       await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onError', 'onFinish'])
+    })
+
+    test('fires onFlash with the flash data from the response', async ({ page }) => {
+      await page.getByRole('button', { name: 'Return Flash' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onFlash', 'onSuccess', 'onFinish'])
+      await expect(page.locator('#flash')).toHaveText('{"message":"Form was submitted"}')
+    })
+
+    test('fires onHttpException when the server returns a non-Inertia response', async ({ page }) => {
+      await page.getByRole('button', { name: 'Trigger HTTP Exception' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onHttpException', 'onFinish'])
+      await expect(page.locator('#global-events')).toHaveText('httpException')
+    })
+
+    test('suppresses the global httpException event when onHttpException returns false', async ({ page }) => {
+      await page.getByRole('button', { name: 'Trigger HTTP Exception' }).click()
+      await page.getByRole('button', { name: 'Prevent Error Events' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onHttpException', 'onFinish'])
+      await expect(page.locator('#global-events')).toBeEmpty()
+    })
+
+    test('fires onNetworkError when the request fails', async ({ page }) => {
+      await page.getByRole('button', { name: 'Trigger Network Error' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onNetworkError', 'onFinish'])
+      await expect(page.locator('#global-events')).toHaveText('networkError')
+    })
+
+    test('suppresses the global networkError event when onNetworkError returns false', async ({ page }) => {
+      await page.getByRole('button', { name: 'Trigger Network Error' }).click()
+      await page.getByRole('button', { name: 'Prevent Error Events' }).click()
+      await page.getByRole('button', { name: 'Submit' }).click()
+
+      await waitForEvents(page, ['onBefore', 'onCancelToken', 'onStart', 'onNetworkError', 'onFinish'])
+      await expect(page.locator('#global-events')).toBeEmpty()
     })
 
     test('fires only onBefore and onCancel when canceled via event cancellation', async ({ page }) => {
