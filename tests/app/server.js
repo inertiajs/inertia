@@ -75,9 +75,9 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
-app.get('/ssr/client-only', (req, res) =>
+app.get('/ssr/when-mounted', (req, res) =>
   inertia.renderSSR(req, res, {
-    component: 'SSR/ClientOnly',
+    component: 'SSR/WhenMounted',
     props: {},
   }),
 )
@@ -185,9 +185,9 @@ app.get('/ssr/infinite-scroll', (req, res) => {
   })
 })
 
-app.get('/client-only', (req, res) =>
+app.get('/when-mounted', (req, res) =>
   inertia.render(req, res, {
-    component: 'ClientOnly',
+    component: 'WhenMounted',
     props: {},
   }),
 )

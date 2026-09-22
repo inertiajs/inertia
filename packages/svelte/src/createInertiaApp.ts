@@ -6,7 +6,6 @@ import {
   http as httpModule,
   resolveServerHead,
   router,
-  setHydrationBoot,
   setupProgress,
   type CreateInertiaAppOptions,
   type CreateInertiaAppOptionsForCSR,
@@ -17,6 +16,7 @@ import {
 } from '@inertiajs/core'
 import { hydrate, mount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
+import { setHydrationBoot } from './hydration'
 import { config } from './index'
 import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
 

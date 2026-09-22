@@ -3,7 +3,6 @@ import type { ReactInertiaAppConfig } from './types'
 
 export { http, progress, router } from '@inertiajs/core'
 export { default as App } from './App'
-export { default as ClientOnly } from './ClientOnly'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './Deferred'
 export { default as Form, useFormContext } from './Form'
@@ -27,6 +26,7 @@ export { default as usePage } from './usePage'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
+export { default as WhenMounted } from './WhenMounted'
 export { default as WhenVisible } from './WhenVisible'
 
 export const config = coreConfig.extend<ReactInertiaAppConfig>()

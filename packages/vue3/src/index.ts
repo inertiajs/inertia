@@ -3,7 +3,6 @@ import type { VueInertiaAppConfig } from './types'
 
 export { http, progress, router } from '@inertiajs/core'
 export { default as App, usePage } from './app'
-export { default as ClientOnly } from './clientOnly'
 export { default as createInertiaApp } from './createInertiaApp'
 export { default as Deferred } from './deferred'
 export { createForm, default as Form, useFormContext } from './form'
@@ -17,6 +16,7 @@ export { default as useHttp } from './useHttp'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
+export { default as WhenMounted } from './whenMounted'
 export { default as WhenVisible } from './whenVisible'
 
 export const config = coreConfig.extend<VueInertiaAppConfig>({})

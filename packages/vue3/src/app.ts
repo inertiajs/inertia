@@ -5,7 +5,6 @@ import {
   HeadManagerTitleCallback,
   isPropsObject,
   isPropsObjectOrCallback,
-  markClientRendered,
   normalizeLayouts,
   Page,
   PageProps,
@@ -23,11 +22,13 @@ import {
   markRaw,
   onMounted,
   Plugin,
+  provide,
   PropType,
   reactive,
   ref,
   shallowRef,
 } from 'vue'
+import { hydratedKey, isHydrating } from './hydration'
 import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -142,8 +143,12 @@ const App: InertiaApp = defineComponent({
       resolveServerHead(initialPage, serverHead),
     )
 
+    // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+    const hydrated = ref(!isHydrating())
+    provide(hydratedKey, hydrated)
+
     if (!isServer) {
-      onMounted(() => markClientRendered())
+      onMounted(() => (hydrated.value = true))
 
       router.init<DefineComponent>({
         initialPage,

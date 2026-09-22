@@ -11,12 +11,12 @@ import {
   Page,
   PageProps,
   router,
-  setHydrationBoot,
   setupProgress,
   SharedPageProps,
 } from '@inertiajs/core'
 import { createApp, createSSRApp, DefineComponent, h, Plugin, App as VueApp } from 'vue'
 import App, { InertiaApp, InertiaAppProps, plugin } from './app'
+import { setHydrationBoot } from './hydration'
 import { config } from './index'
 import { VueInertiaAppConfig } from './types'
 

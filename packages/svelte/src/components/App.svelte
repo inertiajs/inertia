@@ -11,10 +11,11 @@
 </script>
 
 <script lang="ts">
-  import { isPropsObjectOrCallback, isPropsObject, markClientRendered, normalizeLayouts } from '@inertiajs/core'
+  import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
   import { onMount } from 'svelte'
   import type { Component } from 'svelte'
+  import { isHydrating, setHydrationContext } from '../hydration'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutType, LayoutResolver } from '../types'
@@ -48,8 +49,12 @@
 
   const isServer = typeof window === 'undefined'
 
+  // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+  const hydration = $state({ hydrated: !isHydrating() })
+  setHydrationContext(hydration)
+
   if (!isServer) {
-    onMount(() => markClientRendered())
+    onMount(() => (hydration.hydrated = true))
 
     // svelte-ignore state_referenced_locally
     router.init<ResolvedComponent>({
