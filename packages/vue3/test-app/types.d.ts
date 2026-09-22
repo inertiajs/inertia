@@ -1,10 +1,11 @@
-import type { Method, Page, PageProps, Router } from '@inertiajs/core'
+import type { http, Method, Page, PageProps, Router } from '@inertiajs/core'
 
 declare global {
   interface Window {
     testing: {
       Inertia: Router
     }
+    testingHttp: typeof http
     initialPage: Page
     _inertia_request_dump: {
       headers: Record<string, string>

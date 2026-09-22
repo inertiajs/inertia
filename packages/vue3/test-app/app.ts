@@ -1,5 +1,5 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
-import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import { axiosAdapter, http, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
@@ -7,6 +7,7 @@ import AppLayout from './Layouts/AppLayout.vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
 
 window.testing = { Inertia: router }
+window.testingHttp = http
 window.resolverReceivedPage = null as Page | null
 
 const params = new URLSearchParams(window.location.search)

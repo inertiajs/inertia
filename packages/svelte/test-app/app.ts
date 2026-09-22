@@ -1,11 +1,12 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
-import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
+import { axiosAdapter, http, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
 import { hydrate, mount } from 'svelte'
 import AppLayout from './Layouts/AppLayout.svelte'
 import DefaultLayout from './Layouts/DefaultLayout.svelte'
 
 window.testing = { Inertia: router }
+window.testingHttp = http
 window.resolverReceivedPage = null as Page | null
 
 const params = new URLSearchParams(window.location.search)
