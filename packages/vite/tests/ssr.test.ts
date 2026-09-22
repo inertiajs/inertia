@@ -902,8 +902,9 @@ createInertiaApp({ resolve: (name) => name })`
 
       expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
       expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
-      expect(result).toContain('const render = await createInertiaApp')
-      expect(result).toContain('const renderPage = (page) => render(page, renderToString)')
+      expect(result).toContain('const renderPromise = createInertiaApp')
+      expect(result).toContain('const render = await renderPromise')
+      expect(result).toContain('return render(page, renderToString)')
       expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
@@ -923,10 +924,39 @@ createInertiaApp({ resolve: (name) => name })`
 
       expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
       expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('const renderPage = (page) => ssr(page, render)')
+      expect(result).toContain('const ssr = await ssrPromise')
+      expect(result).toContain('return ssr(page, render)')
       expect(result).toContain('if (import.meta.env.PROD)')
       expect(result).toContain('createServer(renderPage)')
       expect(result).toContain('export default renderPage')
+    })
+
+    it('generates SSR bootstrap without top-level await', () => {
+      mockExistsSync.mockReturnValue(false)
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const frameworks = [
+        { package: '@inertiajs/vue3', promise: 'renderPromise' },
+        { package: '@inertiajs/react', promise: 'renderPromise' },
+        { package: '@inertiajs/svelte', promise: 'ssrPromise' },
+      ]
+
+      frameworks.forEach(({ package: pkg, promise }) => {
+        const code = `import { createInertiaApp } from '${pkg}'
+createInertiaApp({ resolve: (name) => name })`
+        const result = String(plugin.transform!(code, 'app.ts', { ssr: true }))
+
+        // Any `await` left at the start of a line would be a top-level await
+        expect(result).not.toMatch(/^\S.*\bawait\b/m)
+        expect(result).toContain(`${promise}.catch((error) => console.error(error))`)
+
+        // A configure failure must surface per render instead of taking the server down
+        expect(result).not.toContain('process.exit')
+      })
     })
 
     it('passes SSR config to server', () => {
