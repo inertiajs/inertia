@@ -120,7 +120,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialComponent,
         resolveComponent,
         defaultLayout: layout,
-        isServerRendered: true,
+        serverRendered: true,
       }
 
       let svelteApp: SvelteRenderResult
@@ -173,7 +173,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     initialComponent,
     resolveComponent,
     defaultLayout: layout,
-    isServerRendered: isServer || el!.hasAttribute('data-server-rendered'),
+    serverRendered: isServer || el!.hasAttribute('data-server-rendered'),
   }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
@@ -198,7 +198,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   // CSR
   const target = el!
-  const isServerRendered = props.isServerRendered!
+  const isServerRendered = props.serverRendered!
 
   if (setup) {
     await setup({ el: target, App, props })

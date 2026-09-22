@@ -75,7 +75,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
   serverHead?: ServerHeadOption
-  isServerRendered?: boolean
+  serverRendered?: boolean
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -120,7 +120,7 @@ const App: InertiaApp = defineComponent({
       type: [Boolean, String, Function] as PropType<ServerHeadOption>,
       required: false,
     },
-    isServerRendered: {
+    serverRendered: {
       type: Boolean,
       required: false,
       default: true,
@@ -134,7 +134,7 @@ const App: InertiaApp = defineComponent({
     onHeadUpdate,
     defaultLayout,
     serverHead,
-    isServerRendered,
+    serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -150,7 +150,7 @@ const App: InertiaApp = defineComponent({
     )
 
     // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
-    const hydrated = ref(!isServerRendered)
+    const hydrated = ref(!serverRendered)
     provideHydrationContext(hydrated)
 
     if (!isServer) {

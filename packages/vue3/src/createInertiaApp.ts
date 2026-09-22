@@ -145,7 +145,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
         serverHead,
-        isServerRendered: true,
+        serverRendered: true,
       }
 
       let vueApp: VueApp
@@ -191,7 +191,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
       serverHead,
-      isServerRendered: isServer || el!.hasAttribute('data-server-rendered'),
+      serverRendered: isServer || el!.hasAttribute('data-server-rendered'),
     }
 
     if (isServer) {
@@ -204,7 +204,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
 
     const target = el!
-    const isServerRendered = props.isServerRendered!
+    const isServerRendered = props.serverRendered!
 
     if (setup) {
       return (setup as (options: SetupOptions<HTMLElement, SharedProps>) => void)({

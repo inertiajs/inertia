@@ -7,7 +7,7 @@
     initialPage: Page<SharedProps>
     resolveComponent: ComponentResolver
     defaultLayout?: (name: string, page: Page) => unknown
-    isServerRendered?: boolean
+    serverRendered?: boolean
   }
 </script>
 
@@ -27,10 +27,10 @@
     initialPage: InertiaAppProps['initialPage']
     resolveComponent: InertiaAppProps['resolveComponent']
     defaultLayout?: InertiaAppProps['defaultLayout']
-    isServerRendered?: boolean
+    serverRendered?: boolean
   }
 
-  const { initialComponent, initialPage, resolveComponent, defaultLayout, isServerRendered = true }: Props = $props()
+  const { initialComponent, initialPage, resolveComponent, defaultLayout, serverRendered = true }: Props = $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
@@ -52,7 +52,7 @@
   const isServer = typeof window === 'undefined'
 
   // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
-  const hydration = $state({ hydrated: !isServerRendered })
+  const hydration = $state({ hydrated: !serverRendered })
   setHydrationContext(hydration)
 
   if (!isServer) {
