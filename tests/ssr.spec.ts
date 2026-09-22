@@ -100,6 +100,60 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('SSR WhenMounted', () => {
+  test('it renders the fallback instead of the children on the server', async ({ page }) => {
+    const response = await page.request.get('/ssr/when-mounted')
+    const html = await response.text()
+
+    expect(html).toContain('Loading widget...')
+    expect(html).not.toContain('Client path:')
+  })
+
+  test('it swaps the fallback for the children after hydration and never shows it again', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    await page.goto('/ssr/when-mounted')
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.getByTestId('when-mounted-fallback')).toHaveCount(0)
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('revisit-link').click()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('leave-link').click()
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 2')
+
+    await page.goBack()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+
+  test('it does not show the fallback when arriving from another SSR page', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    // Page1 has no WhenMounted, so the app has to be what records that hydration is over
+    await page.goto('/ssr/page1')
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 1')
+
+    await page.getByTestId('to-when-mounted-link').click()
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('0')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+})
+
 test.describe('Head title escaping', () => {
   test.beforeEach(() => {
     test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')

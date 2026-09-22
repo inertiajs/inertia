@@ -75,6 +75,13 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/when-mounted', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/WhenMounted',
+    props: {},
+  }),
+)
+
 app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
@@ -188,6 +195,13 @@ app.get('/ssr/infinite-scroll', (req, res) => {
     scrollProps: { users: scrollProp },
   })
 })
+
+app.get('/when-mounted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'WhenMounted',
+    props: {},
+  }),
+)
 
 // createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
