@@ -723,6 +723,98 @@ describe('SSR', () => {
       ])
     })
 
+    it('prefers server.origin over resolvedUrls', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger, {
+        origin: 'https://example.ddev.site:5173',
+        resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
+      })
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="https://example.ddev.site:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
+    it('ignores the placeholder origin set by the Laravel Vite plugin', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger, {
+        origin: 'http://__laravel_vite_placeholder__.test',
+        resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
+      })
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
     it('does not duplicate base path in CSS link URLs', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
@@ -962,7 +1054,11 @@ function createMockConfig(
 
 function createMockServer(
   logger: ReturnType<typeof createMockLogger>,
-  { base = '/', resolvedUrls }: { base?: string; resolvedUrls?: { local: string[]; network: string[] } } = {},
+  {
+    base = '/',
+    origin,
+    resolvedUrls,
+  }: { base?: string; origin?: string; resolvedUrls?: { local: string[]; network: string[] } } = {},
 ): ViteDevServer {
   return {
     middlewares: { use: vi.fn() },
@@ -970,7 +1066,7 @@ function createMockServer(
     ssrFixStacktrace: vi.fn(),
     environments: { ssr: { moduleGraph: { getModuleById: vi.fn() } } },
     resolvedUrls: resolvedUrls ?? { local: [`http://localhost:5173${base}`], network: [] },
-    config: { logger, base, root: '/project' },
+    config: { logger, base, root: '/project', server: { origin } },
   } as unknown as ViteDevServer
 }
 
