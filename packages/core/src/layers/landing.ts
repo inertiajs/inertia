@@ -308,8 +308,8 @@ const pageUrl = (response: Page, visitUrl: URL): string => {
   return responseUrl.pathname + responseUrl.search + responseUrl.hash
 }
 
-const preserveOptimisticProps = (response: Page, target: Target | undefined): void => {
-  if (!target || !router.hasPendingOptimistic()) {
+const preserveOptimisticProps = (response: Page, target: Target | undefined, optimisticId: number | null): void => {
+  if (!target || (!router.hasPendingOptimistic() && !isStaleOptimisticResponse(optimisticId))) {
     return
   }
 
@@ -322,6 +322,11 @@ const preserveOptimisticProps = (response: Page, target: Target | undefined): vo
     }
   }
 }
+
+// An optimistic request that started later has already been confirmed, so these
+// props were read before that write and would roll it back on screen
+const isStaleOptimisticResponse = (optimisticId: number | null): boolean =>
+  optimisticId !== null && currentPage.hasConfirmedOptimisticAfter(optimisticId)
 
 const rememberedStateInto = async (response: Page, params: RequestParams): Promise<void> => {
   const rememberedState = await history.getState<Page['rememberedState']>(history.rememberedState, {})
@@ -354,6 +359,7 @@ export const landResponse = async (
   response: Page,
   params: RequestParams,
   captured: BaseSnapshot,
+  optimisticId: number | null = null,
 ): Promise<string | undefined> => {
   const target = responseTarget(currentPage.get(), response, params.all().layerId)
 
@@ -362,7 +368,7 @@ export const landResponse = async (
   }
 
   mergeOncePropsInto(response, target?.state)
-  preserveOptimisticProps(response, target)
+  preserveOptimisticProps(response, target, optimisticId)
   preserveEqualProps(response, target?.state)
 
   await rememberedStateInto(response, params)

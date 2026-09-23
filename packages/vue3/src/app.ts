@@ -27,6 +27,7 @@ import {
   InjectionKey,
   inject,
   markRaw,
+  onMounted,
   onUnmounted,
   Plugin,
   PropType,
@@ -37,6 +38,7 @@ import {
   shallowRef,
   toRef,
 } from 'vue'
+import { provideHydrationContext } from './hydration'
 import Layer from './Layer'
 import { layerState as layerPropsForLayers, state as layoutPropsState, swapLayoutProps } from './layoutProps'
 import remember from './remember'
@@ -89,6 +91,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   layer?: Component
   resolveLoading?: LoadingResolver
   serverHead?: ServerHeadOption
+  serverRendered?: boolean
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -163,6 +166,11 @@ const App: InertiaApp = defineComponent({
       type: [Boolean, String, Function] as PropType<ServerHeadOption>,
       required: false,
     },
+    serverRendered: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   setup({
     initialPage,
@@ -175,6 +183,7 @@ const App: InertiaApp = defineComponent({
     layer: LayerShell = Layer,
     resolveLoading,
     serverHead,
+    serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -191,7 +200,13 @@ const App: InertiaApp = defineComponent({
       () => page.value?.layers ?? [],
     )
 
+    // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+    const hydrated = ref(!serverRendered)
+    provideHydrationContext(hydrated)
+
     if (!isServer) {
+      onMounted(() => (hydrated.value = true))
+
       router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,

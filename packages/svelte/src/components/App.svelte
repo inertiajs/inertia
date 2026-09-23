@@ -10,6 +10,7 @@
     resolveLoading?: LoadingResolver
     defaultLayout?: (name: string, page: Page) => unknown
     layer?: LayerComponent
+    serverRendered?: boolean
   }
 </script>
 
@@ -17,7 +18,9 @@
   import { emptyLayoutSlot, layoutProps, resolveLayouts } from '@inertiajs/core'
   import type { LayoutSlot } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
+  import { onMount } from 'svelte'
   import type { Component } from 'svelte'
+  import { setHydrationContext } from '../hydration'
   import { layerState, storeState, swapLayoutProps } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutResolver } from '../types'
@@ -33,6 +36,7 @@
     resolveLoading?: InertiaAppProps['resolveLoading']
     defaultLayout?: InertiaAppProps['defaultLayout']
     layer?: InertiaAppProps['layer']
+    serverRendered?: boolean
   }
 
   const {
@@ -43,6 +47,7 @@
     resolveLoading,
     defaultLayout,
     layer: LayerComponent = Layer,
+    serverRendered = true,
   }: Props = $props()
 
   // svelte-ignore state_referenced_locally
@@ -66,7 +71,13 @@
 
   const isServer = typeof window === 'undefined'
 
+  // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+  const hydration = $state({ hydrated: !serverRendered })
+  setHydrationContext(hydration)
+
   if (!isServer) {
+    onMount(() => (hydration.hydrated = true))
+
     // svelte-ignore state_referenced_locally
     router.init<ResolvedComponent>({
       initialPage,

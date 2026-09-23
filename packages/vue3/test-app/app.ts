@@ -67,8 +67,9 @@ createInertiaApp({
     return url.startsWith('/layers/loading') ? LoadingBase : undefined
   },
   setup({ el, App, props, plugin }) {
-    const root = { render: () => h(App, props) }
-    const inst = el.hasAttribute('data-server-rendered') ? createSSRApp(root) : createApp(root)
+    const inst = el.hasAttribute('data-server-rendered')
+      ? createSSRApp({ render: () => h(App, props) })
+      : createApp({ render: () => h(App, props) })
 
     if (!window.location.pathname.startsWith('/plugin/without')) {
       inst.use(plugin)

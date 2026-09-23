@@ -404,8 +404,12 @@ export class Router {
       this.syncRequestStream.interruptInFlight()
     }
 
+    let optimisticId: number | null = null
+
     if (options.optimistic) {
-      this.applyOptimisticUpdate(options.optimistic, events, visit.layerId)
+      optimisticId = currentPage.nextOptimisticId()
+
+      this.applyOptimisticUpdate(options.optimistic, events, optimisticId, visit.layerId)
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
@@ -418,7 +422,7 @@ export class Router {
       ...events,
     }
 
-    const sendRequest = () => this.sendVisitRequest(requestParams, capturedBase, !!options.optimistic)
+    const sendRequest = () => this.sendVisitRequest(requestParams, capturedBase, optimisticId)
 
     if (this.instantComponent(visit)) {
       this.swapInstantlyThenSend(visit, requestParams, sendRequest)
@@ -460,7 +464,7 @@ export class Router {
   protected sendVisitRequest(
     requestParams: InternalActiveVisit,
     capturedBase: BaseSnapshot,
-    optimistic: boolean,
+    optimisticId: number | null,
   ): void {
     const prefetched = prefetchedRequests.get(requestParams)
 
@@ -475,7 +479,7 @@ export class Router {
 
     const requestStream = requestParams.async ? this.asyncRequestStream : this.syncRequestStream
 
-    requestStream.send(Request.create(requestParams, currentPage.get(), capturedBase, { optimistic }))
+    requestStream.send(Request.create(requestParams, currentPage.get(), capturedBase, { optimisticId }))
   }
 
   protected instantComponent(visit: PendingVisit): string | null {
@@ -1109,7 +1113,12 @@ export class Router {
     }
   }
 
-  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks, layerId?: string): void {
+  protected applyOptimisticUpdate(
+    optimistic: OptimisticCallback,
+    events: VisitCallbacks,
+    id: number,
+    layerId?: string,
+  ): void {
     const tier = targetAt(currentPage.get(), layerId)
 
     if (layerId && !tier.layer) {
@@ -1135,7 +1144,6 @@ export class Router {
       return
     }
 
-    const id = currentPage.nextOptimisticId()
     const component = tier.state.component
 
     for (const key of changedKeys) {
@@ -1151,6 +1159,8 @@ export class Router {
     const originalOnSuccess = events.onSuccess
     events.onSuccess = (page) => {
       shouldRestore = false
+      currentPage.markOptimisticConfirmed(id)
+
       return originalOnSuccess(page)
     }
 

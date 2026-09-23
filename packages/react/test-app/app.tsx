@@ -66,10 +66,12 @@ createInertiaApp({
     return url.startsWith('/layers/loading') ? LoadingBase : undefined
   },
   setup({ el, App, props }) {
+    const appElement = <App {...props} />
+
     if (el.hasAttribute('data-server-rendered')) {
-      hydrateRoot(el, <App {...props} />)
+      hydrateRoot(el, appElement)
     } else {
-      createRoot(el).render(<App {...props} />)
+      createRoot(el).render(appElement)
     }
   },
   progress: {

@@ -273,6 +273,8 @@ class PrefetchedRequests {
         'onCancel',
         'onSuccess',
         'onError',
+        'onHttpException',
+        'onNetworkError',
         'onFlash',
         'onPrefetched',
         'onCancelToken',

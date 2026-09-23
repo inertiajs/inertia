@@ -30,6 +30,7 @@ export class Response {
     protected response: HttpResponse,
     protected originatingPage: Page,
     protected capturedBase: BaseSnapshot,
+    protected optimisticId: number | null = null,
   ) {}
 
   public static create(
@@ -37,8 +38,9 @@ export class Response {
     response: HttpResponse,
     originatingPage: Page,
     capturedBase: BaseSnapshot,
+    optimisticId: number | null = null,
   ): Response {
-    return new Response(params, response, originatingPage, capturedBase)
+    return new Response(params, response, originatingPage, capturedBase, optimisticId)
   }
 
   public isProcessed(): boolean {
@@ -287,7 +289,7 @@ export class Response {
 
     this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
 
-    return landResponse(pageResponse, this.requestParams, this.capturedBase)
+    return landResponse(pageResponse, this.requestParams, this.capturedBase, this.optimisticId)
   }
 
   // Landing it would reopen what the user dismissed; an open carries no tier yet, so it is exempt.

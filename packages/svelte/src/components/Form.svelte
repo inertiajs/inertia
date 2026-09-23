@@ -41,6 +41,9 @@
     onCancel?: FormComponentProps['onCancel']
     onSuccess?: FormComponentProps['onSuccess']
     onError?: FormComponentProps['onError']
+    onHttpException?: FormComponentProps['onHttpException']
+    onNetworkError?: FormComponentProps['onNetworkError']
+    onFlash?: FormComponentProps['onFlash']
     onSubmitComplete?: FormComponentProps['onSubmitComplete']
     disableWhileProcessing?: boolean
     cancelOnUnmount?: FormComponentProps['cancelOnUnmount']
@@ -75,6 +78,9 @@
     onCancel = noop,
     onSuccess = noop,
     onError = noop,
+    onHttpException = noop,
+    onNetworkError = noop,
+    onFlash = noop,
     onSubmitComplete = noop,
     disableWhileProcessing = false,
     cancelOnUnmount = false,
@@ -176,6 +182,9 @@
       onProgress,
       onFinish,
       onCancel,
+      onHttpException,
+      onNetworkError,
+      onFlash,
       onSuccess: async (...args) => {
         const result = await onSuccess?.(...args)
 
