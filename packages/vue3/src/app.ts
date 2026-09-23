@@ -21,6 +21,7 @@ import {
   defineComponent,
   h,
   markRaw,
+  onMounted,
   Plugin,
   PropType,
   reactive,
@@ -28,6 +29,7 @@ import {
   shallowRef,
   onUnmounted,
 } from 'vue'
+import { provideHydrationContext } from './hydration'
 import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -76,6 +78,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   defaultLayout?: (name: string, page: Page) => unknown
   serverHead?: ServerHeadOption
   externalNavigation?: ExternalNavigationOptions
+  serverRendered?: boolean
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -124,6 +127,11 @@ const App: InertiaApp = defineComponent({
       type: Object as PropType<ExternalNavigationOptions>,
       required: false,
     },
+    serverRendered: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   setup({
     initialPage,
@@ -134,6 +142,7 @@ const App: InertiaApp = defineComponent({
     defaultLayout,
     serverHead,
     externalNavigation,
+    serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -148,7 +157,13 @@ const App: InertiaApp = defineComponent({
       resolveServerHead(initialPage, serverHead),
     ))
 
+    // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+    const hydrated = ref(!serverRendered)
+    provideHydrationContext(hydrated)
+
     if (!isServer) {
+      onMounted(() => (hydrated.value = true))
+
       if (externalNavigation) {
         resetLayoutProps()
       }

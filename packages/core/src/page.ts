@@ -26,6 +26,7 @@ class CurrentPage {
   protected optimisticBaseline: Partial<Page['props']> = {}
   protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
   protected optimisticCounter = 0
+  protected confirmedOptimisticId = 0
   protected removeHistoryQuotaExceededListener: VoidFunction = () => {}
 
   public init<ComponentType = Component>({
@@ -314,12 +315,23 @@ class CurrentPage {
 
     const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
 
+    // The browser skips this transition when a newer one supersedes it, when the tab goes hidden
+    // mid-flight, or when the swap times out, always rejecting with a DOMException. That's
+    // expected, so swallow it and let a failing swap reject as it normally would.
+    const ignoreSkippedTransition = (promise: Promise<unknown>) => {
+      promise.catch((error) => {
+        if (!(error instanceof DOMException)) {
+          throw error
+        }
+      })
+    }
+
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
 
-      // A newer transition aborts this one, rejecting `ready` with an AbortError.
-      // That's expected, so swallow it to avoid an unhandled rejection.
-      transitionResult.ready.catch(() => {})
+      ignoreSkippedTransition(transitionResult.ready)
+      ignoreSkippedTransition(transitionResult.finished)
+      ignoreSkippedTransition(transitionResult.updateCallbackDone)
 
       viewTransitionCallback(transitionResult)
     })
@@ -331,6 +343,14 @@ class CurrentPage {
 
   public nextOptimisticId(): number {
     return ++this.optimisticCounter
+  }
+
+  public markOptimisticConfirmed(id: number): void {
+    this.confirmedOptimisticId = Math.max(this.confirmedOptimisticId, id)
+  }
+
+  public hasConfirmedOptimisticAfter(id: number): boolean {
+    return this.confirmedOptimisticId > id
   }
 
   public setBaseline(key: string, value: unknown): void {
@@ -399,6 +419,7 @@ class CurrentPage {
   public clearOptimisticState(): void {
     this.optimisticBaseline = {}
     this.pendingOptimistics = []
+    this.confirmedOptimisticId = 0
   }
 
   public isTheSame(page: Page): boolean {

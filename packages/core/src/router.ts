@@ -402,8 +402,12 @@ export class Router {
       }
     }
 
+    let optimisticId: number | null = null
+
     if (options.optimistic) {
-      this.applyOptimisticUpdate(options.optimistic, events)
+      optimisticId = currentPage.nextOptimisticId()
+
+      this.applyOptimisticUpdate(options.optimistic, events, optimisticId)
 
       if (!navigation.isCurrent(generation)) {
         return
@@ -433,7 +437,7 @@ export class Router {
       } else {
         progress.reveal(true)
         const requestStream = visit.async ? this.asyncRequestStream : this.syncRequestStream
-        requestStream.send(Request.create(requestParams, currentPage.get(), { optimistic: !!options.optimistic }))
+        requestStream.send(Request.create(requestParams, currentPage.get(), { optimisticId }))
       }
     }
 
@@ -984,7 +988,7 @@ export class Router {
     }
   }
 
-  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks): void {
+  protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks, id: number): void {
     const generation = navigation.generation
     const currentProps = currentPage.get().props
     const optimisticProps = optimistic(cloneDeep(currentProps))
@@ -1005,7 +1009,6 @@ export class Router {
       return
     }
 
-    const id = currentPage.nextOptimisticId()
     const component = currentPage.get().component
 
     for (const key of changedKeys) {
@@ -1020,6 +1023,8 @@ export class Router {
     const originalOnSuccess = events.onSuccess
     events.onSuccess = (page) => {
       shouldRestore = false
+      currentPage.markOptimisticConfirmed(id)
+
       return originalOnSuccess(page)
     }
 

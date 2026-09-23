@@ -41,16 +41,27 @@ test.describe('SSR', () => {
 
     expect(html).toContain('data-page="app"')
     expect(html).toContain('<script data-page="app" type="application/json">')
-    expect(html).toContain('Hello from script element! Escape <\\/script>.')
+    expect(html).toContain('Hello from script element! Escape \\u003c\\/script> and \\u003c!--\\u003cscript>.')
 
     await page.goto('/ssr/page-with-script-element')
+
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page With Script Element')
+
     const scriptContent = await page.locator('script[data-page="app"]').textContent()
     expect(JSON.parse(scriptContent || '')).toMatchObject({
       component: 'SSR/PageWithScriptElement',
       props: {
-        message: 'Hello from script element! Escape </script>.',
+        message: 'Hello from script element! Escape </script> and <!--<script>.',
       },
     })
+  })
+
+  test('renders multi-byte characters when the SSR request body spans multiple chunks', async ({ page }) => {
+    const response = await page.request.get('/ssr/multibyte-body')
+    const html = await response.text()
+
+    expect(html).not.toContain('\uFFFD')
+    expect(html).toMatch(/Characters:.*175000/)
   })
 
   test.describe('client-side navigation', () => {
@@ -86,6 +97,60 @@ test.describe('SSR', () => {
       const health = await response.json()
       expect(health.status).toBe('OK')
     })
+  })
+})
+
+test.describe('SSR WhenMounted', () => {
+  test('it renders the fallback instead of the children on the server', async ({ page }) => {
+    const response = await page.request.get('/ssr/when-mounted')
+    const html = await response.text()
+
+    expect(html).toContain('Loading widget...')
+    expect(html).not.toContain('Client path:')
+  })
+
+  test('it swaps the fallback for the children after hydration and never shows it again', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    await page.goto('/ssr/when-mounted')
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.getByTestId('when-mounted-fallback')).toHaveCount(0)
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('revisit-link').click()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('leave-link').click()
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 2')
+
+    await page.goBack()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+
+  test('it does not show the fallback when arriving from another SSR page', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    // Page1 has no WhenMounted, so the app has to be what records that hydration is over
+    await page.goto('/ssr/page1')
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 1')
+
+    await page.getByTestId('to-when-mounted-link').click()
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('0')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
   })
 })
 

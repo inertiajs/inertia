@@ -9,6 +9,7 @@
     defaultLayout?: (name: string, page: Page) => unknown
     serverHead?: ServerHeadOption
     externalNavigation?: ExternalNavigationOptions
+    serverRendered?: boolean
   }
 </script>
 
@@ -21,7 +22,8 @@
     resolveServerHead,
     router,
   } from '@inertiajs/core'
-  import { onDestroy, type Component } from 'svelte'
+  import { onDestroy, onMount, type Component } from 'svelte'
+  import { setHydrationContext } from '../hydration'
   import { resetLayoutProps, storeState } from '../layoutProps.svelte'
   import { setPage } from '../page.svelte'
   import type { LayoutType, LayoutResolver } from '../types'
@@ -34,10 +36,18 @@
     defaultLayout?: InertiaAppProps['defaultLayout']
     serverHead?: InertiaAppProps['serverHead']
     externalNavigation?: InertiaAppProps['externalNavigation']
+    serverRendered?: boolean
   }
 
-  const { initialComponent, initialPage, resolveComponent, defaultLayout, serverHead, externalNavigation }: Props =
-    $props()
+  const {
+    initialComponent,
+    initialPage,
+    resolveComponent,
+    defaultLayout,
+    serverHead,
+    externalNavigation,
+    serverRendered = true,
+  }: Props = $props()
 
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
@@ -58,7 +68,13 @@
 
   const isServer = typeof window === 'undefined'
 
+  // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+  const hydration = $state({ hydrated: !serverRendered })
+  setHydrationContext(hydration)
+
   if (!isServer) {
+    onMount(() => (hydration.hydrated = true))
+
     // svelte-ignore state_referenced_locally
     if (externalNavigation) {
       resetLayoutProps()
