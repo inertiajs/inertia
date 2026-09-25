@@ -48,7 +48,7 @@ class PrefetchedRequests {
         onCancel: () => {
           cancelled = true
           this.remove(params)
-          this.removeFromInFlight(params)
+          this.removeFromInFlight(params.id)
           params.onCancel()
           reject(new HttpCancelledError())
         },
@@ -66,8 +66,8 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
-        onPrefetchError(error) {
-          prefetchedRequests.removeFromInFlight(params)
+        onPrefetchError: (error) => {
+          this.removeFromInFlight(params.id)
           reject(error)
         },
       })
@@ -94,7 +94,7 @@ class PrefetchedRequests {
         params,
         oncePropExpiresIn ? Math.min(prefetchExpiresIn, oncePropExpiresIn) : prefetchExpiresIn,
       )
-      this.removeFromInFlight(params)
+      this.removeFromInFlight(params.id)
 
       response.handlePrefetch()
 
@@ -111,7 +111,7 @@ class PrefetchedRequests {
     }
 
     return promise.catch((error) => {
-      this.removeFromInFlight(params)
+      this.removeFromInFlight(params.id)
 
       if (!(error instanceof HttpCancelledError)) {
         throw error
@@ -141,9 +141,9 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected removeFromInFlight(params: ActiveVisit): void {
+  protected removeFromInFlight(visitId: string): void {
     this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-      return prefetching.params.id !== params.id
+      return prefetching.params.id !== visitId
     })
   }
 
