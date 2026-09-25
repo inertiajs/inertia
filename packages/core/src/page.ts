@@ -178,6 +178,9 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
+    // A restored history entry supersedes any page update still resolving its component
+    this.componentId = {}
+
     return this.resolve(page.component, page).then((component) => {
       this.page = page
       this.cleared = false
