@@ -12,7 +12,7 @@ export default class Queue<T> {
       () => {
         this.processingPromise = null
 
-        if (this.items.length) {
+        if (this.items.length > 0) {
           return this.process()
         }
       },
