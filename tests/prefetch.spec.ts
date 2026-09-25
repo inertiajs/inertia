@@ -315,47 +315,37 @@ test.describe('cancelled prefetches', () => {
     })
   })
 
-  for (const flush of ['flush', 'flushByCacheTags', 'flushAll'] as const) {
-    test(`can visit after cancellation and ${flush}`, async ({ page }) => {
-      await page.goto('prefetch/after-error')
+  const holdPrefetchResponses = (page: Page) =>
+    page.route('**/prefetch/swr/1', (route) => {
+      if (route.request().headers().purpose !== 'prefetch') {
+        return route.continue()
+      }
+    })
+
+  for (const flush of ['Flush', 'Flush By Cache Tags', 'Flush All'] as const) {
+    test(`can visit after cancellation and ${flush.toLowerCase()}`, async ({ page }) => {
+      await page.goto('prefetch/cancelled')
       consoleMessages.listen(page)
       requests.listen(page)
+      await holdPrefetchResponses(page)
 
-      await page.route('**/prefetch/swr/1', (route) => {
-        if (route.request().headers().purpose !== 'prefetch') {
-          return route.continue()
-        }
-      })
+      const cancelAndFlush = async () => {
+        await page.getByRole('button', { name: 'Prefetch', exact: true }).click()
+        await expect(page.locator('#prefetch-status')).toHaveText('yes')
 
-      const prefetchThenCancelAndFlush = () =>
-        page.evaluate(async (flush) => {
-          const router = window.testing.Inertia
-          const url = '/prefetch/swr/1'
+        await page.getByRole('button', { name: 'Cancel Prefetch' }).click()
+        await page.getByRole('button', { name: flush, exact: true }).click()
 
-          const token = await new Promise<{ cancel: () => void }>((resolve) => {
-            router.prefetch(url, { onCancelToken: resolve }, { cacheTags: ['example'] })
-          })
+        await expect(page.locator('#prefetch-status')).toHaveText('no')
+        await expect(page.locator('#cache-status')).toHaveText('no')
+      }
 
-          token.cancel()
-          await new Promise((resolve) => setTimeout(resolve, 0))
-
-          if (flush === 'flush') {
-            router.flush(url)
-          } else if (flush === 'flushByCacheTags') {
-            router.flushByCacheTags('example')
-          } else {
-            router.flushAll()
-          }
-
-          return router.getPrefetching(url) !== null
-        }, flush)
-
-      expect(await prefetchThenCancelAndFlush()).toBe(false)
+      await cancelAndFlush()
 
       // A second round proves the first cancellation didn't leave the URL unprefetchable
-      expect(await prefetchThenCancelAndFlush()).toBe(false)
+      await cancelAndFlush()
 
-      await page.getByRole('button', { name: 'Visit Page', exact: true }).click()
+      await page.getByRole('button', { name: 'Visit', exact: true }).click()
       await isPrefetchSwrPage(page, 1)
       expect(requests.requests.filter((request) => request.headers().purpose !== 'prefetch')).toHaveLength(1)
       expect(consoleMessages.errors).toEqual([])
@@ -363,102 +353,60 @@ test.describe('cancelled prefetches', () => {
   }
 
   test('can cancel synchronously from onCancelToken', async ({ page }) => {
-    await page.goto('prefetch/after-error')
+    await page.goto('prefetch/cancelled')
     consoleMessages.listen(page)
 
-    await page.evaluate(() => {
-      window.testing.Inertia.prefetch('/prefetch/swr/1', { onCancelToken: (token) => token.cancel() })
-    })
+    await page.getByRole('button', { name: 'Prefetch And Cancel', exact: true }).click()
+    await expect(page.locator('#prefetch-status')).toHaveText('no')
 
-    await expect
-      .poll(() => page.evaluate(() => window.testing.Inertia.getPrefetching('/prefetch/swr/1') === null))
-      .toBe(true)
-    await page.getByRole('button', { name: 'Visit Page', exact: true }).click()
+    await page.getByRole('button', { name: 'Visit', exact: true }).click()
     await isPrefetchSwrPage(page, 1)
     expect(consoleMessages.errors).toEqual([])
   })
 
   test('keeps a replacement prefetch after cancellation', async ({ page }) => {
-    await page.goto('prefetch/after-error')
+    await page.goto('prefetch/cancelled')
     consoleMessages.listen(page)
+    await holdPrefetchResponses(page)
 
-    await page.route('**/prefetch/swr/1', () => {})
+    await page.getByRole('button', { name: 'Prefetch With Replacement' }).click()
+    await expect(page.locator('#prefetch-status')).toHaveText('yes')
+    const original = await page.locator('#prefetch-id').textContent()
 
-    const hasReplacement = await page.evaluate(async () => {
-      const router = window.testing.Inertia
-      const token = await new Promise<{ cancel: () => void }>((resolve) => {
-        router.prefetch('/prefetch/swr/1', {
-          onCancelToken: resolve,
-          onCancel: () => router.prefetch('/prefetch/swr/1'),
-        })
-      })
+    await page.getByRole('button', { name: 'Cancel Prefetch' }).click()
 
-      const original = router.getPrefetching('/prefetch/swr/1')
-      token.cancel()
-      await Promise.resolve()
-      const replacement = router.getPrefetching('/prefetch/swr/1')
-      await new Promise((resolve) => setTimeout(resolve, 0))
-
-      return (
-        replacement !== null && replacement !== original && router.getPrefetching('/prefetch/swr/1') === replacement
-      )
-    })
-
-    expect(hasReplacement).toBe(true)
+    await expect(page.locator('#prefetch-status')).toHaveText('yes')
+    await expect(page.locator('#prefetch-id')).not.toHaveText(original!)
     expect(consoleMessages.errors).toEqual([])
   })
 
   test('can replace a prefetch cancelled synchronously from onCancelToken', async ({ page }) => {
-    await page.goto('prefetch/after-error')
+    await page.goto('prefetch/cancelled')
     consoleMessages.listen(page)
 
-    await page.evaluate(() => {
-      const router = window.testing.Inertia
-      router.prefetch('/prefetch/swr/1', {
-        onCancelToken: (token) => token.cancel(),
-        onCancel: () => router.prefetch('/prefetch/swr/1'),
-      })
-    })
+    await page.getByRole('button', { name: 'Prefetch And Cancel With Replacement' }).click()
+    await expect(page.locator('#cache-status')).toHaveText('yes')
 
-    await expect
-      .poll(() => page.evaluate(() => window.testing.Inertia.getCached('/prefetch/swr/1') !== null))
-      .toBe(true)
-    await page.getByRole('button', { name: 'Visit Page', exact: true }).click()
+    await page.getByRole('button', { name: 'Visit', exact: true }).click()
     await isPrefetchSwrPage(page, 1)
     expect(consoleMessages.errors).toEqual([])
   })
 
   test('handles cancellation after a visit starts using the prefetch', async ({ page }) => {
-    await page.goto('prefetch/after-error')
+    await page.goto('prefetch/cancelled')
     consoleMessages.listen(page)
+    await holdPrefetchResponses(page)
 
-    await page.route('**/prefetch/swr/1', (route) => {
-      if (route.request().headers().purpose !== 'prefetch') {
-        return route.continue()
-      }
-    })
+    await page.getByRole('button', { name: 'Prefetch', exact: true }).click()
+    await expect(page.locator('#prefetch-status')).toHaveText('yes')
 
-    const events = await page.evaluate(async () => {
-      const router = window.testing.Inertia
-      const events: string[] = []
-      const token = await new Promise<{ cancel: () => void }>((resolve) => {
-        router.prefetch('/prefetch/swr/1', { onCancelToken: resolve })
-      })
+    await page.getByRole('button', { name: 'Visit', exact: true }).click()
+    await page.getByRole('button', { name: 'Cancel Prefetch' }).click()
 
-      router.visit('/prefetch/swr/1', {
-        onCancel: () => events.push('cancel'),
-        onFinish: () => events.push('finish'),
-        onSuccess: () => events.push('success'),
-      })
-      token.cancel()
-      await new Promise((resolve) => setTimeout(resolve, 0))
-
-      return events
-    })
-
-    expect(events).toEqual(['cancel', 'finish'])
+    await expect(page.locator('#visit-events')).toHaveText('cancel,finish')
     expect(consoleMessages.errors).toEqual([])
-    await page.getByRole('button', { name: 'Visit Page', exact: true }).click()
+
+    await page.getByRole('button', { name: 'Visit', exact: true }).click()
     await isPrefetchSwrPage(page, 1)
     expect(consoleMessages.errors).toEqual([])
   })
@@ -467,7 +415,7 @@ test.describe('cancelled prefetches', () => {
 test.describe('unexpected prefetch response errors', () => {
   for (const visit of [false, true]) {
     test(`reports the error ${visit ? 'with' : 'without'} a waiting visit`, async ({ page }) => {
-      await page.goto('prefetch/after-error')
+      await page.goto('prefetch/cancelled')
       consoleMessages.listen(page)
 
       let releaseResponse: () => void = () => {}
@@ -485,20 +433,17 @@ test.describe('unexpected prefetch response errors', () => {
         })
       })
 
-      await page.evaluate(async (visit) => {
-        const router = window.testing.Inertia
-        await new Promise<void>((resolve) => {
-          router.prefetch('/prefetch/swr/1', { onCancelToken: () => resolve() })
-        })
+      await page.getByRole('button', { name: 'Prefetch', exact: true }).click()
+      await expect(page.locator('#prefetch-status')).toHaveText('yes')
 
-        if (visit) {
-          router.visit('/prefetch/swr/1')
-        }
-      }, visit)
+      if (visit) {
+        await page.getByRole('button', { name: 'Visit', exact: true }).click()
+      }
 
       releaseResponse()
+
       await expect.poll(() => consoleMessages.errors.length).toBeGreaterThan(0)
-      expect(await page.evaluate(() => window.testing.Inertia.getPrefetching('/prefetch/swr/1'))).toBeNull()
+      await expect(page.locator('#prefetch-status')).toHaveText('no')
     })
   }
 })
