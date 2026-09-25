@@ -55,7 +55,7 @@ class PrefetchedRequests {
         onError: (error) => {
           this.remove(params)
           params.onError(error)
-          reject()
+          reject(error)
         },
         onPrefetching(visitParams) {
           params.onPrefetching(visitParams)

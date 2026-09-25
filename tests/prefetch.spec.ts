@@ -327,11 +327,11 @@ test.describe('cancelled prefetches', () => {
         }
       })
 
-      const prefetching = await page.evaluate(async (flush) => {
-        const router = window.testing.Inertia
-        const url = '/prefetch/swr/1'
+      const prefetchThenCancelAndFlush = () =>
+        page.evaluate(async (flush) => {
+          const router = window.testing.Inertia
+          const url = '/prefetch/swr/1'
 
-        for (let attempt = 0; attempt < 2; attempt++) {
           const token = await new Promise<{ cancel: () => void }>((resolve) => {
             router.prefetch(url, { onCancelToken: resolve }, { cacheTags: ['example'] })
           })
@@ -347,15 +347,14 @@ test.describe('cancelled prefetches', () => {
             router.flushAll()
           }
 
-          if (router.getPrefetching(url)) {
-            return true
-          }
-        }
+          return router.getPrefetching(url) !== null
+        }, flush)
 
-        return router.getPrefetching(url) !== null
-      }, flush)
+      expect(await prefetchThenCancelAndFlush()).toBe(false)
 
-      expect(prefetching).toBe(false)
+      // A second round proves the first cancellation didn't leave the URL unprefetchable
+      expect(await prefetchThenCancelAndFlush()).toBe(false)
+
       await page.getByRole('button', { name: 'Visit Page', exact: true }).click()
       await isPrefetchSwrPage(page, 1)
       expect(requests.requests.filter((request) => request.headers().purpose !== 'prefetch')).toHaveLength(1)
@@ -465,44 +464,44 @@ test.describe('cancelled prefetches', () => {
   })
 })
 
-for (const visit of [false, true]) {
-  test(`reports unexpected prefetch response errors ${visit ? 'with' : 'without'} a waiting visit`, async ({
-    page,
-  }) => {
-    await page.goto('prefetch/after-error')
-    consoleMessages.listen(page)
+test.describe('unexpected prefetch response errors', () => {
+  for (const visit of [false, true]) {
+    test(`reports the error ${visit ? 'with' : 'without'} a waiting visit`, async ({ page }) => {
+      await page.goto('prefetch/after-error')
+      consoleMessages.listen(page)
 
-    let releaseResponse: () => void = () => {}
-    const responseReady = new Promise<void>((resolve) => {
-      releaseResponse = resolve
-    })
-
-    await page.route('**/prefetch/swr/1', async (route) => {
-      await responseReady
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        headers: { 'X-Inertia': 'true' },
-        body: 'null',
-      })
-    })
-
-    await page.evaluate(async (visit) => {
-      const router = window.testing.Inertia
-      await new Promise<void>((resolve) => {
-        router.prefetch('/prefetch/swr/1', { onCancelToken: () => resolve() })
+      let releaseResponse: () => void = () => {}
+      const responseReady = new Promise<void>((resolve) => {
+        releaseResponse = resolve
       })
 
-      if (visit) {
-        router.visit('/prefetch/swr/1')
-      }
-    }, visit)
+      await page.route('**/prefetch/swr/1', async (route) => {
+        await responseReady
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          headers: { 'X-Inertia': 'true' },
+          body: 'null',
+        })
+      })
 
-    releaseResponse()
-    await expect.poll(() => consoleMessages.errors.length).toBeGreaterThan(0)
-    expect(await page.evaluate(() => window.testing.Inertia.getPrefetching('/prefetch/swr/1'))).toBeNull()
-  })
-}
+      await page.evaluate(async (visit) => {
+        const router = window.testing.Inertia
+        await new Promise<void>((resolve) => {
+          router.prefetch('/prefetch/swr/1', { onCancelToken: () => resolve() })
+        })
+
+        if (visit) {
+          router.visit('/prefetch/swr/1')
+        }
+      }, visit)
+
+      releaseResponse()
+      await expect.poll(() => consoleMessages.errors.length).toBeGreaterThan(0)
+      expect(await page.evaluate(() => window.testing.Inertia.getPrefetching('/prefetch/swr/1'))).toBeNull()
+    })
+  }
+})
 
 test('can visit the page when prefetching has failed due to network error', async ({ page, browser }) => {
   await page.goto('prefetch/after-error')
