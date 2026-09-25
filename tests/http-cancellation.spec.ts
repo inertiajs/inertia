@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { consoleMessages, requests } from './support'
+import { consoleMessages, pageLoads, requests } from './support'
 
 const getLog = (page: Page): Promise<string[]> => {
   return page.evaluate(() => window._http_cancellation_log || [])
@@ -11,6 +11,7 @@ const sentRequests = (query: string) => {
 
 test.describe('HTTP cancellation', () => {
   test.beforeEach(async ({ page }) => {
+    pageLoads.watch(page)
     await page.goto('/http-cancellation')
     requests.listen(page)
     consoleMessages.listen(page)

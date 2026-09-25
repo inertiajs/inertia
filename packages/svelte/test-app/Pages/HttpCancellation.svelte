@@ -8,10 +8,11 @@
 
 <script lang="ts">
   import { http, router } from '@inertiajs/svelte'
-
-  window._http_cancellation_log = []
+  import { onMount } from 'svelte'
 
   let messages = $state<string[]>([])
+
+  onMount(() => (window._http_cancellation_log = []))
 
   const log = (message: string) => {
     window._http_cancellation_log.push(message)

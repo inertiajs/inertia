@@ -1,5 +1,5 @@
 import { http, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 declare global {
   interface Window {
@@ -7,10 +7,12 @@ declare global {
   }
 }
 
-window._http_cancellation_log = []
-
 export default () => {
   const [messages, setMessages] = useState<string[]>([])
+
+  useEffect(() => {
+    window._http_cancellation_log = []
+  }, [])
 
   const log = (message: string) => {
     window._http_cancellation_log.push(message)

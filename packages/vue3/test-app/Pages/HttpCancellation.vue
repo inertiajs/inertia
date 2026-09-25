@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { http, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 declare global {
   interface Window {
@@ -8,9 +8,9 @@ declare global {
   }
 }
 
-window._http_cancellation_log = []
-
 const messages = ref<string[]>([])
+
+onMounted(() => (window._http_cancellation_log = []))
 
 const log = (message: string) => {
   window._http_cancellation_log.push(message)
