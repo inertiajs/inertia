@@ -1,4 +1,5 @@
 import { expect, type Route, test } from '@playwright/test'
+import { consoleMessages, requests } from './support'
 
 test.describe('HTTP cancellation', () => {
   test.beforeEach(async ({ page }) => {
@@ -6,10 +7,7 @@ test.describe('HTTP cancellation', () => {
   })
 
   test('rejects an already-aborted signal without sending a request', async ({ page }) => {
-    const requests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/dump/get')) requests.push(request.url())
-    })
+    requests.listen(page)
 
     const result = await page.evaluate(async () => {
       const http = window.testingHttp
@@ -30,14 +28,11 @@ test.describe('HTTP cancellation', () => {
     })
 
     expect(result).toEqual({ outcome: 'HttpCancelledError', errors: ['HttpCancelledError'] })
-    expect(requests).toEqual([])
+    expect(requests.requests.filter((request) => request.url().includes('/dump/get'))).toEqual([])
   })
 
   test('rejects cancellation during asynchronous request preparation', async ({ page }) => {
-    const requests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/dump/get')) requests.push(request.url())
-    })
+    requests.listen(page)
 
     const result = await page.evaluate(async () => {
       const http = window.testingHttp
@@ -73,7 +68,7 @@ test.describe('HTTP cancellation', () => {
     })
 
     expect(result).toBe('HttpCancelledError')
-    expect(requests).toEqual([])
+    expect(requests.requests.filter((request) => request.url().includes('/dump/get'))).toEqual([])
   })
 
   test('still aborts a request after it has started', async ({ page }) => {
@@ -105,12 +100,8 @@ test.describe('HTTP cancellation', () => {
     await page.route('**/dump/get?request=old', (route) => {
       oldRequest = route
     })
-    const requests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/dump/get')) requests.push(new URL(request.url()).search)
-    })
-    const errors: string[] = []
-    page.on('pageerror', (error) => errors.push(error.message))
+    requests.listen(page)
+    consoleMessages.listen(page)
 
     const result = await page.evaluate(async () => {
       const router = window.testing.Inertia
@@ -161,15 +152,16 @@ test.describe('HTTP cancellation', () => {
     expect(applied).toEqual({ url: '/dump/get?request=current', query: { request: 'current' } })
     expect(await page.evaluate(() => (window as any).cancelledCallbacks)).toEqual(['cancel', 'finish'])
     await expect(page).toHaveURL('/dump/get?request=current')
-    expect(requests).not.toContain('?request=old')
-    expect(errors).toEqual([])
+    expect(
+      requests.requests
+        .filter((request) => request.url().includes('/dump/get'))
+        .map((request) => new URL(request.url()).search),
+    ).not.toContain('?request=old')
+    expect(consoleMessages.errors).toEqual([])
   })
 
   test('does not send a prefetch cancelled before its XHR is created', async ({ page }) => {
-    const requests: string[] = []
-    page.on('request', (request) => {
-      if (request.url().includes('/dump/get')) requests.push(request.url())
-    })
+    requests.listen(page)
     const result = await page.evaluate(async () => {
       const http = window.testingHttp
       const router = window.testing.Inertia
@@ -193,6 +185,6 @@ test.describe('HTTP cancellation', () => {
       }
     })
     expect(result).toBe('HttpCancelledError')
-    expect(requests).toEqual([])
+    expect(requests.requests.filter((request) => request.url().includes('/dump/get'))).toEqual([])
   })
 })
