@@ -1501,6 +1501,10 @@ packages:
     resolution: {integrity: sha512-2cGmJupaNgg+QUwVLAucDuWuoMZ6EX9iHDRswZ5lsNYEmwPaRknMPCLZz07yTzVq/83p4o/wzbDZbBrTvGGTIw==}
     engines: {node: '>=18'}
 
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
+    engines: {node: 20 || >=22}
+
   brace-expansion@5.0.9:
     resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
@@ -1630,8 +1634,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  devalue@5.8.1:
-    resolution: {integrity: sha512-4CXDYRBGqN+57wVJkuXBYmpAVUSg3L6JAQa/DFqm238G73E1wuyc/JhGQJzN7vUf/CMphYau2zXbfWzDR5aTEw==}
+  devalue@5.9.4:
+    resolution: {integrity: sha512-sPAT4pztbu6586/hrhOnMKS17IJrvg12mXiSPSS3W5qDeN2RGgvZ0diZCm31dBbnevfVmujNO3IM2wrS4Y2Rhg==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -3195,7 +3199,7 @@ snapshots:
       '@types/cookie': 0.6.0
       acorn: 8.17.0
       cookie: 1.1.1
-      devalue: 5.8.1
+      devalue: 5.9.4
       esm-env: 1.2.2
       kleur: 4.1.5
       magic-string: 0.30.21
@@ -3566,6 +3570,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  brace-expansion@5.0.12:
+    dependencies:
+      balanced-match: 4.0.4
+
   brace-expansion@5.0.9:
     dependencies:
       balanced-match: 4.0.4
@@ -3677,7 +3685,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  devalue@5.8.1: {}
+  devalue@5.9.4: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -4214,7 +4222,7 @@ snapshots:
 
   minimatch@10.2.6:
     dependencies:
-      brace-expansion: 5.0.9
+      brace-expansion: 5.0.12
 
   mri@1.2.0: {}
 
@@ -4648,7 +4656,7 @@ snapshots:
       aria-query: 5.3.1
       axobject-query: 4.1.0
       clsx: 2.1.1
-      devalue: 5.8.1
+      devalue: 5.9.4
       esm-env: 1.2.2
       esrap: 2.2.12
       is-reference: 3.0.3
