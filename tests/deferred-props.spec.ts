@@ -521,6 +521,30 @@ test('it does not refetch deferred props that were already loaded on a previous 
   expect(requests.requests).toHaveLength(0)
 })
 
+test('it keeps the page restored by the back button when a deferred response for the previous page is still resolving', async ({
+  page,
+}) => {
+  await gotoPageAndWaitForContent(page, '/deferred-props/back-button/a')
+  await page.getByRole('link', { name: 'Go to Page B' }).click()
+  await page.waitForURL('/deferred-props/back-button/b')
+  await expect(page.getByText('Loading data...')).toBeVisible()
+
+  // Page B's deferred response arrives while its component is still resolving
+  await page.evaluate(() => (window.holdResolveFor = 'DeferredProps/BackButton/PageB'))
+  await page.waitForFunction(() => typeof window.releaseHeldResolve === 'function')
+
+  await page.goBack()
+  await page.waitForURL('/deferred-props/back-button/a')
+  await expect(page.getByRole('link', { name: 'Go to Page B' })).toBeVisible()
+
+  await page.evaluate(() => window.releaseHeldResolve?.())
+
+  await expect(page.getByText('Slow prop loaded')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Go to Page B' })).toBeVisible()
+  await expect(page.getByText('Page B data loaded')).not.toBeVisible()
+  await expect(page).toHaveURL('/deferred-props/back-button/a')
+})
+
 test('it restores already-resolved deferred props on a back_forward initial visit', async ({ page }) => {
   await gotoPageAndWaitForContent(page, '/deferred-props/tab-duplication')
 
