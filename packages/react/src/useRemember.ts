@@ -1,13 +1,14 @@
-import { router } from '@inertiajs/core'
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from 'react'
+import useLayer from './useLayer'
 
 export default function useRemember<State>(
   initialState: State,
   key?: string,
   excludeKeysRef?: MutableRefObject<string[]>,
 ): [State, Dispatch<SetStateAction<State>>] {
+  const layer = useLayer()
   const [state, setState] = useState(() => {
-    const restored = router.restore(key) as State
+    const restored = layer.restore(key) as State
 
     return restored !== undefined ? restored : initialState
   })
@@ -17,11 +18,11 @@ export default function useRemember<State>(
     if (keys && keys.length > 0 && typeof state === 'object' && state !== null) {
       const filtered = { ...state } as Record<string, unknown>
       keys.forEach((k) => delete filtered[k])
-      router.remember(filtered, key)
+      layer.remember(filtered, key)
     } else {
-      router.remember(state, key)
+      layer.remember(state, key)
     }
-  }, [state, key])
+  }, [layer, state, key])
 
   return [state, setState]
 }

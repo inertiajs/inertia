@@ -1,5 +1,6 @@
-import { PollOptions, ReloadOptions, router } from '@inertiajs/core'
+import { PollOptions, ReloadOptions } from '@inertiajs/core'
 import { onMounted, onUnmounted, ref, Ref } from 'vue'
+import useLayer from './useLayer'
 
 export default function usePoll(
   interval: number,
@@ -15,7 +16,7 @@ export default function usePoll(
 } {
   const autoStart = options.autoStart ?? true
 
-  const { stop, start, destroy } = router.poll(interval, requestOptions, {
+  const { stop, start, destroy } = useLayer().poll(interval, requestOptions, {
     ...options,
     autoStart: false,
   })

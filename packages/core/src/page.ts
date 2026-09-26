@@ -1,29 +1,143 @@
 import { cloneDeep } from 'es-toolkit'
-import { get, set } from 'es-toolkit/compat'
 import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
+import { interceptors } from './interceptors'
+import {
+  addressOf,
+  dropHistoryEntry,
+  isBlankBase,
+  layerAt,
+  layersOf,
+  loadingBase,
+  mapLayers,
+  recordHistoryEntry,
+  tierOf,
+  withBrowserHash,
+  withTier,
+  withoutAbandonedMarks,
+} from './layers'
+import { registryClose } from './layers/handles'
+import { resolveLayers } from './layers/render'
+import { continueWalk } from './layers/walk'
 import { prefetchedRequests } from './prefetched'
 import { Scroll } from './scroll'
-import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
+import {
+  Component,
+  FlashData,
+  LoadingResolver,
+  Page,
+  PageEvent,
+  PageHandler,
+  PageResolver,
+  ResolvedLayer,
+  RouterInitParams,
+  ScrollRegion,
+  Tier,
+  Visit,
+} from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
+
+const tiersOf = (page: Page): [string | undefined, Tier][] => [
+  ...layersOf(page).map((layer): [string, Tier] => [layer.id, layer]),
+  [undefined, page],
+]
+
+const pendingDeferred = new Map<string | undefined, Pick<Tier, 'deferredProps' | 'component' | 'url'>>()
+
+const recordDeferredProps = (page: Page, onScreen?: Page): void => {
+  const carried = new Map(onScreen ? tiersOf(onScreen).map(([key, tier]) => [key, tier.deferredProps]) : [])
+
+  for (const [key, tier] of tiersOf(page)) {
+    if (Object.keys(tier.deferredProps ?? {}).length && tier.deferredProps !== carried.get(key)) {
+      pendingDeferred.set(key, { deferredProps: tier.deferredProps, component: tier.component, url: tier.url })
+    }
+  }
+}
+
+const announceDeferredProps = (page: Page): void => {
+  const tiers = tiersOf(page)
+  const open = new Set(tiers.map(([key]) => key))
+
+  for (const key of pendingDeferred.keys()) {
+    if (!open.has(key)) {
+      pendingDeferred.delete(key)
+    }
+  }
+
+  for (const [key, tier] of tiers) {
+    const owed = pendingDeferred.get(key)
+
+    if (!owed) {
+      continue
+    }
+
+    pendingDeferred.delete(key)
+
+    if (owed.component !== tier.component || owed.url !== tier.url) {
+      continue
+    }
+
+    eventHandler.fireInternalEvent('loadDeferredProps', { deferredProps: owed.deferredProps, layerId: key })
+  }
+}
+
+const withLiveOwners = (page: Page, baseId: string): Page => {
+  const open = new Set(layersOf(page).map((layer) => layer.id))
+
+  return mapLayers(page, (layer) =>
+    layer.owner !== null && !open.has(layer.owner) ? { ...layer, owner: baseId } : layer,
+  )
+}
+
+const withoutFlash = (page: Page): Page => ({
+  ...mapLayers(page, (layer) => ({ ...layer, flash: {} })),
+  flash: {},
+})
+
+let baseSequence = 0
+
+const nextBaseId = (): string => `base-${++baseSequence}`
+
+interface SetOptions {
+  replace?: boolean
+  preserveScroll?: boolean
+  preserveState?: boolean
+  viewTransition?: Visit['viewTransition']
+  cached?: boolean
+  initialRender?: boolean
+  preservesBase?: boolean
+  visitId?: string
+}
+
+interface InstallOptions extends SetOptions {
+  replace: boolean
+  scrollRegions: ScrollRegion[]
+  scrollRegionLayers?: (string | null)[]
+}
 
 class CurrentPage {
   protected page!: Page
   protected swapComponent!: PageHandler<any>
   protected resolveComponent!: PageResolver
+  protected resolveLoading?: LoadingResolver
   protected onFlashCallback?: (flash: Page['flash']) => void
   protected componentId = {}
+  protected baseGeneration = 0
+  protected baseId = ''
   protected listeners: {
     event: PageEvent
     callback: VoidFunction
   }[] = []
   protected isFirstPageLoad = true
   protected cleared = false
-  protected pendingDeferredProps: Pick<Page, 'deferredProps' | 'url' | 'component'> | null = null
   protected historyQuotaExceeded = false
-  protected optimisticBaseline: Partial<Page['props']> = {}
-  protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
+  protected optimisticBaselines: Map<string | undefined, Partial<Page['props']>> = new Map()
+  protected pendingOptimistics: {
+    id: number
+    layerId?: string
+    callback: (props: Page['props']) => Partial<Page['props']> | void
+  }[] = []
   protected optimisticCounter = 0
   protected confirmedOptimisticId = 0
 
@@ -31,12 +145,15 @@ class CurrentPage {
     initialPage,
     swapComponent,
     resolveComponent,
+    resolveLoading,
     onFlash,
   }: RouterInitParams<ComponentType>) {
     this.page = { ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] }
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
+    this.resolveLoading = resolveLoading
     this.onFlashCallback = onFlash
+    this.baseId = nextBaseId()
 
     eventHandler.on('historyQuotaExceeded', () => {
       this.historyQuotaExceeded = true
@@ -45,38 +162,40 @@ class CurrentPage {
     return this
   }
 
-  public set(
-    page: Page,
-    {
-      replace = false,
-      preserveScroll = false,
-      preserveState = false,
-      viewTransition = false,
-      cached = false,
-      initialRender = false,
-      visitId,
-    }: {
-      replace?: boolean
-      preserveScroll?: boolean
-      preserveState?: boolean
-      viewTransition?: Visit['viewTransition']
-      cached?: boolean
-      initialRender?: boolean
-      visitId?: string
-    } = {},
-  ): Promise<void> {
-    if (Object.keys(page.deferredProps || {}).length) {
-      this.pendingDeferredProps = {
-        deferredProps: page.deferredProps,
-        component: page.component,
-        url: page.url,
-      }
+  protected commit(page: Page, { announceAll = false }: { announceAll?: boolean } = {}): void {
+    const previous = announceAll ? [] : layersOf(this.page)
+    const next = layersOf(page)
+    const before = new Set(previous.map((layer) => layer.id))
+    const after = new Set(next.map((layer) => layer.id))
 
+    this.page = page
+
+    const departed = previous.filter((layer) => !after.has(layer.id))
+
+    this.dropLayerOptimisticState(departed.map((layer) => layer.id))
+    departed.forEach((layer) => interceptors.fireLayerEvent({ type: 'closed', layer }))
+    next
+      .filter((layer) => !before.has(layer.id))
+      .forEach((layer) => interceptors.fireLayerEvent({ type: 'opened', layer }))
+
+    this.fireEventsFor('commit')
+  }
+
+  public set(page: Page, options: SetOptions = {}): Promise<void> {
+    const { initialRender = false, preservesBase = false } = options
+
+    if (Object.keys(page.deferredProps || {}).length && page.initialDeferredProps === undefined) {
       // Preserve original deferred props for back button handling
-      if (page.initialDeferredProps === undefined) {
-        page.initialDeferredProps = page.deferredProps
-      }
+      page.initialDeferredProps = page.deferredProps
     }
+
+    recordDeferredProps(page, initialRender ? undefined : this.page)
+
+    if (!preservesBase) {
+      this.baseGeneration++
+    }
+
+    page = withoutAbandonedMarks(this.page, page)
 
     this.componentId = {}
 
@@ -84,90 +203,136 @@ class CurrentPage {
 
     if (page.clearHistory) {
       history.clear()
+      page = { ...page, clearHistory: false }
     }
 
-    return this.resolve(page.component, page).then((component) => {
+    return Promise.all([this.resolve(page.component, page), this.resolveLayers(page)]).then(([component, layers]) => {
       if (componentId !== this.componentId) {
         // Component has changed since we started resolving this component, bail
         return
       }
 
-      page.rememberedState ??= {}
-
-      const isServer = typeof window === 'undefined'
-      const location = !isServer ? window.location : new URL(page.url)
-      const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
-      replace = replace || isSameUrlWithoutHash(hrefToUrl(page.url), location)
-
-      // Clear flash data from the page object, we don't want it when navigating back/forward...
-      const pageForHistory = { ...page, flash: {} }
-
-      return new Promise<void>((resolve) =>
-        replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
-      ).then(() => {
-        const isNewComponent = !this.isTheSame(page)
-
-        if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
-          // Don't use view transition if the page stays the same and there are (new) errors...
-          viewTransition = false
-        }
-
-        this.page = page
-        this.cleared = false
-
-        if (this.hasOnceProps()) {
-          prefetchedRequests.updateCachedOncePropsFromCurrentPage()
-        }
-
-        if (isNewComponent) {
-          this.fireEventsFor('newComponent')
-        }
-
-        if (this.isFirstPageLoad) {
-          this.fireEventsFor('firstLoad')
-        }
-
-        this.isFirstPageLoad = false
-
-        if (this.historyQuotaExceeded) {
-          // If we exceeded the history quota, don't attempt to swap the
-          // component as we're performing a full page reload instead.
-          this.historyQuotaExceeded = false
-          return
-        }
-
-        return this.swap({
-          component,
-          page,
-          preserveState,
-          viewTransition,
-          initialRender,
-        }).then(() => {
-          if (preserveScroll) {
-            // Scroll regions must be explicitly restored since the DOM elements are destroyed
-            // and recreated during the component 'swap'. Document scroll is naturally
-            // preserved as the document element itself persists across navigations.
-            window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions))
-          } else {
-            Scroll.reset()
-          }
-
-          if (
-            this.pendingDeferredProps &&
-            this.pendingDeferredProps.component === page.component &&
-            this.pendingDeferredProps.url === page.url
-          ) {
-            eventHandler.fireInternalEvent('loadDeferredProps', this.pendingDeferredProps.deferredProps)
-          }
-
-          this.pendingDeferredProps = null
-
-          if (!replace) {
-            fireNavigateEvent(page, { cached, visitId })
-          }
-        })
-      })
+      return this.write(page, component, layers, options)
     })
+  }
+
+  // The history entry is written before the swap, so anything reading the address mid-swap sees the new one.
+  protected write(
+    page: Page,
+    component: Component | undefined,
+    layers: ResolvedLayer[] | undefined,
+    options: SetOptions,
+  ): Promise<void> {
+    const { preserveScroll = false, preserveState = false, preservesBase = false } = options
+
+    if (!preservesBase && this.takesBaseAway(page, preserveState)) {
+      registryClose(this.baseId)
+      this.baseId = nextBaseId()
+    }
+
+    page = withLiveOwners(page, this.baseId)
+
+    page.rememberedState ??= {}
+
+    const isServer = typeof window === 'undefined'
+    const scrollRegions = !isServer && preserveScroll ? Scroll.getScrollRegions() : []
+    const scrollRegionLayers = !isServer && preserveScroll ? Scroll.getScrollRegionLayers() : undefined
+    const replace = this.takesOverTheEntry(page, options.replace ?? false, isServer)
+
+    if (!replace && !history.preserveUrl) {
+      page = recordHistoryEntry(page)
+    }
+
+    // Clear flash data from the page object, we don't want it when navigating back/forward...
+    const pageForHistory = withoutFlash(page)
+
+    return new Promise<boolean>((resolve) =>
+      replace ? history.replaceState(pageForHistory, () => resolve(true)) : history.pushState(pageForHistory, resolve),
+    ).then((written) =>
+      // An entry the browser refused to write is not one a close should step back over.
+      this.install(written ? page : dropHistoryEntry(page), component, layers, {
+        ...options,
+        replace,
+        scrollRegions,
+        scrollRegionLayers,
+      }),
+    )
+  }
+
+  protected takesOverTheEntry(page: Page, replace: boolean, isServer: boolean): boolean {
+    if (replace) {
+      return true
+    }
+
+    if (layersOf(page).some((layer) => !layer.standalone && !layerAt(this.page, layer.id))) {
+      return false
+    }
+
+    return isSameUrlWithoutHash(hrefToUrl(addressOf(page)), !isServer ? window.location : new URL(page.url))
+  }
+
+  protected install(
+    page: Page,
+    component: Component | undefined,
+    layers: ResolvedLayer[] | undefined,
+    { preserveState = false, viewTransition = false, initialRender = false, ...options }: InstallOptions,
+  ): Promise<void> | void {
+    const isNewComponent = !this.isTheSame(page)
+
+    if (!isNewComponent && Object.keys(page.props.errors || {}).length > 0) {
+      // Don't use view transition if the page stays the same and there are (new) errors...
+      viewTransition = false
+    }
+
+    this.commit(page, { announceAll: initialRender })
+    this.cleared = false
+
+    if (this.hasOnceProps()) {
+      prefetchedRequests.updateCachedOncePropsFromCurrentPage()
+    }
+
+    if (isNewComponent) {
+      this.fireEventsFor('newComponent')
+    }
+
+    if (this.isFirstPageLoad) {
+      this.fireEventsFor('firstLoad')
+    }
+
+    this.isFirstPageLoad = false
+
+    if (this.historyQuotaExceeded) {
+      // If we exceeded the history quota, don't attempt to swap the
+      // component as we're performing a full page reload instead.
+      this.historyQuotaExceeded = false
+      return
+    }
+
+    return this.swap({ component, layers, page, preserveState, viewTransition, initialRender }).then(() =>
+      this.afterSwap(page, options),
+    )
+  }
+
+  protected afterSwap(
+    page: Page,
+    { preserveScroll = false, scrollRegions, scrollRegionLayers, replace, cached = false, visitId }: InstallOptions,
+  ): void {
+    if (preserveScroll) {
+      // Scroll regions must be explicitly restored since the DOM elements are destroyed
+      // and recreated during the component 'swap'. Document scroll is naturally
+      // preserved as the document element itself persists across navigations.
+      window.requestAnimationFrame(() => Scroll.restoreScrollRegions(scrollRegions, scrollRegionLayers))
+    } else {
+      Scroll.reset()
+    }
+
+    announceDeferredProps(page)
+
+    if (!replace) {
+      fireNavigateEvent(page, { cached, visitId })
+    }
+
+    continueWalk()
   }
 
   public setQuietly(
@@ -178,11 +343,18 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
-    return this.resolve(page.component, page).then((component) => {
-      this.page = page
+    page = withLiveOwners(page, this.baseId)
+
+    this.baseGeneration++
+    page = withoutAbandonedMarks(this.page, page)
+
+    return this.resolve(page.component, page).then(async (component) => {
+      const layers = await this.resolveLayers(page)
+
+      this.commit(page)
       this.cleared = false
       history.setCurrent(page)
-      return this.swap({ component, page, preserveState, viewTransition: false })
+      return this.swap({ component, layers, page, preserveState, viewTransition: false })
     })
   }
 
@@ -198,35 +370,57 @@ class CurrentPage {
     return this.page
   }
 
+  public generation(): number {
+    return this.baseGeneration
+  }
+
+  public id(): string {
+    return this.baseId
+  }
+
+  protected takesBaseAway(page: Page, preserveState: boolean): boolean {
+    return !layersOf(page).some((open) => layerAt(this.page, open.id)) && !(preserveState && this.isTheSame(page))
+  }
+
   public getWithoutFlashData(): Page {
-    return { ...this.page, flash: {} }
+    return withoutFlash(this.page)
   }
 
   public hasOnceProps(): boolean {
-    return Object.keys(this.page.onceProps ?? {}).length > 0
+    return tiersOf(this.page).some(([, tier]) => Object.keys(tier.onceProps ?? {}).length > 0)
   }
 
   public merge(data: Partial<Page>): void {
-    this.page = { ...this.page, ...data }
+    this.commit({ ...this.page, ...data })
   }
 
-  public setPropsQuietly(props: Page['props']): Promise<unknown> {
-    this.page = { ...this.page, props }
+  public setPropsQuietly(props: Page['props'], layerId?: string): Promise<unknown> {
+    this.page = withTier(this.page, layerId, { props })
 
-    return this.resolve(this.page.component, this.page).then((component) => {
-      return this.swap({ component, page: this.page, preserveState: true, viewTransition: false })
-    })
+    return this.rerender()
   }
 
-  public setFlash(flash: FlashData): void {
-    this.page = { ...this.page, flash }
+  public rerender(): Promise<void> {
+    return Promise.all([this.resolve(this.page.component, this.page), this.resolveLayers(this.page)]).then(
+      ([component, layers]) =>
+        this.swap({ component, layers, page: this.page, preserveState: true, viewTransition: false }).then(() => {}),
+    )
+  }
+
+  public setFlash(flash: FlashData, layerId?: string): void {
+    this.page = withTier(this.page, layerId, { flash })
+
+    if (layerId) {
+      this.rerender()
+
+      return
+    }
+
     this.onFlashCallback?.(flash)
   }
 
   public setUrlHash(hash: string): void {
-    if (!this.page.url.includes(hash)) {
-      this.page.url += hash
-    }
+    this.page = withBrowserHash(this.page, hash)
   }
 
   public remember(data: Page['rememberedState']): void {
@@ -235,18 +429,20 @@ class CurrentPage {
 
   public swap({
     component,
+    layers,
     page,
     preserveState,
     viewTransition,
     initialRender = false,
   }: {
-    component: Component
+    component?: Component
+    layers?: ResolvedLayer[]
     page: Page
     preserveState: boolean
     viewTransition: Visit['viewTransition']
     initialRender?: boolean
   }): Promise<unknown> {
-    const doSwap = () => this.swapComponent({ component, page, preserveState, initialRender })
+    const doSwap = () => this.swapComponent({ component, layers, page, preserveState, initialRender })
 
     if (!viewTransition || !document?.startViewTransition || document.visibilityState === 'hidden') {
       return doSwap()
@@ -277,7 +473,23 @@ class CurrentPage {
   }
 
   public resolve(component: string, page?: Page): Promise<Component> {
-    return Promise.resolve(this.resolveComponent(component, page))
+    if (!isBlankBase({ component })) {
+      return Promise.resolve(this.resolveComponent(component, page))
+    }
+
+    return Promise.resolve(
+      page === undefined || this.resolveLoading === undefined
+        ? undefined
+        : this.resolveLoading(loadingBase(page) ?? page.url, page),
+    )
+  }
+
+  protected resolveLayers(page: Page): Promise<ResolvedLayer[] | undefined> {
+    if (!page.layers?.length) {
+      return Promise.resolve(undefined)
+    }
+
+    return resolveLayers(page, (name, layerPage) => this.resolve(name, layerPage))
   }
 
   public nextOptimisticId(): number {
@@ -292,45 +504,63 @@ class CurrentPage {
     return this.confirmedOptimisticId > id
   }
 
-  public setBaseline(key: string, value: unknown): void {
-    if (!(key in this.optimisticBaseline)) {
-      this.optimisticBaseline[key] = value
+  protected baselineOf(layerId?: string): Partial<Page['props']> {
+    return this.optimisticBaselines.get(layerId) ?? {}
+  }
+
+  public setBaseline(key: string, value: unknown, layerId?: string): void {
+    const baseline = this.baselineOf(layerId)
+
+    if (!(key in baseline)) {
+      this.optimisticBaselines.set(layerId, { ...baseline, [key]: value })
     }
   }
 
-  public updateBaseline(key: string, value: unknown): void {
-    if (key in this.optimisticBaseline) {
-      this.optimisticBaseline[key] = value
+  public updateBaseline(key: string, value: unknown, layerId?: string): void {
+    const baseline = this.baselineOf(layerId)
+
+    if (key in baseline) {
+      this.optimisticBaselines.set(layerId, { ...baseline, [key]: value })
     }
   }
 
-  public hasBaseline(key: string): boolean {
-    return key in this.optimisticBaseline
+  public hasBaseline(key: string, layerId?: string): boolean {
+    return key in this.baselineOf(layerId)
   }
 
-  public registerOptimistic(id: number, callback: (props: Page['props']) => Partial<Page['props']> | void): void {
-    this.pendingOptimistics.push({ id, callback })
+  public registerOptimistic(
+    id: number,
+    layerId: string | undefined,
+    callback: (props: Page['props']) => Partial<Page['props']> | void,
+  ): void {
+    this.pendingOptimistics.push({ id, layerId, callback })
   }
 
   public unregisterOptimistic(id: number): void {
     this.pendingOptimistics = this.pendingOptimistics.filter((entry) => entry.id !== id)
   }
 
-  public replayOptimistics(): Partial<Page['props']> {
-    const baselineKeys = Object.keys(this.optimisticBaseline)
+  public replayOptimistics(layerId?: string): Partial<Page['props']> {
+    const tierProps = tierOf(this.page, layerId).props
+    const baseline = this.baselineOf(layerId)
+    const baselineKeys = Object.keys(baseline)
 
     if (baselineKeys.length === 0) {
       return {}
     }
 
-    const props = cloneDeep(this.page.props)
+    const props = cloneDeep(tierProps) as Record<string, unknown>
 
     for (const key of baselineKeys) {
-      props[key] = cloneDeep(this.optimisticBaseline[key])
+      props[key] = cloneDeep(baseline[key])
     }
 
-    for (const { callback } of this.pendingOptimistics) {
-      const result = callback(cloneDeep(props))
+    for (const { callback, layerId: entryTier } of this.pendingOptimistics) {
+      if (entryTier !== layerId) {
+        continue
+      }
+
+      const result = callback(cloneDeep(props) as Page['props'])
 
       if (result) {
         Object.assign(props, result)
@@ -351,9 +581,19 @@ class CurrentPage {
   }
 
   public clearOptimisticState(): void {
-    this.optimisticBaseline = {}
+    this.optimisticBaselines.clear()
     this.pendingOptimistics = []
     this.confirmedOptimisticId = 0
+  }
+
+  public dropLayerOptimisticState(layerIds: string[]): void {
+    for (const id of layerIds) {
+      this.optimisticBaselines.delete(id)
+    }
+
+    this.pendingOptimistics = this.pendingOptimistics.filter(
+      (entry) => !entry.layerId || !layerIds.includes(entry.layerId),
+    )
   }
 
   public isTheSame(page: Page): boolean {
@@ -370,21 +610,6 @@ class CurrentPage {
 
   public fireEventsFor(event: PageEvent): void {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback())
-  }
-
-  public mergeOncePropsIntoResponse(response: Page, { force = false }: { force?: boolean } = {}): void {
-    Object.entries(response.onceProps ?? {}).forEach(([key, onceProp]) => {
-      const existingOnceProp = this.page.onceProps?.[key]
-
-      if (existingOnceProp === undefined) {
-        return
-      }
-
-      if (force || get(response.props, onceProp.prop) === undefined) {
-        set(response.props, onceProp.prop, get(this.page.props, existingOnceProp.prop))
-        response.onceProps![key].expiresAt = existingOnceProp.expiresAt
-      }
-    })
   }
 }
 

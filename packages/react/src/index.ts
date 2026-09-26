@@ -8,9 +8,10 @@ export { default as Deferred } from './Deferred'
 export { default as Form, useFormContext } from './Form'
 export { default as Head } from './Head'
 export { default as InfiniteScroll } from './InfiniteScroll'
+export { default as Layer } from './Layer'
 export { resetLayoutProps, setLayoutProps } from './layoutProps'
 export { InertiaLinkProps, default as Link } from './Link'
-export { LayoutCallback, ReactComponent as ResolvedComponent } from './types'
+export { type LayerComponent, LayoutCallback, ReactComponent as ResolvedComponent } from './types'
 export {
   InertiaForm,
   InertiaFormProps,
@@ -22,6 +23,7 @@ export {
   default as useForm,
 } from './useForm'
 export { default as useHttp } from './useHttp'
+export { default as useLayer } from './useLayer'
 export { default as usePage } from './usePage'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'

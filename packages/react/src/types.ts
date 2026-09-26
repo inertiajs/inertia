@@ -1,9 +1,10 @@
-import { type LayoutCallbackReturn, PageHandler, SharedPageProps } from '@inertiajs/core'
+import { type LayerShellProps, type LayoutCallbackReturn, PageHandler, SharedPageProps } from '@inertiajs/core'
 import { ComponentType, ReactNode } from 'react'
 
 export type LayoutFunction = (page: ReactNode) => ReactNode
 export type LayoutCallback = (props: SharedPageProps) => LayoutCallbackReturn<ComponentType<any>>
 export type LayoutComponent = ComponentType<{ children: ReactNode }>
+export type LayerComponent = ComponentType<LayerShellProps & { children?: ReactNode }>
 
 export type ReactComponent = ComponentType<any> & {
   layout?: LayoutComponent | LayoutComponent[] | LayoutFunction | ((props: any) => any)

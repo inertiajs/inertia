@@ -1,6 +1,7 @@
 import { escape } from 'es-toolkit/compat'
 import React, { FunctionComponent, ReactElement, ReactNode, use, useEffect, useMemo } from 'react'
 import HeadContext from './HeadContext'
+import { useLayerId } from './useLayer'
 
 type InertiaHeadProps = {
   title?: string
@@ -11,7 +12,8 @@ type InertiaHead = FunctionComponent<InertiaHeadProps>
 
 const Head: InertiaHead = function ({ children, title }) {
   const headManager = use(HeadContext)
-  const provider = useMemo(() => headManager!.createProvider(), [headManager])
+  const layerId = useLayerId()
+  const provider = useMemo(() => headManager!.createProvider(layerId), [headManager, layerId])
   const isServer = typeof window === 'undefined'
 
   useEffect(() => {

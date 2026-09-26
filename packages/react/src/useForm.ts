@@ -9,7 +9,6 @@ import {
   OptimisticCallback,
   Progress,
   RequestPayload,
-  router,
   UrlMethodPair,
   UseFormArguments,
   UseFormSubmitArguments,
@@ -23,6 +22,7 @@ import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
 import { useCallback, useMemo, useRef } from 'react'
 import useFormState, { SetDataAction, SetDataByKeyValuePair, SetDataByMethod, SetDataByObject } from './useFormState'
+import useLayer from './useLayer'
 import useRemember from './useRemember'
 
 // Re-export types that were moved to useFormState
@@ -117,6 +117,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
   // Resolve initial data for remember functionality hooks
   const initialDefaults = typeof data === 'function' ? cloneDeep(data()) : cloneDeep(data)
 
+  const layer = useLayer()
   const cancelToken = useRef<CancelToken | null>(null)
   const excludeKeysRef = useRef<FormDataKeys<TForm>[]>([])
   const pendingOptimisticRef = useRef<OptimisticCallback | null>(null)
@@ -224,12 +225,12 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       const transformedData = transformRef.current(dataRef.current) as RequestPayload
 
       if (method === 'delete') {
-        router.delete(url, { ..._options, data: transformedData })
+        layer.delete(url, { ..._options, data: transformedData })
       } else {
-        router[method](url, transformedData, _options)
+        layer[method](url, transformedData, _options)
       }
     },
-    [clearErrors, setError, transformRef],
+    [clearErrors, layer, setError, transformRef],
   )
 
   const cancel = useCallback(() => {

@@ -1,6 +1,17 @@
-import { cloneDeep, isEqual } from 'es-toolkit'
+import { isEqual } from 'es-toolkit'
 import { decryptHistory, encryptHistory, historySessionStorageKeys } from './encryption'
 import { eventHandler } from './eventHandler'
+import {
+  addressOf,
+  encryptsHistory,
+  isBlankBase,
+  mapLayers,
+  promoteDeepestLayer,
+  rememberedStateOf,
+  withTier,
+  withoutClosingLayers,
+} from './layers'
+import { toStructuredCloneable } from './objectUtils'
 import { page as currentPage } from './page'
 import Queue from './queue'
 import { SessionStorage } from './sessionStorage'
@@ -15,34 +26,46 @@ class History {
   public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
   protected current: Partial<Page> = {}
+  // Set while the browser steps back for a close, so a write raised mid-unwind waits. Always settles.
+  protected unwinding: Promise<unknown> | null = null
   // We need initialState for `restore`
   protected initialState: Partial<Page> | null = null
 
-  public remember(data: unknown, key: string): void {
-    this.replaceState({
-      ...currentPage.getWithoutFlashData(),
-      rememberedState: {
-        ...(currentPage.get()?.rememberedState ?? {}),
-        [key]: data,
-      },
-    })
-  }
-
-  public restore(key: string): unknown {
-    if (!isServer) {
-      return this.current[this.rememberedState]?.[key] !== undefined
-        ? this.current[this.rememberedState]?.[key]
-        : this.initialState?.[this.rememberedState]?.[key]
+  public remember(data: unknown, key: string, layerId?: string): void {
+    if (isServer) {
+      return
     }
+
+    // Composed from whatever is current, so it waits out an unwind.
+    if (this.unwinding) {
+      this.unwinding.then(() => this.remember(data, key, layerId))
+      return
+    }
+
+    const current = rememberedStateOf(currentPage.get(), layerId)
+
+    this.replaceState(
+      withTier(currentPage.getWithoutFlashData(), layerId, { rememberedState: { ...current, [key]: data } }),
+    )
   }
 
-  public pushState(page: Page, cb: (() => void) | null = null): void {
+  public restore(key: string, layerId?: string): unknown {
+    if (isServer) {
+      return
+    }
+
+    const stored = rememberedStateOf(this.current, layerId)
+
+    return stored[key] !== undefined ? stored[key] : rememberedStateOf(this.initialState ?? {}, layerId)[key]
+  }
+
+  public pushState(page: Page, cb: ((written: boolean) => void) | null = null): void {
     if (isServer) {
       return
     }
 
     if (this.preserveUrl) {
-      cb && cb()
+      cb && cb(true)
       return
     }
 
@@ -52,7 +75,7 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.pushState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.replaceState completes before pushState is executed.
-        const doPush = () => this.doPushState({ page: data }, page.url).then(() => cb?.())
+        const doPush = () => this.doPushState({ page: data }, addressOf(page)).then((written) => cb?.(written))
 
         if (isChromeIOS) {
           return new Promise((resolve) => {
@@ -67,23 +90,22 @@ class History {
 
   protected clonePageProps(page: Page): Page {
     try {
-      structuredClone(page.props)
+      structuredClone(page)
       return page
     } catch {
       // Props contain non-serializable data (e.g., Proxies, functions).
-      // Clone them to ensure they can be safely stored in browser history.
-      return {
-        ...page,
-        props: cloneDeep(page.props),
-      }
+      // Drop what the browser cannot store in history.
+      return toStructuredCloneable(page)
     }
   }
 
   protected getPageData(page: Page): Promise<Page | ArrayBuffer> {
-    const pageWithClonedProps = this.clonePageProps(page)
+    const open = withoutClosingLayers(page)
+    const entry = isBlankBase(open) ? promoteDeepestLayer(open) : open
+    const pageWithClonedProps = this.clonePageProps(entry)
 
     return new Promise((resolve) => {
-      return page.encryptHistory ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
+      return encryptsHistory(entry) ? encryptHistory(pageWithClonedProps).then(resolve) : resolve(pageWithClonedProps)
     })
   }
 
@@ -117,20 +139,24 @@ class History {
     return pageData instanceof ArrayBuffer ? decryptHistory(pageData) : Promise.resolve(pageData)
   }
 
-  public saveScrollPositions(scrollRegions: ScrollRegion[]): void {
+  public saveScrollPositions(scrollRegions: ScrollRegion[], scrollRegionLayers?: (string | null)[]): void {
     queue.add(() => {
       return Promise.resolve().then(() => {
         if (!window.history.state?.page) {
           return
         }
 
-        if (isEqual(this.getScrollRegions(), scrollRegions)) {
+        if (
+          isEqual(this.getScrollRegions(), scrollRegions) &&
+          isEqual(this.getScrollRegionLayers() ?? [], scrollRegionLayers ?? [])
+        ) {
           return
         }
 
         return this.doReplaceState({
           page: window.history.state.page,
           scrollRegions,
+          scrollRegionLayers,
         })
       })
     })
@@ -159,6 +185,10 @@ class History {
     return window.history.state?.scrollRegions || []
   }
 
+  public getScrollRegionLayers(): (string | null)[] | undefined {
+    return window.history.state?.scrollRegionLayers
+  }
+
   public getDocumentScrollPosition(): ScrollRegion {
     return window.history.state?.documentScrollPosition || { top: 0, left: 0 }
   }
@@ -171,7 +201,12 @@ class History {
 
     // Exclude flash from the merge to prevent callers (like router.remember())
     // from accidentally clearing flash data on the current page.
-    const { flash, ...pageWithoutFlash } = page
+    const live = currentPage.get().layers ?? []
+    const { flash, ...pageWithoutFlash } = mapLayers(page, (layer) => ({
+      ...layer,
+      flash: live.find((open) => open.id === layer.id)?.flash ?? {},
+    }))
+
     currentPage.merge(pageWithoutFlash)
 
     if (isServer) {
@@ -189,7 +224,7 @@ class History {
       return this.getPageData(page).then((data) => {
         // Defer history.replaceState to the next event loop tick to prevent timing conflicts.
         // Ensure any previous history.pushState completes before replaceState is executed.
-        const doReplace = () => this.doReplaceState({ page: data }, page.url).then(() => cb?.())
+        const doReplace = () => this.doReplaceState({ page: data }, addressOf(page)).then(() => cb?.())
 
         if (isChromeIOS) {
           return new Promise((resolve) => {
@@ -200,6 +235,23 @@ class History {
         return doReplace()
       })
     })
+  }
+
+  // Queued behind earlier writes, which are async under encryption, and holding the queue until the browser answers.
+  public back(entries: number, answered: Promise<unknown>): void {
+    const settled = answered.then(() => {
+      if (this.unwinding === settled) {
+        this.unwinding = null
+      }
+    })
+
+    this.unwinding = settled
+
+    queue.add(() =>
+      Promise.resolve()
+        .then(() => window.history.go(-entries))
+        .then(() => answered.then(() => {})),
+    )
   }
 
   protected isHistoryThrottleError(error: unknown): error is Error & { name: 'SecurityError' } {
@@ -232,14 +284,19 @@ class History {
     data: {
       page: Page | ArrayBuffer
       scrollRegions?: ScrollRegion[]
+      scrollRegionLayers?: (string | null)[]
       documentScrollPosition?: ScrollRegion
     },
     url?: string,
   ): Promise<void> {
     return this.withThrottleProtection(() => {
+      const { scrollRegionLayers, ...state } = data
+      const carriedLayers = 'scrollRegionLayers' in data ? scrollRegionLayers : window.history.state?.scrollRegionLayers
+
       window.history.replaceState(
         {
-          ...data,
+          ...state,
+          ...(carriedLayers !== undefined && { scrollRegionLayers: carriedLayers }),
           scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
           documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
         },
@@ -253,21 +310,30 @@ class History {
     data: {
       page: Page | ArrayBuffer
       scrollRegions?: ScrollRegion[]
+      scrollRegionLayers?: (string | null)[]
       documentScrollPosition?: ScrollRegion
     },
     url: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     return this.withThrottleProtection(() => {
       try {
         window.history.pushState(data, '', url)
       } catch (error) {
+        if (this.isHistoryThrottleError(error)) {
+          console.error(error.message)
+
+          return false
+        }
+
         if (!this.isQuotaExceededError(error)) {
           throw error
         }
 
         eventHandler.fireInternalEvent('historyQuotaExceeded', url)
       }
-    })
+
+      return true
+    }).then((written) => written !== false)
   }
 
   public getState<T>(key: keyof Page, defaultValue?: T): any {
@@ -275,6 +341,11 @@ class History {
   }
 
   public deleteState(key: keyof Page) {
+    if (this.unwinding) {
+      this.unwinding.then(() => this.deleteState(key))
+      return
+    }
+
     if (this.current[key] !== undefined) {
       delete this.current[key]
       this.replaceState(this.current as Page)

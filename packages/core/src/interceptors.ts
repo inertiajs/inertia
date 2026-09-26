@@ -3,7 +3,7 @@
 // and transform a visit's outgoing request and incoming response without coupling
 // the framework-agnostic HTTP client (`http`) to Inertia visit internals. Mirrors
 // the mechanism of `httpHandlers`, with the originating visit added as context.
-import type { HttpRequestConfig, HttpResponse, InternalActiveVisit } from './types'
+import type { HttpRequestConfig, HttpResponse, InternalActiveVisit, LayerState } from './types'
 
 type VisitRequestHandler = (
   visit: InternalActiveVisit,
@@ -12,9 +12,17 @@ type VisitRequestHandler = (
 
 type VisitResponseHandler = (visit: InternalActiveVisit, response: HttpResponse) => HttpResponse | Promise<HttpResponse>
 
+export type LayerEvent =
+  | { type: 'opened'; layer: LayerState }
+  | { type: 'closed'; layer: LayerState }
+  | { type: 'event'; from: string; to: string | null; name: string; payload?: unknown }
+
+type LayerEventHandler = (event: LayerEvent) => void
+
 class VisitInterceptors {
   protected requestHandlers: VisitRequestHandler[] = []
   protected responseHandlers: VisitResponseHandler[] = []
+  protected layerHandlers: LayerEventHandler[] = []
 
   public onVisitRequest(handler: VisitRequestHandler): () => void {
     this.requestHandlers.push(handler)
@@ -29,6 +37,25 @@ class VisitInterceptors {
 
     return () => {
       this.responseHandlers = this.responseHandlers.filter((h) => h !== handler)
+    }
+  }
+
+  public onLayerEvent(handler: LayerEventHandler): () => void {
+    this.layerHandlers.push(handler)
+
+    return () => {
+      this.layerHandlers = this.layerHandlers.filter((h) => h !== handler)
+    }
+  }
+
+  // Observation only: a handler that throws must not break the write or the emit that announced.
+  public fireLayerEvent(event: LayerEvent): void {
+    for (const handler of this.layerHandlers) {
+      try {
+        handler(event)
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 
