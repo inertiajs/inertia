@@ -36,11 +36,13 @@
  */
 
 import type { Property } from 'estree'
+import MagicString from 'magic-string'
 import { type NodeWithPos, ParsedCode, extractBoolean, extractString, extractStringArray } from './astUtils'
+import { replaceRange } from './sourceMap'
 import type { FrameworkConfig } from './types'
 
 export interface PageTransformResult {
-  code: string
+  code: MagicString
   pageGlobs: string[]
 }
 
@@ -97,8 +99,8 @@ function replacePages(
   property: NodeWithPos<Property>,
   defaultExtensions: string[],
   extractDefault: boolean,
-): { code: string; globs: string[] } | null {
-  const config = extractPagesConfig(property.value, code)
+): { code: MagicString; globs: string[] } | null {
+  const config = extractPagesConfig(property.value)
 
   if (!config) {
     return null
@@ -114,11 +116,22 @@ function replacePages(
 
   const directories = config.directory ? [config.directory.replace(/\/$/, '')] : ['./pages', './Pages']
 
-  const resolver = buildResolver(directories, extensions, extractDefault, eager, config.transform)
+  const transform = config.transform ? code.slice(config.transform.start, config.transform.end) : undefined
+  const resolver = buildResolver(directories, extensions, extractDefault, eager, transform)
   const globs = directories.map((d) => buildGlob(d, extensions))
+  const result = new MagicString(code)
+
+  if (config.transform && transform) {
+    const offset = resolver.indexOf(RESOLVED_NAME_PREFIX) + RESOLVED_NAME_PREFIX.length
+
+    replaceRange(result, property.start, config.transform.start, resolver.slice(0, offset))
+    replaceRange(result, config.transform.end, property.end, resolver.slice(offset + transform.length))
+  } else {
+    replaceRange(result, property.start, property.end, resolver)
+  }
 
   return {
-    code: code.slice(0, property.start) + resolver + code.slice(property.end),
+    code: result,
     globs,
   }
 }
@@ -136,25 +149,27 @@ function injectResolver(
   call: { callEnd: number; options?: { start: number; end: number; isEmpty: boolean } },
   extensions: string[],
   extractDefault: boolean,
-): string {
+): MagicString {
   const resolver = buildDefaultResolver(extensions, extractDefault)
+  const result = new MagicString(code)
 
   if (!call.options) {
-    return code.slice(0, call.callEnd - 1) + `{ ${resolver} })` + code.slice(call.callEnd)
+    return result.appendLeft(call.callEnd - 1, `{ ${resolver} }`)
   }
 
   if (call.options.isEmpty) {
-    return code.slice(0, call.options.start) + `{ ${resolver} }` + code.slice(call.options.end)
+    result.remove(call.options.start + 1, call.options.end - 1)
+    return result.appendLeft(call.options.start + 1, ` ${resolver} `)
   }
 
-  return code.slice(0, call.options.start + 1) + ` ${resolver},` + code.slice(call.options.start + 1)
+  return result.appendLeft(call.options.start + 1, ` ${resolver},`)
 }
 
 /** The parsed representation of a `pages` property value. */
 interface PagesConfig {
   directory?: string
   extensions?: string | string[]
-  transform?: string
+  transform?: NodeWithPos<Property['value']>
   lazy?: boolean
 }
 
@@ -165,7 +180,7 @@ interface PagesConfig {
  * 1. String: `pages: './Pages'`
  * 2. Object: `pages: { path: './Pages', extension: '.vue', lazy: true, transform: fn }`
  */
-function extractPagesConfig(node: Property['value'], code: string): PagesConfig | null {
+function extractPagesConfig(node: Property['value']): PagesConfig | null {
   const str = extractString(node)
 
   if (str) {
@@ -178,7 +193,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
 
   let directory: string | undefined
   let extensions: string | string[] | undefined
-  let transform: string | undefined
+  let transform: NodeWithPos<Property['value']> | undefined
   let lazy: boolean | undefined
 
   for (const prop of node.properties) {
@@ -194,7 +209,7 @@ function extractPagesConfig(node: Property['value'], code: string): PagesConfig 
     } else if (key === 'extension') {
       extensions = extractString(value) ?? extractStringArray(value)
     } else if (key === 'transform') {
-      transform = code.slice(value.start, value.end)
+      transform = value
     } else if (key === 'lazy') {
       lazy = extractBoolean(value)
     }
@@ -218,7 +233,7 @@ function buildResolver(
   const nameVar = transform ? 'resolvedName' : 'name'
   const lookup = dirs.flatMap((d) => extensions.map((ext) => `pages[\`${d}/\${${nameVar}}${ext}\`]`)).join(' || ')
 
-  const transformLine = transform ? `const resolvedName = (${transform})(name, page)\n    ` : ''
+  const transformLine = transform ? `${RESOLVED_NAME_PREFIX}${transform})(name, page)\n    ` : ''
 
   const returnValue = extractDefault ? 'module.default ?? module' : 'module'
 
@@ -234,6 +249,7 @@ function buildResolver(
 }
 
 const DEFAULT_PAGE_DIRECTORIES = ['./pages', './Pages']
+const RESOLVED_NAME_PREFIX = 'const resolvedName = ('
 
 function buildDefaultResolver(extensions: string[], extractDefault: boolean, eager: boolean = false): string {
   return buildResolver(DEFAULT_PAGE_DIRECTORIES, extensions, extractDefault, eager)

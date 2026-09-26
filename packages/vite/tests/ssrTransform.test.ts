@@ -3,8 +3,9 @@ import { defaultFrameworks } from '../src/frameworks/index'
 import { transformPageResolution } from '../src/pagesTransform'
 import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 
-const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, options, defaultFrameworks)
-const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)?.code ?? null
+const wrap = (code: string, options = {}) =>
+  wrapWithServerBootstrap(code, options, defaultFrameworks)?.toString() ?? null
+const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)?.code.toString() ?? null
 
 describe('SSR Transform', () => {
   describe('findInertiaAppExport', () => {

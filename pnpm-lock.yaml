@@ -233,6 +233,12 @@ importers:
       '@inertiajs/core':
         specifier: workspace:*
         version: link:../core
+      '@jridgewell/remapping':
+        specifier: ^2.3.5
+        version: 2.3.5
+      magic-string:
+        specifier: ^0.30.21
+        version: 0.30.21
       tinyglobby:
         specifier: ^0.2.15
         version: 0.2.17
