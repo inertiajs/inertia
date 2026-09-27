@@ -71,10 +71,11 @@ export class UseFormUtils {
     }
 
     if (args.length === 2) {
-      if (typeof args[0] === 'string') {
-        // Rememberable form: useForm(rememberKey, data)
+      if (typeof args[0] === 'string' || args[0] === null || args[0] === undefined) {
+        // Rememberable form: useForm(rememberKey, data). A nullish key means the form is not
+        // remembered, so the key can be optional without a second call site for the hook.
         return {
-          rememberKey: args[0],
+          rememberKey: args[0] ?? null,
           data: args[1],
           precognitionEndpoint: null,
         }

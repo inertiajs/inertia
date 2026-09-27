@@ -770,7 +770,7 @@ export type UseFormWithPrecognitionArguments =
 type UseFormInertiaArguments<TForm> =
   | []
   | [data: TForm | (() => TForm)]
-  | [rememberKey: string, data: TForm | (() => TForm)]
+  | [rememberKey: string | null | undefined, data: TForm | (() => TForm)]
 type UseFormPrecognitionArguments<TForm> =
   | [urlMethodPair: UrlMethodPair | (() => UrlMethodPair), data: TForm | (() => TForm)]
   | [method: Method | (() => Method), url: string | (() => string), data: TForm | (() => TForm)]
