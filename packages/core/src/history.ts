@@ -237,15 +237,25 @@ class History {
     url?: string,
   ): Promise<void> {
     return this.withThrottleProtection(() => {
-      window.history.replaceState(
-        {
-          ...data,
-          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-        },
-        '',
-        url,
-      )
+      try {
+        window.history.replaceState(
+          {
+            ...data,
+            scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+            documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+          },
+          '',
+          url,
+        )
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        // Unlike pushState, a full page reload won't help here: the reloaded page
+        // would call replaceState with the same data and exceed the quota again.
+        console.error(error.message)
+      }
     })
   }
 
