@@ -1,4 +1,3 @@
-import { clientSocketId } from './clientSocketId'
 import { LiveChannel, LiveChannelTransport, LiveOptions, SocketIdResolver } from './types'
 
 export type ActionCableIdentifier = { channel: string } & Record<string, unknown>
@@ -52,7 +51,7 @@ export const actionCable = ({
   channel = 'InertiaChannel',
   identifier = defaultIdentifier(channel),
   eventName,
-  socketId = clientSocketId,
+  socketId,
   ...options
 }: ActionCableOptions): LiveOptions => {
   let statusCallback: ((connected: boolean) => void) | null = null
@@ -80,8 +79,6 @@ export const actionCable = ({
 
     eventName,
 
-    // Action Cable issues no socket id, so the client brings its own for the
-    // server to send back on a broadcast
     socketId,
 
     /**

@@ -143,12 +143,8 @@ describe('actionCable', () => {
     expect(actionCable({ consumer: fake.consumer }).transport.eventName).toBeUndefined()
   })
 
-  it('brings its own socket id, since Action Cable issues none, and takes one that is given', () => {
-    const { transport } = actionCable({ consumer: fake.consumer })
-
-    expect(transport.socketId!()).toBe(transport.socketId!())
-    expect(transport.socketId!()).toBeTypeOf('string')
-
+  it('leaves the socket id to core unless one is given, since Action Cable issues none', () => {
+    expect(actionCable({ consumer: fake.consumer }).transport.socketId).toBeUndefined()
     expect(actionCable({ consumer: fake.consumer, socketId: () => 'mine' }).transport.socketId!()).toBe('mine')
   })
 

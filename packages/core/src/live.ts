@@ -1,5 +1,6 @@
 import { toPath } from 'es-toolkit/compat'
 import { router } from '.'
+import { clientSocketId } from './clientSocketId'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
 import { liveChannelKey } from './liveChannel'
@@ -120,10 +121,12 @@ class Live {
     this.throttle = options.throttle ?? DEFAULT_THROTTLE
     this.pauseWhenHidden = options.pauseWhenHidden ?? true
 
-    // Only adopt the transport's resolver if it has one, so a transport that
-    // cannot report a socket id leaves an app-registered resolver alone
+    // A broadcaster that issues no socket id of its own still needs one, since
+    // that is what an event it caused is recognised by
     if (this.transport.socketId) {
       socketId.resolveUsing(this.transport.socketId)
+    } else {
+      socketId.resolveUsingDefault(clientSocketId)
     }
 
     eventHandler.on('pageUpdated', (page: Page) => this.sync(page))
