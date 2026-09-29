@@ -86,6 +86,18 @@ manualData.forEach(({ method, url }) => {
   })
 })
 
+test('it exposes whether the poll is running', async ({ page }) => {
+  await page.goto('/poll/hook/manual')
+
+  await expect(page.getByText('Polling: no')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Start' }).click()
+  await expect(page.getByText('Polling: yes')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Stop' }).click()
+  await expect(page.getByText('Polling: no')).toBeVisible()
+})
+
 const setHidden = (page, hidden: boolean) =>
   page.evaluate((hidden) => {
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden })

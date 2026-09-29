@@ -477,7 +477,7 @@ test.describe('Manual page loading', () => {
 
     // Scroll to the bottom of the page to trigger loading the next page
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(1)
 
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
@@ -485,18 +485,14 @@ test.describe('Manual page loading', () => {
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('Manual mode: false')).toBeVisible()
 
-    await expect(infiniteScrollRequests().length).toBe(1)
-
     // Scroll to the bottom of the page to trigger loading the next page
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(2)
 
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 45')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
     await expect(page.getByText('Manual mode: true')).toBeVisible()
-
-    await expect(infiniteScrollRequests().length).toBe(2)
 
     // Scroll to the bottom of the page - should NOT trigger loading since we're in manual mode now
     await scrollToBottom(page)
@@ -808,7 +804,7 @@ test.describe('Remember state', () => {
 
     // Scroll to bottom to load page 2
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(1)
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('User 31')).toBeHidden()
@@ -1351,26 +1347,33 @@ test.describe('URL query string management', () => {
 
     // Scroll to bottom to load page 2
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(1)
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom again to load page 3
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(2)
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
-    // Verify data attributes are set correctly for infinite scroll
-    const dataAttrs = await page.evaluate(() => {
-      const elements = Array.from(document.querySelectorAll('[data-user-id]'))
-      return elements.map((el) => ({
-        userId: parseInt(el.getAttribute('data-user-id') || '0'),
-        infiniteScrollPage: el.getAttribute('data-infinite-scroll-page'),
-      }))
-    })
+    // The page attributes are assigned after the items render, so wait for the last page to be tagged
+    const readPageAttributes = () =>
+      page.evaluate(() => {
+        const elements = Array.from(document.querySelectorAll('[data-user-id]'))
+        return elements.map((el) => ({
+          userId: parseInt(el.getAttribute('data-user-id') || '0'),
+          infiniteScrollPage: el.getAttribute('data-infinite-scroll-page'),
+        }))
+      })
+
+    await expect
+      .poll(async () => (await readPageAttributes()).filter((el) => el.infiniteScrollPage === '3').length)
+      .toBe(10)
+
+    const dataAttrs = await readPageAttributes()
 
     // Verify that we have elements from all 3 pages with correct page attributes
     const page1Elements = dataAttrs.filter((el) => el.infiniteScrollPage === '1')
@@ -1399,14 +1402,14 @@ test.describe('URL query string management', () => {
 
     // Scroll to bottom to load page 2
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(1)
     await expect(page.getByText('User 16')).toBeVisible()
     await expect(page.getByText('User 30')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()
 
     // Scroll to bottom again to load page 3
     await scrollToBottom(page)
-    await expect(page.getByText('Loading...')).toBeVisible()
+    await expect.poll(() => infiniteScrollRequests().length).toBe(2)
     await expect(page.getByText('User 31')).toBeVisible()
     await expect(page.getByText('User 40')).toBeVisible()
     await expect(page.getByText('Loading...')).toBeHidden()

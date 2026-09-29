@@ -69,4 +69,28 @@ test.describe('Optimistic Rollback', () => {
     await expect(page.locator('.contact-status').nth(1)).toContainText('Favorite')
     await expect(page.locator('.contact-status').nth(2)).toContainText('Not Favorite')
   })
+
+  test('it does not let a stale optimistic response revert a newer optimistic update', async ({ page }) => {
+    pageLoads.watch(page)
+
+    // Request 1: toggle John. The server commits and snapshots its props right
+    // away, but holds the response until after request 2 has settled
+    await page.locator('.toggle-held-btn').nth(0).click()
+
+    // Request 2: toggle Jane, settles first
+    await page.locator('.toggle-btn').nth(1).click()
+
+    await expect(page.locator('.contact-status').nth(0)).toHaveText('Favorite')
+    await expect(page.locator('.contact-status').nth(1)).toHaveText('Favorite')
+
+    await page.waitForTimeout(700)
+    await expect(page.locator('.contact-status').nth(0)).toHaveText('Favorite')
+    await expect(page.locator('.contact-status').nth(1)).toHaveText('Favorite')
+
+    // Request 1 lands last with props that predate Jane's write, and nothing
+    // else is pending. Jane should not be reverted by it
+    await page.waitForTimeout(800)
+    await expect(page.locator('.contact-status').nth(0)).toHaveText('Favorite')
+    await expect(page.locator('.contact-status').nth(1)).toHaveText('Favorite')
+  })
 })

@@ -122,7 +122,7 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    const jsonData = JSON.stringify(data).replace(/\//g, '\\/')
+    const jsonData = JSON.stringify(data).replace(/\//g, '\\/').replace(/</g, '\\u003c')
 
     const html = fs
       .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-unified.html'))
@@ -188,7 +188,7 @@ module.exports = {
       return res.status(200).json(data)
     }
 
-    const jsonData = JSON.stringify(data).replace(/\//g, '\\/')
+    const jsonData = JSON.stringify(data).replace(/\//g, '\\/').replace(/</g, '\\u003c')
 
     const html = fs
       .readFileSync(path.resolve(__dirname, '../../packages/', package, 'test-app/dist/index-auto.html'))

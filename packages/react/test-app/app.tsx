@@ -2,7 +2,7 @@ import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
 import { echo } from '@inertiajs/react/echo'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import { resolveFakeEcho } from './fakeEcho'
 import { fakeLiveTransport } from './fakeLiveTransport'
 import AppLayout from './Layouts/AppLayout'
@@ -58,7 +58,13 @@ createInertiaApp({
     return pages[`./Pages/${name}.tsx`]
   },
   setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />)
+    const appElement = <App {...props} />
+
+    if (el.hasAttribute('data-server-rendered')) {
+      hydrateRoot(el, appElement)
+    } else {
+      createRoot(el).render(appElement)
+    }
   },
   progress: {
     delay: 0,

@@ -107,6 +107,11 @@ export class XhrHttpClient implements HttpClient {
 
   protected doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     return new Promise((resolve, reject) => {
+      if (config.signal?.aborted) {
+        reject(new HttpCancelledError('Request was cancelled', config.url))
+        return
+      }
+
       const xhr = new XMLHttpRequest()
       const url = buildUrlWithParams(config.url, config.params)
 

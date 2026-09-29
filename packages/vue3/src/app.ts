@@ -20,12 +20,14 @@ import {
   defineComponent,
   h,
   markRaw,
+  onMounted,
   Plugin,
   PropType,
   reactive,
   ref,
   shallowRef,
 } from 'vue'
+import { provideHydrationContext } from './hydration'
 import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -73,6 +75,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
   serverHead?: ServerHeadOption
+  serverRendered?: boolean
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -117,6 +120,11 @@ const App: InertiaApp = defineComponent({
       type: [Boolean, String, Function] as PropType<ServerHeadOption>,
       required: false,
     },
+    serverRendered: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   setup({
     initialPage,
@@ -126,6 +134,7 @@ const App: InertiaApp = defineComponent({
     onHeadUpdate,
     defaultLayout,
     serverHead,
+    serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -140,7 +149,13 @@ const App: InertiaApp = defineComponent({
       resolveServerHead(initialPage, serverHead),
     )
 
+    // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+    const hydrated = ref(!serverRendered)
+    provideHydrationContext(hydrated)
+
     if (!isServer) {
+      onMounted(() => (hydrated.value = true))
+
       router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,

@@ -758,6 +758,13 @@
     class="link-success-promise">Success Event Link (delaying onFinish w/ Promise)</button
   >
 
+  <!-- Events: Flash -->
+  <button
+    use:inertia={{ href: '/events/flash', method: 'post' }}
+    onflash={(event) => internalAlert('linkOnFlash', event.detail.flash)}
+    class="link-flash">Flash Event Link</button
+  >
+
   <!-- Events: HTTP Exception -->
   <a href={'#'} onclick={httpExceptionVisit} class="http-exception">HTTP Exception Event</a>
   <a href={'#'} onclick={httpExceptionPreventVisit} class="http-exception-prevent">HTTP Exception Event (Prevent)</a>
@@ -768,9 +775,36 @@
     >HTTP Exception Event (Inertia Response Prevent)</a
   >
 
+  <button
+    use:inertia={{ href: '/non-inertia', method: 'post' }}
+    onhttpException={(event) => internalAlert('linkOnHttpException', event.detail.response.status)}
+    class="link-http-exception">HTTP Exception Event Link</button
+  >
+  <button
+    use:inertia={{ href: '/non-inertia', method: 'post' }}
+    onhttpException={(event) => {
+      event.preventDefault()
+      internalAlert('linkOnHttpException')
+    }}
+    class="link-http-exception-prevent">HTTP Exception Event Link (Prevent)</button
+  >
+
   <!-- Events: Network Error -->
   <a href={'#'} onclick={networkErrorVisit} class="network-error">Network Error Event</a>
   <a href={'#'} onclick={networkErrorPreventVisit} class="network-error-prevent">Network Error Event (Prevent)</a>
+  <button
+    use:inertia={{ href: '/disconnect', method: 'post' }}
+    onnetworkError={(event) => internalAlert('linkOnNetworkError', event.detail.error.message)}
+    class="link-network-error">Network Error Event Link</button
+  >
+  <button
+    use:inertia={{ href: '/disconnect', method: 'post' }}
+    onnetworkError={(event) => {
+      event.preventDefault()
+      internalAlert('linkOnNetworkError')
+    }}
+    class="link-network-error-prevent">Network Error Event Link (Prevent)</button
+  >
 
   <!-- Events: Finish -->
   <a href={'#'} onclick={finishVisit} class="finish">Finish Event</a>

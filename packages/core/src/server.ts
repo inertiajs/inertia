@@ -65,6 +65,7 @@ type Port = number
 const readableToString: (readable: IncomingMessage) => Promise<string> = (readable) =>
   new Promise((resolve, reject) => {
     let data = ''
+    readable.setEncoding('utf8')
     readable.on('data', (chunk) => (data += chunk))
     readable.on('end', () => resolve(data))
     readable.on('error', (err) => reject(err))

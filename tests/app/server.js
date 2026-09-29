@@ -75,11 +75,18 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/when-mounted', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/WhenMounted',
+    props: {},
+  }),
+)
+
 app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
     props: {
-      message: 'Hello from script element! Escape </script>.',
+      message: 'Hello from script element! Escape </script> and <!--<script>.',
     },
   }),
 )
@@ -117,6 +124,17 @@ app.get('/ssr/head-with-xss-title', (req, res) =>
     component: 'SSR/HeadWithXssTitle',
     props: {
       title: "Safe Title\n</title><script>alert('xss')</script>",
+    },
+  }),
+)
+
+app.get('/ssr/multibyte-body', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/MultiByteBody',
+    props: {
+      // Large enough that the JSON body sent to the SSR server spans many chunks,
+      // so a chunk boundary is guaranteed to land inside a multi-byte character
+      text: '日本語のテスト'.repeat(25000),
     },
   }),
 )
@@ -177,6 +195,13 @@ app.get('/ssr/infinite-scroll', (req, res) => {
     scrollProps: { users: scrollProp },
   })
 })
+
+app.get('/when-mounted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'WhenMounted',
+    props: {},
+  }),
+)
 
 // createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
@@ -966,6 +991,7 @@ app.get('/layout-props/callback-component-prop', (req, res) => inertia.render(re
 app.post('/events/errors', (req, res) =>
   inertia.render(req, res, { component: 'Events', props: { errors: { foo: 'bar' } } }),
 )
+app.post('/events/flash', (req, res) => inertia.render(req, res, { component: 'Events', flash: { foo: 'bar' } }))
 
 app.get('/poll/overlap/:mode', (req, res) => {
   const mode = req.params.mode
@@ -1046,6 +1072,7 @@ app.get('/prefetch/preserve-state', (req, res) => {
 
 // Registered explicitly to prevent the :pageNumber catch-all below from matching
 app.get('/prefetch/after-error', (req, res) => inertia.render(req, res, { component: 'Prefetch/AfterError' }))
+app.get('/prefetch/cancelled', (req, res) => inertia.render(req, res, { component: 'Prefetch/Cancelled' }))
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))
@@ -1114,6 +1141,27 @@ app.get('/history/version/:pageNumber', (req, res) => {
       pageNumber: req.params.pageNumber,
     },
     version: req.params.pageNumber === '1' ? 'version-1' : 'version-2',
+  })
+})
+
+let historyVersionReloadDeploy = '1'
+
+app.get('/history-version-reload/deploy/:deploy', (req, res) => {
+  historyVersionReloadDeploy = req.params.deploy
+
+  res.json({ deploy: historyVersionReloadDeploy })
+})
+
+app.get('/history-version-reload', (req, res) => {
+  // Prevents the browser from serving this document from cache on a back navigation
+  res.header('Cache-Control', 'no-store')
+
+  inertia.render(req, res, {
+    component: 'HistoryVersionReload',
+    props: {
+      deploy: historyVersionReloadDeploy,
+    },
+    version: `deploy-${historyVersionReloadDeploy}`,
   })
 })
 
@@ -2035,6 +2083,22 @@ app.post('/form-component/errors/bag', (req, res) =>
 app.post('/form-component/events/delay', upload.any(), async (req, res) =>
   setTimeout(() => inertia.render(req, res, { component: 'FormComponent/Events' }), 500),
 )
+app.get('/form-component/unmount-cancel/:cancelOnUnmount', (req, res) =>
+  inertia.render(req, res, {
+    component: 'FormComponent/UnmountCancel',
+    props: { cancelOnUnmount: req.params.cancelOnUnmount === 'yes' },
+  }),
+)
+app.post('/form-component/unmount-cancel/:cancelOnUnmount', upload.any(), async (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'FormComponent/UnmountCancel',
+        props: { cancelOnUnmount: req.params.cancelOnUnmount === 'yes' },
+      }),
+    500,
+  ),
+)
 app.get('/form-component/disable-while-processing/:disable', upload.any(), async (req, res) =>
   inertia.render(req, res, {
     component: 'FormComponent/DisableWhileProcessing',
@@ -2069,6 +2133,9 @@ app.post('/form-component/events/errors', async (req, res) =>
     component: 'FormComponent/Events',
     props: { errors: { field: 'Something went wrong' } },
   }),
+)
+app.post('/form-component/events/flash', async (req, res) =>
+  inertia.render(req, res, { component: 'FormComponent/Events', flash: { message: 'Form was submitted' } }),
 )
 
 app.post('/form-component/progress', async (req, res) =>
@@ -2900,6 +2967,25 @@ app.get('/once-props/client-side-visit', (req, res) => {
   })
 })
 
+app.get('/once-props/instant/:page', (req, res) => {
+  const { isPartialRequest, shouldResolveProp, hasPropAlready } = getOncePropsData(req)
+  const page = req.params.page
+  const deferFoo = req.query.deferred === '1' && !isPartialRequest && !hasPropAlready
+  const delay = page === 'b' && !isPartialRequest ? 500 : 0
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: `OnceProps/InstantPage${page.toUpperCase()}`,
+      props: {
+        foo: !deferFoo && shouldResolveProp ? `foo-${page}-` + Date.now() : undefined,
+        bar: `bar-${page}`,
+      },
+      deferredProps: deferFoo ? { default: ['foo'] } : {},
+      onceProps: { foo: { prop: 'foo', expiresAt: null } },
+    })
+  }, delay)
+})
+
 app.get('/deferred-props/back-button/a', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -3673,7 +3759,31 @@ app.get('/optimistic/rollback', (req, res) => {
 
 app.post('/optimistic/rollback/toggle/:id', (req, res) => {
   const delay = parseInt(req.query.delay || '500')
+  const hold = parseInt(req.query.hold || '0')
   const simulateError = req.query.error === '1'
+
+  if (hold > 0) {
+    // Commit the write and snapshot the props right away, but hold the
+    // response on the wire so it lands after later requests have settled
+    const session = getOptimisticSession(req)
+    const contact = session.contacts.find((c) => c.id === parseInt(req.params.id))
+
+    if (contact) {
+      contact.is_favorite = !contact.is_favorite
+    }
+
+    const contacts = session.contacts.map((c) => ({ ...c }))
+
+    setTimeout(() => {
+      inertia.render(req, res, {
+        component: 'Optimistic/Rollback',
+        url: '/optimistic/rollback',
+        props: { contacts },
+      })
+    }, hold)
+
+    return
+  }
 
   setTimeout(() => {
     if (simulateError) {

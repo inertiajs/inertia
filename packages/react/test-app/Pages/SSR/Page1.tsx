@@ -27,6 +27,9 @@ export default ({ user, items, count }: { user: { name: string; email: string };
       <Link href="/ssr/page2" data-testid="navigate-link">
         Navigate to another page
       </Link>
+      <Link href="/ssr/when-mounted" data-testid="to-when-mounted-link">
+        Navigate to WhenMounted page
+      </Link>
     </div>
   )
 }

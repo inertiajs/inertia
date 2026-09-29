@@ -169,6 +169,7 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
   return new Promise((resolve, reject) => {
     let data = ''
 
+    req.setEncoding('utf8')
     req.on('data', (chunk) => (data += chunk))
 
     req.on('end', () => {

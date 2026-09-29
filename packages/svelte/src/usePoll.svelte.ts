@@ -9,13 +9,17 @@ export default function usePoll(
     autoStart: true,
   },
 ) {
+  const autoStart = options.autoStart ?? true
+
   const { stop, start, destroy } = router.poll(interval, requestOptions, {
     ...options,
     autoStart: false,
   })
 
+  let polling = $state(autoStart)
+
   onMount(() => {
-    if (options.autoStart ?? true) {
+    if (autoStart) {
       start()
     }
   })
@@ -24,5 +28,17 @@ export default function usePoll(
     destroy()
   })
 
-  return { stop, start }
+  return {
+    get polling() {
+      return polling
+    },
+    stop() {
+      stop()
+      polling = false
+    },
+    start() {
+      start()
+      polling = true
+    },
+  }
 }

@@ -34,6 +34,11 @@ export class InitialVisit {
     history
       .decrypt()
       .then((data) => {
+        if (currentPage.get().version !== data.version) {
+          this.handleDefault()
+          return
+        }
+
         const visitId = uid()
 
         currentPage.set(data, { preserveScroll: true, preserveState: true, visitId }).then(() => {

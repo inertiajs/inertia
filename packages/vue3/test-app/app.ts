@@ -3,7 +3,7 @@ import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import { echo } from '@inertiajs/vue3/echo'
 import type { DefineComponent } from 'vue'
-import { createApp, h } from 'vue'
+import { createApp, createSSRApp, h } from 'vue'
 import { resolveFakeEcho } from './fakeEcho'
 import { fakeLiveTransport } from './fakeLiveTransport'
 import AppLayout from './Layouts/AppLayout.vue'
@@ -46,7 +46,9 @@ createInertiaApp({
     return pages[`./Pages/${name}.vue`]
   },
   setup({ el, App, props, plugin }) {
-    const inst = createApp({ render: () => h(App, props) })
+    const inst = el.hasAttribute('data-server-rendered')
+      ? createSSRApp({ render: () => h(App, props) })
+      : createApp({ render: () => h(App, props) })
 
     if (!window.location.pathname.startsWith('/plugin/without')) {
       inst.use(plugin)
