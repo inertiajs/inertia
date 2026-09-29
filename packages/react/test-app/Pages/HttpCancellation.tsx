@@ -37,54 +37,20 @@ export default () => {
 
   const cancelDuringPreparation = async () => {
     const controller = new AbortController()
-
-    let release!: () => void
-    let entered!: () => void
-    const blocked = new Promise<void>((resolve) => (release = resolve))
-    const started = new Promise<void>((resolve) => (entered = resolve))
-
     const off = http.onRequest(async (config) => {
-      entered()
-      await blocked
+      controller.abort()
 
       return config
     })
 
-    const outcome = http
-      .getClient()
-      .request({ method: 'get', url: '/dump/get?request=preparing', signal: controller.signal })
-      .then(
-        () => 'resolved',
-        (error: Error) => error.name,
-      )
-
-    await started
-    controller.abort()
-    release()
-
-    log(`outcome:${await outcome}`)
-    off()
-  }
-
-  let startedController: AbortController | null = null
-
-  const startLongRequest = async () => {
-    startedController = new AbortController()
-
-    const outcome = await http
-      .getClient()
-      .request({ method: 'get', url: '/dump/get?request=started', signal: startedController.signal })
-      .then(
-        () => 'resolved',
-        (error: Error) => error.name,
-      )
-
-    log(`outcome:${outcome}`)
-  }
-
-  const cancelStartedRequest = () => {
-    startedController?.abort()
-    startedController = null
+    try {
+      await http.getClient().request({ method: 'get', url: '/dump/get?request=preparing', signal: controller.signal })
+      log('outcome:resolved')
+    } catch (error) {
+      log(`outcome:${(error as Error).name}`)
+    } finally {
+      off()
+    }
   }
 
   const visitCancelledBeforeSend = () => {
@@ -119,8 +85,6 @@ export default () => {
 
       <button onClick={requestWithAbortedSignal}>Request With Aborted Signal</button>
       <button onClick={cancelDuringPreparation}>Cancel During Preparation</button>
-      <button onClick={startLongRequest}>Start Long Request</button>
-      <button onClick={cancelStartedRequest}>Cancel Started Request</button>
       <button onClick={visitCancelledBeforeSend}>Visit Cancelled Before Send</button>
       <button onClick={prefetchCancelledBeforeSend}>Prefetch Cancelled Before Send</button>
 
