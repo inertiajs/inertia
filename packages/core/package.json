@@ -44,6 +44,10 @@
     "./pusher": {
       "types": "./types/pusher.d.ts",
       "import": "./dist/pusher.js"
+    },
+    "./actionCable": {
+      "types": "./types/actionCable.d.ts",
+      "import": "./dist/actionCable.js"
     }
   },
   "typesVersions": {
@@ -59,6 +63,9 @@
       ],
       "pusher": [
         "types/pusher.d.ts"
+      ],
+      "actionCable": [
+        "types/actionCable.d.ts"
       ]
     }
   },

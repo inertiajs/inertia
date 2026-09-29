@@ -65,7 +65,12 @@ export type LiveChannelType = 'public' | 'private' | 'presence' | 'encrypted-pri
  */
 export type LiveChannel = {
   name: string
-  type: LiveChannelType
+  type: LiveChannelType | (string & {})
+  /**
+   * Passed to the transport untouched. A channel is identified by its type and
+   * name alone, so these have to stay stable for a given one.
+   */
+  params?: Record<string, unknown>
 }
 
 /**
@@ -84,32 +89,62 @@ export type LiveProp = {
 
 export type LiveEventHandler = (payload: unknown) => void
 
-/**
- * The seam between the live engine and a broadcaster.
- */
-export interface LiveTransport {
-  /**
-   * Avoid throwing for anything recoverable: this runs during a page swap, so
-   * an error takes the swap with it.
-   */
-  subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
+export type LiveEnvelope = {
+  __inertia?: {
+    event?: string
 
+    /**
+     * Props delivered by value, which spares the reload they would otherwise
+     * trigger. Only the subscription that delivered the event says which props
+     * may be written, so a key it does not feed is ignored rather than trusted.
+     */
+    props?: Record<string, unknown>
+
+    /**
+     * The connection that caused the broadcast, dropped when it is this client.
+     * How a broadcaster that cannot exclude a connection gets `toOthers`.
+     */
+    socketId?: string
+  }
+}
+
+interface LiveTransportBase {
   socketId?: SocketIdResolver
 
   /**
    * Inertia refreshes every live prop once a dropped connection returns, so a
    * transport never has to distinguish the ways in which it is not connected.
+   * Repeating a status, or reporting per channel, is safe for the same reason.
    */
   onStatusChange?(callback: (connected: boolean) => void): VoidFunction
 }
 
+/** The seam for a broadcaster that routes by event name, such as Pusher or Echo. */
+export interface LiveTransport extends LiveTransportBase {
+  /**
+   * Avoid throwing for anything recoverable: this runs during a page swap, so
+   * an error takes the swap with it.
+   */
+  subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
+}
+
+/** The seam for a broadcaster with no event names, such as Action Cable. Inertia routes instead. */
+export interface LiveChannelTransport extends LiveTransportBase {
+  subscribeToChannel(channel: LiveChannel, handler: LiveEventHandler): VoidFunction
+
+  /** Defaults to the `__inertia.event` the envelope reserves for it. */
+  eventName?(payload: unknown): string | undefined
+}
+
+export type AnyLiveTransport = LiveTransport | LiveChannelTransport
+
 export type LiveOptions = {
-  transport: LiveTransport
+  transport: AnyLiveTransport
   throttle?: number
   pauseWhenHidden?: boolean
 }
 
-export type LiveOption = LiveTransport | LiveOptions
+export type LiveOption = AnyLiveTransport | LiveOptions
 
 /**
  * Only the adapters that wire live props accept this, so it is intersected into

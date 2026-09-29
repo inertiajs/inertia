@@ -2,11 +2,22 @@ import { toPath } from 'es-toolkit/compat'
 import { router } from '.'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
+import { liveChannelKey } from './liveChannel'
 import { setPathPreservingIdentity } from './objectUtils'
 import { page as currentPage } from './page'
 import { propRefreshes } from './propRefreshes'
 import { socketId } from './socketId'
-import { LiveChannel, LiveOption, LiveOptions, LiveProp, LiveTransport, Page } from './types'
+import {
+  AnyLiveTransport,
+  LiveChannel,
+  LiveChannelTransport,
+  LiveEnvelope,
+  LiveOption,
+  LiveOptions,
+  LiveProp,
+  LiveTransport,
+  Page,
+} from './types'
 import { visibility } from './visibility'
 
 const DEFAULT_THROTTLE = 1000
@@ -36,7 +47,7 @@ type Subscription = {
   props: Set<string>
 }
 
-const subscriptionKey = (channel: LiveChannel, event: string): string => `${channel.type}:${channel.name}::${event}`
+const subscriptionKey = (channel: LiveChannel, event: string): string => `${liveChannelKey(channel)}::${event}`
 
 /**
  * Compared the way `pendingDeferredProps` compares its own, since a partial
@@ -44,18 +55,19 @@ const subscriptionKey = (channel: LiveChannel, event: string): string => `${chan
  */
 const pageKey = (page: Page): string => `${page.component}::${page.url}`
 
-const isTransport = (live: LiveOption): live is LiveTransport => {
-  return typeof (live as LiveTransport).subscribe === 'function'
+const isTransport = (live: LiveOption): live is AnyLiveTransport => {
+  return (
+    typeof (live as LiveTransport).subscribe === 'function' ||
+    typeof (live as LiveChannelTransport).subscribeToChannel === 'function'
+  )
 }
 
-/**
- * Everything outside this envelope belongs to the application.
- */
-type LivePayload = {
-  __inertia?: {
-    props?: Record<string, unknown>
-  }
+const isChannelTransport = (transport: AnyLiveTransport): transport is LiveChannelTransport => {
+  return typeof (transport as LiveChannelTransport).subscribeToChannel === 'function'
 }
+
+const envelope = (payload: unknown): LiveEnvelope['__inertia'] =>
+  (payload as LiveEnvelope | null | undefined)?.__inertia
 
 /**
  * Keyed by prop dot path. A payload that carries none, or that isn't an object
@@ -63,10 +75,16 @@ type LivePayload = {
  * reload as it always has.
  */
 const propValues = (payload: unknown): Record<string, unknown> => {
-  const props = (payload as LivePayload | null | undefined)?.__inertia?.props
+  const props = envelope(payload)?.props
 
   return props && typeof props === 'object' ? props : {}
 }
+
+/**
+ * The event name a channel transport's message carries, unless the transport
+ * reads it from somewhere of its own.
+ */
+export const liveEventName = (payload: unknown): string | undefined => envelope(payload)?.event
 
 /**
  * Every page swap diffs the server's live props against the active
@@ -74,7 +92,7 @@ const propValues = (payload: unknown): Record<string, unknown> => {
  * one throttled partial request.
  */
 class Live {
-  protected transport: LiveTransport | null = null
+  protected transport: AnyLiveTransport | null = null
   protected throttle = DEFAULT_THROTTLE
   protected pauseWhenHidden = true
   protected liveProps: Record<string, LiveProp> = {}
@@ -178,21 +196,20 @@ class Live {
     // synchronously from `subscribe()` already resolves to its subscription
     this.subscriptions = desired
 
+    const wanted = this.pendingSubscriptions(transport, desired)
+
     // Subscribe before unsubscribing so refcounted transports keep shared
     // channels alive while the event set changes.
-    desired.forEach(({ channel, event }, key) => {
+    wanted.forEach((subscribe, key) => {
       if (this.unsubscribers.has(key)) {
         return
       }
 
-      this.unsubscribers.set(
-        key,
-        transport.subscribe(channel, event, (payload) => this.handleEvent(key, payload)),
-      )
+      this.unsubscribers.set(key, subscribe())
     })
 
     this.unsubscribers.forEach((unsubscribe, key) => {
-      if (!desired.has(key)) {
+      if (!wanted.has(key)) {
         unsubscribe()
         this.unsubscribers.delete(key)
       }
@@ -219,10 +236,60 @@ class Live {
     })
   }
 
+  /**
+   * Keyed by what the transport holds: one entry per channel for a channel
+   * transport, which cannot route events of its own, and one per channel and
+   * event for a transport that can.
+   */
+  protected pendingSubscriptions(
+    transport: AnyLiveTransport,
+    desired: Map<string, Subscription>,
+  ): Map<string, () => VoidFunction> {
+    const pending = new Map<string, () => VoidFunction>()
+
+    if (isChannelTransport(transport)) {
+      desired.forEach(({ channel }) => {
+        pending.set(liveChannelKey(channel), () => this.subscribeToChannel(transport, channel))
+      })
+
+      return pending
+    }
+
+    desired.forEach(({ channel, event }, key) => {
+      pending.set(key, () => transport.subscribe(channel, event, (payload) => this.handleEvent(key, payload)))
+    })
+
+    return pending
+  }
+
+  protected subscribeToChannel(transport: LiveChannelTransport, channel: LiveChannel): VoidFunction {
+    const readEvent = transport.eventName?.bind(transport) ?? liveEventName
+
+    return transport.subscribeToChannel(channel, (payload) => {
+      const event = readEvent(payload)
+
+      if (event === undefined) {
+        return
+      }
+
+      // Routed back through the same index an event transport resolves
+      // against, so the props a subscription feeds stay its own
+      this.handleEvent(subscriptionKey(channel, event), payload)
+    })
+  }
+
   protected handleEvent(key: string, payload: unknown): void {
     const subscription = this.subscriptions.get(key)
 
     if (!subscription) {
+      return
+    }
+
+    // A broadcaster that cannot exclude a connection says which one caused the
+    // event instead, so the client that caused it drops its own
+    const origin = envelope(payload)?.socketId
+
+    if (typeof origin === 'string' && origin === socketId.resolve()) {
       return
     }
 

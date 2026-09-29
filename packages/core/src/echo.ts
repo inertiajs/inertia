@@ -42,7 +42,7 @@ const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) =>
 
 // An unrecognised type falls back to a public channel rather than throwing,
 // since the manifest is a hand-synced contract with the server
-const subscriberFor = (channel: LiveChannel) => subscribers[channel.type] ?? subscribers.public
+const subscriberFor = (channel: LiveChannel) => subscribers[channel.type as LiveChannelType] ?? subscribers.public
 
 /**
  * Laravel already sends the broadcast name. Prefix literal names with `.` so

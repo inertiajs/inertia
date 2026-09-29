@@ -8,8 +8,13 @@ const prefixes: Record<LiveChannelType, string> = {
 }
 
 export const liveChannelName = (channel: LiveChannel): string => {
-  return `${prefixes[channel.type] ?? ''}${channel.name}`
+  return `${prefixes[channel.type as LiveChannelType] ?? ''}${channel.name}`
 }
+
+/**
+ * `params` are left out, so a server varying them cannot churn the subscription.
+ */
+export const liveChannelKey = (channel: LiveChannel): string => `${channel.type}:${channel.name}`
 
 /**
  * Counted by type and name, so a public channel called `private-orders.1` stays
@@ -18,26 +23,24 @@ export const liveChannelName = (channel: LiveChannel): string => {
 export const createLiveChannelTracker = () => {
   const counts = new Map<string, number>()
 
-  const key = (channel: LiveChannel): string => `${channel.type}:${channel.name}`
-
   return {
     acquire(channel: LiveChannel): void {
-      counts.set(key(channel), (counts.get(key(channel)) ?? 0) + 1)
+      counts.set(liveChannelKey(channel), (counts.get(liveChannelKey(channel)) ?? 0) + 1)
     },
 
     /**
      * Drop a listener. Returns true when it was the last on the channel.
      */
     release(channel: LiveChannel): boolean {
-      const remaining = (counts.get(key(channel)) ?? 1) - 1
+      const remaining = (counts.get(liveChannelKey(channel)) ?? 1) - 1
 
       if (remaining > 0) {
-        counts.set(key(channel), remaining)
+        counts.set(liveChannelKey(channel), remaining)
 
         return false
       }
 
-      counts.delete(key(channel))
+      counts.delete(liveChannelKey(channel))
 
       return true
     },

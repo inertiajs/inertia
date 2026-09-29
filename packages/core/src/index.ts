@@ -25,7 +25,8 @@ export {
   type LayoutPropsStore,
 } from './layout'
 /** @internal Not part of the public API. May change or be removed without notice. */
-export { configureLive } from './live'
+export { clientSocketId } from './clientSocketId'
+export { configureLive, liveEventName } from './live'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { isPathOrSubPath, partialReloadRequestsProp, partialReloadRequestsSomeProps } from './partialReload'
 export { propRefreshes } from './propRefreshes'
