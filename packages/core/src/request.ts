@@ -9,10 +9,12 @@ import {
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
+import { layerAt } from './layers'
+import { attemptEnded } from './layers/landing'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
-import type { ActiveVisit, Page } from './types'
+import type { ActiveVisit, BaseSnapshot, Page } from './types'
 import { HttpProgressEvent, HttpRequestConfig, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
 
@@ -26,6 +28,7 @@ export class Request {
   constructor(
     params: ActiveVisit,
     protected page: Page,
+    protected capturedBase: BaseSnapshot,
     { optimisticId = null }: { optimisticId?: number | null } = {},
   ) {
     this.requestParams = RequestParams.create(params)
@@ -33,8 +36,13 @@ export class Request {
     this.optimisticId = optimisticId
   }
 
-  public static create(params: ActiveVisit, page: Page, options?: { optimisticId?: number | null }): Request {
-    return new Request(params, page, options)
+  public static create(
+    params: ActiveVisit,
+    page: Page,
+    capturedBase: BaseSnapshot,
+    options?: { optimisticId?: number | null },
+  ): Request {
+    return new Request(params, page, capturedBase, options)
   }
 
   public isPrefetch(): boolean {
@@ -43,6 +51,10 @@ export class Request {
 
   public getUrl(): URL {
     return this.requestParams.all().url
+  }
+
+  public get layerId(): string | undefined {
+    return this.requestParams.all().layerId
   }
 
   public isOptimistic(): boolean {
@@ -91,14 +103,20 @@ export class Request {
       .getClient()
       .request(processedConfig)
       .then((response) => {
-        this.response = Response.create(this.requestParams, response, this.page, this.optimisticId)
+        this.response = Response.create(this.requestParams, response, this.page, this.capturedBase, this.optimisticId)
 
         return this.response.handle()
       })
       .catch((error) => {
         // Handle HTTP error responses (4xx/5xx)
         if (error instanceof HttpResponseError) {
-          this.response = Response.create(this.requestParams, error.response, this.page, this.optimisticId)
+          this.response = Response.create(
+            this.requestParams,
+            error.response,
+            this.page,
+            this.capturedBase,
+            this.optimisticId,
+          )
 
           return this.response.handle()
         }
@@ -149,6 +167,8 @@ export class Request {
 
     this.requestHasFinished = true
 
+    attemptEnded(currentPage.get(), this.requestParams.all().layerId)
+
     fireFinishEvent(this.requestParams.all())
     this.requestParams.onFinish()
   }
@@ -187,9 +207,12 @@ export class Request {
       headers['X-Inertia-Version'] = page.version
     }
 
-    const onceProps = Object.entries(page.onceProps || {})
+    // Once keys are the request's own tier's only; a visit opening a layer has no tier yet, so it names none.
+    const { layerId } = this.requestParams.all()
+    const tier = layerId === undefined ? page : layerAt(page, layerId)
+    const onceProps = Object.entries(tier?.onceProps || {})
       .filter(([, onceProp]) => {
-        if (get(page.props, onceProp.prop) === undefined) {
+        if (get(tier?.props, onceProp.prop) === undefined) {
           // The prop could deferred and not be loaded yet
           return false
         }

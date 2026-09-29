@@ -13,6 +13,7 @@ import {
 } from '@inertiajs/core'
 import { Component, computed, defineComponent, DefineComponent, h, onMounted, onUnmounted, PropType, ref } from 'vue'
 import { config } from '.'
+import { useLayerId } from './useLayer'
 
 const noop = () => {}
 
@@ -160,6 +161,7 @@ const Link: InertiaLink = defineComponent({
     },
   },
   setup(props, { slots, attrs }) {
+    const layerId = useLayerId()
     const inFlightCount = ref(0)
     const hoverTimeout = ref<ReturnType<typeof setTimeout>>()
 
@@ -264,6 +266,7 @@ const Link: InertiaLink = defineComponent({
       async: props.async,
       component: resolvedComponent.value,
       pageProps: props.pageProps,
+      layerId,
     }))
 
     const visitParams = computed(() => ({

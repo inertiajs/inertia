@@ -7,6 +7,8 @@ declare module '@inertiajs/core' {
     layoutProps: {
       title: string
       showSidebar: boolean
+      baseChrome?: string
+      layerChrome?: string
     }
     namedLayoutProps: {
       app: { title: string; theme: 'light' | 'dark' }

@@ -1,12 +1,15 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
 import { HttpCancelledError } from './httpErrors'
+import { responseTarget } from './layers'
+import { mergeOncePropsInto } from './layers/merge'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
 import { timeToMs } from './time'
 import {
   ActiveVisit,
+  BaseSnapshot,
   CacheForOption,
   InFlightPrefetch,
   InternalActiveVisit,
@@ -76,7 +79,7 @@ class PrefetchedRequests {
 
       const pageResponse = response.getPageResponse()
 
-      currentPage.mergeOncePropsIntoResponse(pageResponse)
+      mergeOncePropsInto(pageResponse, responseTarget(currentPage.get(), pageResponse)?.state)
 
       this.cached.push({
         params: { ...params },
@@ -200,7 +203,7 @@ class PrefetchedRequests {
     return this.findCached(params) || this.findInFlight(params)
   }
 
-  public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
+  public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit, capturedBase: BaseSnapshot) {
     const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
     this.currentUseId = id
@@ -219,6 +222,8 @@ class PrefetchedRequests {
         }
 
         response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
+
+        response.setCapturedBase(capturedBase)
 
         // If this was a one-time cache, remove it
         // (generally a prefetch="click" request with no specified cache value)
@@ -273,7 +278,7 @@ class PrefetchedRequests {
   }
 
   protected paramsAreEqual(params1: ActiveVisit, params2: ActiveVisit): boolean {
-    return objectsAreEqual<ActiveVisit>(
+    return objectsAreEqual<InternalActiveVisit>(
       this.withoutPurposePrefetchHeader(params1),
       this.withoutPurposePrefetchHeader(params2),
       [
@@ -303,6 +308,9 @@ class PrefetchedRequests {
         'component',
         'pageProps',
         'cached',
+        'claims',
+        'layerId',
+        'layerOwner',
       ],
     )
   }
@@ -312,7 +320,7 @@ class PrefetchedRequests {
       prefetched.response.then((response) => {
         const pageResponse = response.getPageResponse()
 
-        currentPage.mergeOncePropsIntoResponse(pageResponse, { force: true })
+        mergeOncePropsInto(pageResponse, responseTarget(currentPage.get(), pageResponse)?.state, true)
 
         for (const [group, deferredProps] of Object.entries(pageResponse.deferredProps ?? {})) {
           const remaining = deferredProps.filter((prop) => get(pageResponse.props, prop) === undefined)

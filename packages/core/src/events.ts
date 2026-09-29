@@ -1,3 +1,4 @@
+import { addressOf } from './layers'
 import { GlobalEventDetails, GlobalEventNames, GlobalEventTrigger } from './types'
 
 function fireEvent<TEventName extends GlobalEventNames>(
@@ -11,8 +12,8 @@ export const fireBeforeEvent: GlobalEventTrigger<'before'> = (visit) => {
   return fireEvent('before', { cancelable: true, detail: { visit } })
 }
 
-export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors, { page, visitId } = {}) => {
-  return fireEvent('error', { detail: { errors, page, visitId } })
+export const fireErrorEvent: GlobalEventTrigger<'error'> = (errors, { page, visitId, stack = page } = {}) => {
+  return fireEvent('error', { detail: { errors, page, visitId, stack } })
 }
 
 export const fireNetworkErrorEvent: GlobalEventTrigger<'networkError'> = (error) => {
@@ -32,7 +33,7 @@ export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) 
 }
 
 export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, { cached = false, visitId } = {}) => {
-  return fireEvent('navigate', { detail: { page, cached, visitId } })
+  return fireEvent('navigate', { detail: { page, url: addressOf(page), cached, visitId } })
 }
 
 export const fireClientVisitEvent: GlobalEventTrigger<'clientVisit'> = (page, { replace, visitId }) => {
@@ -47,8 +48,8 @@ export const fireStartEvent: GlobalEventTrigger<'start'> = (visit) => {
   return fireEvent('start', { detail: { visit } })
 }
 
-export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page, { visitId } = {}) => {
-  return fireEvent('success', { detail: { page, visitId } })
+export const fireSuccessEvent: GlobalEventTrigger<'success'> = (page, { visitId, stack = page } = {}) => {
+  return fireEvent('success', { detail: { page, url: addressOf(page), visitId, stack } })
 }
 
 export const firePrefetchedEvent: GlobalEventTrigger<'prefetched'> = (response, visit) => {
