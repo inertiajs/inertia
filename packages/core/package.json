@@ -49,6 +49,9 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
+      ],
+      "json": [
+        "types/json.d.ts"
       ]
     }
   },

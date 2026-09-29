@@ -49,9 +49,9 @@ export function parseJson(text: string, { trusted = false }: { trusted?: boolean
 }
 
 /**
- * Only a BigInt makes a plain stringify throw here, so the replacer is kept off
- * the common path. A circular structure throws again on the retry. Without the
- * feature a BigInt keeps throwing, so nothing silently changes shape.
+ * The replacer is kept off the common path, so a plain stringify runs first and
+ * only a BigInt earns the retry. Any other failure is rethrown untouched, so a
+ * circular structure or a throwing getter still reports its original error.
  */
 export function stringifyJson(value: any, { trusted = false }: { trusted?: boolean } = {}): string {
   if (!trusted && !isEnabled()) {
@@ -60,7 +60,11 @@ export function stringifyJson(value: any, { trusted = false }: { trusted?: boole
 
   try {
     return JSON.stringify(value)
-  } catch {
+  } catch (error) {
+    if (!containsBigInt(value)) {
+      throw error
+    }
+
     return JSON.stringify(value, replaceBigInt)
   }
 }

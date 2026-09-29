@@ -94,6 +94,19 @@ describe('stringifyJson', () => {
     expect(() => stringifyJson(cyclic)).toThrow(/circular/i)
   })
 
+  it('rethrows the original error when the value holds no big integers', () => {
+    enable()
+
+    const value = {
+      get broken() {
+        throw new RangeError('cannot read this')
+      },
+    }
+
+    expect(() => stringifyJson(value)).toThrow(RangeError)
+    expect(() => stringifyJson(value)).toThrow('cannot read this')
+  })
+
   it('round trips through parseJson', () => {
     enable()
 
