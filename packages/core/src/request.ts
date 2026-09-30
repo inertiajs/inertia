@@ -21,19 +21,19 @@ export class Request {
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
   protected requestHasFinished = false
-  protected optimistic: boolean
+  protected optimisticId: number | null
 
   constructor(
     params: ActiveVisit,
     protected page: Page,
-    { optimistic = false }: { optimistic?: boolean } = {},
+    { optimisticId = null }: { optimisticId?: number | null } = {},
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
-    this.optimistic = optimistic
+    this.optimisticId = optimisticId
   }
 
-  public static create(params: ActiveVisit, page: Page, options?: { optimistic?: boolean }): Request {
+  public static create(params: ActiveVisit, page: Page, options?: { optimisticId?: number | null }): Request {
     return new Request(params, page, options)
   }
 
@@ -46,7 +46,7 @@ export class Request {
   }
 
   public isOptimistic(): boolean {
-    return this.optimistic
+    return this.optimisticId !== null
   }
 
   public isPendingOptimistic(): boolean {
@@ -91,14 +91,14 @@ export class Request {
       .getClient()
       .request(processedConfig)
       .then((response) => {
-        this.response = Response.create(this.requestParams, response, this.page)
+        this.response = Response.create(this.requestParams, response, this.page, this.optimisticId)
 
         return this.response.handle()
       })
       .catch((error) => {
         // Handle HTTP error responses (4xx/5xx)
         if (error instanceof HttpResponseError) {
-          this.response = Response.create(this.requestParams, error.response, this.page)
+          this.response = Response.create(this.requestParams, error.response, this.page, this.optimisticId)
 
           return this.response.handle()
         }

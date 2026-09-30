@@ -1,29 +1,18 @@
 <script lang="ts">
   import { Form } from '@inertiajs/svelte'
+  import { onMount } from 'svelte'
 
   let events: string[] = $state([])
+  let globalEvents: string[] = $state([])
+  let flashData = $state('')
   let cancelInOnBefore = $state(false)
-  let shouldFail = $state(false)
-  let shouldDelay = $state(false)
+  let preventErrorEvents = $state(false)
+  let action = $state('/form-component/events/success')
   let cancelToken: { cancel: () => void } | null = null
 
   function log(eventName: string) {
     events = [...events, eventName]
   }
-
-  let action = $derived(
-    (() => {
-      if (shouldFail) {
-        return '/form-component/events/errors'
-      }
-
-      if (shouldDelay) {
-        return '/form-component/events/delay'
-      }
-
-      return '/form-component/events/success'
-    })(),
-  )
 
   function onBefore() {
     log('onBefore')
@@ -58,6 +47,27 @@
     log('onError')
   }
 
+  function onHttpException() {
+    log('onHttpException')
+
+    if (preventErrorEvents) {
+      return false
+    }
+  }
+
+  function onNetworkError() {
+    log('onNetworkError')
+
+    if (preventErrorEvents) {
+      return false
+    }
+  }
+
+  function onFlash(flash: Record<string, unknown>) {
+    log('onFlash')
+    flashData = JSON.stringify(flash)
+  }
+
   function onCancelToken(token: { cancel: () => void }) {
     log('onCancelToken')
     cancelToken = token
@@ -69,6 +79,21 @@
       cancelToken = null
     }
   }
+
+  onMount(() => {
+    const logGlobalEvent = (name: string) => () => (globalEvents = [...globalEvents, name])
+
+    const httpExceptionListener = logGlobalEvent('httpException')
+    const networkErrorListener = logGlobalEvent('networkError')
+
+    document.addEventListener('inertia:httpException', httpExceptionListener)
+    document.addEventListener('inertia:networkError', networkErrorListener)
+
+    return () => {
+      document.removeEventListener('inertia:httpException', httpExceptionListener)
+      document.removeEventListener('inertia:networkError', networkErrorListener)
+    }
+  })
 </script>
 
 <Form
@@ -81,6 +106,9 @@
   {onCancel}
   {onSuccess}
   {onError}
+  {onHttpException}
+  {onNetworkError}
+  {onFlash}
   {onCancelToken}
 >
   {#snippet children({ processing, progress, wasSuccessful, recentlySuccessful, cancel })}
@@ -88,6 +116,14 @@
 
     <div>
       Events: <span id="events">{events.join(',')}</span>
+    </div>
+
+    <div>
+      Global events: <span id="global-events">{globalEvents.join(',')}</span>
+    </div>
+
+    <div>
+      Flash: <span id="flash">{flashData}</span>
     </div>
 
     <div>
@@ -114,8 +150,12 @@
 
     <div>
       <button type="button" onclick={() => (cancelInOnBefore = true)}>Cancel in onBefore</button>
-      <button type="button" onclick={() => (shouldFail = true)}>Fail Request</button>
-      <button type="button" onclick={() => (shouldDelay = true)}>Should Delay</button>
+      <button type="button" onclick={() => (action = '/form-component/events/errors')}>Fail Request</button>
+      <button type="button" onclick={() => (action = '/form-component/events/delay')}>Should Delay</button>
+      <button type="button" onclick={() => (action = '/form-component/events/flash')}>Return Flash</button>
+      <button type="button" onclick={() => (action = '/non-inertia')}>Trigger HTTP Exception</button>
+      <button type="button" onclick={() => (action = '/disconnect')}>Trigger Network Error</button>
+      <button type="button" onclick={() => (preventErrorEvents = true)}>Prevent Error Events</button>
       <button type="button" onclick={cancelVisit}>Cancel Visit</button>
       <button type="button" onclick={cancel}>Cancel Submission</button>
       <button type="submit">Submit</button>

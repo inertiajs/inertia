@@ -172,8 +172,9 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
 
     // The app config lives in the SSR entry loaded below, so the server adapter
     // tells us by header whether the page may contain big integer markers
-    const trusted = req.headers['x-inertia-preserve-big-integers'] === 'true'
+    const trusted = req.headers?.['x-inertia-preserve-big-integers'] === 'true'
 
+    req.setEncoding('utf8')
     req.on('data', (chunk) => (data += chunk))
 
     req.on('end', () => {

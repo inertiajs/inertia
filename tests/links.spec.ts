@@ -903,9 +903,8 @@ test.describe('scroll', () => {
     await page.click('#scroll-and-navigate')
     await expect(page.getByText('Page: 2')).toBeVisible()
 
-    // Verify scroll position was preserved (should be +100px, not 0)
-    const finalScroll = await page.locator('#scroll-container').evaluate((el) => el.scrollTop)
-    expect(finalScroll).toBeGreaterThan(100)
+    const container = page.locator('#scroll-container')
+    await expect.poll(() => container.evaluate((el) => el.scrollTop)).toBeGreaterThanOrEqual(100)
   })
 })
 

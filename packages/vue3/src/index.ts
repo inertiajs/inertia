@@ -16,6 +16,7 @@ export { default as useHttp } from './useHttp'
 export { default as usePoll } from './usePoll'
 export { default as usePrefetch } from './usePrefetch'
 export { default as useRemember } from './useRemember'
+export { default as WhenMounted } from './whenMounted'
 export { default as WhenVisible } from './whenVisible'
 
 export const config = coreConfig.extend<VueInertiaAppConfig>({})

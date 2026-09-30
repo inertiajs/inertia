@@ -21,11 +21,17 @@
  * import createServer from '@inertiajs/svelte/server'
  * import { render } from 'svelte/server'
  *
- * const ssr = await createInertiaApp({
+ * const ssrPromise = createInertiaApp({
  *   resolve: (name) => resolvePageComponent(name),
  * })
  *
- * const renderPage = (page) => ssr(page, render)
+ * ssrPromise.catch((error) => console.error(error))
+ *
+ * const renderPage = async (page) => {
+ *   const ssr = await ssrPromise
+ *
+ *   return ssr(page, render)
+ * }
  *
  * // Only start server in production
  * if (import.meta.env.PROD) {
@@ -51,14 +57,22 @@ export const config: FrameworkConfig = {
 
   // SSR template that wraps the createInertiaApp call with server bootstrap code
   // Uses import.meta.env.PROD to skip the standalone server in dev mode
-  // Note: Svelte uses a different variable name (ssr) and render function import
+  // Note: Svelte uses a different variable name (ssrPromise) and render function import
+  // Awaited per render, not at the top level, so the bundle can compile to CommonJS
   ssr: (configureCall, options) => `
 import createServer from '@inertiajs/svelte/server'
 import { render } from 'svelte/server'
 
-const ssr = await ${configureCall}
+const ssrPromise = ${configureCall}
 
-const renderPage = (page) => ssr(page, render)
+// Logged here so it never goes unhandled, and reported again per render by the SSR server
+ssrPromise.catch((error) => console.error(error))
+
+const renderPage = async (page) => {
+  const ssr = await ssrPromise
+
+  return ssr(page, render)
+}
 
 if (import.meta.env.PROD) {
   createServer(renderPage${options})

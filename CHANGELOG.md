@@ -7,9 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.7.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.7.1...3.x)
 
 - Nothing yet
+
+## [v3.7.1](https://github.com/inertiajs/inertia/compare/v3.7.0...v3.7.1) - 2026-09-11
+
+### What's Changed
+
+* [3.x] Prefer server.origin when resolving SSR CSS link URLs by [@RenautMestdagh](https://github.com/RenautMestdagh) in https://github.com/inertiajs/inertia/pull/3217
+* [3.x] Prevent unhandled rejection when a view transition is aborted mid-flight by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3230
+* [3.x] Clear the prefetch hover timer when a link is clicked by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3234
+* Revert "[3.x] Prefer server.origin when resolving SSR CSS link URLs" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3255
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3254
+* [3.x] Escape `<` in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3253
+
+### New Contributors
+
+* [@RenautMestdagh](https://github.com/RenautMestdagh) made their first contribution in https://github.com/inertiajs/inertia/pull/3217
+* [@lazerg](https://github.com/lazerg) made their first contribution in https://github.com/inertiajs/inertia/pull/3230
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.7.0...v3.7.1
 
 ## [v3.7.0](https://github.com/inertiajs/inertia/compare/v3.6.1...v3.7.0) - 2026-08-18
 

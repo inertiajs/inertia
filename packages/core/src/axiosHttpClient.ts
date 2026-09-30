@@ -1,10 +1,24 @@
-import type { AxiosInstance, AxiosProgressEvent } from 'axios'
 import { config as appConfig } from './config'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
 import { containsBigInt, stringifyJson } from './json'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 import { isRawRequestBody } from './xhrHttpClient'
+
+type AxiosProgressEvent = {
+  loaded: number
+  total?: number
+  progress?: number
+}
+
+// Keep the adapter's public contract independent of the optional Axios package.
+type AxiosInstance = (
+  config: Omit<HttpRequestConfig, 'headers' | 'onUploadProgress'> & {
+    headers: Record<string, string>
+    responseType: 'text'
+    onUploadProgress?: (event: AxiosProgressEvent) => void
+  },
+) => Promise<Omit<HttpResponse, 'headers'> & { headers: unknown }>
 
 /**
  * Normalize Axios headers to a simple string record with lowercase keys

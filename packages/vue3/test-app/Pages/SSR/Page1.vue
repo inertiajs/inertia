@@ -31,5 +31,6 @@ const page = usePage()
     <p data-testid="count">Count: {{ count }}</p>
 
     <Link href="/ssr/page2" data-testid="navigate-link">Navigate to another page</Link>
+    <Link href="/ssr/when-mounted" data-testid="to-when-mounted-link">Navigate to WhenMounted page</Link>
   </div>
 </template>
