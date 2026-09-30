@@ -1,4 +1,5 @@
 import type { Method, Page, PageProps, Router } from '@inertiajs/core'
+import type { FakeLiveTransportControls } from './fakeLiveTransport'
 
 declare global {
   interface Window {
@@ -26,6 +27,13 @@ declare global {
     _inertia_content_layout_id: string | undefined
     _plugin_global_props: object
     resolverReceivedPage: Page | null
+    __inertiaLive: FakeLiveTransportControls
+    __inertiaEcho: {
+      emit(channel: string, event: string, payload?: unknown): void
+      status(status: string): void
+      log(): string[]
+      swap(): void
+    }
   }
 
   interface ImportMeta {

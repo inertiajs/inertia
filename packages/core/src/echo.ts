@@ -1,0 +1,154 @@
+import { createLiveChannelTracker, liveChannelName } from './liveChannel'
+import { LiveChannel, LiveChannelType, LiveOptions, LiveTransport } from './types'
+
+/**
+ * Mirrors Laravel Echo's own `ConnectionStatus` so `EchoInstance` matches
+ * structurally, without core depending on `laravel-echo`.
+ */
+export type EchoConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
+
+/**
+ * Kept structural so every `@laravel/echo-*` package satisfies it without core
+ * depending on any of them.
+ */
+export interface EchoInstance {
+  channel(name: string): EchoChannel
+  private(name: string): EchoChannel
+  encryptedPrivate(name: string): EchoChannel
+  join(name: string): EchoChannel
+  leaveChannel(name: string): void
+  socketId(): string | null | undefined
+  connector: {
+    onConnectionChange(callback: (status: EchoConnectionStatus) => void): VoidFunction
+  }
+}
+
+export interface EchoChannel {
+  listen(event: string, callback: (payload: unknown) => void): unknown
+  stopListening(event: string, callback: (payload: unknown) => void): unknown
+}
+
+export type EchoTransportConfig = {
+  echo: () => EchoInstance
+  echoIsConfigured: () => boolean
+}
+
+const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) => EchoChannel> = {
+  public: (echo, name) => echo.channel(name),
+  private: (echo, name) => echo.private(name),
+  presence: (echo, name) => echo.join(name),
+  'encrypted-private': (echo, name) => echo.encryptedPrivate(name),
+}
+
+// An unrecognised type falls back to a public channel rather than throwing,
+// since the manifest is a hand-synced contract with the server
+const subscriberFor = (channel: LiveChannel) => subscribers[channel.type as LiveChannelType] ?? subscribers.public
+
+/**
+ * Laravel already sends the broadcast name. Prefix literal names with `.` so
+ * Echo does not apply the app namespace.
+ */
+const formatEvent = (event: string): string => {
+  return ['.', '\\'].includes(event.charAt(0)) ? event : `.${event}`
+}
+
+/**
+ * Resolves the configured Echo instance on each use, so `configureEcho()` swaps
+ * are respected.
+ */
+export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
+  const channels = createLiveChannelTracker()
+
+  let statusCallback: ((connected: boolean) => void) | null = null
+  let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
+
+  const resolve = (): EchoInstance => {
+    if (!echoIsConfigured()) {
+      throw new Error(
+        'Echo has not been configured. Call `configureEcho()` before Inertia subscribes to a live prop, or pass a `resolve` option to `echo()`.',
+      )
+    }
+
+    return echo()
+  }
+
+  // Watch only after a subscription exists, so resolving Echo does not connect
+  // before anything can receive. Re-arm when configureEcho() swaps instances.
+  const watchConnection = (instance: EchoInstance): void => {
+    if (!statusCallback || watch?.instance === instance) {
+      return
+    }
+
+    watch?.stop()
+
+    watch = {
+      instance,
+      stop: instance.connector.onConnectionChange((status: EchoConnectionStatus) => {
+        statusCallback?.(status === 'connected')
+      }),
+    }
+  }
+
+  return {
+    subscribe(channel, event, handler) {
+      const name = formatEvent(event)
+      const instance = resolve()
+
+      // Echo joins on demand, so there is nothing to do when this is the first
+      // listener. Leaving is another matter.
+      subscriberFor(channel)(instance, channel.name).listen(name, handler)
+      watchConnection(instance)
+      channels.acquire(channel)
+
+      return () => {
+        const current = resolve()
+
+        subscriberFor(channel)(current, channel.name).stopListening(name, handler)
+
+        // Unbinding the callback leaves the channel itself subscribed, so the
+        // last listener has to leave it as well
+        if (channels.release(channel)) {
+          current.leaveChannel(liveChannelName(channel))
+        }
+      }
+    },
+
+    socketId: () => (echoIsConfigured() ? (echo().socketId() ?? null) : null),
+
+    onStatusChange(callback) {
+      statusCallback = callback
+
+      if (channels.hasAny()) {
+        watchConnection(resolve())
+      }
+
+      return () => {
+        statusCallback = null
+        watch?.stop()
+        watch = null
+      }
+    },
+  }
+}
+
+export type EchoOptions = {
+  throttle?: number
+  pauseWhenHidden?: boolean
+  resolve?: () => EchoInstance
+}
+
+/**
+ * An adapter supplies the bindings for its own `@laravel/echo-*` package.
+ * Resolving the instance yourself replaces them, and counts as configured by
+ * definition.
+ */
+export const echoLive = (
+  { echo, echoIsConfigured }: EchoTransportConfig,
+  { resolve, ...options }: EchoOptions = {},
+): LiveOptions => ({
+  transport: createEchoTransport({
+    echo: resolve ?? echo,
+    echoIsConfigured: resolve ? () => true : echoIsConfigured,
+  }),
+  ...options,
+})

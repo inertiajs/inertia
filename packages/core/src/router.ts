@@ -584,12 +584,12 @@ export class Router {
 
     const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
 
-    const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
+    const { viewTransition, preserveFlash, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
     const page = {
       ...current,
       ...pageParams,
-      flash: flash ?? {},
+      flash: preserveFlash ? current.flash : (flash ?? {}),
       props: props as Page['props'],
     }
 
@@ -611,7 +611,9 @@ export class Router {
 
         const currentFlash = currentPage.get().flash
 
-        if (Object.keys(currentFlash).length > 0) {
+        // Flash that was carried over was already announced when it arrived,
+        // so announcing it again would replay whatever the app did with it.
+        if (!preserveFlash && Object.keys(currentFlash).length > 0) {
           fireFlashEvent(currentFlash)
           onFlash?.(currentFlash)
         }

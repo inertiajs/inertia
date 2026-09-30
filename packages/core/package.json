@@ -36,6 +36,18 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
+    },
+    "./echo": {
+      "types": "./types/echo.d.ts",
+      "import": "./dist/echo.js"
+    },
+    "./pusher": {
+      "types": "./types/pusher.d.ts",
+      "import": "./dist/pusher.js"
+    },
+    "./actionCable": {
+      "types": "./types/actionCable.d.ts",
+      "import": "./dist/actionCable.js"
     }
   },
   "typesVersions": {
@@ -45,6 +57,15 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
+      ],
+      "echo": [
+        "types/echo.d.ts"
+      ],
+      "pusher": [
+        "types/pusher.d.ts"
+      ],
+      "actionCable": [
+        "types/actionCable.d.ts"
       ]
     }
   },

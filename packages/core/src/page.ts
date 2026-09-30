@@ -33,7 +33,7 @@ class CurrentPage {
     resolveComponent,
     onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.page = { ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] }
+    this.assignPage({ ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] })
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
@@ -112,8 +112,8 @@ class CurrentPage {
           viewTransition = false
         }
 
-        this.page = page
         this.cleared = false
+        this.assignPage(page)
 
         if (this.hasOnceProps()) {
           prefetchedRequests.updateCachedOncePropsFromCurrentPage()
@@ -179,8 +179,8 @@ class CurrentPage {
     } = {},
   ) {
     return this.resolve(page.component, page).then((component) => {
-      this.page = page
       this.cleared = false
+      this.assignPage(page)
       history.setCurrent(page)
       return this.swap({ component, page, preserveState, viewTransition: false })
     })
@@ -204,6 +204,17 @@ class CurrentPage {
 
   public hasOnceProps(): boolean {
     return Object.keys(this.page.onceProps ?? {}).length > 0
+  }
+
+  /**
+   * Replace the whole page object and announce it. The partial mutations below
+   * deliberately do not, except `merge()`, which takes a `Partial<Page>` and is
+   * handed a whole page by `history.replaceState`.
+   */
+  protected assignPage(page: Page): void {
+    this.page = page
+
+    eventHandler.fireInternalEvent('pageUpdated', page)
   }
 
   public merge(data: Partial<Page>): void {

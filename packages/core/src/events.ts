@@ -66,3 +66,7 @@ export const fireFlashEvent: GlobalEventTrigger<'flash'> = (flash) => {
 export const fireLocationEvent: GlobalEventTrigger<'location'> = (url, versionChange) => {
   return fireEvent('location', { cancelable: true, detail: { url, versionChange } })
 }
+
+export const fireLiveEvent: GlobalEventTrigger<'live'> = (details) => {
+  return fireEvent('live', { cancelable: true, detail: details })
+}

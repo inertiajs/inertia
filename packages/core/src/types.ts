@@ -51,6 +51,116 @@ export type HttpErrorHandler = (
   error: HttpResponseError | HttpNetworkError | HttpCancelledError,
 ) => void | Promise<void>
 
+/**
+ * Resolves the websocket connection id that Inertia sends along as the
+ * `X-Socket-Id` header, so the server can skip broadcasting back to it.
+ */
+export type SocketIdResolver = () => string | null | undefined
+
+export type LiveChannelType = 'public' | 'private' | 'presence' | 'encrypted-private'
+
+/**
+ * Names arrive unprefixed, applying any broadcaster specific prefix is up to
+ * the transport.
+ */
+export type LiveChannel = {
+  name: string
+  type: LiveChannelType | (string & {})
+  /**
+   * Passed to the transport untouched. A channel is identified by its type and
+   * name alone, so these have to stay stable for a given one.
+   */
+  params?: Record<string, unknown>
+}
+
+/**
+ * Channels stay paired with their events instead of being flattened so the
+ * client does not subscribe to a cross product of unrelated channels and events.
+ */
+export type LiveListener = {
+  channel: LiveChannel
+  events: string[]
+}
+
+export type LiveProp = {
+  listeners: LiveListener[]
+  throttle?: number
+}
+
+export type LiveEventHandler = (payload: unknown) => void
+
+export type LiveEnvelope = {
+  __inertia?: {
+    event?: string
+
+    /**
+     * Props delivered by value, which spares the reload they would otherwise
+     * trigger. Only the subscription that delivered the event says which props
+     * may be written, so a key it does not feed is ignored rather than trusted.
+     */
+    props?: Record<string, unknown>
+
+    /**
+     * The connection that caused the broadcast, dropped when it is this client.
+     * How a broadcaster that cannot exclude a connection gets `toOthers`.
+     */
+    socketId?: string
+  }
+}
+
+interface LiveTransportBase {
+  socketId?: SocketIdResolver
+
+  /**
+   * Inertia refreshes every live prop once a dropped connection returns, so a
+   * transport never has to distinguish the ways in which it is not connected.
+   * Repeating a status, or reporting per channel, is safe for the same reason.
+   */
+  onStatusChange?(callback: (connected: boolean) => void): VoidFunction
+}
+
+/** The seam for a broadcaster that routes by event name, such as Pusher or Echo. */
+export interface LiveTransport extends LiveTransportBase {
+  /**
+   * Avoid throwing for anything recoverable: this runs during a page swap, so
+   * an error takes the swap with it.
+   */
+  subscribe(channel: LiveChannel, event: string, handler: LiveEventHandler): VoidFunction
+}
+
+/** The seam for a broadcaster with no event names, such as Action Cable. Inertia routes instead. */
+export interface LiveChannelTransport extends LiveTransportBase {
+  subscribeToChannel(channel: LiveChannel, handler: LiveEventHandler): VoidFunction
+
+  /** Defaults to the `__inertia.event` the envelope reserves for it. */
+  eventName?(payload: unknown): string | undefined
+}
+
+export type AnyLiveTransport = LiveTransport | LiveChannelTransport
+
+export type LiveOptions = {
+  transport: AnyLiveTransport
+  throttle?: number
+  pauseWhenHidden?: boolean
+}
+
+export type LiveOption = AnyLiveTransport | LiveOptions
+
+/**
+ * Only the adapters that wire live props accept this, so it is intersected into
+ * their app options rather than living on the shared ones.
+ */
+export type LiveAppOption = {
+  live?: LiveOption
+}
+
+export type LiveEventDetails = {
+  props: string[]
+  channel: LiveChannel
+  event: string
+  payload: unknown
+}
+
 export interface PageFlashData {
   [key: string]: unknown
 }
@@ -244,6 +354,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   matchPropsOn?: string[]
   sharedProps?: string[]
   scrollProps?: Record<keyof PageProps, ScrollProp>
+  liveProps?: Record<string, LiveProp>
   flash: FlashData
   onceProps?: Record<
     string,
@@ -273,6 +384,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   encryptHistory?: Page['encryptHistory']
   preserveScroll?: VisitOptions['preserveScroll']
   preserveState?: VisitOptions['preserveState']
+  preserveFlash?: boolean
   errorBag?: string | null
   viewTransition?: VisitOptions['viewTransition']
   onError?: (errors: Errors) => void
@@ -464,6 +576,11 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     }
     result: boolean | void
   }
+  live: {
+    parameters: [LiveEventDetails]
+    details: LiveEventDetails
+    result: boolean | void
+  }
 }
 
 export type PageEvent = 'newComponent' | 'firstLoad'
@@ -498,7 +615,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
   ...params: GlobalEventParameters<TEventName, T>
 ) => GlobalEventResult<TEventName, T>
 
-export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded'
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded' | 'pageUpdated'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: CancelTokenCallback
@@ -994,5 +1111,6 @@ declare global {
     'inertia:clientVisit': GlobalEvent<'clientVisit'>
     'inertia:flash': GlobalEvent<'flash'>
     'inertia:location': GlobalEvent<'location'>
+    'inertia:live': GlobalEvent<'live'>
   }
 }
