@@ -18,7 +18,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { flushSync } from 'react-dom'
+import { react } from 'vue-react'
 import usePage from './usePage'
 
 const resolveHTMLElement = (
