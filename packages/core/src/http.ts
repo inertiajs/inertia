@@ -1,7 +1,13 @@
 import { client as precognitionClient } from 'laravel-precognition'
 import { httpHandlers } from './httpHandlers'
+import { stringifyJson } from './json'
 import { HttpClient, HttpClientOptions } from './types'
 import { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
+
+// Precognition serializes its own request bodies, so it is handed the same
+// encoder the rest of Inertia uses. It falls back to a plain stringify while
+// big integers are disabled, so validation requests keep their current shape.
+precognitionClient.withSerializer(stringifyJson)
 
 let httpClient: HttpClient = xhrHttpClient
 

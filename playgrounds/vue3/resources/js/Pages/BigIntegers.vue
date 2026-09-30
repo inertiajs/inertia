@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -20,6 +20,23 @@ const incremented = computed(() => props.big + 1n)
 
 const submit = () => {
   router.post('/big-integers/echo', { id: props.big })
+}
+
+const safeValue = 900719925474099988n
+const hugeValue = 99999999999999999999999n
+
+const validationForm = useForm({
+  account_id: safeValue,
+  reference: 'ABC-123',
+}).withPrecognition('post', '/big-integers/validate')
+
+const uploadForm = useForm({
+  account_id: safeValue,
+  avatar: null as File | null,
+})
+
+const pickAvatar = (event: Event) => {
+  uploadForm.avatar = (event.target as HTMLInputElement).files?.[0] ?? null
 }
 </script>
 
@@ -108,6 +125,69 @@ big + 1n         {{ incremented }}</pre
       <p class="mt-2 text-sm text-gray-600">
         The value is encoded on submit and decoded by the Inertia middleware, so the controller receives an integer.
       </p>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold">Validation</h2>
+      <p class="mt-1 max-w-2xl text-sm text-gray-600">
+        The rule is <code>integer</code>. It passes because the middleware revived the marker before validation ran.
+        Beyond PHP_INT_MAX the digits cannot become a native integer, so the same rule fails.
+      </p>
+
+      <form
+        @submit.prevent="validationForm.post('/big-integers/validate')"
+        class="mt-2 max-w-md space-y-2 font-mono text-sm"
+      >
+        <p>
+          account_id: <span id="validation-account-id">{{ validationForm.account_id }}</span>
+        </p>
+
+        <label class="block">
+          reference
+          <input
+            id="validation-reference"
+            v-model="validationForm.reference"
+            @blur="validationForm.validate('reference')"
+            class="mt-1 w-full rounded-sm border border-gray-300 px-2 py-1"
+          />
+        </label>
+
+        <div class="space-x-2">
+          <button type="button" @click="validationForm.account_id = safeValue" class="rounded-sm bg-gray-200 px-3 py-1">
+            Use safe value
+          </button>
+          <button type="button" @click="validationForm.account_id = hugeValue" class="rounded-sm bg-gray-200 px-3 py-1">
+            Use value beyond PHP_INT_MAX
+          </button>
+          <button type="submit" class="rounded-sm bg-slate-800 px-4 py-1 text-white">Submit</button>
+        </div>
+      </form>
+
+      <p class="mt-2 text-sm">
+        validating: <span id="validation-validating" class="font-mono">{{ validationForm.validating }}</span>
+      </p>
+      <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm" id="validation-errors">{{
+        Object.keys(validationForm.errors).length ? validationForm.errors : 'No errors'
+      }}</pre>
+    </div>
+
+    <div>
+      <h2 class="text-lg font-semibold">File Upload</h2>
+      <p class="mt-1 max-w-2xl text-sm text-gray-600">
+        Attaching a file switches the request to multipart, which carries no types. The value arrives as its digits, so
+        the rule still passes but the controller receives a string instead of an integer.
+      </p>
+
+      <form @submit.prevent="uploadForm.post('/big-integers/upload')" class="mt-2 max-w-md space-y-2">
+        <input id="upload-avatar" type="file" @change="pickAvatar" class="block text-sm" />
+        <button type="submit" class="rounded-sm bg-slate-800 px-4 py-1 text-sm text-white">
+          Upload with account_id
+        </button>
+      </form>
+
+      <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm" id="upload-errors">{{
+        Object.keys(uploadForm.errors).length ? uploadForm.errors : 'No errors'
+      }}</pre>
     </div>
   </div>
 </template>

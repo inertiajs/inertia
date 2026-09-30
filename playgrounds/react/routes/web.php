@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Requests\BigIntegerFormRequest;
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\ChatMessage;
 use App\Models\Todo;
@@ -512,3 +513,28 @@ Route::post('/big-integers/echo', function (Request $request) {
         'type' => get_debug_type($received),
     ])->back();
 });
+
+Route::post('/big-integers/validate', function (BigIntegerFormRequest $request) {
+    $received = $request->input('account_id');
+
+    return Inertia::flash([
+        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
+        'type' => get_debug_type($received),
+    ])->back();
+})->middleware([HandlePrecognitiveRequests::class]);
+
+Route::post('/big-integers/upload', function (Request $request) {
+    $request->validate([
+        'account_id' => ['required', 'integer', 'min:1'],
+        'avatar' => ['required', 'file'],
+    ]);
+
+    $received = $request->input('account_id');
+
+    return Inertia::flash([
+        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
+        'type' => get_debug_type($received),
+        'avatar' => $request->file('avatar')->getClientOriginalName(),
+    ])->back();
+});
+
