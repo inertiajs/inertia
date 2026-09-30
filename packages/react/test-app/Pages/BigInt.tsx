@@ -7,6 +7,7 @@ export default ({
   nested,
   huge,
   collision,
+  echoedType,
 }: {
   safe: number
   big: bigint
@@ -14,6 +15,7 @@ export default ({
   nested: { deep: bigint[] }
   huge: bigint
   collision?: any
+  echoedType?: string
 }) => {
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
@@ -40,6 +42,12 @@ export default ({
         <p>
           collision: <span id="collision">{typeof collision === 'object' ? collision.$bigint : String(collision)}</span>{' '}
           (<span id="collision-type">{typeof collision}</span>)
+        </p>
+      )}
+
+      {echoedType && (
+        <p>
+          echoed type: <span id="echoed-type">{echoedType}</span>
         </p>
       )}
 

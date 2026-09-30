@@ -1,7 +1,7 @@
 <script lang="ts">
   import { router } from '@inertiajs/svelte'
 
-  let { safe, big, negative, nested, huge, collision } = $props()
+  let { safe, big, negative, nested, huge, collision, echoedType } = $props()
 
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
@@ -20,6 +20,10 @@
         id="collision-type">{typeof collision}</span
       >)
     </p>
+  {/if}
+
+  {#if echoedType}
+    <p>echoed type: <span id="echoed-type">{echoedType}</span></p>
   {/if}
 
   <button onclick={loadReloadData}>Load reload data</button>

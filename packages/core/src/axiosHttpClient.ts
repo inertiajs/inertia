@@ -1,7 +1,6 @@
-import { config as appConfig } from './config'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { containsBigInt, stringifyJson } from './json'
+import { encodesBigIntegers, preserveBigIntegersHeader, stringifyJson } from './json'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
 import { isRawRequestBody } from './xhrHttpClient'
 
@@ -137,18 +136,23 @@ export class AxiosHttpClient implements HttpClient {
     let data = config.data
 
     if (
-      appConfig.get('preserveBigIntegers') &&
       data !== null &&
       data !== undefined &&
       typeof data === 'object' &&
       !isRawRequestBody(data) &&
-      containsBigInt(data)
+      encodesBigIntegers(data)
     ) {
       data = stringifyJson(data)
 
       if (!hasContentTypeHeader(config.headers)) {
         headers['Content-Type'] = 'application/json'
       }
+    }
+
+    // An already-serialized body carries markers too, so the announcement is
+    // made from whatever is actually about to be sent.
+    if (encodesBigIntegers(data)) {
+      headers[preserveBigIntegersHeader] = 'true'
     }
 
     try {

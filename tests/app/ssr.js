@@ -21,8 +21,9 @@ function renderToPort(port, pageData) {
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(postData),
-          // Mirrors the Laravel adapter, which only sends this when the config is enabled
-          'X-Inertia-Preserve-Big-Integers': 'true',
+          // Mirrors the Laravel adapter, which announces this per page rather
+          // than globally, and only when the page it is sending carries markers
+          ...(postData.includes('"preserveBigIntegers":true') ? { 'X-Inertia-Preserve-Big-Integers': 'true' } : {}),
         },
       },
       (res) => {

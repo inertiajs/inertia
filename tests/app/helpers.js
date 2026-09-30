@@ -21,6 +21,14 @@ const encodeBigInts = (value) => {
   return value
 }
 
+// Mirrors the Laravel adapter, which tells the client when a payload may carry
+// markers rather than making it guess from the shape of the data.
+const announceBigInts = (res, data) => {
+  if (data.preserveBigIntegers) {
+    res.header('X-Inertia-Preserve-Big-Integers', 'true')
+  }
+}
+
 const decodeBigInts = (value) => {
   if (Array.isArray(value)) {
     return value.map(decodeBigInts)
@@ -39,8 +47,8 @@ const decodeBigInts = (value) => {
   return value
 }
 
-const buildPageData = (req, data) =>
-  encodeBigInts({
+const buildPageData = (req, data) => {
+  const page = encodeBigInts({
     component: req.path
       .slice(1)
       .split('/')
@@ -54,6 +62,15 @@ const buildPageData = (req, data) =>
     version: null,
     ...data,
   })
+
+  // Mirrors the Laravel adapter: the page says whether it may carry markers,
+  // so the client never has to guess from the shape of the data.
+  if (JSON.stringify(page).includes('"$bigint"')) {
+    page.preserveBigIntegers = true
+  }
+
+  return page
+}
 
 const processPartialProps = (req, data) => {
   const partialDataHeader = req.headers['x-inertia-partial-data'] || ''
@@ -98,6 +115,7 @@ const applyDefaultNonce = (req, html) => {
 module.exports = {
   package,
   decodeBigInts,
+  announceBigInts,
   render: (req, res, data) => {
     data = buildPageData(req, data)
 
@@ -119,6 +137,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 
@@ -137,6 +156,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 
@@ -155,6 +175,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 
@@ -174,6 +195,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 
@@ -197,6 +219,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 
@@ -221,6 +244,7 @@ module.exports = {
     if (req.get('X-Inertia')) {
       res.header('Vary', 'Accept')
       res.header('X-Inertia', true)
+      announceBigInts(res, data)
       return res.status(200).json(data)
     }
 

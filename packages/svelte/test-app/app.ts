@@ -52,7 +52,6 @@ createInertiaApp({
   },
   http: getHttpConfig(),
   defaults: {
-    preserveBigIntegers: true,
     ...(params.has('withAppDefaults') && {
       visitOptions: (href: string, options: VisitOptions) => {
         return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }

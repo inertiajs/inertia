@@ -16,6 +16,7 @@ import {
   Method,
   objectToFormData,
   parseJson,
+  preserveBigIntegersHeader,
   Progress,
   stringifyJson,
   UrlMethodPair,
@@ -244,7 +245,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           },
         })
 
-        const responseData = (httpResponse.data ? parseJson(httpResponse.data) : null) as TResponse
+        const responseData = (
+          httpResponse.data
+            ? parseJson(httpResponse.data, { trusted: httpResponse.headers[preserveBigIntegersHeader] === 'true' })
+            : null
+        ) as TResponse
 
         if (httpResponse.status >= 200 && httpResponse.status < 300) {
           if (isMounted.current) {
@@ -272,7 +277,9 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
         if (error instanceof HttpResponseError) {
           if (error.response.status === 422) {
-            const responseData = parseJson(error.response.data)
+            const responseData = parseJson(error.response.data, {
+              trusted: error.response.headers[preserveBigIntegersHeader] === 'true',
+            })
             const validationErrors = responseData.errors || {}
             const processedErrors = (
               withAllErrors.enabled() ? validationErrors : toSimpleValidationErrors(validationErrors)

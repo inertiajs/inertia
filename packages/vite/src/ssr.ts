@@ -21,7 +21,7 @@
 import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
-import { parseJson } from '@inertiajs/core/json'
+import { parseJson, preserveBigIntegersHeader } from '@inertiajs/core/json'
 import { classifySSRError, formatConsoleError } from '@inertiajs/core/ssrErrors'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { collectCSSFromModuleGraph } from './css'
@@ -172,7 +172,7 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
 
     // The app config lives in the SSR entry loaded below, so the server adapter
     // tells us by header whether the page may contain big integer markers
-    const trusted = req.headers?.['x-inertia-preserve-big-integers'] === 'true'
+    const trusted = req.headers?.[preserveBigIntegersHeader] === 'true'
 
     req.setEncoding('utf8')
     req.on('data', (chunk) => (data += chunk))

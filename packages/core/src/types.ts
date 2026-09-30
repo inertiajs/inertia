@@ -235,6 +235,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   clearHistory?: boolean
   preserveFragment?: boolean
   encryptHistory?: boolean
+  preserveBigIntegers?: boolean
   deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   initialDeferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   rescuedProps: string[]
@@ -683,7 +684,6 @@ export type InertiaAppConfig = {
   }
   nonce?: string
   visitOptions?: (href: string, options: VisitOptions) => VisitOptions
-  preserveBigIntegers: boolean
 }
 
 export interface LinkComponentBaseProps extends Partial<

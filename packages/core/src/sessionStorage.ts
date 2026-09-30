@@ -11,7 +11,7 @@ export class SessionStorage {
 
   public static get(key: string): any {
     if (typeof window !== 'undefined') {
-      return parseJson(window.sessionStorage.getItem(key) || 'null')
+      return parseJson(window.sessionStorage.getItem(key) || 'null', { trusted: true })
     }
   }
 

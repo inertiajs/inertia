@@ -5,8 +5,8 @@ import { HttpClient, HttpClientOptions } from './types'
 import { XhrHttpClient, xhrHttpClient } from './xhrHttpClient'
 
 // Precognition serializes its own request bodies, so it is handed the same
-// encoder the rest of Inertia uses. It falls back to a plain stringify while
-// big integers are disabled, so validation requests keep their current shape.
+// encoder the rest of Inertia uses. Bodies without big integers serialize
+// exactly as a plain stringify would.
 precognitionClient.withSerializer(stringifyJson)
 
 let httpClient: HttpClient = xhrHttpClient

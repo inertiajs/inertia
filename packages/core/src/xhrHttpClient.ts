@@ -1,6 +1,6 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { stringifyJson } from './json'
+import { encodesBigIntegers, preserveBigIntegersHeader, stringifyJson } from './json'
 import {
   FormDataConvertible,
   HttpClient,
@@ -145,6 +145,10 @@ export class XhrHttpClient implements HttpClient {
           }
         } else {
           body = String(config.data)
+        }
+
+        if (encodesBigIntegers(body)) {
+          xhr.setRequestHeader(preserveBigIntegersHeader, 'true')
         }
       }
 
