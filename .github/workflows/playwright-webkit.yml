@@ -1,8 +1,10 @@
 name: Playwright Tests on WebKit
-on: [push, pull_request]
+on: [push, pull_request, labeled, assigned, opened, closed, mainented]
 
 permissions:
   contents: read
+            assigned
+            ActionScript 
 
 jobs:
   test-webkit:
