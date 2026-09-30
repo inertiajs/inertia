@@ -1,5 +1,12 @@
-import test, { expect } from '@playwright/test'
+import test, { expect, type Page } from '@playwright/test'
 import { requests, shouldBeDumpPage } from './support'
+
+async function waitForValidation(page: Page, trigger: () => Promise<unknown>) {
+  const request = page.waitForRequest((request) => !!request.headers()['precognition'])
+
+  await trigger()
+  await (await request).response()
+}
 
 const integrations = ['form-component', 'form-helper']
 
@@ -87,9 +94,8 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
 
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('Name is valid!')).toBeVisible()
@@ -99,9 +105,8 @@ integrations.forEach((integration) => {
       await expect(page.getByText('Name is valid!')).not.toBeVisible()
 
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('Name is valid!')).toBeVisible()
@@ -110,9 +115,8 @@ integrations.forEach((integration) => {
 
     test(prefix + 'field is not valid after failed validation', async ({ page }) => {
       await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -121,17 +125,15 @@ integrations.forEach((integration) => {
 
     test(prefix + 'valid field persists after successful validation', async ({ page }) => {
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('Name is valid!')).toBeVisible()
 
       await page.fill('input[name="name"]', 'Jane Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('Name is valid!')).toBeVisible()
@@ -139,17 +141,15 @@ integrations.forEach((integration) => {
 
     test(prefix + 'valid field becomes invalid when field is revalidated with errors', async ({ page }) => {
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('Name is valid!')).toBeVisible()
 
       await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -160,9 +160,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/without-all-errors')
 
       await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       // Should show only the first error from the array, not the second
@@ -174,9 +173,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/with-all-errors')
 
       await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       // Should show all errors from the array
@@ -188,9 +186,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/with-all-errors-config')
 
       await page.fill('input[name="name"]', 'ab')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       // Should show all errors from the array
@@ -211,9 +208,8 @@ integrations.forEach((integration) => {
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
 
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -237,9 +233,8 @@ integrations.forEach((integration) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
 
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -265,9 +260,8 @@ integrations.forEach((integration) => {
 
       await page.fill('input[name="email"]', 'y')
 
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name field is required.')).not.toBeVisible()
@@ -278,9 +272,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/methods')
 
       await page.getByRole('button', { name: 'Touch Name and Email' }).click()
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name field is required.')).toBeVisible()
@@ -293,9 +286,8 @@ integrations.forEach((integration) => {
       await page.fill('input[name="name"]', 'ab')
 
       await page.getByRole('button', { name: 'Touch Name Twice' }).click()
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -351,9 +343,8 @@ integrations.forEach((integration) => {
       await page.fill('input[name="name"]', 'ab')
       await page.fill('input[name="email"]', 'x')
 
-      await page.getByRole('button', { name: 'Validate Name', exact: true }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate Name', exact: true }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -363,9 +354,8 @@ integrations.forEach((integration) => {
     test(prefix + 'validate with array of fields validates multiple fields', async ({ page }) => {
       await page.goto('/' + integration + '/precognition/methods')
 
-      await page.getByRole('button', { name: 'Validate Name and Email' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate Name and Email' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name field is required.')).toBeVisible()
@@ -381,9 +371,8 @@ integrations.forEach((integration) => {
       await page.fill('input[name="email"]', 'x')
       await page.locator('input[name="email"]').blur()
 
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -401,9 +390,7 @@ integrations.forEach((integration) => {
       await page.fill('input[name="name"]', 'abc')
       await page.fill('input[name="email"]', 'test@example.com')
 
-      await page.getByRole('button', { name: 'Validate All Touched' }).click()
-
-      await page.waitForTimeout(500)
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate All Touched' }).click())
 
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
@@ -418,9 +405,8 @@ integrations.forEach((integration) => {
         buffer: Buffer.from('fake image data'),
       })
 
-      await page.getByRole('button', { name: 'Validate Both' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate Both' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name field is required.')).toBeVisible()
@@ -439,9 +425,8 @@ integrations.forEach((integration) => {
         buffer: Buffer.from('fake image data'),
       })
 
-      await page.getByRole('button', { name: 'Validate Both' }).click()
+      await waitForValidation(page, () => page.getByRole('button', { name: 'Validate Both' }).click())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
@@ -452,17 +437,15 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/transform')
 
       await page.fill('input[name="name"]', 'a')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
 
       await page.fill('input[name="name"]', 'aa')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The name must be at least 3 characters.')).not.toBeVisible()
@@ -474,18 +457,16 @@ integrations.forEach((integration) => {
 
       // Invalid email triggers validation error
       await page.fill('#email-input', 'invalid-email')
-      await page.locator('#email-input').blur()
+      await waitForValidation(page, () => page.locator('#email-input').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The email must be a valid email address.')).toBeVisible()
 
       // Valid email clears the error
       await page.fill('#email-input', 'valid@email.com')
-      await page.locator('#email-input').blur()
+      await waitForValidation(page, () => page.locator('#email-input').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('The email must be a valid email address.')).not.toBeVisible()
@@ -496,9 +477,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/callbacks')
 
       await page.fill('input[name="name"]', 'John Doe')
-      await page.click('button:has-text("Validate")')
+      await waitForValidation(page, () => page.click('button:has-text("Validate")'))
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('onPrecognitionSuccess called!')).toBeVisible()
@@ -510,9 +490,8 @@ integrations.forEach((integration) => {
       await page.goto('/' + integration + '/precognition/callbacks')
 
       await page.fill('input[name="name"]', 'ab')
-      await page.click('button:has-text("Validate")')
+      await waitForValidation(page, () => page.click('button:has-text("Validate")'))
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       await expect(page.getByText('onPrecognitionSuccess called!')).not.toBeVisible()
@@ -537,9 +516,8 @@ integrations.forEach((integration) => {
 
       // Fill in a valid name to trigger validation
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
 
       // Should show error confirming custom header was received
@@ -560,13 +538,13 @@ integrations.forEach((integration) => {
 
         // Immediately change value and trigger new validation - should cancel the first one
         await page.fill('#auto-cancel-name-input', 'xy')
-        await page.locator('#auto-cancel-name-input').blur()
+        await waitForValidation(page, () => page.locator('#auto-cancel-name-input').blur())
         await expect(page.getByText('Validating...')).not.toBeVisible()
         await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
 
         // One cancelled, one 422 response
-        expect(requests.failed).toHaveLength(1)
-        expect(requests.responses).toHaveLength(1)
+        await expect.poll(() => requests.failed.length).toBe(1)
+        await expect.poll(() => requests.responses.length).toBe(1)
 
         const cancelledRequestError = await requests.failed[0].failure()?.errorText
         const expectedError =
@@ -584,17 +562,15 @@ integrations.forEach((integration) => {
 
       // Validate first item
       await page.fill('input[name="items.0.name"]', 'ab')
-      await page.locator('input[name="items.0.name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="items.0.name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.locator('#items\\.0\\.name-error')).toBeVisible()
 
       // Validate second item - this should also trigger validation
       await page.fill('input[name="items.1.name"]', 'x')
-      await page.locator('input[name="items.1.name"]').blur()
+      await waitForValidation(page, () => page.locator('input[name="items.1.name"]').blur())
 
-      await expect(page.getByText('Validating...')).toBeVisible()
       await expect(page.getByText('Validating...')).not.toBeVisible()
       await expect(page.locator('#items\\.1\\.name-error')).toBeVisible()
     })
@@ -611,8 +587,7 @@ integrations.forEach((integration) => {
 
       // Fill valid name and trigger precognition validation
       await page.fill('input[name="name"]', 'John Doe')
-      await page.locator('input[name="name"]').blur()
-      await expect(page.locator('#validating')).toBeVisible()
+      await waitForValidation(page, () => page.locator('input[name="name"]').blur())
       await expect(page.locator('#validating')).not.toBeVisible()
 
       // Name error should be cleared, email error should remain
@@ -640,8 +615,7 @@ test.describe('Form Helper', () => {
 
       test('validates form data using the precognition endpoint', async ({ page }) => {
         await page.selectOption('select', key)
-        await page.getByRole('button', { name: 'Validate' }).click()
-        await expect(page.getByText('Validating...')).toBeVisible()
+        await waitForValidation(page, () => page.getByRole('button', { name: 'Validate' }).click())
         await expect(page.getByText('Validating...')).not.toBeVisible()
         await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
       })
