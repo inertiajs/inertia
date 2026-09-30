@@ -505,36 +505,27 @@ Route::get('/big-integers', function () {
     ]);
 });
 
-Route::post('/big-integers/echo', function (Request $request) {
-    $received = $request->input('id');
+$bigIntegerDebug = fn (mixed $value): array => [
+    'received' => is_int($value) ? (string) $value : $value,
+    'type' => get_debug_type($value),
+];
 
-    return Inertia::flash([
-        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
-        'type' => get_debug_type($received),
-    ])->back();
+Route::post('/big-integers/echo', function (Request $request) use ($bigIntegerDebug) {
+    return Inertia::flash($bigIntegerDebug($request->input('id')))->back();
 });
 
-Route::post('/big-integers/validate', function (BigIntegerFormRequest $request) {
-    $received = $request->input('account_id');
-
-    return Inertia::flash([
-        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
-        'type' => get_debug_type($received),
-    ])->back();
+Route::post('/big-integers/validate', function (BigIntegerFormRequest $request) use ($bigIntegerDebug) {
+    return Inertia::flash($bigIntegerDebug($request->input('account_id')))->back();
 })->middleware([HandlePrecognitiveRequests::class]);
 
-Route::post('/big-integers/upload', function (Request $request) {
+Route::post('/big-integers/upload', function (Request $request) use ($bigIntegerDebug) {
     $request->validate([
         'account_id' => ['required', 'integer', 'min:1'],
         'avatar' => ['required', 'file'],
     ]);
 
-    $received = $request->input('account_id');
-
     return Inertia::flash([
-        'received' => is_int($received) ? number_format($received, 0, '.', '') : $received,
-        'type' => get_debug_type($received),
+        ...$bigIntegerDebug($request->input('account_id')),
         'avatar' => $request->file('avatar')->getClientOriginalName(),
     ])->back();
 });
-

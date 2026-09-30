@@ -16,9 +16,7 @@ class BigIntegerFormRequest extends FormRequest
     }
 
     /**
-     * The integer rule is the interesting one. It only passes because the
-     * middleware revived the marker before validation ran, and it fails for
-     * digits beyond PHP_INT_MAX, which cannot become a native integer here.
+     * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
