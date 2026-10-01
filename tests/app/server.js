@@ -224,6 +224,7 @@ app.get('/bigint', (req, res) =>
       nested: { deep: [900719925474099988n, 2n] },
       huge: 9223372036854775807n,
     },
+    encryptHistory: true,
   }),
 )
 
@@ -251,6 +252,22 @@ app.get('/bigint/collision', (req, res) =>
       nested: { deep: [1, 2] },
       collision: { $bigint: '123' },
     },
+  }),
+)
+
+app.get('/bigint/unflagged', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+    preserveBigIntegers: false,
+    encryptHistory: true,
   }),
 )
 

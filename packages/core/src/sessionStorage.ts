@@ -1,17 +1,15 @@
-import { parseJson, stringifyJson } from './json'
-
 export class SessionStorage {
   public static locationVisitKey = 'inertiaLocationVisit'
 
   public static set(key: string, value: any): void {
     if (typeof window !== 'undefined') {
-      window.sessionStorage.setItem(key, stringifyJson(value))
+      window.sessionStorage.setItem(key, JSON.stringify(value))
     }
   }
 
   public static get(key: string): any {
     if (typeof window !== 'undefined') {
-      return parseJson(window.sessionStorage.getItem(key) || 'null')
+      return JSON.parse(window.sessionStorage.getItem(key) || 'null')
     }
   }
 

@@ -6,6 +6,7 @@
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
   const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666n })
+  const submitMarkerEcho = () => router.post('/bigint/echo', { value: { $bigint: '123' } })
 </script>
 
 <div>
@@ -29,4 +30,5 @@
   <button onclick={loadReloadData}>Load reload data</button>
   <button onclick={loadCollisionData}>Load collision data</button>
   <button onclick={submitEcho}>Submit echo</button>
+  <button onclick={submitMarkerEcho}>Submit marker echo</button>
 </div>

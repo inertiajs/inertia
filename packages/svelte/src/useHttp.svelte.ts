@@ -24,9 +24,6 @@ import {
   HttpResponseError,
   mergeDataIntoQueryString,
   objectToFormData,
-  parseJson,
-  preserveBigIntegersHeader,
-  stringifyJson,
   UseFormUtils,
 } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
@@ -204,7 +201,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       if (useFormData) {
         requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
       } else {
-        requestData = stringifyJson(transformedData)
+        requestData = JSON.stringify(transformedData)
         contentType = 'application/json'
       }
     }
@@ -226,11 +223,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         },
       })
 
-      const responseData = (
-        response.data
-          ? parseJson(response.data, { preserveBigIntegers: response.headers[preserveBigIntegersHeader] === 'true' })
-          : null
-      ) as TResponse
+      const responseData = (response.data ? JSON.parse(response.data) : null) as TResponse
 
       if (response.status >= 200 && response.status < 300) {
         markAsSuccessful()
@@ -257,9 +250,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
       if (error instanceof HttpResponseError) {
         if (error.response.status === 422) {
-          const responseData = parseJson(error.response.data, {
-            preserveBigIntegers: error.response.headers[preserveBigIntegersHeader] === 'true',
-          })
+          const responseData = JSON.parse(error.response.data)
           const validationErrors = responseData.errors || {}
           const processedErrors = (
             withAllErrors.enabled() ? validationErrors : toSimpleValidationErrors(validationErrors)

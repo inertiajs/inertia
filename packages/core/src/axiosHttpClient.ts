@@ -1,8 +1,6 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { encodesBigIntegers, preserveBigIntegersHeader, stringifyJson } from './json'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
-import { isRawRequestBody } from './xhrHttpClient'
 
 type AxiosProgressEvent = {
   loaded: number
@@ -133,33 +131,11 @@ export class AxiosHttpClient implements HttpClient {
       headers['Content-Type'] = false
     }
 
-    let data = config.data
-
-    if (
-      data !== null &&
-      data !== undefined &&
-      typeof data === 'object' &&
-      !isRawRequestBody(data) &&
-      encodesBigIntegers(data)
-    ) {
-      data = stringifyJson(data)
-
-      if (!hasContentTypeHeader(config.headers)) {
-        headers['Content-Type'] = 'application/json'
-      }
-    }
-
-    // An already-serialized body carries markers too, so the announcement is
-    // made from whatever is actually about to be sent.
-    if (encodesBigIntegers(data)) {
-      headers[preserveBigIntegersHeader] = 'true'
-    }
-
     try {
       const response = await axios({
         method: config.method,
         url: config.url,
-        data,
+        data: config.data,
         params: config.params,
         headers: headers as Record<string, string>,
         signal: config.signal,

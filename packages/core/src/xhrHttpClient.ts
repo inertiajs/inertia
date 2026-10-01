@@ -1,6 +1,5 @@
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
-import { encodesBigIntegers, preserveBigIntegersHeader, stringifyJson } from './json'
 import {
   FormDataConvertible,
   HttpClient,
@@ -38,7 +37,7 @@ function isFormDataRequestBody(value: unknown): value is FormData {
   return typeof FormData !== 'undefined' && value instanceof FormData
 }
 
-export function isRawRequestBody(value: unknown): value is XMLHttpRequestBodyInit {
+function isRawRequestBody(value: unknown): value is XMLHttpRequestBodyInit {
   return (
     typeof value === 'string' ||
     isFormDataRequestBody(value) ||
@@ -138,17 +137,13 @@ export class XhrHttpClient implements HttpClient {
         if (isRawRequestBody(config.data)) {
           body = config.data
         } else if (typeof config.data === 'object') {
-          body = stringifyJson(config.data)
+          body = JSON.stringify(config.data)
 
           if (!config.headers?.['Content-Type'] && !config.headers?.['content-type']) {
             xhr.setRequestHeader('Content-Type', 'application/json')
           }
         } else {
           body = String(config.data)
-        }
-
-        if (encodesBigIntegers(body)) {
-          xhr.setRequestHeader(preserveBigIntegersHeader, 'true')
         }
       }
 

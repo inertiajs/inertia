@@ -13,7 +13,7 @@ import {
 } from './events'
 import { history } from './history'
 import { interceptors } from './interceptors'
-import { parseJson, preserveBigIntegersHeader } from './json'
+import { parsePage } from './json'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -281,7 +281,7 @@ export class Response {
     }
 
     try {
-      return parseJson(response, { preserveBigIntegers: this.response.headers[preserveBigIntegersHeader] === 'true' })
+      return parsePage(response)
     } catch (error) {
       return response
     }

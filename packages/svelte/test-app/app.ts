@@ -51,13 +51,13 @@ createInertiaApp({
     }
   },
   http: getHttpConfig(),
-  defaults: {
-    ...(params.has('withAppDefaults') && {
+  ...(params.has('withAppDefaults') && {
+    defaults: {
       visitOptions: (href: string, options: VisitOptions) => {
         return { headers: { ...options.headers, 'X-From-App-Defaults': 'test' } }
       },
-    }),
-  },
+    },
+  }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
   }),

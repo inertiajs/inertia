@@ -44,3 +44,25 @@ test('it treats the marker as a reserved wire shape once big integers are enable
   await expect(page.locator('#collision-type')).toHaveText('bigint')
   await expect(page.locator('#collision')).toHaveText('123')
 })
+
+test('it leaves markers built by the app untouched when the page did not opt in', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/')
+  await page.evaluate(() => (window as any).testing.Inertia.visit('/bigint/unflagged'))
+
+  await expect(page.locator('#collision-type')).toHaveText('object')
+  await expect(page.locator('#collision')).toHaveText('123')
+
+  await page.getByRole('button', { name: 'Load reload data' }).click()
+  await expect(page.locator('#safe')).toHaveText('100')
+
+  await page.goBack()
+
+  await expect(page.locator('#collision-type')).toHaveText('object')
+  await expect(page.locator('#collision')).toHaveText('123')
+
+  await page.getByRole('button', { name: 'Submit marker echo' }).click()
+
+  await expect(page.locator('#echoed-type')).toHaveText('object')
+})

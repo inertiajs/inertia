@@ -5,7 +5,7 @@ import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
-import { parseJson, preserveBigIntegersHeader } from './json'
+import { parsePage } from './json'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
@@ -105,10 +105,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   }
 
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
-    // The app config is set by the render callback below, so the server adapter
-    // tells us by header whether the page may contain big integer markers
-    const preserveBigIntegers = request.headers[preserveBigIntegersHeader] === 'true'
-    const page: Page = parseJson(await readableToString(request), { preserveBigIntegers })
+    const page: Page = parsePage(await readableToString(request))
 
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
