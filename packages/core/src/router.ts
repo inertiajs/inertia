@@ -6,6 +6,7 @@ import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
+import { navigation } from './navigation'
 import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils'
 import { page as currentPage } from './page'
 import { polls } from './polls'
@@ -68,12 +69,38 @@ export class Router {
 
   protected pendingOptimisticCallback: OptimisticCallback | undefined = undefined
 
+  protected disposeCurrent: VoidFunction | undefined
+
   public init<ComponentType = Component>({
     initialPage,
     resolveComponent,
     swapComponent,
     onFlash,
-  }: RouterInitParams<ComponentType>): void {
+    externalNavigation,
+  }: RouterInitParams<ComponentType>): VoidFunction {
+    const previousGeneration = navigation.generation
+    this.disposeCurrent?.()
+
+    // A cancellation callback may have initialized a newer mount during disposal.
+    if (navigation.generation !== previousGeneration) {
+      return noop
+    }
+
+    const generation = navigation.init(externalNavigation)
+    const syncRequestStream = (this.syncRequestStream = new RequestStream({ maxConcurrent: 1, interruptible: true }))
+    const asyncRequestStream = (this.asyncRequestStream = new RequestStream({
+      maxConcurrent: Infinity,
+      interruptible: false,
+    }))
+
+    this.clientVisitQueue = new Queue<Promise<void>>()
+
+    if (externalNavigation) {
+      history.reset()
+    } else if (typeof window !== 'undefined') {
+      window.history.scrollRestoration = 'manual'
+    }
+
     currentPage.init({
       initialPage,
       resolveComponent,
@@ -81,23 +108,52 @@ export class Router {
       onFlash,
     })
 
-    InitialVisit.handle()
+    const disposeEvents = eventHandler.init(!!externalNavigation)
 
-    eventHandler.init()
-
-    eventHandler.on('missingHistoryItem', () => {
+    const removeMissingHistoryItemListener = eventHandler.on('missingHistoryItem', () => {
       if (typeof window !== 'undefined') {
         this.visit(window.location.href, { preserveState: true, preserveScroll: true, replace: true })
       }
     })
 
-    eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
-      this.loadDeferredProps(deferredProps)
-    })
+    const removeLoadDeferredPropsListener = eventHandler.on(
+      'loadDeferredProps',
+      (deferredProps: Page['deferredProps']) => {
+        this.loadDeferredProps(deferredProps)
+      },
+    )
 
-    eventHandler.on('historyQuotaExceeded', (url) => {
+    const removeHistoryQuotaExceededListener = eventHandler.on('historyQuotaExceeded', (url) => {
       window.location.href = url
     })
+
+    const dispose = (this.disposeCurrent = () => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
+
+      navigation.active = false
+      this.pendingOptimisticCallback = undefined
+      polls.clear()
+      prefetchedRequests.dispose()
+      currentPage.destroy()
+      disposeEvents()
+      removeMissingHistoryItemListener()
+      removeLoadDeferredPropsListener()
+      removeHistoryQuotaExceededListener()
+      asyncRequestStream.cancelInFlight()
+      syncRequestStream.cancelInFlight()
+    })
+
+    try {
+      InitialVisit.handle()
+    } catch (exception) {
+      dispose()
+
+      throw exception
+    }
+
+    return dispose
   }
 
   public optimistic<TProps>(callback: OptimisticCallback<TProps>): this {
@@ -159,7 +215,7 @@ export class Router {
       return
     }
 
-    return this.visit(window.location.href, {
+    return this.visit(navigation.external ? currentPage.get().url : window.location.href, {
       ...options,
       preserveScroll: true,
       preserveState: true,
@@ -215,20 +271,33 @@ export class Router {
   }
 
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
+    const syncRequestStream = this.syncRequestStream
+    const asyncRequestStream = this.asyncRequestStream
+
     if (async) {
-      this.asyncRequestStream.cancelInFlight({ prefetch })
+      asyncRequestStream.cancelInFlight({ prefetch })
     }
 
     if (sync) {
-      this.syncRequestStream.cancelInFlight()
+      syncRequestStream.cancelInFlight()
     }
   }
 
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
+    const generation = navigation.generation
+
     return polls.add(
       interval,
       ({ onStart, onFinish }) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         const resolved = typeof requestOptions === 'function' ? requestOptions() : requestOptions
+
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
 
         this.doReload({
           poll: true,
@@ -256,6 +325,12 @@ export class Router {
     href: string | URL | UrlMethodPair,
     options: VisitOptions<T> = {},
   ): void {
+    if (!navigation.active) {
+      return
+    }
+
+    const generation = navigation.generation
+
     options.optimistic = options.optimistic ?? this.pendingOptimisticCallback
     this.pendingOptimisticCallback = undefined
 
@@ -271,7 +346,24 @@ export class Router {
     const events = this.getVisitEvents(options as VisitOptions)
 
     // If either of these return false, we don't want to continue
-    if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
+    if (events.onBefore(visit) === false || !navigation.isCurrent(generation) || !fireBeforeEvent(visit)) {
+      return
+    }
+
+    if (!navigation.isCurrent(generation)) {
+      return
+    }
+
+    if (
+      navigation.external &&
+      visit.method === 'get' &&
+      !visit.async &&
+      !visit.only.length &&
+      !visit.except.length &&
+      !visit.reset.length
+    ) {
+      navigation.external.navigate(visit.url.href)
+
       return
     }
 
@@ -294,12 +386,20 @@ export class Router {
           !request.isOptimistic() &&
           isSameUrlWithoutQueryOrHash(request.getUrl(), currentPageUrl),
       )
+
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
     }
 
     // Interrupt in-flight requests before taking the optimistic snapshot
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
     }
 
     let optimisticId: number | null = null
@@ -308,6 +408,10 @@ export class Router {
       optimisticId = currentPage.nextOptimisticId()
 
       this.applyOptimisticUpdate(options.optimistic, events, optimisticId)
+
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
     }
 
     if (!currentPage.isCleared() && !visit.preserveUrl) {
@@ -321,6 +425,10 @@ export class Router {
     }
 
     const sendRequest = () => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
+
       const prefetched = prefetchedRequests.get(requestParams)
 
       if (prefetched) {
@@ -340,8 +448,12 @@ export class Router {
       visit.component = null
     }
 
-    if (visit.component) {
+    if (visit.component && !navigation.external) {
       history.processQueue().then(() => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         this.performInstantSwap(visit).then(() => {
           requestParams.preserveScroll = true
           requestParams.preserveState = true
@@ -386,6 +498,7 @@ export class Router {
     options: VisitOptions = {},
     prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
+    const generation = navigation.generation
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
 
     if (method !== 'get') {
@@ -411,7 +524,12 @@ export class Router {
     const events = this.getVisitEvents(options)
 
     // If either of these return false, we don't want to continue
-    if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
+    if (
+      events.onBefore(visit) === false ||
+      !navigation.isCurrent(generation) ||
+      !fireBeforeEvent(visit) ||
+      !navigation.isCurrent(generation)
+    ) {
       return
     }
 
@@ -427,7 +545,7 @@ export class Router {
     const ensureCurrentPageIsSet = (): Promise<void> => {
       return new Promise((resolve) => {
         const checkIfPageIsDefined = () => {
-          if (currentPage.get()) {
+          if (!navigation.isCurrent(generation) || currentPage.get()) {
             resolve()
           } else {
             setTimeout(checkIfPageIsDefined, 50)
@@ -439,6 +557,10 @@ export class Router {
     }
 
     ensureCurrentPageIsSet().then(() => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
+
       prefetchedRequests.add(
         requestParams,
         (params) => {
@@ -534,6 +656,7 @@ export class Router {
     keyOrData: string | ((flash: FlashData) => TFlash) | TFlash,
     value?: unknown,
   ): void {
+    const generation = navigation.generation
     const current = currentPage.get().flash
     let flash: PageFlashData
 
@@ -547,7 +670,15 @@ export class Router {
       return
     }
 
+    if (!navigation.isCurrent(generation)) {
+      return
+    }
+
     currentPage.setFlash(flash)
+
+    if (!navigation.isCurrent(generation)) {
+      return
+    }
 
     if (Object.keys(flash).length) {
       fireFlashEvent(flash)
@@ -558,13 +689,34 @@ export class Router {
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): void {
-    this.clientVisitQueue.add(() => this.performClientVisit(params, { replace }))
+    const generation = navigation.generation
+
+    this.clientVisitQueue.add(() => {
+      if (!navigation.isCurrent(generation)) {
+        return Promise.resolve()
+      }
+
+      const current = currentPage.get()
+
+      if (
+        navigation.external &&
+        ((params.url && hrefToUrl(params.url).href !== hrefToUrl(current.url).href) ||
+          (params.component && params.component !== current.component))
+      ) {
+        navigation.external.navigate(hrefToUrl(params.url || current.url).href)
+
+        return Promise.resolve()
+      }
+
+      return this.performClientVisit(params, { replace })
+    })
   }
 
   protected performClientVisit<TProps = Page['props']>(
     params: ClientSideVisitOptions<TProps>,
     { replace = false }: { replace?: boolean } = {},
   ): Promise<void> {
+    const generation = navigation.generation
     const current = currentPage.get()
 
     const onceProps =
@@ -582,7 +734,15 @@ export class Router {
         ? params.props(current.props as TProps, onceProps as Partial<TProps>)
         : (params.props ?? current.props)
 
+    if (!navigation.isCurrent(generation)) {
+      return Promise.resolve()
+    }
+
     const flash = typeof params.flash === 'function' ? params.flash(current.flash) : params.flash
+
+    if (!navigation.isCurrent(generation)) {
+      return Promise.resolve()
+    }
 
     const { viewTransition, onError, onFinish, onFlash, onSuccess, ...pageParams } = params
 
@@ -594,9 +754,18 @@ export class Router {
     }
 
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
+
+    if (!navigation.isCurrent(generation)) {
+      return Promise.resolve()
+    }
+
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     const visitId = this.createVisitId()
+
+    if (!navigation.isCurrent(generation)) {
+      return Promise.resolve()
+    }
 
     return currentPage
       .set(page, {
@@ -607,13 +776,30 @@ export class Router {
         visitId,
       })
       .then(() => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         fireClientVisitEvent(currentPage.get(), { replace, visitId })
+
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
 
         const currentFlash = currentPage.get().flash
 
         if (Object.keys(currentFlash).length > 0) {
           fireFlashEvent(currentFlash)
+
+          if (!navigation.isCurrent(generation)) {
+            return
+          }
+
           onFlash?.(currentFlash)
+        }
+
+        if (!navigation.isCurrent(generation)) {
+          return
         }
 
         const errors = currentPage.get().props.errors || {}
@@ -803,10 +989,11 @@ export class Router {
   }
 
   protected applyOptimisticUpdate(optimistic: OptimisticCallback, events: VisitCallbacks, id: number): void {
+    const generation = navigation.generation
     const currentProps = currentPage.get().props
     const optimisticProps = optimistic(cloneDeep(currentProps))
 
-    if (!optimisticProps) {
+    if (!optimisticProps || !navigation.isCurrent(generation)) {
       return
     }
 
@@ -843,10 +1030,18 @@ export class Router {
 
     const originalOnFinish = events.onFinish
     events.onFinish = (visit) => {
+      if (!navigation.isCurrent(generation)) {
+        return originalOnFinish(visit)
+      }
+
       currentPage.unregisterOptimistic(id)
 
       if (shouldRestore && currentPage.get().component === component) {
         const replayedProps = currentPage.replayOptimistics()
+
+        if (!navigation.isCurrent(generation)) {
+          return originalOnFinish(visit)
+        }
 
         if (Object.keys(replayedProps).length > 0) {
           currentPage.setPropsQuietly({ ...currentPage.get().props, ...replayedProps })
@@ -862,10 +1057,16 @@ export class Router {
   }
 
   protected loadDeferredProps(deferred: Page['deferredProps']): void {
+    const generation = navigation.generation
+
     if (deferred) {
-      Object.values(deferred).forEach((props) => {
+      for (const props of Object.values(deferred)) {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         this.doReload({ only: props, deferredProps: true, preserveErrors: true })
-      })
+      }
     }
   }
 }

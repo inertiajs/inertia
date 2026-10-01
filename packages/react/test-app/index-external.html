@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Reports host</title>
+    <script>
+      window.initialPage = '{{ placeholder }}'
+    </script>
+    <script type="module" src="external-navigation.tsx"></script>
+  </head>
+  <body>
+    <nav>
+      <button id="open-first">Open first report</button>
+      <button id="open-second">Open second report</button>
+      <button id="leave">Close report</button>
+    </nav>
+    <p id="host-status">Opening report</p>
+    <div id="app"></div>
+  </body>
+</html>

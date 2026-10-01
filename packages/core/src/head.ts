@@ -2,6 +2,7 @@ import debounce from './debounce'
 import type { HeadManager, HeadManagerOnUpdateCallback, Page, ServerHeadOption } from './types'
 
 const serverHeadProviderId = 'server'
+const elementOwners = new WeakMap<ChildNode, object>()
 
 function ensureElementHasInertiaAttribute(element: string, index: number): string {
   if (element.match(/\sdata-inertia(=|\s|>)/)) {
@@ -62,7 +63,11 @@ const Renderer = {
     return -1
   },
 
-  update: debounce(function (elements: Array<string>) {
+  update: debounce(function (elements: Array<string>, owner: object, isActive: () => boolean) {
+    if (!isActive()) {
+      return
+    }
+
     const sourceElements = elements.map((element) => this.buildDOMElement(element))
     const targetElements = Array.from(document.head.childNodes).filter((element) =>
       this.isInertiaManagedElement(element as Element),
@@ -82,11 +87,15 @@ const Renderer = {
       const sourceElement = sourceElements.splice(index, 1)[0]
       if (sourceElement && !targetElement.isEqualNode(sourceElement)) {
         targetElement.replaceWith(sourceElement)
+        elementOwners.set(sourceElement, owner)
+      } else {
+        elementOwners.set(targetElement, owner)
       }
     })
 
     sourceElements.forEach((element) => {
       document.head.appendChild(element)
+      elementOwners.set(element, owner)
     })
   }, 1),
 }
@@ -101,6 +110,8 @@ export default function createHeadManager(
     ? { [serverHeadProviderId]: initialServerHead }
     : {}
   let lastProviderId = 0
+  let disposed = false
+  const owner = {}
 
   function connect(): string {
     const id = (lastProviderId += 1)
@@ -177,7 +188,11 @@ export default function createHeadManager(
   }
 
   function commit(): void {
-    isServer ? onUpdate(collect()) : Renderer.update(collect())
+    if (disposed) {
+      return
+    }
+
+    isServer ? onUpdate(collect()) : Renderer.update(collect(), owner, () => !disposed)
   }
 
   // By committing during initialization, we can guarantee that the default
@@ -187,6 +202,18 @@ export default function createHeadManager(
   return {
     forceUpdate: commit,
     updateServerHead,
+    dispose: () => {
+      disposed = true
+      Object.keys(states).forEach((id) => delete states[id])
+
+      if (!isServer) {
+        Array.from(document.head.childNodes).forEach((element) => {
+          if (elementOwners.get(element) === owner) {
+            element.remove()
+          }
+        })
+      }
+    },
     createProvider: function () {
       const id = connect()
 
