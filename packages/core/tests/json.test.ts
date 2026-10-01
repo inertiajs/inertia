@@ -46,11 +46,9 @@ describe('stringifyJson', () => {
     expect(stringifyJson(value)).toBe(JSON.stringify(value))
   })
 
-  it('always encodes big integers, since a plain stringify would throw', () => {
-    expect(stringifyJson({ id: 900719925474099988n })).toBe('{"id":{"$bigint":"900719925474099988"}}')
-    expect(stringifyJson({ deep: [1n, { nested: -2n }] })).toBe(
-      '{"deep":[{"$bigint":"1"},{"nested":{"$bigint":"-2"}}]}',
-    )
+  it('sends big integers as their digits, since a plain stringify would throw', () => {
+    expect(stringifyJson({ id: 900719925474099988n })).toBe('{"id":"900719925474099988"}')
+    expect(stringifyJson({ deep: [1n, { nested: -2n }] })).toBe('{"deep":["1",{"nested":"-2"}]}')
   })
 
   it('still reports circular structures', () => {

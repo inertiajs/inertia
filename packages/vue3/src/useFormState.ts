@@ -1,11 +1,9 @@
 import {
-  containsBigInt,
   Errors,
   ErrorValue,
   FormDataErrors,
   FormDataKeys,
   FormDataValues,
-  preserveBigIntegersHeader,
   Progress,
   router,
   UrlMethodPair,
@@ -149,11 +147,7 @@ export default function useFormState<TForm extends object>(
           const { method, url } = precognitionEndpoint!()
           const transformedData = cloneDeep(transform(this.data())) as Record<string, unknown>
 
-          // Precognition uses its own HTTP client, so the header Inertia's
-          // clients add has to be passed along by hand here.
-          return client[method](url, transformedData, {
-            headers: containsBigInt(transformedData) ? { [preserveBigIntegersHeader]: 'true' } : {},
-          })
+          return client[method](url, transformedData)
         },
         cloneDeep(defaults) as Record<string, unknown>,
       )

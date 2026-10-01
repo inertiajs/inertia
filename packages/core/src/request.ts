@@ -9,7 +9,7 @@ import {
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
-import { containsBigInt, preserveBigIntegersHeader, stringifyJson } from './json'
+import { containsBigInt, stringifyJson } from './json'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
@@ -78,14 +78,18 @@ export class Request {
     const originallyPrefetch = this.requestParams.all().prefetch
 
     const data = this.requestParams.data()
-    const encodesBigIntegers = containsBigInt(data)
+    const hasBigIntegers = containsBigInt(data)
 
     const config: HttpRequestConfig = {
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,
-      data: encodesBigIntegers ? stringifyJson(data) : data,
+      // The HTTP clients would throw on a BigInt, so those bodies are encoded here
+      data: hasBigIntegers ? stringifyJson(data) : data,
       signal: this.cancelToken.signal,
-      headers: this.getHeaders(encodesBigIntegers),
+      headers: {
+        ...(hasBigIntegers && { 'Content-Type': 'application/json' }),
+        ...this.getHeaders(),
+      },
       onUploadProgress: this.onProgress.bind(this),
     }
 
@@ -177,9 +181,8 @@ export class Request {
     }
   }
 
-  protected getHeaders(encodesBigIntegers: boolean): HttpRequestHeaders {
+  protected getHeaders(): HttpRequestHeaders {
     const headers: HttpRequestHeaders = {
-      ...(encodesBigIntegers && { 'Content-Type': 'application/json', [preserveBigIntegersHeader]: 'true' }),
       ...this.requestParams.headers(),
       Accept: 'text/html, application/xhtml+xml',
       'X-Requested-With': 'XMLHttpRequest',

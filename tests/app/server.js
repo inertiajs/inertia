@@ -276,15 +276,8 @@ app.post('/bigint/echo', (req, res) =>
     component: 'BigInt',
     props: {
       safe: 42,
-      // Gated the way the Laravel middleware is, so a missing request header
-      // shows up here instead of passing silently.
-      big:
-        req.get('X-Inertia-Preserve-Big-Integers') === 'true' ? inertia.decodeBigInts(req.body).value : req.body.value,
-      // The shape the server actually received, which is what a missing
-      // header changes. The value alone survives either way.
-      echoedType: typeof (req.get('X-Inertia-Preserve-Big-Integers') === 'true'
-        ? inertia.decodeBigInts(req.body).value
-        : req.body.value),
+      big: req.body.value,
+      echoedType: typeof req.body.value,
       negative: -900719925474099988n,
       nested: { deep: [900719925474099988n, 2n] },
       huge: 9223372036854775807n,

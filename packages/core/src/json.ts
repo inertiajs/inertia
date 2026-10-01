@@ -8,7 +8,6 @@ import type { Page } from './types'
  * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
  */
 export const bigIntMarker = '$bigint'
-export const preserveBigIntegersHeader = 'x-inertia-preserve-big-integers'
 
 const reviveBigInt = (_key: string, value: any): any => {
   if (value !== null && typeof value === 'object' && typeof value[bigIntMarker] === 'string') {
@@ -24,6 +23,10 @@ const replaceBigInt = (_key: string, value: any): any => {
   }
 
   return value
+}
+
+const replaceBigIntWithDigits = (_key: string, value: any): any => {
+  return typeof value === 'bigint' ? value.toString() : value
 }
 
 /**
@@ -46,11 +49,15 @@ export function parsePage(text: string): any {
  * on the client (or with remembered state) parses back the way it went in.
  */
 export function stringifyPage(page: Page): string {
-  return stringify(page, () => ({ ...page, preserveBigIntegers: true }))
+  return stringify(page, () => ({ ...page, preserveBigIntegers: true }), replaceBigInt)
 }
 
+/**
+ * Request bodies send a BigInt as its digits, the same way form data and query
+ * strings do, so the server receives it like any other numeric input.
+ */
 export function stringifyJson(value: any): string {
-  return stringify(value, () => value)
+  return stringify(value, () => value, replaceBigIntWithDigits)
 }
 
 /**
@@ -58,12 +65,12 @@ export function stringifyJson(value: any): string {
  * only a BigInt earns the retry. Any other failure is rethrown untouched, so a
  * circular structure or a throwing getter still reports its original error.
  */
-function stringify(value: any, valueWithBigInts: () => any): string {
+function stringify(value: any, valueWithBigInts: () => any, replacer: (key: string, value: any) => any): string {
   try {
     return JSON.stringify(value)
   } catch (error) {
     try {
-      return JSON.stringify(valueWithBigInts(), replaceBigInt)
+      return JSON.stringify(valueWithBigInts(), replacer)
     } catch {
       throw error
     }

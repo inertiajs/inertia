@@ -20,7 +20,6 @@ export default ({
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
   const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666n })
-  const submitMarkerEcho = () => router.post('/bigint/echo', { value: { $bigint: '123' } })
 
   return (
     <div>
@@ -55,7 +54,6 @@ export default ({
       <button onClick={loadReloadData}>Load reload data</button>
       <button onClick={loadCollisionData}>Load collision data</button>
       <button onClick={submitEcho}>Submit echo</button>
-      <button onClick={submitMarkerEcho}>Submit marker echo</button>
     </div>
   )
 }

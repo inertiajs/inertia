@@ -9,7 +9,7 @@ import type {
   UseFormTransformCallback,
   UseFormWithPrecognitionArguments,
 } from '@inertiajs/core'
-import { containsBigInt, preserveBigIntegersHeader, router, UseFormUtils } from '@inertiajs/core'
+import { router, UseFormUtils } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
 import type { NamedInputEvent, ValidationConfig, Validator } from 'laravel-precognition'
@@ -142,11 +142,7 @@ export default function useFormState<TForm extends object>(
           const { method, url } = precognitionEndpoint!()
           const f = formWithPrecognition()
           const transformedData = cloneDeep(transform(f.data())) as Record<string, unknown>
-          // Precognition uses its own HTTP client, so the header Inertia's
-          // clients add has to be passed along by hand here.
-          return client[method](url, transformedData, {
-            headers: containsBigInt(transformedData) ? { [preserveBigIntegersHeader]: 'true' } : {},
-          })
+          return client[method](url, transformedData)
         },
         cloneDeep(defaults) as Record<string, unknown>,
       )

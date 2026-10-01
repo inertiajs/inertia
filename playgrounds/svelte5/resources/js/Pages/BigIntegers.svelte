@@ -90,15 +90,16 @@ big + 1n         {big + 1n}</pre>
         ? JSON.stringify(page.flash, null, 2)
         : 'Nothing submitted yet'}</pre>
     <p class="mt-2 text-sm text-gray-600">
-      The value is encoded on submit and decoded by the Inertia middleware, so the controller receives an integer.
+      The value is sent as its digits, the same way form data and query strings send it, so the controller receives a
+      numeric string.
     </p>
   </div>
 
   <div>
     <h2 class="text-lg font-semibold">Validation</h2>
     <p class="mt-1 max-w-2xl text-sm text-gray-600">
-      The rule is <code>integer</code>. It passes because the middleware revived the marker before validation ran.
-      Beyond PHP_INT_MAX the digits cannot become a native integer, so the same rule fails.
+      The rule is <code>integer</code>. It passes because the digits arrive as a numeric string. Beyond PHP_INT_MAX the
+      digits cannot become a native integer, so the same rule fails.
     </p>
 
     <form
@@ -151,8 +152,7 @@ big + 1n         {big + 1n}</pre>
   <div>
     <h2 class="text-lg font-semibold">File Upload</h2>
     <p class="mt-1 max-w-2xl text-sm text-gray-600">
-      Attaching a file switches the request to multipart, which carries no types. The value arrives as its digits, so
-      the rule still passes but the controller receives a string instead of an integer.
+      Attaching a file switches the request to multipart. The value arrives as its digits, just like a JSON submission.
     </p>
 
     <form

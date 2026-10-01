@@ -21,24 +21,6 @@ const encodeBigInts = (value) => {
   return value
 }
 
-const decodeBigInts = (value) => {
-  if (Array.isArray(value)) {
-    return value.map(decodeBigInts)
-  }
-
-  if (value !== null && typeof value === 'object' && value.constructor === Object) {
-    const keys = Object.keys(value)
-
-    if (keys.length === 1 && keys[0] === '$bigint') {
-      return BigInt(value.$bigint)
-    }
-
-    return Object.fromEntries(Object.entries(value).map(([key, val]) => [key, decodeBigInts(val)]))
-  }
-
-  return value
-}
-
 const buildPageData = (req, data) => {
   const page = encodeBigInts({
     component: req.path
@@ -107,7 +89,6 @@ const applyDefaultNonce = (req, html) => {
 
 module.exports = {
   package,
-  decodeBigInts,
   render: (req, res, data) => {
     data = buildPageData(req, data)
 
