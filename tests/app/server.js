@@ -118,6 +118,16 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/bigint', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/BigInt',
+    props: {
+      big: 900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+    },
+  }),
+)
+
 app.get('/ssr/when-mounted', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/WhenMounted',
@@ -243,6 +253,79 @@ app.get('/when-mounted', (req, res) =>
   inertia.render(req, res, {
     component: 'WhenMounted',
     props: {},
+  }),
+)
+
+// Big integer test routes
+app.get('/bigint', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 900719925474099988n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+    encryptHistory: req.query.encrypt !== 'false',
+  }),
+)
+
+app.get('/bigint/reload', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 100,
+      big: 123456789012345678n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+    encryptHistory: req.query.encrypt !== 'false',
+  }),
+)
+
+app.get('/bigint/collision', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+  }),
+)
+
+app.get('/bigint/unflagged', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+    preserveBigIntegers: false,
+    encryptHistory: true,
+  }),
+)
+
+app.post('/bigint/echo', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: req.body.value,
+      echoedType: typeof req.body.value,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
   }),
 )
 
@@ -1115,6 +1198,7 @@ app.get('/prefetch/preserve-state', (req, res) => {
 
 // Registered explicitly to prevent the :pageNumber catch-all below from matching
 app.get('/prefetch/after-error', (req, res) => inertia.render(req, res, { component: 'Prefetch/AfterError' }))
+app.get('/prefetch/cancelled', (req, res) => inertia.render(req, res, { component: 'Prefetch/Cancelled' }))
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))

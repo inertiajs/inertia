@@ -411,6 +411,68 @@ test('leaves an outgoing deferred request without overwriting the replacement pa
   await expect(page.getByText('Details for report 1', { exact: true })).not.toBeVisible()
 })
 
+for (const closeOnCancel of [false, true]) {
+  test(`stops prefetch visit callbacks when the host closes ${closeOnCancel ? 'during' : 'before'} cancellation`, async ({
+    page,
+  }) => {
+    let releaseResponse!: () => void
+    const responseReleased = new Promise<void>((resolve) => (releaseResponse = resolve))
+    const errors: string[] = []
+
+    page.on('pageerror', (error) => errors.push(error.message))
+    await page.route('**/external-navigation/1?preview', async (route) => {
+      const response = await route.fetch()
+
+      await responseReleased
+      await route.fulfill({ response })
+    })
+
+    await page.goto('/external-navigation/1')
+    await expect(page.getByText('Details for report 1', { exact: true })).toBeVisible()
+
+    const prefetchStarted = page.waitForRequest('**/external-navigation/1?preview')
+
+    await page.evaluate(() => window.testing.Inertia.prefetch('/external-navigation/1?preview', { only: ['total'] }))
+    await prefetchStarted
+
+    await page.evaluate((closeOnCancel) => {
+      window.testing.Inertia.visit('/external-navigation/1?preview', {
+        only: ['total'],
+        async: true,
+        onCancel: () => {
+          document.body.dataset.visitCancelled = 'true'
+          document.getElementById('leave')!.click()
+        },
+        onFinish: () => (document.body.dataset.visitFinished = 'true'),
+      })
+
+      if (closeOnCancel) {
+        window.testing.Inertia.cancelAll()
+      } else {
+        document.getElementById('leave')!.click()
+      }
+    }, closeOnCancel)
+
+    await expect(page.locator('#app')).toBeEmpty()
+    releaseResponse()
+
+    await page.getByRole('button', { name: 'Open second report' }).click()
+    await expect(page.getByText('Details for report 2', { exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Refresh total' }).click()
+
+    await expect(page.getByText('Total: 201', { exact: true })).toBeVisible()
+
+    if (closeOnCancel) {
+      await expect(page.locator('body')).toHaveAttribute('data-visit-cancelled', 'true')
+    } else {
+      await expect(page.locator('body')).not.toHaveAttribute('data-visit-cancelled')
+    }
+
+    await expect(page.locator('body')).not.toHaveAttribute('data-visit-finished')
+    expect(errors).toEqual([])
+  })
+}
+
 test('loads more items without letting infinite scroll navigate the host', async ({ page }) => {
   await page.goto('/external-navigation/scroll')
 

@@ -13,6 +13,7 @@ import {
 } from './events'
 import { history } from './history'
 import { interceptors } from './interceptors'
+import { parsePage } from './json'
 import { navigation } from './navigation'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
@@ -449,7 +450,7 @@ export class Response {
     }
 
     try {
-      return JSON.parse(response)
+      return parsePage(response)
     } catch (error) {
       return response
     }

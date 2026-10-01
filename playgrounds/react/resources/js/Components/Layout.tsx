@@ -55,6 +55,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         <Link href="/flash" className="hover:underline">
           Flash
         </Link>
+        <Link href="/big-integers" className="hover:underline">
+          Big Integers
+        </Link>
         <Link href="/error/404" className="hover:underline">
           Errors
         </Link>

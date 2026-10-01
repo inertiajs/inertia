@@ -1,5 +1,6 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
+import { HttpCancelledError } from './httpErrors'
 import { navigation } from './navigation'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
@@ -41,27 +42,29 @@ class PrefetchedRequests {
     }
 
     const [stale, prefetchExpiresIn] = this.extractStaleValues(cacheFor)
+    let cancelled = false
 
     const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
+          cancelled = true
+
           if (navigation.isCurrent(generation)) {
             this.remove(params)
-            this.removeFromInFlight(params)
+            this.removeFromInFlight(params.id)
             params.onCancel()
           }
 
-          reject()
+          reject(new HttpCancelledError())
         },
         onError: (error) => {
           if (navigation.isCurrent(generation)) {
             this.remove(params)
-            this.removeFromInFlight(params)
             params.onError(error)
           }
 
-          reject()
+          reject(error)
         },
         onPrefetching(visitParams) {
           if (navigation.isCurrent(generation)) {
@@ -76,9 +79,9 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
-        onPrefetchError(error) {
+        onPrefetchError: (error) => {
           if (navigation.isCurrent(generation)) {
-            prefetchedRequests.removeFromInFlight(params)
+            this.removeFromInFlight(params.id)
           }
 
           reject(error)
@@ -111,28 +114,33 @@ class PrefetchedRequests {
         params,
         oncePropExpiresIn ? Math.min(prefetchExpiresIn, oncePropExpiresIn) : prefetchExpiresIn,
       )
-      this.removeFromInFlight(params)
+      this.removeFromInFlight(params.id)
 
       response.handlePrefetch()
 
       return response
     })
 
-    // Cancellation may happen without a consumer awaiting this prefetch.
-    promise.catch(() => {})
-
-    if (!navigation.isCurrent(generation)) {
-      return promise
+    if (!cancelled && navigation.isCurrent(generation)) {
+      this.inFlightRequests.push({
+        params: { ...params },
+        response: promise,
+        staleTimestamp: null,
+        inFlight: true,
+      })
     }
 
-    this.inFlightRequests.push({
-      params: { ...params },
-      response: promise,
-      staleTimestamp: null,
-      inFlight: true,
-    })
+    return promise.catch((error) => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
 
-    return promise
+      this.removeFromInFlight(params.id)
+
+      if (!(error instanceof HttpCancelledError)) {
+        throw error
+      }
+    })
   }
 
   public removeAll(): void {
@@ -163,9 +171,9 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected removeFromInFlight(params: ActiveVisit): void {
+  protected removeFromInFlight(visitId: string): void {
     this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-      return !this.paramsAreEqual(prefetching.params, params)
+      return prefetching.params.id !== visitId
     })
   }
 
@@ -249,7 +257,24 @@ class PrefetchedRequests {
 
         return response.handle()
       },
-      () => {},
+      (error) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
+        if (!(error instanceof HttpCancelledError)) {
+          throw error
+        }
+
+        consumedParams.onCancel()
+
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
+        consumedParams.cancelled = true
+        consumedParams.onFinish(consumedParams)
+      },
     )
   }
 
