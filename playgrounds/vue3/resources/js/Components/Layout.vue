@@ -30,6 +30,7 @@ const appName = computed(() => page.props.appName)
     <Link href="/once/1" class="hover:underline">Once</Link>
     <Link href="/optimistic" class="hover:underline">Optimistic</Link>
     <Link href="/flash" class="hover:underline">Flash</Link>
+    <Link href="/big-integers" class="hover:underline">Big Integers</Link>
     <Link href="/error/404" class="hover:underline">Errors</Link>
     <Link href="/ssr-debug" class="hover:underline">SSR Debug</Link>
   </nav>
