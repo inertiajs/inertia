@@ -224,7 +224,7 @@ app.get('/bigint', (req, res) =>
       nested: { deep: [900719925474099988n, 2n] },
       huge: 9223372036854775807n,
     },
-    encryptHistory: true,
+    encryptHistory: req.query.encrypt !== 'false',
   }),
 )
 
@@ -238,6 +238,7 @@ app.get('/bigint/reload', (req, res) =>
       nested: { deep: [900719925474099988n, 2n] },
       huge: 9223372036854775807n,
     },
+    encryptHistory: req.query.encrypt !== 'false',
   }),
 )
 
