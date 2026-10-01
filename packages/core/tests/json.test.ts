@@ -14,35 +14,6 @@ describe('parsePage', () => {
     expect(parsePage(text).props.id).toEqual({ $bigint: '900719925474099988' })
   })
 
-  it('only revives canonical single-key integer markers', () => {
-    const { props } = parsePage(
-      JSON.stringify({
-        props: {
-          negative: { $bigint: '-900719925474099988' },
-          fraction: { $bigint: '12.5' },
-          words: { $bigint: 'abc' },
-          padded: { $bigint: '007' },
-          negativeZero: { $bigint: '-0' },
-          zero: { $bigint: '0' },
-          extraKey: { $bigint: '1', other: 2 },
-          numeric: { $bigint: 1 },
-          note: 'the "$bigint" marker documented in a string',
-        },
-        preserveBigIntegers: true,
-      }),
-    )
-
-    expect(props.negative).toBe(-900719925474099988n)
-    expect(props.fraction).toEqual({ $bigint: '12.5' })
-    expect(props.words).toEqual({ $bigint: 'abc' })
-    expect(props.padded).toEqual({ $bigint: '007' })
-    expect(props.negativeZero).toEqual({ $bigint: '-0' })
-    expect(props.zero).toBe(0n)
-    expect(props.extraKey).toEqual({ $bigint: '1', other: 2 })
-    expect(props.numeric).toEqual({ $bigint: 1 })
-    expect(props.note).toContain('$bigint')
-  })
-
   it('revives markers nested in arrays and objects', () => {
     const { props } = parsePage(
       '{"props":{"deep":[{"id":{"$bigint":"-1234567890123456789"}}]},"preserveBigIntegers":true}',

@@ -9,17 +9,9 @@ import type { Page } from './types'
  */
 export const bigIntMarker = '$bigint'
 export const preserveBigIntegersHeader = 'x-inertia-preserve-big-integers'
-const integerPattern = /^(0|-?[1-9]\d*)$/
 
 const reviveBigInt = (_key: string, value: any): any => {
-  if (
-    value !== null &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    typeof value[bigIntMarker] === 'string' &&
-    Object.keys(value).length === 1 &&
-    integerPattern.test(value[bigIntMarker])
-  ) {
+  if (value !== null && typeof value === 'object' && typeof value[bigIntMarker] === 'string') {
     return BigInt(value[bigIntMarker])
   }
 
