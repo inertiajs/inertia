@@ -281,7 +281,7 @@ export class Response {
     }
 
     try {
-      return parseJson(response, { trusted: this.response.headers[preserveBigIntegersHeader] === 'true' })
+      return parseJson(response, { preserveBigIntegers: this.response.headers[preserveBigIntegersHeader] === 'true' })
     } catch (error) {
       return response
     }

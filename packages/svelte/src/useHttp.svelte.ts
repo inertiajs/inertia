@@ -228,7 +228,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
 
       const responseData = (
         response.data
-          ? parseJson(response.data, { trusted: response.headers[preserveBigIntegersHeader] === 'true' })
+          ? parseJson(response.data, { preserveBigIntegers: response.headers[preserveBigIntegersHeader] === 'true' })
           : null
       ) as TResponse
 
@@ -258,7 +258,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       if (error instanceof HttpResponseError) {
         if (error.response.status === 422) {
           const responseData = parseJson(error.response.data, {
-            trusted: error.response.headers[preserveBigIntegersHeader] === 'true',
+            preserveBigIntegers: error.response.headers[preserveBigIntegersHeader] === 'true',
           })
           const validationErrors = responseData.errors || {}
           const processedErrors = (

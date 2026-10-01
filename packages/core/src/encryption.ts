@@ -78,7 +78,7 @@ const decryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
     data,
   )
 
-  return parseJson(new TextDecoder().decode(decrypted), { trusted: true })
+  return parseJson(new TextDecoder().decode(decrypted), { preserveBigIntegers: true })
 }
 
 const getIv = (): BufferSource => {

@@ -172,7 +172,7 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
 
     // The app config lives in the SSR entry loaded below, so the server adapter
     // tells us by header whether the page may contain big integer markers
-    const trusted = req.headers?.[preserveBigIntegersHeader] === 'true'
+    const preserveBigIntegers = req.headers?.[preserveBigIntegersHeader] === 'true'
 
     req.setEncoding('utf8')
     req.on('data', (chunk) => (data += chunk))
@@ -184,7 +184,7 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
       }
 
       try {
-        resolve(parseJson(data, { trusted }))
+        resolve(parseJson(data, { preserveBigIntegers }))
       } catch (error) {
         reject(new Error(`Invalid JSON in request body: ${error instanceof Error ? error.message : 'Unknown error'}`))
       }

@@ -40,12 +40,12 @@ const replaceBigInt = (_key: string, value: any): any => {
 }
 
 /**
- * Only payloads the server told us to expect markers in are revived, so a prop
- * that merely looks like a marker is left alone. Scanning the raw text first is
+ * Only payloads the server said are preserving big integers are revived, so a
+ * prop that merely looks like a marker is left alone. Scanning the raw text is
  * roughly ten times cheaper than running the reviver over a payload without one.
  */
-export function parseJson(text: string, { trusted = false }: { trusted?: boolean } = {}): any {
-  if (trusted && text.includes(`"${bigIntMarker}"`)) {
+export function parseJson(text: string, { preserveBigIntegers = false }: { preserveBigIntegers?: boolean } = {}): any {
+  if (preserveBigIntegers && text.includes(`"${bigIntMarker}"`)) {
     return JSON.parse(text, reviveBigInt)
   }
 

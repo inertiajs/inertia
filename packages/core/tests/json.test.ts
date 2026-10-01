@@ -2,11 +2,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { containsBigInt, encodesBigIntegers, parseInitialPage, parseJson, stringifyJson } from '../src/json'
 
 describe('parseJson', () => {
-  it('leaves markers alone until the payload is trusted', () => {
+  it('leaves markers alone until the payload says it preserves them', () => {
     const text = '{"props":{"id":{"$bigint":"900719925474099988"}}}'
 
     expect(parseJson(text).props.id).toEqual({ $bigint: '900719925474099988' })
-    expect(parseJson(text, { trusted: true }).props.id).toBe(900719925474099988n)
+    expect(parseJson(text, { preserveBigIntegers: true }).props.id).toBe(900719925474099988n)
   })
 
   it('only revives canonical single-key integer markers', () => {
@@ -24,7 +24,7 @@ describe('parseJson', () => {
           note: 'the "$bigint" marker documented in a string',
         },
       }),
-      { trusted: true },
+      { preserveBigIntegers: true },
     )
 
     expect(props.negative).toBe(-900719925474099988n)
@@ -39,7 +39,9 @@ describe('parseJson', () => {
   })
 
   it('revives markers nested in arrays and objects', () => {
-    const { props } = parseJson('{"props":{"deep":[{"id":{"$bigint":"-1234567890123456789"}}]}}', { trusted: true })
+    const { props } = parseJson('{"props":{"deep":[{"id":{"$bigint":"-1234567890123456789"}}]}}', {
+      preserveBigIntegers: true,
+    })
 
     expect(props.deep[0].id).toBe(-1234567890123456789n)
   })
@@ -93,7 +95,7 @@ describe('stringifyJson', () => {
   it('round trips through parseJson', () => {
     const value = { props: { id: 900719925474099988n, list: [1n, 2n] } }
 
-    expect(parseJson(stringifyJson(value), { trusted: true })).toEqual(value)
+    expect(parseJson(stringifyJson(value), { preserveBigIntegers: true })).toEqual(value)
   })
 })
 
