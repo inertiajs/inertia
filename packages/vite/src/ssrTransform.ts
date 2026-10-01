@@ -6,7 +6,9 @@
  * write the boilerplate manually.
  */
 
-import { ParsedCode } from './astUtils'
+import MagicString from 'magic-string'
+import { type NodeWithPos, ParsedCode } from './astUtils'
+import { replaceRange } from './sourceMap'
 import type { FrameworkConfig, SSROptions } from './types'
 
 /**
@@ -33,7 +35,7 @@ export function wrapWithServerBootstrap(
   code: string,
   options: SSROptions,
   frameworks: Record<string, FrameworkConfig>,
-): string | null {
+): MagicString | null {
   const parsed = ParsedCode.from(code)
 
   if (!parsed) {
@@ -51,24 +53,51 @@ export function wrapWithServerBootstrap(
     const configureCall = code.slice(call.start, call.end)
     const ssrCode = framework.config.ssr(configureCall, formatSSROptions(options)).trim()
 
-    return code.slice(0, statement.start) + ssrCode + code.slice(statement.end)
+    const result = new MagicString(code)
+    // Custom templates may rewrite the call. Only map an unchanged expression.
+    const generatedCall = ParsedCode.from(ssrCode)?.inertiaCalls.find((candidate) => {
+      const { start, end } = candidate as NodeWithPos<typeof candidate>
+      return ssrCode.slice(start, end) === configureCall
+    }) as NodeWithPos<typeof call> | undefined
+
+    if (generatedCall) {
+      replaceRange(result, statement.start, call.start, ssrCode.slice(0, generatedCall.start))
+      replaceRange(result, call.end, statement.end, ssrCode.slice(generatedCall.end))
+    } else {
+      replaceRange(result, statement.start, statement.end, ssrCode)
+    }
+
+    return result
   }
 
   if (parsed.createServerStatement) {
     const statement = parsed.createServerStatement
     const args = (statement.expression as unknown as { arguments: Array<{ start: number; end: number }> }).arguments
-    const callback = code.slice(args[0].start, args[0].end)
-    const trailingArgs = code.slice(args[0].end, args[args.length - 1].end)
+    const callback = args[0]
+    const lastArgument = args[args.length - 1]
+    const result = new MagicString(code)
 
-    const replacement = `const renderPage = ${callback}
+    replaceRange(result, statement.start, callback.start, 'const renderPage = ')
+    replaceRange(
+      result,
+      callback.end,
+      callback.end,
+      `
 
 if (import.meta.env.PROD) {
-  createServer(renderPage${trailingArgs})
+  createServer(renderPage`,
+    )
+    replaceRange(
+      result,
+      lastArgument.end,
+      statement.end,
+      `)
 }
 
-export default renderPage`
+export default renderPage`,
+    )
 
-    return code.slice(0, statement.start) + replacement + code.slice(statement.end)
+    return result
   }
 
   return null
