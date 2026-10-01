@@ -15,7 +15,7 @@ const encodeBigInts = (value) => {
   }
 
   if (value !== null && typeof value === 'object' && value.constructor === Object) {
-    return Object.fromEntries(Object.entries(value).map(([key, val]) => [key, encodeBigInts(val)]))
+    return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, encodeBigInts(nested)]))
   }
 
   return value
@@ -37,9 +37,9 @@ const buildPageData = (req, data) => {
     ...data,
   })
 
-  // Mirrors the Laravel adapter: the page says whether it may carry markers,
-  // so the client never has to guess from the shape of the data. A route can
-  // opt out to act like an app that builds its own markers.
+  // Stands in for the Laravel opt-in by flagging pages that carry markers. A
+  // route can pass `preserveBigIntegers: false` to act like an app that builds
+  // its own markers.
   if (page.preserveBigIntegers === undefined && JSON.stringify(page).includes('"$bigint"')) {
     page.preserveBigIntegers = true
   }

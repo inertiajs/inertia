@@ -22,12 +22,12 @@ describe('parsePage', () => {
     expect(props.deep[0].id).toBe(-1234567890123456789n)
   })
 
-  it('parses a page without markers exactly once', () => {
+  it('parses a page exactly once, with or without markers', () => {
     const parse = vi.spyOn(JSON, 'parse')
-    const text = '{"props":{"id":42},"preserveBigIntegers":true}'
 
-    expect(parsePage(text).props.id).toBe(42)
-    expect(parse).toHaveBeenCalledTimes(1)
+    expect(parsePage('{"props":{"id":42},"preserveBigIntegers":true}').props.id).toBe(42)
+    expect(parsePage('{"props":{"id":{"$bigint":"1"}},"preserveBigIntegers":true}').props.id).toBe(1n)
+    expect(parse).toHaveBeenCalledTimes(2)
 
     parse.mockRestore()
   })
@@ -66,8 +66,7 @@ describe('stringifyJson', () => {
       },
     }
 
-    // The BigInt is hit first, so a TypeError is the real failure. Walking the
-    // value again to check for a BigInt would surface 'boom' instead.
+    // A plain stringify fails on the BigInt first, so its TypeError is what callers see.
     expect(() => stringifyJson(value)).toThrow(TypeError)
   })
 
@@ -84,7 +83,7 @@ describe('stringifyJson', () => {
 })
 
 describe('stringifyPage', () => {
-  it('matches JSON.stringify for pages without big integers', () => {
+  it('leaves markers built by the app alone on pages without big integers', () => {
     const page = { component: 'Logs', props: { id: { $bigint: '900719925474099988' } } }
 
     expect(stringifyPage(page as any)).toBe(JSON.stringify(page))

@@ -50,6 +50,8 @@ test.describe('SSR', () => {
     await expect(page.getByTestId('big-type')).toHaveText('type: bigint')
     await expect(page.getByTestId('nested')).toHaveText('nested: 900719925474099988,2')
 
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
     expect(consoleMessages.errors).toHaveLength(0)
   })
 

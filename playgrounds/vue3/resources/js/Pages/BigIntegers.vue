@@ -22,16 +22,16 @@ const submit = () => {
   router.post('/big-integers/echo', { id: props.big })
 }
 
-const safeValue = 900719925474099988n
-const hugeValue = 99999999999999999999999n
+const withinPhpRangeValue = 900719925474099988n
+const beyondPhpRangeValue = 99999999999999999999999n
 
 const validationForm = useForm({
-  account_id: safeValue,
+  account_id: withinPhpRangeValue,
   reference: 'ABC-123',
 }).withPrecognition('post', '/big-integers/validate')
 
 const uploadForm = useForm({
-  account_id: safeValue,
+  account_id: withinPhpRangeValue,
   avatar: null as File | null,
 })
 
@@ -154,10 +154,18 @@ big + 1n         {{ incremented }}</pre
         </label>
 
         <div class="space-x-2">
-          <button type="button" @click="validationForm.account_id = safeValue" class="rounded-sm bg-gray-200 px-3 py-1">
-            Use safe value
+          <button
+            type="button"
+            @click="validationForm.account_id = withinPhpRangeValue"
+            class="rounded-sm bg-gray-200 px-3 py-1"
+          >
+            Use value within PHP_INT_MAX
           </button>
-          <button type="button" @click="validationForm.account_id = hugeValue" class="rounded-sm bg-gray-200 px-3 py-1">
+          <button
+            type="button"
+            @click="validationForm.account_id = beyondPhpRangeValue"
+            class="rounded-sm bg-gray-200 px-3 py-1"
+          >
             Use value beyond PHP_INT_MAX
           </button>
           <button type="submit" class="rounded-sm bg-slate-800 px-4 py-1 text-white">Submit</button>

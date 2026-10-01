@@ -506,7 +506,7 @@ Route::get('/big-integers', function () {
 });
 
 $bigIntegerDebug = fn (mixed $value): array => [
-    'received' => is_int($value) ? (string) $value : $value,
+    'received' => $value,
     'type' => get_debug_type($value),
 ];
 

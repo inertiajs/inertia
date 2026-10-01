@@ -66,21 +66,21 @@ app.get('/ssr/page1', (req, res) =>
   }),
 )
 
+app.get('/ssr/page2', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/Page2',
+    props: {
+      navigatedTo: true,
+    },
+  }),
+)
+
 app.get('/ssr/bigint', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/BigInt',
     props: {
       big: 900719925474099988n,
       nested: { deep: [900719925474099988n, 2n] },
-    },
-  }),
-)
-
-app.get('/ssr/page2', (req, res) =>
-  inertia.renderSSR(req, res, {
-    component: 'SSR/Page2',
-    props: {
-      navigatedTo: true,
     },
   }),
 )
@@ -213,7 +213,7 @@ app.get('/when-mounted', (req, res) =>
   }),
 )
 
-// createInertiaApp (unified) test routes
+// Big integer test routes
 app.get('/bigint', (req, res) =>
   inertia.render(req, res, {
     component: 'BigInt',
@@ -285,6 +285,7 @@ app.post('/bigint/echo', (req, res) =>
   }),
 )
 
+// createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {
     component: 'Home',

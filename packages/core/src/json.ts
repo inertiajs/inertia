@@ -2,20 +2,12 @@ import type { Page } from './types'
 
 /**
  * BigInt values cannot be represented in JSON, so integers outside the safe
- * range are transported as a `{ "$bigint": "<value>" }` marker and revived
- * with a custom reviver/replacer pair.
+ * range are transported as a `{ "$bigint": "<value>" }` marker, written by a
+ * custom replacer and revived after parsing.
  *
  * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
  */
-export const bigIntMarker = '$bigint'
-
-const reviveBigInt = (_key: string, value: any): any => {
-  if (value !== null && typeof value === 'object' && typeof value[bigIntMarker] === 'string') {
-    return BigInt(value[bigIntMarker])
-  }
-
-  return value
-}
+const bigIntMarker = '$bigint'
 
 const replaceBigInt = (_key: string, value: any): any => {
   if (typeof value === 'bigint') {
@@ -26,22 +18,58 @@ const replaceBigInt = (_key: string, value: any): any => {
 }
 
 const replaceBigIntWithDigits = (_key: string, value: any): any => {
-  return typeof value === 'bigint' ? value.toString() : value
+  if (typeof value === 'bigint') {
+    return value.toString()
+  }
+
+  return value
 }
 
 /**
  * Markers are only revived on pages that opted in, so an application sending
- * its own `$bigint` objects receives them untouched. The second parse only
- * happens on a page that actually opted in.
+ * its own `$bigint` objects receives them untouched.
  */
 export function parsePage(text: string): any {
   const page = JSON.parse(text)
 
   if (page?.preserveBigIntegers === true && text.includes(`"${bigIntMarker}"`)) {
-    return JSON.parse(text, reviveBigInt)
+    reviveBigIntegers(page)
   }
 
   return page
+}
+
+/**
+ * Walking the freshly parsed page is several times faster than a JSON.parse
+ * reviver, which calls back for every value. Arrays are walked by index, since
+ * key lists over large arrays of numbers are slow in some engines.
+ */
+function reviveBigIntegers(value: any): void {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index++) {
+      value[index] = reviveBigInteger(value[index])
+    }
+
+    return
+  }
+
+  for (const key of Object.keys(value)) {
+    value[key] = reviveBigInteger(value[key])
+  }
+}
+
+function reviveBigInteger(value: any): any {
+  if (value === null || typeof value !== 'object') {
+    return value
+  }
+
+  if (typeof value[bigIntMarker] === 'string') {
+    return BigInt(value[bigIntMarker])
+  }
+
+  reviveBigIntegers(value)
+
+  return value
 }
 
 /**
@@ -62,15 +90,15 @@ export function stringifyJson(value: any): string {
 
 /**
  * The replacer is kept off the common path, so a plain stringify runs first and
- * only a BigInt earns the retry. Any other failure is rethrown untouched, so a
- * circular structure or a throwing getter still reports its original error.
+ * the replacer only runs after it fails. When the retry fails too, the original
+ * error is rethrown, so a circular structure still reports its own error.
  */
-function stringify(value: any, valueWithBigInts: () => any, replacer: (key: string, value: any) => any): string {
+function stringify(value: any, retryValue: () => any, replacer: (key: string, value: any) => any): string {
   try {
     return JSON.stringify(value)
   } catch (error) {
     try {
-      return JSON.stringify(valueWithBigInts(), replacer)
+      return JSON.stringify(retryValue(), replacer)
     } catch {
       throw error
     }

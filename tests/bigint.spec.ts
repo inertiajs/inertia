@@ -33,7 +33,7 @@ test('it decodes integers beyond the safe range as native BigInt values without 
   await expect(page.locator('#echoed-type')).toHaveText('string')
 })
 
-test('it treats the marker as a reserved wire shape once big integers are enabled', async ({ page }) => {
+test('it revives markers built by the app on pages that preserve big integers', async ({ page }) => {
   pageLoads.watch(page)
 
   await page.goto('/')

@@ -128,8 +128,10 @@ return [
     |--------------------------------------------------------------------------
     |
     | When enabled, integers outside JavaScript's safe integer range are
-    | wrapped so the frontend can revive them as native BigInt values
-    | instead of silently losing precision when JSON is parsed.
+    | wrapped as `{"$bigint": "<value>"}` so the frontend can revive them
+    | as native BigInt values instead of silently losing precision when
+    | JSON is parsed. A single response may opt in or out on its own with
+    | the `preserveBigIntegers` method.
     |
     */
 

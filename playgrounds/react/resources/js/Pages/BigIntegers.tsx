@@ -23,16 +23,16 @@ const BigIntegers = ({
     router.post('/big-integers/echo', { id: big })
   }
 
-  const safeValue = 900719925474099988n
-  const hugeValue = 99999999999999999999999n
+  const withinPhpRangeValue = 900719925474099988n
+  const beyondPhpRangeValue = 99999999999999999999999n
 
   const validationForm = useForm({
-    account_id: safeValue,
+    account_id: withinPhpRangeValue,
     reference: 'ABC-123',
   }).withPrecognition('post', '/big-integers/validate')
 
   const uploadForm = useForm<{ account_id: bigint; avatar: File | null }>({
-    account_id: safeValue,
+    account_id: withinPhpRangeValue,
     avatar: null,
   })
 
@@ -139,14 +139,14 @@ const BigIntegers = ({
             <div className="space-x-2">
               <button
                 type="button"
-                onClick={() => validationForm.setData('account_id', safeValue)}
+                onClick={() => validationForm.setData('account_id', withinPhpRangeValue)}
                 className="rounded-sm bg-gray-200 px-3 py-1"
               >
-                Use safe value
+                Use value within PHP_INT_MAX
               </button>
               <button
                 type="button"
-                onClick={() => validationForm.setData('account_id', hugeValue)}
+                onClick={() => validationForm.setData('account_id', beyondPhpRangeValue)}
                 className="rounded-sm bg-gray-200 px-3 py-1"
               >
                 Use value beyond PHP_INT_MAX

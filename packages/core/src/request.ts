@@ -77,20 +77,19 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
-    const data = this.requestParams.data()
-    const hasBigIntegers = containsBigInt(data)
-
     const config: HttpRequestConfig = {
       method: this.requestParams.all().method,
       url: urlWithoutHash(this.requestParams.all().url).href,
-      // The HTTP clients would throw on a BigInt, so those bodies are encoded here
-      data: hasBigIntegers ? stringifyJson(data) : data,
+      data: this.requestParams.data(),
       signal: this.cancelToken.signal,
-      headers: {
-        ...(hasBigIntegers && { 'Content-Type': 'application/json' }),
-        ...this.getHeaders(),
-      },
+      headers: this.getHeaders(),
       onUploadProgress: this.onProgress.bind(this),
+    }
+
+    // The HTTP clients would throw on a BigInt, so those bodies are encoded here
+    if (containsBigInt(config.data)) {
+      config.data = stringifyJson(config.data)
+      config.headers = { 'Content-Type': 'application/json', ...config.headers }
     }
 
     const processedConfig = await interceptors.processRequest(this.requestParams.all(), config)

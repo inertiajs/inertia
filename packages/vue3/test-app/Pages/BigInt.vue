@@ -49,12 +49,12 @@ const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666
       >)
     </p>
 
-    <button @click="loadReloadData">Load reload data</button>
-    <button @click="loadCollisionData">Load collision data</button>
     <p v-if="echoedType">
       echoed type: <span id="echoed-type">{{ echoedType }}</span>
     </p>
 
+    <button @click="loadReloadData">Load reload data</button>
+    <button @click="loadCollisionData">Load collision data</button>
     <button @click="submitEcho">Submit echo</button>
   </div>
 </template>
