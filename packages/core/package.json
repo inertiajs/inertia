@@ -36,6 +36,10 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
+    },
+    "./json": {
+      "types": "./types/json.d.ts",
+      "import": "./dist/json.js"
     }
   },
   "typesVersions": {
@@ -45,6 +49,9 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
+      ],
+      "json": [
+        "types/json.d.ts"
       ]
     }
   },
@@ -61,7 +68,7 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.0.0"
+    "laravel-precognition": "^2.1.0"
   },
   "peerDependencies": {
     "axios": "^1.15.2"
