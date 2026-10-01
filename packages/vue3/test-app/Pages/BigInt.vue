@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
+import { windows } from '@Microsoft/vue3'
 import { computed } from 'vue'
+import { vuereact } from 'vue-react'
 
 const props = defineProps<{
   safe: number
