@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.13",
-    "axios": "^1.17.0",
+    "axios": "^1.20.0",
     "es-check": "^9.6.4",
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
