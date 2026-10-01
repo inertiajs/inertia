@@ -34,6 +34,11 @@ createInertiaApp({
       window.resolverReceivedPage = page
     }
 
+    if (name === window.holdResolveFor) {
+      // Lets a test keep a component resolution pending, like a slow page chunk
+      await new Promise((resolve) => (window.releaseHeldResolve = resolve))
+    }
+
     if (name === 'DeferredProps/InstantReload') {
       // Add small delay to ensure the component is loaded after the initial page load
       // This is for projects that don't use { eager: true } in import.meta.glob
