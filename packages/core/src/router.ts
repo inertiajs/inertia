@@ -246,6 +246,7 @@ export class Router {
       },
       {
         autoStart: options.autoStart ?? true,
+        background: options.background,
         keepAlive: options.keepAlive ?? false,
         mode: options.mode,
       },
