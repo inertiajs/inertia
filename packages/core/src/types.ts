@@ -386,9 +386,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: string }?]
+    parameters: [Page<SharedPageProps>, { type: 'initial' | 'visit' | 'history'; cached?: boolean; visitId?: string }]
     details: {
       page: Page<SharedPageProps>
+      type: 'initial' | 'visit' | 'history'
       cached?: boolean
       visitId?: string
     }
