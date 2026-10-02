@@ -1,6 +1,5 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
-import { HttpCancelledError } from './httpErrors'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -40,22 +39,19 @@ class PrefetchedRequests {
     }
 
     const [stale, prefetchExpiresIn] = this.extractStaleValues(cacheFor)
-    let cancelled = false
 
     const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
-          cancelled = true
           this.remove(params)
-          this.removeFromInFlight(params.id)
           params.onCancel()
-          reject(new HttpCancelledError())
+          reject()
         },
         onError: (error) => {
           this.remove(params)
           params.onError(error)
-          reject(error)
+          reject()
         },
         onPrefetching(visitParams) {
           params.onPrefetching(visitParams)
@@ -66,8 +62,8 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
-        onPrefetchError: (error) => {
-          this.removeFromInFlight(params.id)
+        onPrefetchError(error) {
+          prefetchedRequests.removeFromInFlight(params)
           reject(error)
         },
       })
@@ -94,29 +90,21 @@ class PrefetchedRequests {
         params,
         oncePropExpiresIn ? Math.min(prefetchExpiresIn, oncePropExpiresIn) : prefetchExpiresIn,
       )
-      this.removeFromInFlight(params.id)
+      this.removeFromInFlight(params)
 
       response.handlePrefetch()
 
       return response
     })
 
-    if (!cancelled) {
-      this.inFlightRequests.push({
-        params: { ...params },
-        response: promise,
-        staleTimestamp: null,
-        inFlight: true,
-      })
-    }
-
-    return promise.catch((error) => {
-      this.removeFromInFlight(params.id)
-
-      if (!(error instanceof HttpCancelledError)) {
-        throw error
-      }
+    this.inFlightRequests.push({
+      params: { ...params },
+      response: promise,
+      staleTimestamp: null,
+      inFlight: true,
     })
+
+    return promise
   }
 
   public removeAll(): void {
@@ -141,9 +129,9 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected removeFromInFlight(visitId: string): void {
+  protected removeFromInFlight(params: ActiveVisit): void {
     this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-      return prefetching.params.id !== visitId
+      return !this.paramsAreEqual(prefetching.params, params)
     })
   }
 
@@ -210,32 +198,21 @@ class PrefetchedRequests {
       cached: true,
     }
 
-    return prefetched.response.then(
-      (response) => {
-        if (this.currentUseId !== id) {
-          // They've since gone on to `use` a different request,
-          // so we should ignore this one
-          return
-        }
+    return prefetched.response.then((response) => {
+      if (this.currentUseId !== id) {
+        // They've since gone on to `use` a different request,
+        // so we should ignore this one
+        return
+      }
 
-        response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
+      response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
-        // If this was a one-time cache, remove it
-        // (generally a prefetch="click" request with no specified cache value)
-        this.removeSingleUseItems(params)
+      // If this was a one-time cache, remove it
+      // (generally a prefetch="click" request with no specified cache value)
+      this.removeSingleUseItems(params)
 
-        return response.handle()
-      },
-      (error) => {
-        if (!(error instanceof HttpCancelledError)) {
-          throw error
-        }
-
-        consumedParams.onCancel()
-        consumedParams.cancelled = true
-        consumedParams.onFinish(consumedParams)
-      },
-    )
+      return response.handle()
+    })
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {
