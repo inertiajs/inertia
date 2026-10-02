@@ -6,7 +6,11 @@ const props = defineProps<{ mode: string; time: number }>()
 const params = new URLSearchParams(window.location.search)
 const interval = parseInt(params.get('interval') || '200')
 
-const options: { mode?: 'overlap' | 'cancel' | 'rest'; keepAlive?: boolean } = {}
+const options: {
+  mode?: 'overlap' | 'cancel' | 'rest'
+  background?: 'throttle' | 'pause' | 'continue'
+  keepAlive?: boolean
+} = {}
 
 if (props.mode === 'overlap' || props.mode === 'cancel' || props.mode === 'rest') {
   options.mode = props.mode
@@ -14,6 +18,12 @@ if (props.mode === 'overlap' || props.mode === 'cancel' || props.mode === 'rest'
 
 if (params.get('keepAlive') === '1') {
   options.keepAlive = true
+}
+
+const background = params.get('background')
+
+if (background === 'throttle' || background === 'pause' || background === 'continue') {
+  options.background = background
 }
 
 const { start, stop } = usePoll(interval, {}, options)
