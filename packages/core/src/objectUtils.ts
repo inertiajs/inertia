@@ -55,6 +55,16 @@ export const objectsAreEqual = <T extends Record<string, any>>(
 const compareValues = (value1: any, value2: any): boolean => {
   switch (typeof value1) {
     case 'object':
+      // `typeof null` is 'object', and arrays/objects/primitives must never be compared structurally
+      if (
+        value1 === null ||
+        value2 === null ||
+        typeof value2 !== 'object' ||
+        Array.isArray(value1) !== Array.isArray(value2)
+      ) {
+        return value1 === value2
+      }
+
       return objectsAreEqual(value1, value2, [])
     case 'function':
       return value1.toString() === value2.toString()

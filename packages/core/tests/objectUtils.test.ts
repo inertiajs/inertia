@@ -1,6 +1,6 @@
 import { set } from 'es-toolkit/compat'
 import { describe, expect, it } from 'vitest'
-import { setPathPreservingIdentity } from '../src/objectUtils'
+import { objectsAreEqual, setPathPreservingIdentity } from '../src/objectUtils'
 
 describe('setPathPreservingIdentity', () => {
   it('matches es-toolkit set() semantics for values', () => {
@@ -65,5 +65,25 @@ describe('setPathPreservingIdentity', () => {
 
     expect(result.items[0]).toBe(first)
     expect(result.items[1]).toEqual({ id: 99 })
+  })
+})
+
+describe('objectsAreEqual', () => {
+  it('does not throw when comparing null with an object', () => {
+    expect(objectsAreEqual({ a: null } as any, { a: { x: 1 } } as any, [])).toBe(false)
+    expect(objectsAreEqual({ a: { x: 1 } } as any, { a: null } as any, [])).toBe(false)
+  })
+
+  it('does not treat null and undefined as equal', () => {
+    expect(objectsAreEqual({ a: null } as any, { a: undefined } as any, [])).toBe(false)
+  })
+
+  it('does not treat an array and an object as equal', () => {
+    expect(objectsAreEqual({ a: [] } as any, { a: {} } as any, [])).toBe(false)
+  })
+
+  it('still compares nested structures deeply', () => {
+    expect(objectsAreEqual({ a: { b: [1, 2] } } as any, { a: { b: [1, 2] } } as any, [])).toBe(true)
+    expect(objectsAreEqual({ a: { b: [1, 2] } } as any, { a: { b: [1, 3] } } as any, [])).toBe(false)
   })
 })
