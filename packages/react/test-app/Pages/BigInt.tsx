@@ -1,4 +1,5 @@
-import { router } from '@inertiajs/react'
+import { router, useHttp } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default ({
   safe,
@@ -20,6 +21,14 @@ export default ({
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
   const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666n })
+
+  const http = useHttp({ value: 111222333444555666n })
+  const [httpEcho, setHttpEcho] = useState<string | null>(null)
+  const submitHttpEcho = () =>
+    http
+      .post('/api/bigint/echo')
+      .then((response: any) => setHttpEcho(`${response.value} (${response.type})`))
+      .catch((error: Error) => setHttpEcho(`error: ${error.message}`))
 
   return (
     <div>
@@ -54,6 +63,9 @@ export default ({
       <button onClick={loadReloadData}>Load reload data</button>
       <button onClick={loadCollisionData}>Load collision data</button>
       <button onClick={submitEcho}>Submit echo</button>
+      <button onClick={submitHttpEcho}>Submit useHttp echo</button>
+
+      {httpEcho && <p id="http-echo">{httpEcho}</p>}
     </div>
   )
 }
