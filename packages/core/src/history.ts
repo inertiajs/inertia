@@ -283,7 +283,8 @@ class History {
 
   public clearInitialState(key: keyof Page) {
     if (this.initialState && this.initialState[key] !== undefined) {
-      delete this.initialState[key]
+      // The initial state can be the same object as the current page, so replace it instead of mutating it
+      this.initialState = { ...this.initialState, [key]: undefined }
     }
   }
 
