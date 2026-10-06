@@ -7,8 +7,21 @@ import {
   ReloadOptions,
   useInfiniteScroll,
 } from '@inertiajs/core'
-import { computed, defineComponent, Fragment, h, onMounted, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
+import {
+  computed,
+  defineComponent,
+  Fragment,
+  h,
+  inject,
+  onMounted,
+  onUnmounted,
+  PropType,
+  ref,
+  SlotsType,
+  watch,
+} from 'vue'
 import { usePage } from './app'
+import { layerIdKey } from './useLayer'
 
 // Vue-specific element resolver
 const resolveHTMLElement = (
@@ -130,6 +143,7 @@ const InfiniteScroll = defineComponent({
       elementManager,
       flush: flushInfiniteScroll,
     } = useInfiniteScroll({
+      layerId: inject(layerIdKey, undefined),
       // Data
       getPropName: () => props.data,
       inReverseMode: () => props.reverse,

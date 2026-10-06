@@ -5,11 +5,11 @@ import {
   FormDataKeys,
   FormDataValues,
   Progress,
-  router,
   UrlMethodPair,
   UseFormTransformCallback,
   UseFormUtils,
   UseFormWithPrecognitionArguments,
+  type LayerApi,
 } from '@inertiajs/core'
 import { cloneDeep, isEqual } from 'es-toolkit'
 import { get, has, set } from 'es-toolkit/compat'
@@ -23,6 +23,7 @@ import {
 } from 'laravel-precognition'
 import { reactive, watch } from 'vue'
 import { config } from '.'
+import useLayer from './useLayer'
 
 type PrecognitionValidationConfig<TKeys> = ValidationConfig & {
   only?: TKeys[] | Iterable<TKeys> | ArrayLike<TKeys>
@@ -102,19 +103,21 @@ export interface UseFormStateReturn<TForm extends object> {
   resetBeforeSubmit: () => void
   finishProcessing: () => void
   withAllErrors: { enabled: () => boolean; enable: () => void }
+  layer: LayerApi
 }
 
 export default function useFormState<TForm extends object>(
   options: UseFormStateOptions<TForm>,
 ): UseFormStateReturn<TForm> {
   const { data: dataOption, rememberKey } = options
+  const layer = useLayer()
   let { precognitionEndpoint } = options
 
   const isDataFunction = typeof dataOption === 'function'
   const resolveData = () => (isDataFunction ? (dataOption as () => TForm)() : dataOption)
 
   const restored = rememberKey
-    ? (router.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, ErrorValue> } | null)
+    ? (layer.restore(rememberKey) as { data: TForm; errors: Record<FormDataKeys<TForm>, ErrorValue> } | null)
     : null
 
   const initialData = restored?.data ?? cloneDeep(resolveData())
@@ -378,11 +381,11 @@ export default function useFormState<TForm extends object>(
         return
       }
 
-      const storedData = router.restore(rememberKey)
+      const storedData = layer.restore(rememberKey)
       const newData = cloneDeep((newValue as unknown as InternalRememberState<TForm>).__remember())
 
       if (!isEqual(storedData, newData)) {
-        router.remember(newData, rememberKey)
+        layer.remember(newData, rememberKey)
       }
     },
     { immediate: true, deep: true },
@@ -394,6 +397,7 @@ export default function useFormState<TForm extends object>(
 
   return {
     form: typedForm,
+    layer,
     setDefaults: (newDefaults: TForm) => {
       defaults = newDefaults
     },
