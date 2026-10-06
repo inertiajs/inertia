@@ -122,4 +122,17 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Big Integers
+    |--------------------------------------------------------------------------
+    |
+    | When enabled, integers outside JavaScript's safe range arrive in the
+    | frontend as native BigInt values instead of losing precision. Single
+    | responses may opt in or out using the `preserveBigIntegers` method.
+    |
+    */
+
+    'preserve_big_integers' => (bool) env('INERTIA_PRESERVE_BIG_INTEGERS', true),
+
 ];

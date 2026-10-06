@@ -72,6 +72,7 @@
   const isServer = typeof window === 'undefined'
 
   // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+  // svelte-ignore state_referenced_locally
   const hydration = $state({ hydrated: !serverRendered })
   setHydrationContext(hydration)
 

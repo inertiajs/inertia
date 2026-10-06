@@ -11,6 +11,7 @@ import {
 } from './events'
 import { history } from './history'
 import { interceptors } from './interceptors'
+import { parsePage } from './json'
 import { isLayerResponse, layerAt, layerPageOf, layersOf, tierOf, withoutClosingLayers } from './layers'
 import { landResponse } from './layers/landing'
 import { landWalk } from './layers/walk'
@@ -310,7 +311,7 @@ export class Response {
     }
 
     try {
-      return JSON.parse(response)
+      return parsePage(response)
     } catch (error) {
       return response
     }
