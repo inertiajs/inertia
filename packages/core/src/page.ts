@@ -163,7 +163,7 @@ class CurrentPage {
           this.pendingDeferredProps = null
 
           if (!replace) {
-            fireNavigateEvent(page, { cached, visitId })
+            fireNavigateEvent(page, { type: 'visit', cached, visitId })
           }
         })
       })
