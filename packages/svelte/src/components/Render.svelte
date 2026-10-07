@@ -38,7 +38,7 @@
 </script>
 
 <script lang="ts">
-  import Render from './Render.svelte'
+  import RecursiveRender from './Render.svelte'
 
   // svelte-ignore state_referenced_locally
   const { component, props = {}, children = [], key = null }: RenderProps = $props()
@@ -50,7 +50,7 @@
       {@const SvelteComponent = component}
       <SvelteComponent {...props}>
         {#each children as child}
-          <Render {...child} />
+          <RecursiveRender {...child} />
         {/each}
       </SvelteComponent>
     {:else}

@@ -14,16 +14,36 @@ class EventHandler {
     listener: (...args: any[]) => void
   }[] = []
 
-  public init() {
+  public init(external = false): VoidFunction {
+    if (external) {
+      return () => {}
+    }
+
+    const controller = new AbortController()
+    const popstate = this.handlePopstateEvent.bind(this)
+    const pageshow = this.handlePageshowEvent.bind(this)
+    const windowScroll = debounce(() => {
+      if (!controller.signal.aborted) {
+        Scroll.onWindowScroll()
+      }
+    }, 100)
+    const documentScroll = debounce((event: Event) => {
+      if (!controller.signal.aborted) {
+        Scroll.onScroll(event)
+      }
+    }, 100)
+
     if (typeof window !== 'undefined') {
-      window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
-      window.addEventListener('pageshow', this.handlePageshowEvent.bind(this))
-      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
+      window.addEventListener('popstate', popstate, { signal: controller.signal })
+      window.addEventListener('pageshow', pageshow, { signal: controller.signal })
+      window.addEventListener('scroll', windowScroll, { capture: true, signal: controller.signal })
     }
 
     if (typeof document !== 'undefined') {
-      document.addEventListener('scroll', debounce(Scroll.onScroll.bind(Scroll), 100), true)
+      document.addEventListener('scroll', documentScroll, { capture: true, signal: controller.signal })
     }
+
+    return () => controller.abort()
   }
 
   public onGlobalEvent<TEventName extends GlobalEventNames>(

@@ -14,7 +14,7 @@ import {
   type PageProps,
   type SharedPageProps,
 } from '@inertiajs/core'
-import { hydrate, mount } from 'svelte'
+import { hydrate, mount, unmount } from 'svelte'
 import App, { type InertiaAppProps } from './components/App.svelte'
 import { config } from './index'
 import type { ComponentResolver, ResolvedComponent, SvelteInertiaAppConfig } from './types'
@@ -67,6 +67,15 @@ type RenderFunction<SharedProps extends PageProps> = (
   render: SvelteServerRender,
 ) => Promise<InertiaAppSSRResponse>
 
+type ExternalInertiaApp = { dispose: () => Promise<void> }
+
+export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
+  options: InertiaAppOptionsAuto<SharedProps> & {
+    externalNavigation: NonNullable<InertiaAppOptionsAuto<SharedProps>['externalNavigation']>
+    setup?: undefined
+  },
+): Promise<ExternalInertiaApp | RenderFunction<SharedProps>>
+
 export default async function createInertiaApp<SharedProps extends PageProps = PageProps & SharedPageProps>(
   options: InertiaAppOptionsForCSR<SharedProps>,
 ): Promise<InertiaAppSSRResponse | void>
@@ -85,12 +94,13 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     http,
     layout,
     serverHead,
+    externalNavigation,
     withApp,
     dev = !!import.meta.env?.DEV,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
-): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | void> {
+): Promise<InertiaAppSSRResponse | RenderFunction<SharedProps> | ExternalInertiaApp | void> {
   config.replace(defaults)
 
   if (nonce) {
@@ -120,6 +130,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialComponent,
         resolveComponent,
         defaultLayout: layout,
+        externalNavigation,
         serverRendered: true,
       }
 
@@ -152,7 +163,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
   const serverHeadManager =
-    !isServer && serverHead
+    !isServer && !externalNavigation && serverHead
       ? createHeadManager(
           false,
           (title) => title,
@@ -163,7 +174,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
-    router.decryptHistory().catch(() => {}),
+    externalNavigation ? Promise.resolve() : router.decryptHistory().catch(() => {}),
   ])
 
   const el = isServer ? null : document.getElementById(id)!
@@ -173,6 +184,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     initialComponent,
     resolveComponent,
     defaultLayout: layout,
+    serverHead,
+    externalNavigation,
     serverRendered: isServer || el!.hasAttribute('data-server-rendered'),
   }
 
@@ -199,6 +212,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   // CSR
   const target = el!
   const isServerRendered = props.serverRendered!
+  let dispose: (() => Promise<void>) | undefined
 
   if (setup) {
     await setup({ el: target, App, props })
@@ -210,9 +224,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
 
     if (isServerRendered) {
-      hydrate(App, { target, props, context })
+      const app = hydrate(App, { target, props, context })
+      dispose = () => unmount(app)
     } else {
-      mount(App, { target, props, context })
+      const app = mount(App, { target, props, context })
+      dispose = () => unmount(app)
     }
   }
 
@@ -225,7 +241,11 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.on('clientVisit', syncServerHead)
   }
 
-  if (progress) {
+  if (progress && !externalNavigation) {
     setupProgress(progress)
+  }
+
+  if (externalNavigation && !setup && dispose) {
+    return { dispose }
   }
 }
