@@ -1165,6 +1165,25 @@ app.get('/history-version-reload', (req, res) => {
   })
 })
 
+app.get('/history-quota/deferred', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'HistoryQuota/Deferred',
+      deferredProps: {
+        default: ['largeData'],
+      },
+      props: {},
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Deferred',
+    props: {
+      largeData: 'x'.repeat(16 * 1024 * 1024),
+    },
+  })
+})
+
 app.get('/history-quota/:pageNumber', (req, res) => {
   const pageNumber = parseInt(req.params.pageNumber)
   const size = 8 * 1024 * 1024 // 8 MB

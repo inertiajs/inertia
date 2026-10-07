@@ -102,26 +102,20 @@ test.describe('history quota exceeded', () => {
     await page.waitForURL(`/history-quota/${pageAfterReload}`)
     await expect(page.getByText(`History Quota Test - Page ${pageAfterReload}`)).toBeVisible()
   })
-})
 
-test.describe('history quota exceeded on replaceState', () => {
-  test('it does not throw when replaceState exceeds the quota', async ({ page }) => {
+  test('it still renders deferred props that exceed the quota', async ({ page }) => {
     consoleMessages.listen(page)
 
-    await page.goto('/history-quota/1')
-    await expect(page.getByText('History Quota Test - Page 1')).toBeVisible()
+    for (let i = 2; i <= 7; i++) {
+      await clickAndWaitForResponse(page, `Page ${i}`, `/history-quota/${i}`)
+      await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
+    }
 
-    await page.evaluate(() => {
-      window.history.replaceState = () => {
-        throw new DOMException('The quota has been exceeded.', 'QuotaExceededError')
-      }
-    })
+    await clickAndWaitForResponse(page, 'Deferred', '/history-quota/deferred')
+    await expect(page.getByText('History Quota Test - Deferred')).toBeVisible()
+    await expect(page.getByText('Data size: 16,777,216 bytes')).toBeVisible()
 
-    // Scrolling saves the document scroll position via history.replaceState
-    await page.evaluate(() => window.scrollTo(0, 500))
-    await expect.poll(() => consoleMessages.messages).toContain('The quota has been exceeded.')
-
+    expect(consoleMessages.messages).toContain('Attempt to store more data than allowed using history.replaceState()')
     expect(consoleMessages.errors).toHaveLength(0)
-    await expect(page.getByText('History Quota Test - Page 1')).toBeVisible()
   })
 })

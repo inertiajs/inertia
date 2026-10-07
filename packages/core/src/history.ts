@@ -252,8 +252,8 @@ class History {
           throw error
         }
 
-        // Unlike pushState, a full page reload won't help here: the reloaded page
-        // would call replaceState with the same data and exceed the quota again.
+        // Unlike pushState, we don't reload here. replaceState runs on scroll, remember()
+        // and partial reloads, so a reload would discard client state mid-interaction.
         console.error(error.message)
       }
     })
