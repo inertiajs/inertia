@@ -237,15 +237,25 @@ class History {
     url?: string,
   ): Promise<void> {
     return this.withThrottleProtection(() => {
-      window.history.replaceState(
-        {
-          ...data,
-          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-        },
-        '',
-        url,
-      )
+      try {
+        window.history.replaceState(
+          {
+            ...data,
+            scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+            documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+          },
+          '',
+          url,
+        )
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        // Unlike pushState, we don't reload here. replaceState runs on scroll, remember()
+        // and partial reloads, so a reload would discard client state mid-interaction.
+        console.error(error.message)
+      }
     })
   }
 

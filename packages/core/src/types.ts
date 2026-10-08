@@ -140,21 +140,21 @@ export type FormDataKeys<T> = T extends Function | FormDataConvertibleValue
  */
 type ArrayFormDataKeys<T extends unknown[]> = number extends T['length']
   ? // Dynamic array
-      | `${number}`
-      | (0 extends 1 & T[number]
+    | `${number}`
+    | (0 extends 1 & T[number]
+        ? never
+        : T[number] extends FormDataConvertibleValue
           ? never
-          : T[number] extends FormDataConvertibleValue
-            ? never
-            : `${number}.${FormDataKeys<T[number]>}`)
+          : `${number}.${FormDataKeys<T[number]>}`)
   : // Tuple with known length
-      | Extract<keyof T, `${number}`>
-      | {
-          [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
+    | Extract<keyof T, `${number}`>
+    | {
+        [Key in Extract<keyof T, `${number}`>]: 0 extends 1 & T[Key]
+          ? never
+          : T[Key] extends FormDataConvertibleValue
             ? never
-            : T[Key] extends FormDataConvertibleValue
-              ? never
-              : `${Key & string}.${FormDataKeys<T[Key & string] & string>}`
-        }[Extract<keyof T, `${number}`>]
+            : `${Key & string}.${FormDataKeys<T[Key & string] & string>}`
+      }[Extract<keyof T, `${number}`>]
 
 /**
  * Helper type for object form data keys
@@ -386,9 +386,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: string }?]
+    parameters: [Page<SharedPageProps>, { type: 'initial' | 'visit' | 'history'; cached?: boolean; visitId?: string }]
     details: {
       page: Page<SharedPageProps>
+      type: 'initial' | 'visit' | 'history'
       cached?: boolean
       visitId?: string
     }
@@ -525,7 +526,11 @@ export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   'preserveScroll' | 'preserveState'
 >
 
+export type PollBackgroundOption = 'throttle' | 'pause' | 'continue'
+
 export type PollOptions = {
+  background?: PollBackgroundOption
+  /** @deprecated Use `background: 'continue'` instead. */
   keepAlive?: boolean
   autoStart?: boolean
   mode?: 'overlap' | 'cancel' | 'rest'
@@ -906,6 +911,7 @@ export interface UseInfiniteScrollDataManager {
   fetchNext: (reloadOptions?: ReloadOptions) => void
   fetchPrevious: (reloadOptions?: ReloadOptions) => void
   removeEventListener: () => void
+  flush: () => void
 }
 
 export interface UseInfiniteScrollElementManager {
