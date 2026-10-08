@@ -188,3 +188,41 @@ test('will pull from server if history version is different than current version
   await page.waitForTimeout(200)
   await expect(requests.requests).toHaveLength(1)
 })
+
+test('it keeps the restored page when the back button is pressed while the next page is still loading', async ({
+  page,
+}) => {
+  await page.goto('/auto/props')
+  await expect(page.getByTestId('props-title')).toBeVisible()
+
+  // Gives the back button an entry within the app to return to
+  await page.evaluate(() => window.testing.Inertia.visit('/auto/props?again=1'))
+  await page.waitForURL('/auto/props?again=1')
+
+  let releaseHomeChunk!: () => void
+  const homeChunkHeld = new Promise<void>((resolve) => (releaseHomeChunk = resolve))
+  const homeChunkRequested = new Promise<void>((resolve) => {
+    page.route('**/Home-*.js', async (route) => {
+      resolve()
+      await homeChunkHeld
+      await route.continue()
+    })
+  })
+
+  await page.getByTestId('home-link').click()
+  await homeChunkRequested
+
+  await page.goBack()
+  await page.waitForURL('/auto/props')
+
+  const visitFinished = page.evaluate(
+    () => new Promise((resolve) => document.addEventListener('inertia:success', () => resolve(null), { once: true })),
+  )
+
+  releaseHomeChunk()
+  await visitFinished
+
+  await expect(page.getByTestId('props-title')).toBeVisible()
+  await expect(page.getByTestId('vite-title')).not.toBeVisible()
+  await expect(page).toHaveURL('/auto/props')
+})

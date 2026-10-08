@@ -120,6 +120,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialComponent,
         resolveComponent,
         defaultLayout: layout,
+        serverRendered: true,
       }
 
       let svelteApp: SvelteRenderResult
@@ -165,7 +166,15 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     router.decryptHistory().catch(() => {}),
   ])
 
-  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
+  const el = isServer ? null : document.getElementById(id)!
+
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage,
+    initialComponent,
+    resolveComponent,
+    defaultLayout: layout,
+    serverRendered: isServer || el!.hasAttribute('data-server-rendered'),
+  }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
@@ -188,7 +197,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   // CSR
-  const target = document.getElementById(id)!
+  const target = el!
+  const isServerRendered = props.serverRendered!
 
   if (setup) {
     await setup({ el: target, App, props })
@@ -199,7 +209,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       withApp(context, { ssr: false, page: initialPage })
     }
 
-    if (target.hasAttribute('data-server-rendered')) {
+    if (isServerRendered) {
       hydrate(App, { target, props, context })
     } else {
       mount(App, { target, props, context })

@@ -106,7 +106,7 @@ export type NamedLayoutProps = InertiaConfigFor<'namedLayoutProps'>
 export type Errors = Record<string, ErrorValue>
 export type ErrorBag = Record<string, Errors>
 
-export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | null | undefined
+export type FormDataConvertibleValue = Blob | FormDataEntryValue | Date | boolean | number | bigint | null | undefined
 export type FormDataConvertible =
   | Array<FormDataConvertible>
   | { [key: string]: FormDataConvertible }
@@ -235,6 +235,7 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   clearHistory?: boolean
   preserveFragment?: boolean
   encryptHistory?: boolean
+  preserveBigIntegers?: boolean
   deferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   initialDeferredProps?: Record<string, NonNullable<VisitOptions['only']>>
   rescuedProps: string[]
@@ -385,9 +386,10 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   navigate: {
-    parameters: [Page<SharedPageProps>, { cached?: boolean; visitId?: string }?]
+    parameters: [Page<SharedPageProps>, { type: 'initial' | 'visit' | 'history'; cached?: boolean; visitId?: string }]
     details: {
       page: Page<SharedPageProps>
+      type: 'initial' | 'visit' | 'history'
       cached?: boolean
       visitId?: string
     }

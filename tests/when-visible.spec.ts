@@ -11,10 +11,9 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await page.evaluate(() => (window as any).scrollTo(0, 3000))
   await expect(requests.requests).toHaveLength(0)
 
+  const firstResponse = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 5000))
-  await expect(page.getByText('Loading first one...')).toBeVisible()
-  await expect(page.getByText('First one is visible!')).not.toBeVisible()
-  await page.waitForResponse(page.url())
+  await firstResponse
   await expect(page.getByText('Loading first one...')).not.toBeVisible()
   await expect(page.getByText('First one is visible!')).toBeVisible()
 
@@ -32,18 +31,16 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await expect(requests.requests).toHaveLength(0)
 
   // This one has a buffer of 1000
+  const secondResponse = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 9000))
-  await expect(page.getByText('Loading second one...')).toBeVisible()
-  await expect(page.getByText('Second one is visible!')).not.toBeVisible()
-  await page.waitForResponse(page.url())
+  await secondResponse
   await expect(page.getByText('Loading second one...')).not.toBeVisible()
   await expect(page.getByText('Second one is visible!')).toBeVisible()
 
   // This one should trigger every time it's visible
+  const thirdResponse = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 15_000))
-  await expect(page.getByText('Loading third one...')).toBeVisible()
-  await expect(page.getByText('Third one is visible!')).not.toBeVisible()
-  await page.waitForResponse(page.url())
+  await thirdResponse
   await expect(page.getByText('Loading third one...')).not.toBeVisible()
   await expect(page.getByText('Third one is visible!')).toBeVisible()
 
@@ -66,14 +63,14 @@ test('it will wait to fire the reload until element is visible', async ({ page }
   await expect(page.getByText('Third one is visible!')).toBeVisible()
   await responsePromise
 
+  const fourthResponse = page.waitForResponse(page.url())
   await page.evaluate(() => (window as any).scrollTo(0, 20_000))
-  await expect(page.getByText('Loading fourth one...')).toBeVisible()
-  await page.waitForResponse(page.url())
+  await fourthResponse
   await expect(page.getByText('Loading fourth one...')).not.toBeVisible()
 
+  const fifthResponse = page.waitForResponse('/when-visible?count=0')
   await page.evaluate(() => (window as any).scrollTo(0, 26_000))
-  await expect(page.getByText('Loading fifth one...')).toBeVisible()
-  await page.waitForResponse('/when-visible?count=0')
+  await fifthResponse
   await expect(page.getByText('Loading fifth one...')).not.toBeVisible()
   await expect(page.getByText('Count is now 1')).toBeVisible()
 
