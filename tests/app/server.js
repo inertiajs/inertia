@@ -1217,6 +1217,22 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/history/prefetch/:page', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'History/Prefetch',
+        props: {
+          page: req.params.page,
+          loadedAt: Date.now(),
+        },
+        encryptHistory: true,
+        clearHistory: req.params.page === 'signed-out',
+      }),
+    req.params.page === 'reports' ? 500 : 0,
+  )
+})
+
 app.get('/history/version/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Version',
