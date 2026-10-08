@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PollOptions } from '@inertiajs/core'
 import { usePoll } from '@inertiajs/vue3'
 
 const props = defineProps<{ mode: string; time: number }>()
@@ -6,11 +7,7 @@ const props = defineProps<{ mode: string; time: number }>()
 const params = new URLSearchParams(window.location.search)
 const interval = parseInt(params.get('interval') || '200')
 
-const options: {
-  mode?: 'overlap' | 'cancel' | 'rest'
-  background?: 'throttle' | 'pause' | 'continue'
-  keepAlive?: boolean
-} = {}
+const options: PollOptions = {}
 
 if (props.mode === 'overlap' || props.mode === 'cancel' || props.mode === 'rest') {
   options.mode = props.mode

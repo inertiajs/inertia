@@ -191,6 +191,31 @@ Object.entries({
     await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
     await expect(pollRequests().length).toBeLessThanOrEqual(4)
   })
+
+  test(`it waits for the remaining interval when visible again before the next poll is due (${mode})`, async ({
+    page,
+  }) => {
+    test.setTimeout(10_000)
+
+    await page.goto(`/poll/overlap/${mode}?interval=1500&delay=10&background=pause`)
+
+    await page.waitForResponse(page.url())
+
+    requests.listen(page)
+    await setHidden(page, true)
+    await page.waitForTimeout(400)
+
+    const start = Date.now()
+    await setHidden(page, false)
+    await page.waitForTimeout(400)
+
+    await expect(pollRequests()).toHaveLength(0)
+
+    await page.waitForRequest(page.url())
+
+    await expect(Date.now() - start).toBeLessThan(1400)
+    await expect(pollRequests()).toHaveLength(1)
+  })
 })
 
 test('it respects stop and start while paused in the background', async ({ page }) => {

@@ -1,4 +1,4 @@
-import { PollOptions } from './types'
+import { PollBackgroundOption, PollOptions } from './types'
 
 type PollHooks = {
   onStart: (cancel: VoidFunction) => void
@@ -11,7 +11,7 @@ export class Poll {
   protected intervalId: number | null = null
   protected timeoutId: number | null = null
   protected hidden = false
-  protected background: 'throttle' | 'pause' | 'continue'
+  protected background: PollBackgroundOption
   protected cb: PollCallback
   protected interval: number
   protected cbCount = 0
@@ -20,6 +20,7 @@ export class Poll {
   protected currentCancel: VoidFunction | null = null
   protected stopped = true
   protected instanceId = 0
+  protected lastPolledAt = 0
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
     this.background = options.background ?? (options.keepAlive ? 'continue' : 'throttle')
@@ -49,6 +50,7 @@ export class Poll {
 
     this.stop()
     this.stopped = false
+    this.lastPolledAt = Date.now()
 
     if (this.isPaused()) {
       return
@@ -94,6 +96,17 @@ export class Poll {
 
   protected resume() {
     if (this.stopped || (this.mode === 'rest' && this.inFlight)) {
+      return
+    }
+
+    const remaining = this.interval - (Date.now() - this.lastPolledAt)
+
+    if (false && remaining > 0) {
+      this.timeoutId = window.setTimeout(() => {
+        this.timeoutId = null
+        this.resume()
+      }, remaining)
+
       return
     }
 
@@ -150,6 +163,8 @@ export class Poll {
       this.currentCancel?.()
     }
 
+    this.lastPolledAt = Date.now()
+
     const instance = this.instanceId
 
     this.cb({
@@ -170,6 +185,7 @@ export class Poll {
         this.currentCancel = null
 
         if (this.mode === 'rest') {
+          this.lastPolledAt = Date.now()
           this.scheduleNext()
         }
       },

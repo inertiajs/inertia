@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PollOptions } from '@inertiajs/core'
   import { usePoll } from '@inertiajs/svelte'
 
   let { mode, time } = $props<{ mode: string; time: number }>()
@@ -8,11 +9,7 @@
 
   // svelte-ignore state_referenced_locally
   const initialMode = mode
-  const options: {
-    mode?: 'overlap' | 'cancel' | 'rest'
-    background?: 'throttle' | 'pause' | 'continue'
-    keepAlive?: boolean
-  } = {}
+  const options: PollOptions = {}
 
   if (initialMode === 'overlap' || initialMode === 'cancel' || initialMode === 'rest') {
     options.mode = initialMode
