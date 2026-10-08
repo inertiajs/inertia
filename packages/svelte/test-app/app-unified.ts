@@ -7,7 +7,10 @@ const withAppDefaults = new URLSearchParams(window.location.search).get('withApp
 
 createInertiaApp<{ locale?: string }>({
   resolve: async (name) => {
-    const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
+    // Importing an async-compiled component enables Svelte's async mode for every page
+    const pages = import.meta.glob<ResolvedComponent>(['./Pages/**/*.svelte', '!./Pages/SSR/Async.svelte'], {
+      eager: true,
+    })
 
     if (name === 'DeferredProps/InstantReload') {
       await new Promise((resolve) => setTimeout(resolve, 50))
