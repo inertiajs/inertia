@@ -84,6 +84,7 @@ class CurrentPage {
 
     if (page.clearHistory) {
       history.clear()
+      prefetchedRequests.removeAll()
     }
 
     return this.resolve(page.component, page).then((component) => {
