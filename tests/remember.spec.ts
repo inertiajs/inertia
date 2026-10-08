@@ -182,13 +182,15 @@ test.describe('Remember (local state caching)', () => {
     await expect(page.locator('#untracked')).toHaveValue('')
   })
 
-  test('does not restore remembered data on a new visit after pressing the back button', async ({ page }) => {
+  test('it does not restore remembered data on a new visit after pressing the back button', async ({ page }) => {
     await page.goto('remember/tabs/users')
 
     await page.getByLabel('User One').check()
     await page.getByLabel('User Two').check()
     await page.getByRole('link', { name: 'Teams' }).click()
+
     await expect(page.getByRole('heading', { name: 'Teams' })).toBeVisible()
+
     await page.goBack()
 
     await expect(page).toHaveURL('remember/tabs/users')
@@ -197,7 +199,9 @@ test.describe('Remember (local state caching)', () => {
     await page.getByLabel('User One').uncheck()
     await page.getByLabel('User Two').uncheck()
     await page.getByRole('link', { name: 'Teams' }).click()
+
     await expect(page.getByRole('heading', { name: 'Teams' })).toBeVisible()
+
     await page.getByRole('link', { name: 'Users' }).click()
 
     await expect(page).toHaveURL('remember/tabs/users')
@@ -205,13 +209,13 @@ test.describe('Remember (local state caching)', () => {
     await expect(page.locator('#selected')).toHaveText('0 selected')
   })
 
-  test('does not restore remembered data when revisiting the page after returning from another website', async ({
-    page,
-  }) => {
+  test('it restores remembered data when returning from another website but not on a new visit', async ({ page }) => {
     await page.goto('remember/tabs/users')
 
     await page.getByLabel('User One').check()
     await page.getByLabel('User Two').check()
+    await page.getByRole('button', { name: 'Toggle notes' }).click()
+    await page.getByLabel('Notes').fill('Call back')
     await page.getByRole('link', { name: 'Navigate off-site' }).click()
 
     await expect(page).toHaveURL('non-inertia')
@@ -222,36 +226,18 @@ test.describe('Remember (local state caching)', () => {
     await expect(page.locator('#selected')).toHaveText('2 selected')
 
     await page.getByLabel('User Two').uncheck()
+    await page.getByRole('button', { name: 'Toggle notes' }).click()
+
     await expect(page.locator('#selected')).toHaveText('1 selected')
+    await expect(page.getByLabel('Notes')).toHaveValue('Call back')
 
     await page.getByRole('link', { name: 'Users' }).click()
 
-    await expect(page).toHaveURL('remember/tabs/users')
     await expect(page.locator('#selected')).toHaveText('0 selected')
-  })
-
-  test('restores remembered data for a component that mounts after returning from another website', async ({
-    page,
-  }) => {
-    await page.goto('remember/tabs/users')
 
     await page.getByRole('button', { name: 'Toggle notes' }).click()
-    await page.getByLabel('Notes').fill('Call back')
-    await page.getByLabel('User One').check()
-    await page.getByRole('link', { name: 'Navigate off-site' }).click()
 
-    await expect(page).toHaveURL('non-inertia')
-
-    await page.goBack()
-
-    await page.waitForURL('remember/tabs/users')
-    await expect(page.locator('#selected')).toHaveText('1 selected')
-
-    await page.getByLabel('User Two').check()
-    await page.getByRole('button', { name: 'Toggle notes' }).click()
-
-    await expect(page.locator('#selected')).toHaveText('2 selected')
-    await expect(page.getByLabel('Notes')).toHaveValue('Call back')
+    await expect(page.getByLabel('Notes')).toHaveValue('')
   })
 
   test.describe('form helper', () => {
