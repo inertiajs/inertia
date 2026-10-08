@@ -1,7 +1,21 @@
-import type { AxiosInstance, AxiosProgressEvent } from 'axios'
 import { HttpCancelledError, HttpNetworkError, HttpResponseError } from './httpErrors'
 import { httpHandlers } from './httpHandlers'
 import { HttpClient, HttpProgressEvent, HttpRequestConfig, HttpResponse, HttpResponseHeaders } from './types'
+
+type AxiosProgressEvent = {
+  loaded: number
+  total?: number
+  progress?: number
+}
+
+// Keep the adapter's public contract independent of the optional Axios package.
+type AxiosInstance = (
+  config: Omit<HttpRequestConfig, 'headers' | 'onUploadProgress'> & {
+    headers: Record<string, string>
+    responseType: 'text'
+    onUploadProgress?: (event: AxiosProgressEvent) => void
+  },
+) => Promise<Omit<HttpResponse, 'headers'> & { headers: unknown }>
 
 /**
  * Normalize Axios headers to a simple string record with lowercase keys
@@ -27,6 +41,23 @@ function normalizeHeaders(headers: unknown): HttpResponseHeaders {
   }
 
   return normalized
+}
+
+/**
+ * Axios defaults the content type to `application/x-www-form-urlencoded` for
+ * POST/PUT/PATCH requests, which mislabels raw binary payloads. The built-in
+ * XHR client leaves these untouched, so we mirror that behavior here.
+ */
+function isBinaryRequestBody(value: unknown): boolean {
+  return (
+    (typeof Blob !== 'undefined' && value instanceof Blob) ||
+    (typeof ArrayBuffer !== 'undefined' && value instanceof ArrayBuffer) ||
+    (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView(value))
+  )
+}
+
+function hasContentTypeHeader(headers: HttpRequestConfig['headers']): boolean {
+  return Object.keys(headers ?? {}).some((key) => key.toLowerCase() === 'content-type')
 }
 
 /**
@@ -94,13 +125,19 @@ export class AxiosHttpClient implements HttpClient {
   protected async doRequest(config: HttpRequestConfig): Promise<HttpResponse> {
     const axios = await this.getAxios()
 
+    const headers = { ...(config.headers ?? {}) } as Record<string, unknown>
+
+    if (isBinaryRequestBody(config.data) && !hasContentTypeHeader(config.headers)) {
+      headers['Content-Type'] = false
+    }
+
     try {
       const response = await axios({
         method: config.method,
         url: config.url,
         data: config.data,
         params: config.params,
-        headers: config.headers as Record<string, string>,
+        headers: headers as Record<string, string>,
         signal: config.signal,
         responseType: 'text',
         onUploadProgress: config.onUploadProgress

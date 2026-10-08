@@ -144,6 +144,26 @@ describe('SSR Errors', () => {
       expect(result.timestamp).toBeDefined()
       expect(new Date(result.timestamp).getTime()).not.toBeNaN()
     })
+
+    it('handles non-Error objects gracefully', () => {
+      const stringError = 'Something failed'
+      const stringResult = classifySSRError(stringError)
+      expect(stringResult.type).toBe('render')
+      expect(stringResult.error).toBe('Something failed')
+
+      const nullResult = classifySSRError(null)
+      expect(nullResult.type).toBe('render')
+      expect(nullResult.error).toBe('null')
+
+      const undefinedResult = classifySSRError(undefined)
+      expect(undefinedResult.type).toBe('render')
+      expect(undefinedResult.error).toBe('undefined')
+
+      const customObj = { foo: 'bar' }
+      const customResult = classifySSRError(customObj)
+      expect(customResult.type).toBe('render')
+      expect(customResult.error).toBe('[object Object]')
+    })
   })
 
   describe('setSourceMapResolver', () => {

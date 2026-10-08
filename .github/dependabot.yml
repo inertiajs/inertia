@@ -4,6 +4,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    cooldown:
+      default-days: 5
     groups:
       github-actions:
         patterns:
@@ -12,6 +14,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    cooldown:
+      default-days: 5
     target-branch: '2.x'
     groups:
       github-actions:

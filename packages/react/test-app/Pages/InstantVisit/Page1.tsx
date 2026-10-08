@@ -7,6 +7,13 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
     })
   }
 
+  const visitWithComponentAndPreserveScroll = () => {
+    router.visit('/instant-visit/target?delay=500', {
+      component: 'InstantVisit/Target',
+      preserveScroll: true,
+    })
+  }
+
   const visitWithComponentAndPageProps = () => {
     router.visit('/instant-visit/target?delay=500', {
       component: 'InstantVisit/Target',
@@ -57,6 +64,7 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
 
       <button onClick={submitForm}>Submit form</button>
       <button onClick={visitWithComponent}>Visit with component</button>
+      <button onClick={visitWithComponentAndPreserveScroll}>Visit with component and preserve scroll</button>
       <button onClick={visitWithComponentAndPageProps}>Visit with component and pageProps</button>
       <button onClick={visitWithPagePropsCallback}>Visit with pageProps callback</button>
       <button onClick={visitWithPagePropsCallbackUsingShared}>Visit with pageProps callback using shared</button>
@@ -90,6 +98,9 @@ export default ({ foo, auth, errors }: { foo: string; auth?: { user: string }; e
       >
         Link with array component
       </Link>
+
+      <hr style={{ padding: '500px 0' }} />
+      <div id="after-scroll">After scroll</div>
     </div>
   )
 }

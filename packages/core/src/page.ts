@@ -25,6 +25,7 @@ class CurrentPage {
   protected optimisticBaseline: Partial<Page['props']> = {}
   protected pendingOptimistics: { id: number; callback: (props: Page['props']) => Partial<Page['props']> | void }[] = []
   protected optimisticCounter = 0
+  protected confirmedOptimisticId = 0
 
   public init<ComponentType = Component>({
     initialPage,
@@ -51,11 +52,17 @@ class CurrentPage {
       preserveScroll = false,
       preserveState = false,
       viewTransition = false,
+      cached = false,
+      initialRender = false,
+      visitId,
     }: {
       replace?: boolean
       preserveScroll?: boolean
       preserveState?: boolean
       viewTransition?: Visit['viewTransition']
+      cached?: boolean
+      initialRender?: boolean
+      visitId?: string
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -77,6 +84,7 @@ class CurrentPage {
 
     if (page.clearHistory) {
       history.clear()
+      prefetchedRequests.removeAll()
     }
 
     return this.resolve(page.component, page).then((component) => {
@@ -134,6 +142,7 @@ class CurrentPage {
           page,
           preserveState,
           viewTransition,
+          initialRender,
         }).then(() => {
           if (preserveScroll) {
             // Scroll regions must be explicitly restored since the DOM elements are destroyed
@@ -155,7 +164,7 @@ class CurrentPage {
           this.pendingDeferredProps = null
 
           if (!replace) {
-            fireNavigateEvent(page)
+            fireNavigateEvent(page, { type: 'visit', cached, visitId })
           }
         })
       })
@@ -170,6 +179,9 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
+    // A restored history entry supersedes any page update still resolving its component
+    this.componentId = {}
+
     return this.resolve(page.component, page).then((component) => {
       this.page = page
       this.cleared = false
@@ -230,13 +242,15 @@ class CurrentPage {
     page,
     preserveState,
     viewTransition,
+    initialRender = false,
   }: {
     component: Component
     page: Page
     preserveState: boolean
     viewTransition: Visit['viewTransition']
+    initialRender?: boolean
   }): Promise<unknown> {
-    const doSwap = () => this.swapComponent({ component, page, preserveState })
+    const doSwap = () => this.swapComponent({ component, page, preserveState, initialRender })
 
     if (!viewTransition || !document?.startViewTransition || document.visibilityState === 'hidden') {
       return doSwap()
@@ -244,8 +258,23 @@ class CurrentPage {
 
     const viewTransitionCallback = typeof viewTransition === 'boolean' ? () => null : viewTransition
 
+    // The browser skips this transition when a newer one supersedes it, when the tab goes hidden
+    // mid-flight, or when the swap times out, always rejecting with a DOMException. That's
+    // expected, so swallow it and let a failing swap reject as it normally would.
+    const ignoreSkippedTransition = (promise: Promise<unknown>) => {
+      promise.catch((error) => {
+        if (!(error instanceof DOMException)) {
+          throw error
+        }
+      })
+    }
+
     return new Promise((resolve) => {
       const transitionResult = document.startViewTransition(() => doSwap().then(resolve))
+
+      ignoreSkippedTransition(transitionResult.ready)
+      ignoreSkippedTransition(transitionResult.finished)
+      ignoreSkippedTransition(transitionResult.updateCallbackDone)
 
       viewTransitionCallback(transitionResult)
     })
@@ -257,6 +286,14 @@ class CurrentPage {
 
   public nextOptimisticId(): number {
     return ++this.optimisticCounter
+  }
+
+  public markOptimisticConfirmed(id: number): void {
+    this.confirmedOptimisticId = Math.max(this.confirmedOptimisticId, id)
+  }
+
+  public hasConfirmedOptimisticAfter(id: number): boolean {
+    return this.confirmedOptimisticId > id
   }
 
   public setBaseline(key: string, value: unknown): void {
@@ -320,6 +357,7 @@ class CurrentPage {
   public clearOptimisticState(): void {
     this.optimisticBaseline = {}
     this.pendingOptimistics = []
+    this.confirmedOptimisticId = 0
   }
 
   public isTheSame(page: Page): boolean {

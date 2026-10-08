@@ -17,6 +17,22 @@
     })
   }
 
+  const rapidNavigation = () => {
+    router.replace({
+      url: '/view-transition/page-b',
+      component: 'ViewTransition/PageB',
+      props: {},
+      viewTransition: true,
+    })
+
+    router.replace({
+      url: '/view-transition/page-a',
+      component: 'ViewTransition/PageA',
+      props: {},
+      viewTransition: true,
+    })
+  }
+
   const clientSideReplace = () => {
     router.replace({
       url: '/view-transition/page-b',
@@ -36,6 +52,7 @@
 <button onclick={transitionWithBoolean}>Transition with boolean</button>
 <button onclick={transitionWithCallback}>Transition with callback</button>
 <button onclick={clientSideReplace}>Client-side replace</button>
+<button onclick={rapidNavigation}>Rapid navigation</button>
 <Link
   href="/view-transition/page-b"
   viewTransition={(viewTransition) => {

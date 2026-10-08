@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { shouldBeDumpPage } from './support'
+import { scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Remember (local state caching)', () => {
   test('does not remember anything as of default', async ({ page }) => {
@@ -432,5 +432,27 @@ test.describe('Remember (local state caching)', () => {
 
     await expect(page.getByText('Foo: foo')).toBeVisible()
     await expect(page.getByText('Bar: 42')).toBeVisible()
+  })
+
+  test('it restores scroll regions when going back to a page that remembers state on mount', async ({ page }) => {
+    await page.goto('remember/scroll-region')
+    await expect(page.getByText('First visible row: 0')).toBeVisible()
+
+    // The initial visit restores scroll regions in an animation frame, which would undo an early scroll
+    await page.waitForTimeout(100)
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#rows')?.scrollTo(0, 3000)),
+    )
+    await expect(page.getByText('First visible row: 75')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Navigate away' }).click()
+    await shouldBeDumpPage(page, 'get')
+
+    await page.goBack()
+    await expect(page).toHaveURL('remember/scroll-region')
+    await expect(page.getByText('First visible row: 75')).toBeVisible()
+    await expect.poll(() => page.locator('#rows').evaluate((element) => element.scrollTop)).toBe(3000)
   })
 })

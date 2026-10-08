@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "3.2.0",
+  "version": "3.8.0",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -36,6 +36,10 @@
     "./ssrErrors": {
       "types": "./types/ssrErrors.d.ts",
       "import": "./dist/ssrErrors.js"
+    },
+    "./json": {
+      "types": "./types/json.d.ts",
+      "import": "./dist/json.js"
     }
   },
   "typesVersions": {
@@ -45,6 +49,9 @@
       ],
       "ssrErrors": [
         "types/ssrErrors.d.ts"
+      ],
+      "json": [
+        "types/json.d.ts"
       ]
     }
   },
@@ -61,7 +68,7 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.0.0"
+    "laravel-precognition": "^2.1.0"
   },
   "peerDependencies": {
     "axios": "^1.15.2"
@@ -73,11 +80,11 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.13",
-    "axios": "^1.15.2",
+    "axios": "^1.20.0",
     "es-check": "^9.6.4",
-    "esbuild": "^0.27.3",
-    "esbuild-node-externals": "^1.20.1",
+    "esbuild": "^0.28.1",
+    "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.11"
   }
 }

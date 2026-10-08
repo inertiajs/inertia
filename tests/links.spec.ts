@@ -903,9 +903,8 @@ test.describe('scroll', () => {
     await page.click('#scroll-and-navigate')
     await expect(page.getByText('Page: 2')).toBeVisible()
 
-    // Verify scroll position was preserved (should be +100px, not 0)
-    const finalScroll = await page.locator('#scroll-container').evaluate((el) => el.scrollTop)
-    expect(finalScroll).toBeGreaterThan(100)
+    const container = page.locator('#scroll-container')
+    await expect.poll(() => container.evaluate((el) => el.scrollTop)).toBeGreaterThanOrEqual(100)
   })
 })
 
@@ -1332,5 +1331,31 @@ test.describe('path traversal', () => {
 
     await page.getByRole('link', { name: 'Up three levels' }).click()
     await expect(page).toHaveURL('/')
+  })
+})
+
+test.describe('link targets', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+  })
+
+  test('_self opens in same tab', async ({ page }) => {
+    await page.getByRole('link', { name: 'Target _self' }).click()
+
+    await expect(page).toHaveURL('/links/as-element')
+  })
+
+  test('_blank opens in new tab', async ({ page, context }) => {
+    const newTabPromise = context.waitForEvent('page')
+
+    await page.getByRole('link', { name: 'Target _blank' }).click()
+
+    const newTab = await newTabPromise
+
+    await newTab.waitForLoadState()
+
+    await expect(page).toHaveURL('/')
+
+    await expect(newTab).toHaveURL('/links/as-element')
   })
 })

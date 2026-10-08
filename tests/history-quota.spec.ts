@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { clickAndWaitForResponse } from './support'
+import { clickAndWaitForResponse, consoleMessages } from './support'
 
 // WebKit has a ~64MB limit on history.state storage.
 // Chromium and Firefox have virtually unlimited storage.
@@ -101,5 +101,21 @@ test.describe('history quota exceeded', () => {
     await page.goForward()
     await page.waitForURL(`/history-quota/${pageAfterReload}`)
     await expect(page.getByText(`History Quota Test - Page ${pageAfterReload}`)).toBeVisible()
+  })
+
+  test('it still renders deferred props that exceed the quota', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    for (let i = 2; i <= 7; i++) {
+      await clickAndWaitForResponse(page, `Page ${i}`, `/history-quota/${i}`)
+      await expect(page.getByText(`History Quota Test - Page ${i}`)).toBeVisible()
+    }
+
+    await clickAndWaitForResponse(page, 'Deferred', '/history-quota/deferred')
+    await expect(page.getByText('History Quota Test - Deferred')).toBeVisible()
+    await expect(page.getByText('Data size: 16,777,216 bytes')).toBeVisible()
+
+    expect(consoleMessages.messages).toContain('Attempt to store more data than allowed using history.replaceState()')
+    expect(consoleMessages.errors).toHaveLength(0)
   })
 })

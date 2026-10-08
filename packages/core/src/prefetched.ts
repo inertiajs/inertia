@@ -1,5 +1,6 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
+import { HttpCancelledError } from './httpErrors'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -39,19 +40,22 @@ class PrefetchedRequests {
     }
 
     const [stale, prefetchExpiresIn] = this.extractStaleValues(cacheFor)
+    let cancelled = false
 
     const promise = new Promise<Response>((resolve, reject) => {
       sendFunc({
         ...params,
         onCancel: () => {
+          cancelled = true
           this.remove(params)
+          this.removeFromInFlight(params.id)
           params.onCancel()
-          reject()
+          reject(new HttpCancelledError())
         },
         onError: (error) => {
           this.remove(params)
           params.onError(error)
-          reject()
+          reject(error)
         },
         onPrefetching(visitParams) {
           params.onPrefetching(visitParams)
@@ -62,12 +66,16 @@ class PrefetchedRequests {
         onPrefetchResponse(response) {
           resolve(response)
         },
-        onPrefetchError(error) {
-          prefetchedRequests.removeFromInFlight(params)
+        onPrefetchError: (error) => {
+          this.removeFromInFlight(params.id)
           reject(error)
         },
       })
     }).then((response) => {
+      if (!this.isInFlight(params.id)) {
+        return response
+      }
+
       this.remove(params)
 
       const pageResponse = response.getPageResponse()
@@ -90,25 +98,34 @@ class PrefetchedRequests {
         params,
         oncePropExpiresIn ? Math.min(prefetchExpiresIn, oncePropExpiresIn) : prefetchExpiresIn,
       )
-      this.removeFromInFlight(params)
+      this.removeFromInFlight(params.id)
 
       response.handlePrefetch()
 
       return response
     })
 
-    this.inFlightRequests.push({
-      params: { ...params },
-      response: promise,
-      staleTimestamp: null,
-      inFlight: true,
-    })
+    if (!cancelled) {
+      this.inFlightRequests.push({
+        params: { ...params },
+        response: promise,
+        staleTimestamp: null,
+        inFlight: true,
+      })
+    }
 
-    return promise
+    return promise.catch((error) => {
+      this.removeFromInFlight(params.id)
+
+      if (!(error instanceof HttpCancelledError)) {
+        throw error
+      }
+    })
   }
 
   public removeAll(): void {
     this.cached = []
+    this.inFlightRequests = []
     this.removalTimers.forEach((removalTimer) => {
       clearTimeout(removalTimer.timer)
     })
@@ -129,9 +146,13 @@ class PrefetchedRequests {
     this.clearTimer(params)
   }
 
-  protected removeFromInFlight(params: ActiveVisit): void {
+  protected isInFlight(visitId: string): boolean {
+    return this.inFlightRequests.some((prefetching) => prefetching.params.id === visitId)
+  }
+
+  protected removeFromInFlight(visitId: string): void {
     this.inFlightRequests = this.inFlightRequests.filter((prefetching) => {
-      return !this.paramsAreEqual(prefetching.params, params)
+      return prefetching.params.id !== visitId
     })
   }
 
@@ -193,21 +214,37 @@ class PrefetchedRequests {
 
     this.currentUseId = id
 
-    return prefetched.response.then((response) => {
-      if (this.currentUseId !== id) {
-        // They've since gone on to `use` a different request,
-        // so we should ignore this one
-        return
-      }
+    const consumedParams: InternalActiveVisit = {
+      ...params,
+      cached: true,
+    }
 
-      response.mergeParams({ ...params, onPrefetched: () => {} })
+    return prefetched.response.then(
+      (response) => {
+        if (this.currentUseId !== id) {
+          // They've since gone on to `use` a different request,
+          // so we should ignore this one
+          return
+        }
 
-      // If this was a one-time cache, remove it
-      // (generally a prefetch="click" request with no specified cache value)
-      this.removeSingleUseItems(params)
+        response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
-      return response.handle()
-    })
+        // If this was a one-time cache, remove it
+        // (generally a prefetch="click" request with no specified cache value)
+        this.removeSingleUseItems(params)
+
+        return response.handle()
+      },
+      (error) => {
+        if (!(error instanceof HttpCancelledError)) {
+          throw error
+        }
+
+        consumedParams.onCancel()
+        consumedParams.cancelled = true
+        consumedParams.onFinish(consumedParams)
+      },
+    )
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {
@@ -249,6 +286,7 @@ class PrefetchedRequests {
       this.withoutPurposePrefetchHeader(params1),
       this.withoutPurposePrefetchHeader(params2),
       [
+        'id',
         'showProgress',
         'replace',
         'prefetch',
@@ -262,6 +300,8 @@ class PrefetchedRequests {
         'onCancel',
         'onSuccess',
         'onError',
+        'onHttpException',
+        'onNetworkError',
         'onFlash',
         'onPrefetched',
         'onCancelToken',
@@ -271,6 +311,7 @@ class PrefetchedRequests {
         'optimistic',
         'component',
         'pageProps',
+        'cached',
       ],
     )
   }

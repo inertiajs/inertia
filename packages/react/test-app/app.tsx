@@ -1,7 +1,7 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router, type ResolvedComponent } from '@inertiajs/react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import AppLayout from './Layouts/AppLayout'
 import DefaultLayout from './Layouts/DefaultLayout'
 
@@ -42,7 +42,13 @@ createInertiaApp({
     return pages[`./Pages/${name}.tsx`]
   },
   setup({ el, App, props }) {
-    createRoot(el).render(<App {...props} />)
+    const appElement = <App {...props} />
+
+    if (el.hasAttribute('data-server-rendered')) {
+      hydrateRoot(el, appElement)
+    } else {
+      createRoot(el).render(appElement)
+    }
   },
   progress: {
     delay: 0,
@@ -80,10 +86,22 @@ createInertiaApp({
       return DefaultLayout
     },
   }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
   ...(params.get('popover') === 'false' && {
     progress: { popover: false },
   }),
   ...(params.has('nonce') && {
     nonce: params.get('nonce') === 'default' ? 'test-default-nonce' : 'test-nonce',
+  }),
+  ...(params.has('withTitleCallback') && {
+    title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
   }),
 })

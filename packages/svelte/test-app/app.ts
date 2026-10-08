@@ -64,6 +64,15 @@ createInertiaApp({
   ...(params.has('withDefaultAppLayout') && {
     layout: () => AppLayout,
   }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
   ...(params.has('withDefaultLayoutCallback') && {
     layout: (name: string) => {
       if (name.startsWith('DefaultLayout/CallbackExcluded')) {

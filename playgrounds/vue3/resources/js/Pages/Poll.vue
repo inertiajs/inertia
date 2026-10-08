@@ -25,6 +25,10 @@ const triggerAsyncRedirect = () => {
   )
 }
 
+router.once('start', () => {
+  console.log(`Starting a visit `)
+})
+
 const { start: startHookPolling, stop } = usePoll(
   2000,
   {

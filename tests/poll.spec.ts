@@ -86,6 +86,18 @@ manualData.forEach(({ method, url }) => {
   })
 })
 
+test('it exposes whether the poll is running', async ({ page }) => {
+  await page.goto('/poll/hook/manual')
+
+  await expect(page.getByText('Polling: no')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Start' }).click()
+  await expect(page.getByText('Polling: yes')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Stop' }).click()
+  await expect(page.getByText('Polling: no')).toBeVisible()
+})
+
 const setHidden = (page, hidden: boolean) =>
   page.evaluate((hidden) => {
     Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden })
@@ -134,17 +146,122 @@ test('it keeps the throttled cadence when staying in the background past one cyc
   await expect(pollRequests().length).toBeLessThanOrEqual(3)
 })
 
-test('it does not throttle when keepAlive is set, even when hidden', async ({ page }) => {
-  await page.goto('/poll/overlap/overlap?interval=200&delay=10&keepAlive=1')
+Object.entries({
+  keepAlive: 'keepAlive=1',
+  continue: 'background=continue',
+}).forEach(([option, query]) => {
+  test(`it does not throttle when hidden with ${option}`, async ({ page }) => {
+    await page.goto(`/poll/overlap/overlap?interval=200&delay=10&${query}`)
+
+    await page.waitForResponse(page.url())
+
+    await setHidden(page, true)
+
+    requests.listen(page)
+    await page.waitForTimeout(1400)
+
+    await expect(pollRequests().length).toBeGreaterThanOrEqual(4)
+  })
+})
+
+;['overlap', 'cancel', 'rest'].forEach((mode) => {
+  test(`it pauses polling in the background and polls immediately when visible again (${mode})`, async ({ page }) => {
+    test.setTimeout(10_000)
+
+    await page.goto(`/poll/overlap/${mode}?interval=500&delay=10&background=pause`)
+
+    await page.waitForResponse(page.url())
+
+    await setHidden(page, true)
+
+    requests.listen(page)
+    await page.waitForTimeout(1000)
+
+    await expect(pollRequests()).toHaveLength(0)
+
+    const start = Date.now()
+    const request = page.waitForRequest(page.url())
+    await setHidden(page, false)
+    await request
+
+    await expect(Date.now() - start).toBeLessThan(250)
+
+    await page.waitForTimeout(1100)
+
+    await expect(pollRequests().length).toBeGreaterThanOrEqual(2)
+    await expect(pollRequests().length).toBeLessThanOrEqual(4)
+  })
+
+  test(`it waits for the remaining interval when visible again before the next poll is due (${mode})`, async ({
+    page,
+  }) => {
+    test.setTimeout(10_000)
+
+    await page.goto(`/poll/overlap/${mode}?interval=1500&delay=10&background=pause`)
+
+    await page.waitForResponse(page.url())
+
+    requests.listen(page)
+    await setHidden(page, true)
+    await page.waitForTimeout(400)
+
+    const start = Date.now()
+    await setHidden(page, false)
+    await page.waitForTimeout(400)
+
+    await expect(pollRequests()).toHaveLength(0)
+
+    await page.waitForRequest(page.url())
+
+    await expect(Date.now() - start).toBeLessThan(1400)
+    await expect(pollRequests()).toHaveLength(1)
+  })
+})
+
+test('it respects stop and start while paused in the background', async ({ page }) => {
+  await page.goto('/poll/overlap/overlap?interval=300&delay=10&background=pause')
 
   await page.waitForResponse(page.url())
 
   await setHidden(page, true)
+  await page.getByRole('button', { name: 'Stop' }).click()
+  await setHidden(page, false)
 
   requests.listen(page)
-  await page.waitForTimeout(1400)
+  await page.waitForTimeout(900)
 
-  await expect(pollRequests().length).toBeGreaterThanOrEqual(4)
+  await expect(pollRequests()).toHaveLength(0)
+
+  await setHidden(page, true)
+  await page.getByRole('button', { name: 'Start' }).click()
+  await page.waitForTimeout(900)
+
+  await expect(pollRequests()).toHaveLength(0)
+
+  const request = page.waitForRequest(page.url())
+  await setHidden(page, false)
+  await request
+
+  await expect(pollRequests()).toHaveLength(1)
+})
+
+Object.entries({
+  throttle: { query: 'background=throttle', max: 2 },
+  pause: { query: 'background=pause', max: 0 },
+}).forEach(([background, { query, max }]) => {
+  test(`it applies ${background} to a poll that starts while the page is hidden`, async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true })
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' })
+    })
+
+    await page.goto(`/poll/overlap/overlap?interval=100&delay=10&${query}`)
+
+    requests.listen(page)
+    await page.waitForTimeout(1500)
+
+    await expect(pollRequests().length).toBeLessThanOrEqual(max)
+  })
 })
 
 test('it does not double-schedule when stopped and restarted mid-flight (rest)', async ({ page }) => {
@@ -343,4 +460,13 @@ test('it preserves validation errors when poll reloads data', async ({ page }) =
   await expect(page.locator('#page-error')).toHaveText('The name field is required.')
   await expect(page.locator('#form-error')).toBeVisible()
   await expect(page.locator('#form-error')).toHaveText('The name field is required.')
+})
+
+test('poll requests carry the poll marker while regular reloads do not', async ({ page }) => {
+  await page.goto('/poll/flag')
+
+  await expect(page.locator('#poll-flag')).toHaveText('poll: true')
+
+  await page.getByRole('button', { name: 'Reload' }).click()
+  await expect(page.locator('#reload-flag')).toHaveText('reload: false')
 })

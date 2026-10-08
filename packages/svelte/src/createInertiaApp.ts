@@ -1,7 +1,10 @@
 import {
   buildSSRBody,
+  createHeadManager,
+  exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
+  resolveServerHead,
   router,
   setupProgress,
   type CreateInertiaAppOptions,
@@ -81,7 +84,9 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    serverHead,
     withApp,
+    dev = !!import.meta.env?.DEV,
   }:
     | InertiaAppOptionsForCSR<SharedProps>
     | InertiaAppOptionsAuto<SharedProps> = {} as InertiaAppOptionsAuto<SharedProps>,
@@ -94,6 +99,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (dev) {
+    exposeInterceptors()
   }
 
   const isServer = typeof window === 'undefined'
@@ -111,6 +120,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
         initialComponent,
         resolveComponent,
         defaultLayout: layout,
+        serverRendered: true,
       }
 
       let svelteApp: SvelteRenderResult
@@ -128,26 +138,43 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
           withApp(context, { ssr: true, page })
         }
 
-        svelteApp = render(App, { props, context })
+        svelteApp = await render(App, { props, context })
       }
 
       const body = buildSSRBody(id, page, svelteApp.body)
 
       return {
         body,
-        head: [svelteApp.head],
+        head: [...resolveServerHead(page, serverHead), svelteApp.head],
       }
     }
   }
 
   const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+  const serverHeadManager =
+    !isServer && serverHead
+      ? createHeadManager(
+          false,
+          (title) => title,
+          () => {},
+          resolveServerHead(initialPage, serverHead),
+        )
+      : null
 
   const [initialComponent] = await Promise.all([
     resolveComponent(initialPage.component, initialPage) as Promise<ResolvedComponent>,
     router.decryptHistory().catch(() => {}),
   ])
 
-  const props: InertiaAppProps<SharedProps> = { initialPage, initialComponent, resolveComponent, defaultLayout: layout }
+  const el = isServer ? null : document.getElementById(id)!
+
+  const props: InertiaAppProps<SharedProps> = {
+    initialPage,
+    initialComponent,
+    resolveComponent,
+    defaultLayout: layout,
+    serverRendered: isServer || el!.hasAttribute('data-server-rendered'),
+  }
 
   // SSR with page provided (legacy pattern used by ssr.ts)
   if (isServer) {
@@ -162,7 +189,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
       return {
         body,
-        head: [svelteApp.head],
+        head: [...resolveServerHead(initialPage, serverHead), svelteApp.head],
       }
     }
 
@@ -170,7 +197,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   // CSR
-  const target = document.getElementById(id)!
+  const target = el!
+  const isServerRendered = props.serverRendered!
 
   if (setup) {
     await setup({ el: target, App, props })
@@ -181,11 +209,20 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
       withApp(context, { ssr: false, page: initialPage })
     }
 
-    if (target.hasAttribute('data-server-rendered')) {
+    if (isServerRendered) {
       hydrate(App, { target, props, context })
     } else {
       mount(App, { target, props, context })
     }
+  }
+
+  if (serverHeadManager) {
+    const syncServerHead = (event: { detail: { page: Page } }) => {
+      serverHeadManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+    }
+
+    router.on('navigate', syncServerHead)
+    router.on('clientVisit', syncServerHead)
   }
 
   if (progress) {

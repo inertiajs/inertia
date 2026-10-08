@@ -14,5 +14,7 @@ defineProps<{
     <div id="timestamp">Timestamp: {{ timestamp ?? 'none' }}</div>
     <div id="auth">Auth: {{ auth?.user ?? 'none' }}</div>
     <div id="errors">Errors: {{ Object.keys(errors ?? {}).length > 0 ? JSON.stringify(errors) : 'none' }}</div>
+    <hr style="padding: 500px 0" />
+    <div id="after-scroll">After scroll</div>
   </div>
 </template>

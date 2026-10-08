@@ -7,26 +7,35 @@ permissions:
 jobs:
   test-chromium:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }})
+    name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
         http: ['default', 'axios']
+        svelte-async: ['false', 'true']
+        exclude:
+          - adapter: 'vue'
+            svelte-async: 'true'
+          - adapter: 'react'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            http: 'axios'
+            svelte-async: 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 11.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: pnpm
@@ -39,10 +48,12 @@ jobs:
 
       - name: Get Playwright Version
         id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        run: |
+          version=$(node -e "console.log(require('@playwright/test/package.json').version)")
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright Browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -60,36 +71,49 @@ jobs:
         run: pnpm test:${{ matrix.adapter }}
         env:
           VITE_HTTP_CLIENT: ${{ matrix.http }}
+          SVELTE_ASYNC: ${{ matrix.svelte-async }}
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-${{ matrix.http }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-${{ matrix.http }}${{ matrix.svelte-async == 'true' && '-async' || '' }}
           path: test-results
 
   test-chromium-ssr:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }})
+    name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
     timeout-minutes: 15
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
         node-version: ['22.x', '24.x', 'latest']
+        svelte-async: ['false', 'true']
+        exclude:
+          - adapter: 'vue'
+            svelte-async: 'true'
+          - adapter: 'react'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            node-version: '22.x'
+            svelte-async: 'true'
+          - adapter: 'svelte'
+            node-version: 'latest'
+            svelte-async: 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 11.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
@@ -102,10 +126,12 @@ jobs:
 
       - name: Get Playwright Version
         id: playwright-version
-        run: echo "version=$(node -e "console.log(require('playwright/package.json').version)")" >> $GITHUB_OUTPUT
+        run: |
+          version=$(node -e "console.log(require('@playwright/test/package.json').version)")
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright Browsers
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -121,10 +147,12 @@ jobs:
 
       - name: Run Playwright SSR Tests
         run: pnpm test:ssr:${{ matrix.adapter }} --project=chromium
+        env:
+          SVELTE_ASYNC: ${{ matrix.svelte-async }}
 
       - name: Upload failure screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr-node-${{ matrix.node-version }}
+          name: playwright-failure-screenshots-${{ matrix.adapter }}-chromium-ssr-node-${{ matrix.node-version }}${{ matrix.svelte-async == 'true' && '-async' || '' }}
           path: test-results

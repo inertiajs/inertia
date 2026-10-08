@@ -58,6 +58,8 @@ export default () => {
   const [httpExceptionStatus, setHttpExceptionStatus] = useState<number | null>(null)
   const [httpExceptionBody, setHttpExceptionBody] = useState('')
   const [networkErrorMessage, setNetworkErrorMessage] = useState('')
+  const [validationOnErrorMessage, setValidationOnErrorMessage] = useState('')
+  const [validationExceptionMessage, setValidationExceptionMessage] = useState('')
 
   const performSearch = async () => {
     try {
@@ -78,10 +80,17 @@ export default () => {
   }
 
   const performValidation = async () => {
+    setValidationOnErrorMessage('')
+    setValidationExceptionMessage('')
+
     try {
-      await validateUser.post('/api/validate')
-    } catch {
-      // Errors are stored in validateUser.errors
+      await validateUser.post('/api/validate', {
+        onError: () => {
+          setValidationOnErrorMessage('onError called')
+        },
+      })
+    } catch (error: unknown) {
+      setValidationExceptionMessage(error instanceof Error ? error.message : 'Unknown validation exception')
     }
   }
 
@@ -249,6 +258,8 @@ export default () => {
           Validate
         </button>
         {validateUser.hasErrors && <div id="validate-has-errors">Form has errors</div>}
+        {validationOnErrorMessage && <div id="validate-on-error">{validationOnErrorMessage}</div>}
+        {validationExceptionMessage && <div id="validate-exception">{validationExceptionMessage}</div>}
         <button onClick={() => validateUser.clearErrors()} id="clear-errors-button">
           Clear Errors
         </button>

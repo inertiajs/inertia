@@ -3,8 +3,9 @@ import { defaultFrameworks } from '../src/frameworks/index'
 import { transformPageResolution } from '../src/pagesTransform'
 import { findInertiaAppExport, wrapWithServerBootstrap } from '../src/ssrTransform'
 
-const wrap = (code: string, options = {}) => wrapWithServerBootstrap(code, options, defaultFrameworks)
-const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)?.code ?? null
+const wrap = (code: string, options = {}) =>
+  wrapWithServerBootstrap(code, options, defaultFrameworks)?.toString() ?? null
+const transformPages = (code: string) => transformPageResolution(code, defaultFrameworks)?.code.toString() ?? null
 
 describe('SSR Transform', () => {
   describe('findInertiaAppExport', () => {
@@ -43,9 +44,16 @@ createInertiaApp({ resolve: (name) => name })`
         import createServer from '@inertiajs/svelte/server'
         import { render } from 'svelte/server'
 
-        const ssr = await createInertiaApp({ resolve: (name) => name })
+        const ssrPromise = createInertiaApp({ resolve: (name) => name })
 
-        const renderPage = (page) => ssr(page, render)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        ssrPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const ssr = await ssrPromise
+
+          return ssr(page, render)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -64,9 +72,16 @@ createInertiaApp({})`
         import createServer from '@inertiajs/vue3/server'
         import { renderToString } from 'vue/server-renderer'
 
-        const render = await createInertiaApp({})
+        const renderPromise = createInertiaApp({})
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -85,9 +100,16 @@ createInertiaApp({})`
         import createServer from '@inertiajs/react/server'
         import { renderToString } from 'react-dom/server'
 
-        const render = await createInertiaApp({})
+        const renderPromise = createInertiaApp({})
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -106,9 +128,16 @@ createInertiaApp({})`
         import createServer from '@inertiajs/svelte/server'
         import { render } from 'svelte/server'
 
-        const ssr = await createInertiaApp({})
+        const ssrPromise = createInertiaApp({})
 
-        const renderPage = (page) => ssr(page, render)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        ssrPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const ssr = await ssrPromise
+
+          return ssr(page, render)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage, {"port":13715,"host":"127.0.0.1","cluster":true})
@@ -144,12 +173,19 @@ initializeTheme()`
         import createServer from '@inertiajs/vue3/server'
         import { renderToString } from 'vue/server-renderer'
 
-        const render = await createInertiaApp({
+        const renderPromise = createInertiaApp({
             title: (title) => title ? \`\${title} - \${appName}\` : appName,
             progress: { color: '#4B5563' },
         })
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -229,9 +265,16 @@ void createInertiaApp({ resolve: (name) => name })`
         import createServer from '@inertiajs/react/server'
         import { renderToString } from 'react-dom/server'
 
-        const render = await createInertiaApp({ resolve: (name) => name })
+        const renderPromise = createInertiaApp({ resolve: (name) => name })
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -250,9 +293,16 @@ void createInertiaApp({ resolve: (name) => name }).catch(console.error)`
         import createServer from '@inertiajs/react/server'
         import { renderToString } from 'react-dom/server'
 
-        const render = await createInertiaApp({ resolve: (name) => name })
+        const renderPromise = createInertiaApp({ resolve: (name) => name })
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -271,9 +321,16 @@ createInertiaApp({ resolve: (name) => name }).catch(console.error)`
         import createServer from '@inertiajs/react/server'
         import { renderToString } from 'react-dom/server'
 
-        const render = await createInertiaApp({ resolve: (name) => name })
+        const renderPromise = createInertiaApp({ resolve: (name) => name })
 
-        const renderPage = (page) => render(page, renderToString)
+        // Logged here so it never goes unhandled, and reported again per render by the SSR server
+        renderPromise.catch((error) => console.error(error))
+
+        const renderPage = async (page) => {
+          const render = await renderPromise
+
+          return render(page, renderToString)
+        }
 
         if (import.meta.env.PROD) {
           createServer(renderPage)
@@ -300,7 +357,7 @@ createInertiaApp({
 
       const result = wrap(code)
       expect(result).not.toBeNull()
-      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('const renderPromise = createInertiaApp')
       expect(result).toContain('resolve: (name) => require')
       expect(result).toContain('createServer(renderPage)')
     })
@@ -315,7 +372,7 @@ createInertiaApp({
 
       const result = wrap(code)
       expect(result).not.toBeNull()
-      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('const renderPromise = createInertiaApp')
       expect(result).toContain('setup({ App, props, plugin })')
     })
 
@@ -330,7 +387,7 @@ createInertiaApp({
 
       const result = wrap(code)
       expect(result).not.toBeNull()
-      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('const renderPromise = createInertiaApp')
       expect(result).toContain('resolve: (name) => require')
       expect(result).toContain('setup({ App, props, plugin })')
     })
@@ -341,7 +398,7 @@ createInertiaApp({})`
 
       const result = wrap(code)
       expect(result).not.toBeNull()
-      expect(result).toContain('const render = await createInertiaApp({})')
+      expect(result).toContain('const renderPromise = createInertiaApp({})')
     })
 
     it('wraps with resolve and withApp but no setup', () => {
@@ -355,7 +412,7 @@ createInertiaApp({
 
       const result = wrap(code)
       expect(result).not.toBeNull()
-      expect(result).toContain('const render = await createInertiaApp')
+      expect(result).toContain('const renderPromise = createInertiaApp')
       expect(result).toContain('resolve: (name) => require')
       expect(result).toContain('withApp(app)')
       expect(result).toContain('createServer(renderPage)')
@@ -373,7 +430,7 @@ createInertiaApp()`
 
       const afterSSR = wrap(afterPages!)
       expect(afterSSR).not.toBeNull()
-      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('const renderPromise = createInertiaApp')
       expect(afterSSR).toContain('resolve: async (name, page) =>')
       expect(afterSSR).toContain('createServer(renderPage)')
     })
@@ -388,7 +445,7 @@ createInertiaApp({ pages: './Pages' })`
 
       const afterSSR = wrap(afterPages!)
       expect(afterSSR).not.toBeNull()
-      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('const renderPromise = createInertiaApp')
       expect(afterSSR).toContain('resolve: async (name, page) =>')
       expect(afterSSR).toContain("import { renderToString } from 'react-dom/server'")
     })
@@ -409,7 +466,7 @@ createInertiaApp({
 
       const afterSSR = wrap(afterPages!)
       expect(afterSSR).not.toBeNull()
-      expect(afterSSR).toContain('const ssr = await createInertiaApp')
+      expect(afterSSR).toContain('const ssrPromise = createInertiaApp')
       expect(afterSSR).toContain('resolve: async (name, page) =>')
       expect(afterSSR).toContain('withApp(context)')
       expect(afterSSR).toContain("import { render } from 'svelte/server'")
@@ -425,7 +482,7 @@ createInertiaApp({
 
       const afterSSR = wrap(code)
       expect(afterSSR).not.toBeNull()
-      expect(afterSSR).toContain('const render = await createInertiaApp')
+      expect(afterSSR).toContain('const renderPromise = createInertiaApp')
       expect(afterSSR).toContain('resolve: (name) => require')
     })
   })

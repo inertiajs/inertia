@@ -47,3 +47,17 @@ test('it handles back/forward navigation between Inertia and non-Inertia pages c
   )
   expect(inertiaRequests.length).toBe(0)
 })
+
+test('it ignores the stored history page when it was rendered by an older asset version', async ({ page }) => {
+  await page.request.get('/history-version-reload/deploy/1')
+
+  await page.goto('/history-version-reload')
+  await expect(page.locator('#deploy')).toHaveText('1')
+
+  await page.goto('/non-inertia')
+  await page.request.get('/history-version-reload/deploy/2')
+
+  await page.goBack()
+  await page.waitForURL('/history-version-reload')
+  await expect(page.locator('#deploy')).toHaveText('2')
+})

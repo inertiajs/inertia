@@ -13,6 +13,13 @@ const visitWithComponent = () => {
   })
 }
 
+const visitWithComponentAndPreserveScroll = () => {
+  router.visit('/instant-visit/target?delay=500', {
+    component: 'InstantVisit/Target',
+    preserveScroll: true,
+  })
+}
+
 const visitWithComponentAndPageProps = () => {
   router.visit('/instant-visit/target?delay=500', {
     component: 'InstantVisit/Target',
@@ -64,6 +71,7 @@ const submitForm = () => {
 
     <button @click="submitForm">Submit form</button>
     <button @click="visitWithComponent">Visit with component</button>
+    <button @click="visitWithComponentAndPreserveScroll">Visit with component and preserve scroll</button>
     <button @click="visitWithComponentAndPageProps">Visit with component and pageProps</button>
     <button @click="visitWithPagePropsCallback">Visit with pageProps callback</button>
     <button @click="visitWithPagePropsCallbackUsingShared">Visit with pageProps callback using shared</button>
@@ -96,4 +104,7 @@ const submitForm = () => {
       Link with array component
     </Link>
   </div>
+
+  <hr style="padding: 500px 0" />
+  <div id="after-scroll">After scroll</div>
 </template>

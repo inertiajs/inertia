@@ -7,10 +7,13 @@ import {
   fireErrorEvent,
   fireFlashEvent,
   fireHttpExceptionEvent,
+  fireLocationEvent,
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
 import { history } from './history'
+import { interceptors } from './interceptors'
+import { parsePage } from './json'
 import { page as currentPage } from './page'
 import { partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
@@ -29,10 +32,16 @@ export class Response {
     protected requestParams: RequestParams,
     protected response: HttpResponse,
     protected originatingPage: Page,
+    protected optimisticId: number | null = null,
   ) {}
 
-  public static create(params: RequestParams, response: HttpResponse, originatingPage: Page): Response {
-    return new Response(params, response, originatingPage)
+  public static create(
+    params: RequestParams,
+    response: HttpResponse,
+    originatingPage: Page,
+    optimisticId: number | null = null,
+  ): Response {
+    return new Response(params, response, originatingPage, optimisticId)
   }
 
   public isProcessed(): boolean {
@@ -100,7 +109,7 @@ export class Response {
     if (Object.keys(errors).length > 0) {
       const scopedErrors = this.getScopedErrors(errors)
 
-      fireErrorEvent(scopedErrors)
+      fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
 
       return this.requestParams.all().onError(scopedErrors)
     }
@@ -113,7 +122,7 @@ export class Response {
       router.flush(currentPage.get().url)
     }
 
-    fireSuccessEvent(currentPage.get())
+    fireSuccessEvent(currentPage.get(), { visitId: this.requestParams.all().id })
 
     await this.requestParams.all().onSuccess(currentPage.get())
 
@@ -201,13 +210,27 @@ export class Response {
    */
   protected locationVisit(url: URL): boolean | void {
     try {
-      SessionStorage.set(SessionStorage.locationVisitKey, {
-        preserveScroll: this.requestParams.all().preserveScroll === true,
-      })
-
       if (typeof window === 'undefined') {
         return
       }
+
+      const responseVersion = this.getHeader('x-inertia-version')
+      const versionChange = !!responseVersion && responseVersion !== currentPage.get().version
+
+      if (!fireLocationEvent(url, versionChange)) {
+        return
+      }
+
+      // A version change on a background request only needs to pick up new assets, so we don't
+      // force a full-page navigation the user never initiated. The next user-initiated visit
+      // hits the same location response and reloads then.
+      if (versionChange && this.requestParams.all().async) {
+        return
+      }
+
+      SessionStorage.set(SessionStorage.locationVisitKey, {
+        preserveScroll: this.requestParams.all().preserveScroll === true,
+      })
 
       if (isSameUrlWithoutHash(window.location, url)) {
         window.location.reload()
@@ -225,6 +248,8 @@ export class Response {
     if (!this.shouldSetPage(pageResponse)) {
       return Promise.resolve()
     }
+
+    this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
 
     this.mergeProps(pageResponse)
     currentPage.mergeOncePropsIntoResponse(pageResponse)
@@ -245,6 +270,8 @@ export class Response {
       preserveScroll: this.requestParams.all().preserveScroll as boolean,
       preserveState: this.requestParams.all().preserveState as boolean,
       viewTransition: this.requestParams.all().viewTransition,
+      cached: this.requestParams.all().cached,
+      visitId: this.requestParams.all().id,
     })
   }
 
@@ -254,7 +281,7 @@ export class Response {
     }
 
     try {
-      return JSON.parse(response)
+      return parsePage(response)
     } catch (error) {
       return response
     }
@@ -299,7 +326,7 @@ export class Response {
   }
 
   protected preserveOptimisticProps(pageResponse: Page): void {
-    if (!router.hasPendingOptimistic()) {
+    if (!router.hasPendingOptimistic() && !this.isStaleOptimisticResponse()) {
       return
     }
 
@@ -309,6 +336,12 @@ export class Response {
         pageResponse.props[key] = currentPage.get().props[key]
       }
     }
+  }
+
+  protected isStaleOptimisticResponse(): boolean {
+    // An optimistic request that started later has already been confirmed, so these
+    // props were read before that write and would roll it back on screen
+    return this.optimisticId !== null && currentPage.hasConfirmedOptimisticAfter(this.optimisticId)
   }
 
   protected preserveEqualProps(pageResponse: Page): void {

@@ -8,8 +8,10 @@ import {
   normalizeLayouts,
   Page,
   PageProps,
+  resolveServerHead,
   router,
   SharedPageProps,
+  type ServerHeadOption,
 } from '@inertiajs/core'
 import {
   Component,
@@ -18,12 +20,14 @@ import {
   defineComponent,
   h,
   markRaw,
+  onMounted,
   Plugin,
   PropType,
   reactive,
   ref,
   shallowRef,
 } from 'vue'
+import { provideHydrationContext } from './hydration'
 import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
 import remember from './remember'
 import { VuePageHandlerArgs } from './types'
@@ -70,6 +74,8 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   titleCallback?: HeadManagerTitleCallback
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
+  serverHead?: ServerHeadOption
+  serverRendered?: boolean
 }
 
 export type InertiaApp = DefineComponent<InertiaAppProps>
@@ -110,6 +116,15 @@ const App: InertiaApp = defineComponent({
       type: Function as PropType<(name: string, page: Page) => unknown>,
       required: false,
     },
+    serverHead: {
+      type: [Boolean, String, Function] as PropType<ServerHeadOption>,
+      required: false,
+    },
+    serverRendered: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
   },
   setup({
     initialPage,
@@ -118,6 +133,8 @@ const App: InertiaApp = defineComponent({
     titleCallback,
     onHeadUpdate,
     defaultLayout,
+    serverHead,
+    serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
     page.value = { ...initialPage, flash: initialPage.flash ?? {} }
@@ -125,9 +142,20 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
 
-    headManager = createHeadManager(isServer, titleCallback || ((title: string) => title), onHeadUpdate || (() => {}))
+    headManager = createHeadManager(
+      isServer,
+      (title: string) => (titleCallback ? titleCallback(title, page.value!) : title),
+      onHeadUpdate || (() => {}),
+      resolveServerHead(initialPage, serverHead),
+    )
+
+    // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
+    const hydrated = ref(!serverRendered)
+    provideHydrationContext(hydrated)
 
     if (!isServer) {
+      onMounted(() => (hydrated.value = true))
+
       router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,
@@ -145,7 +173,12 @@ const App: InertiaApp = defineComponent({
         },
       })
 
-      router.on('navigate', () => headManager.forceUpdate())
+      const syncServerHead = (event: { detail: { page: Page } }) => {
+        headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+      }
+
+      router.on('navigate', syncServerHead)
+      router.on('clientVisit', syncServerHead)
     }
 
     return () => {

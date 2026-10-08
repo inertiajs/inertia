@@ -122,11 +122,27 @@ const Form = defineComponent({
       type: Function as PropType<FormComponentProps['onError']>,
       default: noop,
     },
+    onHttpException: {
+      type: Function as PropType<FormComponentProps['onHttpException']>,
+      default: noop,
+    },
+    onNetworkError: {
+      type: Function as PropType<FormComponentProps['onNetworkError']>,
+      default: noop,
+    },
+    onFlash: {
+      type: Function as PropType<FormComponentProps['onFlash']>,
+      default: noop,
+    },
     onSubmitComplete: {
       type: Function as PropType<FormComponentProps['onSubmitComplete']>,
       default: noop,
     },
     disableWhileProcessing: {
+      type: Boolean,
+      default: false,
+    },
+    cancelOnUnmount: {
       type: Boolean,
       default: false,
     },
@@ -232,7 +248,13 @@ const Form = defineComponent({
       (value) => form.setValidationTimeout(value),
     )
 
-    onBeforeUnmount(() => formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate)))
+    onBeforeUnmount(() => {
+      formEvents.forEach((e) => formElement.value?.removeEventListener(e, onFormUpdate))
+
+      if (props.cancelOnUnmount) {
+        form.cancel()
+      }
+    })
 
     const getFormData = (submitter?: FormSubmitter): FormData => new FormData(formElement.value, submitter)
 
@@ -286,6 +308,9 @@ const Form = defineComponent({
         onProgress: props.onProgress,
         onFinish: props.onFinish,
         onCancel: props.onCancel,
+        onHttpException: props.onHttpException,
+        onNetworkError: props.onNetworkError,
+        onFlash: props.onFlash,
         onSuccess: async (...args) => {
           const result = await props.onSuccess?.(...args)
           props.onSubmitComplete?.(exposed)
@@ -362,6 +387,7 @@ const Form = defineComponent({
       },
       reset,
       submit,
+      cancel: () => form.cancel(),
       defaults,
       getData,
       getFormData,

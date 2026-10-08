@@ -2,7 +2,7 @@ import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
-import { createApp, h } from 'vue'
+import { createApp, createSSRApp, h } from 'vue'
 import AppLayout from './Layouts/AppLayout.vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
 
@@ -43,7 +43,9 @@ createInertiaApp({
     return pages[`./Pages/${name}.vue`]
   },
   setup({ el, App, props, plugin }) {
-    const inst = createApp({ render: () => h(App, props) })
+    const inst = el.hasAttribute('data-server-rendered')
+      ? createSSRApp({ render: () => h(App, props) })
+      : createApp({ render: () => h(App, props) })
 
     if (!window.location.pathname.startsWith('/plugin/without')) {
       inst.use(plugin)
@@ -73,10 +75,22 @@ createInertiaApp({
       return DefaultLayout
     },
   }),
+  ...(params.has('withServerHead') && {
+    serverHead: true,
+  }),
+  ...(params.has('withServerHeadCallback') && {
+    serverHead: (page) => page.props.head as string[],
+  }),
+  ...(params.has('withServerHeadProp') && {
+    serverHead: 'metaTags',
+  }),
   ...(params.get('popover') === 'false' && {
     progress: { popover: false },
   }),
   ...(params.has('nonce') && {
     nonce: params.get('nonce') === 'default' ? 'test-default-nonce' : 'test-nonce',
+  }),
+  ...(params.has('withTitleCallback') && {
+    title: (title, page) => [title, page.props.titleSuffix].filter(Boolean).join(' | '),
   }),
 })

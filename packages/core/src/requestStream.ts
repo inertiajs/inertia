@@ -24,11 +24,19 @@ export class RequestStream {
     this.cancel({ interrupted: true }, false)
   }
 
-  public cancelInFlight({ prefetch = true, optimistic = true } = {}): void {
-    this.requests
-      .filter((request) => prefetch || !request.isPrefetch())
-      .filter((request) => optimistic || !request.isOptimistic())
-      .forEach((request) => request.cancel({ cancelled: true }))
+  public cancelInFlight(
+    options: { prefetch?: boolean; optimistic?: boolean } | ((request: Request) => boolean) = {},
+  ): void {
+    const shouldCancel =
+      typeof options === 'function'
+        ? options
+        : (request: Request) => {
+            const { prefetch = true, optimistic = true } = options
+
+            return (prefetch || !request.isPrefetch()) && (optimistic || !request.isOptimistic())
+          }
+
+    this.requests.filter(shouldCancel).forEach((request) => request.cancel({ cancelled: true }))
   }
 
   protected cancel({ cancelled = false, interrupted = false } = {}, force: boolean = false): void {

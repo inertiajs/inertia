@@ -71,6 +71,10 @@ export class RequestParams {
     return this.params.deferredProps === true
   }
 
+  public isPollRequest() {
+    return this.params.poll === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,

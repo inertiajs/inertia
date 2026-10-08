@@ -206,18 +206,19 @@ function extractSourceLocation(stack?: string): string | undefined {
   return undefined
 }
 
-export function classifySSRError(error: Error, component?: string, url?: string): ClassifiedSSRError {
+export function classifySSRError(error: unknown, component?: string, url?: string): ClassifiedSSRError {
+  const normalizedError = error instanceof Error ? error : new Error(typeof error === 'string' ? error : String(error))
   const timestamp = new Date().toISOString()
   const base = {
-    error: error.message,
+    error: normalizedError.message,
     component,
     url,
-    stack: error.stack,
-    sourceLocation: extractSourceLocation(error.stack),
+    stack: normalizedError.stack,
+    sourceLocation: extractSourceLocation(normalizedError.stack),
     timestamp,
   }
 
-  const browserApi = detectBrowserApi(error)
+  const browserApi = detectBrowserApi(normalizedError)
 
   if (browserApi) {
     return {
@@ -228,7 +229,7 @@ export function classifySSRError(error: Error, component?: string, url?: string)
     }
   }
 
-  if (isComponentResolutionError(error)) {
+  if (isComponentResolutionError(normalizedError)) {
     return {
       ...base,
       type: 'component-resolution',

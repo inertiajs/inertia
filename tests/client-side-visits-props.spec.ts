@@ -151,3 +151,30 @@ test.describe('Client-side visits with props manipulation', () => {
     })
   })
 })
+
+test('replaceProp preserves the identity of untouched props so memoized children do not re-render', async ({
+  page,
+}) => {
+  // Svelte stores page props as a deep $state that is reassigned wholesale, so a child's
+  // object prop re-proxies on every setPage and there is no memoized-child analog to observe.
+  // The identity guarantee itself is covered by the core setPathPreservingIdentity unit tests.
+  test.skip(process.env.PACKAGE === 'svelte', 'No memoized-child analog in Svelte')
+
+  await page.goto('/client-side-visit/replace-prop-rerender')
+
+  await expect(page.locator('#current-value')).toHaveText('Current value: John Doe')
+  await expect(page.locator('#memo-value')).toHaveText('Value: untouched')
+  const initialMemoRenderCount = await page.locator('#memo-render-count').textContent()
+
+  await page.getByRole('button', { name: 'Replace user.name' }).click()
+
+  await expect(page.locator('#current-value')).toHaveText('Current value: Jane Smith')
+  await expect(page.locator('#memo-render-count')).toHaveText(initialMemoRenderCount!)
+
+  const initialAvatarRenderCount = await page.locator('#avatar-render-count').textContent()
+
+  await page.getByRole('button', { name: 'Replace profile.name' }).click()
+
+  await expect(page.locator('#profile-name')).toHaveText('Profile name: Jane Smith')
+  await expect(page.locator('#avatar-render-count')).toHaveText(initialAvatarRenderCount!)
+})

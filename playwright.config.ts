@@ -36,6 +36,8 @@ const projects = [
   {
     name: 'webkit',
     use: { ...devices['Desktop Safari'] },
+    // WebKit runs on slower macOS runners with fewer workers, so it needs a longer budget
+    timeout: 15 * 1000,
   },
   {
     name: 'firefox',

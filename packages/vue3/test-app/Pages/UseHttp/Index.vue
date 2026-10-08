@@ -58,6 +58,8 @@ const errorMessage = ref('')
 const httpExceptionStatus = ref<number | null>(null)
 const httpExceptionBody = ref('')
 const networkErrorMessage = ref('')
+const validationOnErrorMessage = ref('')
+const validationExceptionMessage = ref('')
 
 const performSearch = async () => {
   try {
@@ -78,10 +80,17 @@ const performCreate = async () => {
 }
 
 const performValidation = async () => {
+  validationOnErrorMessage.value = ''
+  validationExceptionMessage.value = ''
+
   try {
-    await validateUser.post('/api/validate')
-  } catch {
-    // Errors are stored in validateUser.errors
+    await validateUser.post('/api/validate', {
+      onError: () => {
+        validationOnErrorMessage.value = 'onError called'
+      },
+    })
+  } catch (error: unknown) {
+    validationExceptionMessage.value = error instanceof Error ? error.message : 'Unknown validation exception'
   }
 }
 
@@ -215,6 +224,8 @@ const triggerNetworkError = async () => {
       <span v-if="validateUser.errors.email" id="validate-email-error">{{ validateUser.errors.email }}</span>
       <button @click="performValidation" id="validate-button">Validate</button>
       <div v-if="validateUser.hasErrors" id="validate-has-errors">Form has errors</div>
+      <div v-if="validationOnErrorMessage" id="validate-on-error">{{ validationOnErrorMessage }}</div>
+      <div v-if="validationExceptionMessage" id="validate-exception">{{ validationExceptionMessage }}</div>
       <button @click="validateUser.clearErrors()" id="clear-errors-button">Clear Errors</button>
       <button @click="validateUser.clearErrors('name')" id="clear-name-error-button">Clear Name Error</button>
       <button @click="validateUser.setError('name', 'Manual name error')" id="set-name-error-button">

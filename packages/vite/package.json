@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vite",
-  "version": "3.2.0",
+  "version": "3.8.0",
   "license": "MIT",
   "description": "Vite plugin for Inertia.js with SSR dev mode support.",
   "contributors": [
@@ -38,6 +38,8 @@
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
+    "@jridgewell/remapping": "^2.3.5",
+    "magic-string": "^0.30.21",
     "tinyglobby": "^0.2.15"
   },
   "peerDependencies": {
@@ -46,10 +48,10 @@
   "devDependencies": {
     "@types/estree": "^1.0.8",
     "@types/node": "^24.10.13",
-    "esbuild": "^0.27.3",
-    "esbuild-node-externals": "^1.20.1",
+    "esbuild": "^0.28.1",
+    "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.10",
-    "vitest": "^4.1.2"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.11"
   }
 }

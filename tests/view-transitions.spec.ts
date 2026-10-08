@@ -90,4 +90,54 @@ test.describe('View Transitions', () => {
     await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
     await expect(consoleMessages.errors).toEqual([])
   })
+
+  test('does not throw when a rapid navigation aborts an in-flight view transition', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Rapid navigation' }).click()
+
+    await expect(page).toHaveURL('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    // The second navigation aborts the first transition, rejecting its `ready` promise.
+    // It must be handled internally so it never surfaces as an unhandled rejection.
+    await page.waitForTimeout(500)
+    await expect(consoleMessages.errors).toEqual([])
+  })
+
+  test('does not throw when an in-flight view transition is aborted', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    // Chromium and Edge reject `finished` and `updateCallbackDone` when a transition is
+    // aborted, which a headless browser cannot trigger through tab switching.
+    await page.addInitScript(() => {
+      const startViewTransition = document.startViewTransition.bind(document)
+
+      document.startViewTransition = (callback) => {
+        const transition = startViewTransition(callback)
+        const aborted = () =>
+          Promise.reject(new DOMException('Transition was aborted because of invalid state', 'InvalidStateError'))
+
+        return {
+          ready: transition.ready,
+          finished: aborted(),
+          updateCallbackDone: aborted(),
+          types: transition.types,
+          skipTransition: () => transition.skipTransition(),
+        }
+      }
+    })
+
+    await page.goto('/view-transition/page-a')
+    await expect(page.getByText('Page A - View Transition Test')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Transition with boolean' }).click()
+
+    await expect(page).toHaveURL('/view-transition/page-b')
+    await expect(page.getByText('Page B - View Transition Test')).toBeVisible()
+    await expect(consoleMessages.errors).toEqual([])
+  })
 })

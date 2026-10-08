@@ -7,9 +7,184 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.2.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.8.0...3.x)
 
 - Nothing yet
+
+## [v3.8.0](https://github.com/inertiajs/inertia/compare/v3.7.1...v3.8.0) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Fix multi-byte UTF-8 corruption in SSR request body parsing by [@onk](https://github.com/onk) in https://github.com/inertiajs/inertia/pull/3248
+* Bump pnpm/action-setup from 6.0.10 to 6.1.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3261
+* [3.x] Fix core types when Axios is not installed by [@fouteox](https://github.com/fouteox) in https://github.com/inertiajs/inertia/pull/3258
+* [3.x] Compare asset versions before restoring history on a back/forward reload by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3264
+* [3.x] Prevent a stale optimistic response from reverting a newer optimistic update by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3245
+* [3.x] Prefer server.origin when resolving SSR CSS link URLs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3268
+* [3.x] Avoid top-level await in the generated SSR bundle by [@ramonmalcolm10](https://github.com/ramonmalcolm10) in https://github.com/inertiajs/inertia/pull/3239
+* [3.x] Forward missing Form visit callbacks by [@daleweaver777](https://github.com/daleweaver777) in https://github.com/inertiajs/inertia/pull/3262
+* [3.x] Add WhenMounted component by [@evan-burrell](https://github.com/evan-burrell) in https://github.com/inertiajs/inertia/pull/3218
+* [3.x] Improve tests in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3277
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3278
+* [3.x] Clean up in-flight cancelled prefetches by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3271
+* [3.x] Handle already-aborted signals in the XHR client by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3273
+* [3.x] Fix React InfiniteScroll scroll jump on Safari and CI flakiness by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3282
+* [3.x] Support big integers as native BigInt values by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3237
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3286
+* [3.x] Silence `state_referenced_locally` warning in Svelte `App` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3287
+
+### New Contributors
+
+* [@onk](https://github.com/onk) made their first contribution in https://github.com/inertiajs/inertia/pull/3248
+* [@fouteox](https://github.com/fouteox) made their first contribution in https://github.com/inertiajs/inertia/pull/3258
+* [@ramonmalcolm10](https://github.com/ramonmalcolm10) made their first contribution in https://github.com/inertiajs/inertia/pull/3239
+* [@daleweaver777](https://github.com/daleweaver777) made their first contribution in https://github.com/inertiajs/inertia/pull/3262
+* [@evan-burrell](https://github.com/evan-burrell) made their first contribution in https://github.com/inertiajs/inertia/pull/3218
+* [@gianpieropuleo](https://github.com/gianpieropuleo) made their first contribution in https://github.com/inertiajs/inertia/pull/3271
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.7.1...v3.8.0
+
+## [v3.7.1](https://github.com/inertiajs/inertia/compare/v3.7.0...v3.7.1) - 2026-09-11
+
+### What's Changed
+
+* [3.x] Prefer server.origin when resolving SSR CSS link URLs by [@RenautMestdagh](https://github.com/RenautMestdagh) in https://github.com/inertiajs/inertia/pull/3217
+* [3.x] Prevent unhandled rejection when a view transition is aborted mid-flight by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3230
+* [3.x] Clear the prefetch hover timer when a link is clicked by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3234
+* Revert "[3.x] Prefer server.origin when resolving SSR CSS link URLs" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3255
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3254
+* [3.x] Escape `<` in the initial page JSON by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3253
+
+### New Contributors
+
+* [@RenautMestdagh](https://github.com/RenautMestdagh) made their first contribution in https://github.com/inertiajs/inertia/pull/3217
+* [@lazerg](https://github.com/lazerg) made their first contribution in https://github.com/inertiajs/inertia/pull/3230
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.7.0...v3.7.1
+
+## [v3.7.0](https://github.com/inertiajs/inertia/compare/v3.6.1...v3.7.0) - 2026-08-18
+
+### What's Changed
+
+* Bump stefanzweifel/git-auto-commit-action from 7.1.0 to 7.2.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3192
+* [3.x] Guard Form getFormData against a missing form element by [@NiekNijland](https://github.com/NiekNijland) in https://github.com/inertiajs/inertia/pull/3203
+* [3.x] Preserve identity of untouched props in replaceProp by [@skryukov](https://github.com/skryukov) in https://github.com/inertiajs/inertia/pull/3194
+* [3.x] Fix React dropping the restored page on `back_forward` visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3196
+* [3.x] Don't cancel background async visits on navigation by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3198
+* Bump actions/setup-node from 6.4.0 to 7.0.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3205
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3207
+* Bump actions/checkout from 7.0.0 to 7.0.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3209
+* Bump pnpm/action-setup from 6.0.9 to 6.0.10 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3211
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3223
+* [3.x] Return `polling` state from `usePoll` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3220
+* [3.x] Preserve once props during instant visits by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3221
+* [3.x] Expose `cancel` on the `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3224
+* [3.x] Add `cancelOnUnmount` to the `<Form>` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3225
+
+### New Contributors
+
+* [@NiekNijland](https://github.com/NiekNijland) made their first contribution in https://github.com/inertiajs/inertia/pull/3203
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.6.1...v3.7.0
+
+## [v3.6.1](https://github.com/inertiajs/inertia/compare/v3.6.0...v3.6.1) - 2026-07-07
+
+### What's Changed
+
+* [3.x] Change Svelte render call to be asynchronous by [@buhrmi](https://github.com/buhrmi) in https://github.com/inertiajs/inertia/pull/3188
+* [3.x] Support raw request bodies in the built-in HTTP client by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3189
+* [3.x] Fix PHP 8.5 PDO deprecation notice in Playgrounds by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3190
+* Bump actions/cache from 5.0.5 to 6.1.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3181
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.6.0...v3.6.1
+
+## [v3.6.0](https://github.com/inertiajs/inertia/compare/v3.5.0...v3.6.0) - 2026-07-02
+
+### What's Changed
+
+* Bump the github-actions group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3167
+* [3.x]  Improve HTTPS Vite SSR performance on Linux with small response sizes by [@nckrtl](https://github.com/nckrtl) in https://github.com/inertiajs/inertia/pull/3183
+* [3.x] Defer forced reloads to a cancelable `location` event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3180
+* [3.x] Add poll marker to visit for polling requests by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3184
+* [3.x] Send `X-Requested-With` header from the built-in HTTP client by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3186
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.5.0...v3.6.0
+
+## [v3.5.0](https://github.com/inertiajs/inertia/compare/v3.4.0...v3.5.0) - 2026-06-25
+
+### What's Changed
+
+* [3.x] Fix invalid ARIA roles on default progress bar by [@atymic](https://github.com/atymic) in https://github.com/inertiajs/inertia/pull/3163
+* [3.x] Support anchor target attribute by [@devhammed](https://github.com/devhammed) in https://github.com/inertiajs/inertia/pull/3159
+* [3.x] Prevent unhandled rejection when a view transition is superseded by [@mortenhauberg](https://github.com/mortenhauberg) in https://github.com/inertiajs/inertia/pull/3165
+* [3.x] feat: Add page to titleCallback by [@mrleblanc101](https://github.com/mrleblanc101) in https://github.com/inertiajs/inertia/pull/3160
+* [3.x] Fix Svelte build failure from optional TypeScript parameters by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3173
+* Revert "[3.x] Fix Svelte build failure from optional TypeScript parameters" by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3174
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3169
+* [3.x] Add server provided head elements by [@benbjurstrom](https://github.com/benbjurstrom) in https://github.com/inertiajs/inertia/pull/3161
+* [3.x] fix(core): add async option to FormComponentOptions by [@sawirricardo](https://github.com/sawirricardo) in https://github.com/inertiajs/inertia/pull/3157
+* [3.x] fix(core): ensure robust SSR error classification by [@hamdyelbatal122](https://github.com/hamdyelbatal122) in https://github.com/inertiajs/inertia/pull/3151
+* [3.x] Do not throw handled useHttp validation errors by [@cyphercodes](https://github.com/cyphercodes) in https://github.com/inertiajs/inertia/pull/3142
+
+### New Contributors
+
+* [@atymic](https://github.com/atymic) made their first contribution in https://github.com/inertiajs/inertia/pull/3163
+* [@mrleblanc101](https://github.com/mrleblanc101) made their first contribution in https://github.com/inertiajs/inertia/pull/3160
+* [@benbjurstrom](https://github.com/benbjurstrom) made their first contribution in https://github.com/inertiajs/inertia/pull/3161
+* [@sawirricardo](https://github.com/sawirricardo) made their first contribution in https://github.com/inertiajs/inertia/pull/3157
+* [@hamdyelbatal122](https://github.com/hamdyelbatal122) made their first contribution in https://github.com/inertiajs/inertia/pull/3151
+* [@cyphercodes](https://github.com/cyphercodes) made their first contribution in https://github.com/inertiajs/inertia/pull/3142
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.4.0...v3.5.0
+
+## [v3.4.0](https://github.com/inertiajs/inertia/compare/v3.3.1...v3.4.0) - 2026-06-11
+
+### What's Changed
+
+* Bump actions/checkout from 6.0.2 to 6.0.3 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3145
+* [3.x] Add `cached` flag to the `inertia:navigate` event by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3146
+* [3.x] Add `inertia:clientVisit` event and visit correlation id by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3147
+* [3.x] Refactor visit ID to be a string by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3148
+* [3.x] Add page and visit id to error event detail by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3152
+* [3.x] Add internal request and response interceptors by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3153
+* [3.x] Bump Playground dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3154
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.3.1...v3.4.0
+
+## [v3.3.1](https://github.com/inertiajs/inertia/compare/v3.3.0...v3.3.1) - 2026-06-04
+
+### What's Changed
+
+* [3.x] Vue 3 Playground: Fixes scroll + code issues by [@yoeriboven](https://github.com/yoeriboven) in https://github.com/inertiajs/inertia/pull/3133
+* [3.x] Instant visit: only preserve scroll behavior on instant visit by [@yoeriboven](https://github.com/yoeriboven) in https://github.com/inertiajs/inertia/pull/3134
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3137
+* Dependabot cooldown + auto-merge by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3138
+
+### New Contributors
+
+* [@yoeriboven](https://github.com/yoeriboven) made their first contribution in https://github.com/inertiajs/inertia/pull/3133
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.3.0...v3.3.1
+
+## [v3.3.0](https://github.com/inertiajs/inertia/compare/v3.2.0...v3.3.0) - 2026-05-27
+
+### What's Changed
+
+* [3.x] Await user-provided Form onSuccess callback before completing submission by [@mattwigham](https://github.com/mattwigham) in https://github.com/inertiajs/inertia/pull/3122
+* [3.x] Migrate playgrounds from Prism to Laravel AI SDK by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3128
+* [3.x] Support network URLs for loading CSS assets in SSR dev server by [@simonellensohn](https://github.com/simonellensohn) in https://github.com/inertiajs/inertia/pull/3121
+* [3.x] Pass props to withApp callback by [@CL0Pinette](https://github.com/CL0Pinette) in https://github.com/inertiajs/inertia/pull/3125
+* [3.x] Run pnpm audit on push and releases, not on PRs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3129
+* [3.x] Fix Svelte infinite scroll unmount race by [@hschne](https://github.com/hschne) in https://github.com/inertiajs/inertia/pull/3127
+
+### New Contributors
+
+* [@mattwigham](https://github.com/mattwigham) made their first contribution in https://github.com/inertiajs/inertia/pull/3122
+* [@simonellensohn](https://github.com/simonellensohn) made their first contribution in https://github.com/inertiajs/inertia/pull/3121
+* [@CL0Pinette](https://github.com/CL0Pinette) made their first contribution in https://github.com/inertiajs/inertia/pull/3125
+* [@hschne](https://github.com/hschne) made their first contribution in https://github.com/inertiajs/inertia/pull/3127
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.2.0...v3.3.0
 
 ## [v3.2.0](https://github.com/inertiajs/inertia/compare/v3.1.1...v3.2.0) - 2026-05-20
 

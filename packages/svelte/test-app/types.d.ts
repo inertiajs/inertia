@@ -15,6 +15,7 @@ declare global {
       url: string
       page: Page
     }
+    _raw_body_response: unknown
     _inertia_page_key: string | undefined
     _inertia_props: PageProps
     _inertia_layout_id: number | string | undefined

@@ -8,11 +8,13 @@ import {
 } from './events'
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
+import { interceptors } from './interceptors'
+import { containsBigInt, stringifyJson } from './json'
 import { page as currentPage } from './page'
 import { RequestParams } from './requestParams'
 import { Response } from './response'
 import type { ActiveVisit, Page } from './types'
-import { HttpProgressEvent, HttpRequestHeaders } from './types'
+import { HttpProgressEvent, HttpRequestConfig, HttpRequestHeaders } from './types'
 import { urlWithoutHash } from './url'
 
 export class Request {
@@ -20,19 +22,19 @@ export class Request {
   protected cancelToken!: AbortController
   protected requestParams: RequestParams
   protected requestHasFinished = false
-  protected optimistic: boolean
+  protected optimisticId: number | null
 
   constructor(
     params: ActiveVisit,
     protected page: Page,
-    { optimistic = false }: { optimistic?: boolean } = {},
+    { optimisticId = null }: { optimisticId?: number | null } = {},
   ) {
     this.requestParams = RequestParams.create(params)
     this.cancelToken = new AbortController()
-    this.optimistic = optimistic
+    this.optimisticId = optimisticId
   }
 
-  public static create(params: ActiveVisit, page: Page, options?: { optimistic?: boolean }): Request {
+  public static create(params: ActiveVisit, page: Page, options?: { optimisticId?: number | null }): Request {
     return new Request(params, page, options)
   }
 
@@ -40,8 +42,12 @@ export class Request {
     return this.requestParams.isPrefetch()
   }
 
+  public getUrl(): URL {
+    return this.requestParams.all().url
+  }
+
   public isOptimistic(): boolean {
-    return this.optimistic
+    return this.optimisticId !== null
   }
 
   public isPendingOptimistic(): boolean {
@@ -49,7 +55,14 @@ export class Request {
   }
 
   public async send() {
-    this.requestParams.onCancelToken(() => this.cancel({ cancelled: true }))
+    this.requestParams.onCancelToken(() => {
+      // Once the response has arrived it's too late to cancel, the page is already being updated
+      if (this.response) {
+        return
+      }
+
+      this.cancel({ cancelled: true })
+    })
 
     fireStartEvent(this.requestParams.all())
     this.requestParams.onStart()
@@ -64,25 +77,35 @@ export class Request {
     // as a regular response once the prefetch is done
     const originallyPrefetch = this.requestParams.all().prefetch
 
+    const config: HttpRequestConfig = {
+      method: this.requestParams.all().method,
+      url: urlWithoutHash(this.requestParams.all().url).href,
+      data: this.requestParams.data(),
+      signal: this.cancelToken.signal,
+      headers: this.getHeaders(),
+      onUploadProgress: this.onProgress.bind(this),
+    }
+
+    // The HTTP clients would throw on a BigInt, so those bodies are encoded here
+    if (containsBigInt(config.data)) {
+      config.data = stringifyJson(config.data)
+      config.headers = { 'Content-Type': 'application/json', ...config.headers }
+    }
+
+    const processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
+
     return http
       .getClient()
-      .request({
-        method: this.requestParams.all().method,
-        url: urlWithoutHash(this.requestParams.all().url).href,
-        data: this.requestParams.data(),
-        signal: this.cancelToken.signal,
-        headers: this.getHeaders(),
-        onUploadProgress: this.onProgress.bind(this),
-      })
+      .request(processedConfig)
       .then((response) => {
-        this.response = Response.create(this.requestParams, response, this.page)
+        this.response = Response.create(this.requestParams, response, this.page, this.optimisticId)
 
         return this.response.handle()
       })
       .catch((error) => {
         // Handle HTTP error responses (4xx/5xx)
         if (error instanceof HttpResponseError) {
-          this.response = Response.create(this.requestParams, error.response, this.page)
+          this.response = Response.create(this.requestParams, error.response, this.page, this.optimisticId)
 
           return this.response.handle()
         }

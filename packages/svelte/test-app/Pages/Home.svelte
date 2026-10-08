@@ -52,4 +52,7 @@
 
   <a href={'#'} onclick={redirectHash} class="visits-redirect-hash">Manual Hash Redirect visit</a>
   <a href={'#'} onclick={redirectHashPost} class="visits-redirect-hash-post">Manual Hash Redirect POST visit</a>
+
+  <a href="/links/as-element" use:inertia class="link-targets-self" target="_self">Target _self</a>
+  <a href="/links/as-element" use:inertia class="link-targets-blank" target="_blank">Target _blank</a>
 </div>

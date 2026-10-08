@@ -67,6 +67,14 @@
       props: { baz: 'baz from client' },
     })
   }
+
+  const pushSameUrl = () => {
+    router.push({
+      url: '/client-side-visit',
+      component: 'ClientSideVisit/Page1',
+      props: (props: PageProps) => ({ ...props, foo: 'foo from client' }),
+    })
+  }
 </script>
 
 <div>
@@ -78,6 +86,7 @@
   </button>
   <button onclick={() => replaceAndPreserveStateWithErrors()}>Replace without errors</button>
   <button onclick={push}>Push</button>
+  <button onclick={pushSameUrl}>Push same URL</button>
   <button onclick={defaultErrors}>Errors (default)</button>
   <button onclick={bagErrors}>Errors (bag)</button>
   <div>Errors: {errors}</div>

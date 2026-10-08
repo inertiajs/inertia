@@ -35,22 +35,53 @@ test.describe('SSR', () => {
     })
   })
 
+  test('renders big integers on the server and hydrates them without a mismatch', async ({ page }) => {
+    const response = await page.request.get('/ssr/bigint')
+    const html = await response.text()
+
+    expect(html).toMatch(/big:.*900719925474099988/)
+    expect(html).toContain('{"$bigint":"900719925474099988"}')
+
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/bigint')
+
+    await expect(page.getByTestId('big')).toHaveText('big: 900719925474099988')
+    await expect(page.getByTestId('big-type')).toHaveText('type: bigint')
+    await expect(page.getByTestId('nested')).toHaveText('nested: 900719925474099988,2')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+
   test('embeds page data in a script element', async ({ page }) => {
     const response = await page.request.get('/ssr/page-with-script-element')
     const html = await response.text()
 
     expect(html).toContain('data-page="app"')
     expect(html).toContain('<script data-page="app" type="application/json">')
-    expect(html).toContain('Hello from script element! Escape <\\/script>.')
+    expect(html).toContain('Hello from script element! Escape \\u003c\\/script> and \\u003c!--\\u003cscript>.')
 
     await page.goto('/ssr/page-with-script-element')
+
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page With Script Element')
+
     const scriptContent = await page.locator('script[data-page="app"]').textContent()
     expect(JSON.parse(scriptContent || '')).toMatchObject({
       component: 'SSR/PageWithScriptElement',
       props: {
-        message: 'Hello from script element! Escape </script>.',
+        message: 'Hello from script element! Escape </script> and <!--<script>.',
       },
     })
+  })
+
+  test('renders multi-byte characters when the SSR request body spans multiple chunks', async ({ page }) => {
+    const response = await page.request.get('/ssr/multibyte-body')
+    const html = await response.text()
+
+    expect(html).not.toContain('\uFFFD')
+    expect(html).toMatch(/Characters:.*175000/)
   })
 
   test.describe('client-side navigation', () => {
@@ -89,6 +120,60 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('SSR WhenMounted', () => {
+  test('it renders the fallback instead of the children on the server', async ({ page }) => {
+    const response = await page.request.get('/ssr/when-mounted')
+    const html = await response.text()
+
+    expect(html).toContain('Loading widget...')
+    expect(html).not.toContain('Client path:')
+  })
+
+  test('it swaps the fallback for the children after hydration and never shows it again', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    await page.goto('/ssr/when-mounted')
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.getByTestId('when-mounted-fallback')).toHaveCount(0)
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('revisit-link').click()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    await page.getByTestId('leave-link').click()
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 2')
+
+    await page.goBack()
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('1')
+
+    const hydrationErrors = consoleMessages.messages.filter((msg) => msg.includes('Hydration'))
+    expect(hydrationErrors).toHaveLength(0)
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+
+  test('it does not show the fallback when arriving from another SSR page', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page, 1)
+
+    // Page1 has no WhenMounted, so the app has to be what records that hydration is over
+    await page.goto('/ssr/page1')
+    await expect(page.getByTestId('ssr-title')).toHaveText('SSR Page 1')
+
+    await page.getByTestId('to-when-mounted-link').click()
+
+    await expect(page.getByTestId('when-mounted-content')).toHaveText('Client path: /ssr/when-mounted')
+    await expect(page.locator('#fallback-renders')).toHaveText('0')
+
+    expect(consoleMessages.errors).toHaveLength(0)
+    expect(pageLoads.count).toBe(1)
+  })
+})
+
 test.describe('Head title escaping', () => {
   test.beforeEach(() => {
     test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
@@ -100,6 +185,25 @@ test.describe('Head title escaping', () => {
 
     expect(html).not.toContain('</title><script>alert(')
     expect(html).toContain('&lt;/title&gt;&lt;script&gt;')
+  })
+
+  test('it runs the titleCallback with the page during SSR', async ({ page }) => {
+    const response = await page.request.get('/ssr/head-title?withTitleCallback')
+    const html = await response.text()
+
+    expect(html).toContain('<title data-inertia="">SSR Head Title | From Props</title>')
+  })
+})
+
+test.describe('server head', () => {
+  test('it renders server-provided head elements in the SSR output', async ({ page }) => {
+    const response = await page.request.get('/ssr/server-head')
+    const html = await response.text()
+
+    expect(html).toContain('<title data-inertia="title">Server Head SSR</title>')
+    expect(html).toContain('<meta data-inertia="description" name="description" content="Rendered on the server">')
+    expect(html).toContain('<link data-inertia="canonical" rel="canonical" href="https://example.com/ssr">')
+    expect(html).toContain('Server head rendered on the server')
   })
 })
 
@@ -259,6 +363,30 @@ test.describe('SSR Auto Transform', () => {
 
       expect(html).toMatch(/Locale:.*en-CA/)
       expect(html).toMatch(/Component:.*SSR\/WithApp/)
+    })
+
+    test('it renders components with top-level await during SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
+      const response = await page.request.get('/ssr-auto/async')
+      const html = await response.text()
+
+      // Verify that the top-level await resolved correctly on the server
+      expect(html).toContain('Async SSR Page')
+      expect(html).toContain('Result: Hello from async SSR!')
+    })
+
+    test('it hydrates async components without mismatch after SSR', async ({ page }) => {
+      test.skip(process.env.SVELTE_ASYNC !== 'true', 'Requires the async Svelte compiler option')
+
+      consoleMessages.listen(page)
+
+      await page.goto('/ssr-auto/async')
+
+      await expect(page.getByTestId('async-ssr-title')).toHaveText('Async SSR Page')
+      await expect(page.getByTestId('async-result')).toHaveText('Result: Hello from async SSR!')
+
+      expect(consoleMessages.errors).toHaveLength(0)
     })
   })
 })

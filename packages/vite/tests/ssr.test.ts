@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
@@ -118,6 +119,29 @@ describe('SSR', () => {
       expect(logger.info).toHaveBeenCalledWith('Inertia SSR dev endpoint: /__inertia_ssr')
     })
 
+    it('disables Nagle on accepted HTTP server sockets', () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+      const httpServer = { on: vi.fn(), once: vi.fn() }
+
+      ;(server as any).httpServer = httpServer
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      expect(httpServer.on).toHaveBeenCalledWith('connection', expect.any(Function))
+
+      const connectionHandler = httpServer.on.mock.calls[0][1]
+      const socket = { setNoDelay: vi.fn() }
+
+      connectionHandler(socket)
+
+      expect(socket.setNoDelay).toHaveBeenCalledWith(true)
+    })
+
     it('does not add middleware when no entry exists', () => {
       mockExistsSync.mockReturnValue(false)
 
@@ -178,6 +202,37 @@ describe('SSR', () => {
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json')
       expect(res.end).toHaveBeenCalledWith(
         JSON.stringify({ head: ['<title>Test</title>'], body: '<div id="app">Hello</div>' }),
+      )
+    })
+
+    it('revives big integer markers when the page opted in', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+      const render = vi.fn().mockResolvedValue({ head: [], body: '' })
+
+      server.ssrLoadModule.mockResolvedValue({ default: render })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const page = { component: 'Test', props: { id: { $bigint: '900719925474099988' } } }
+
+      await middleware(
+        createMockRequest('POST', JSON.stringify({ ...page, preserveBigIntegers: true })),
+        createMockResponse(),
+        vi.fn(),
+      )
+
+      expect(render).toHaveBeenCalledWith(expect.objectContaining({ props: { id: 900719925474099988n } }))
+
+      await middleware(createMockRequest('POST', JSON.stringify(page)), createMockResponse(), vi.fn())
+
+      expect(render).toHaveBeenLastCalledWith(
+        expect.objectContaining({ props: { id: { $bigint: '900719925474099988' } } }),
       )
     })
 
@@ -426,6 +481,37 @@ describe('SSR', () => {
       const response = JSON.parse(res.end.mock.calls[0][0])
       expect(response.error).toContain('Invalid JSON in request body')
     })
+
+    it('reassembles multi-byte UTF-8 characters split across chunk boundaries', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+
+      let receivedPage: { component: string; props: { text: string } } | undefined
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockImplementation((page: { component: string; props: { text: string } }) => {
+          receivedPage = page
+          return Promise.resolve({ head: [], body: '<div id="app"></div>' })
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+
+      const body = Buffer.from(JSON.stringify({ component: 'Test', props: { text: '日本語のテスト' } }), 'utf8')
+      // Split inside "語" (a 3-byte UTF-8 sequence) so the chunk boundary lands mid-character.
+      const splitIndex = body.indexOf(Buffer.from('語', 'utf8')) + 1
+
+      const req = createMockRequestFromChunks('POST', [body.subarray(0, splitIndex), body.subarray(splitIndex)])
+
+      await middleware(req, createMockResponse(), vi.fn())
+
+      expect(receivedPage?.props.text).toBe('日本語のテスト')
+    })
   })
 
   describe('CSS collection', () => {
@@ -668,6 +754,98 @@ describe('SSR', () => {
       ])
     })
 
+    it('prefers server.origin over resolvedUrls', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger, {
+        origin: 'https://example.ddev.site:5173',
+        resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
+      })
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="https://example.ddev.site:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
+    it('ignores the placeholder origin set by the Laravel Vite plugin', async () => {
+      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger, {
+        origin: 'http://__laravel_vite_placeholder__.test',
+        resolvedUrls: { local: ['http://localhost:5173/'], network: [] },
+      })
+
+      const cssModule = {
+        url: '/resources/css/app.css',
+        id: '/project/resources/css/app.css',
+        importedModules: new Set(),
+      }
+      const entryModule = {
+        url: '/resources/js/ssr.ts',
+        id: '/project/resources/js/ssr.ts',
+        importedModules: new Set([cssModule]),
+      }
+
+      server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
+        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+      )
+      server.ssrLoadModule.mockResolvedValue({
+        default: vi.fn().mockResolvedValue({
+          head: [],
+          body: '<div id="app">Hello</div>',
+        }),
+      })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const req = createMockRequest('POST', JSON.stringify({ component: 'Test', props: {} }))
+      const res = createMockResponse()
+
+      await middleware(req, res, vi.fn())
+
+      const response = JSON.parse(res.end.mock.calls[0][0])
+      expect(response.head).toEqual([
+        '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css" data-vite-dev-id="/project/resources/css/app.css">',
+      ])
+    })
+
     it('does not duplicate base path in CSS link URLs', async () => {
       mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
 
@@ -753,13 +931,14 @@ describe('SSR', () => {
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
-      expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
-      expect(result).toContain('const render = await createInertiaApp')
-      expect(result).toContain('const renderPage = (page) => render(page, renderToString)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/vue3/server'")
+      expect(result?.code).toContain("import { renderToString } from 'vue/server-renderer'")
+      expect(result?.code).toContain('const renderPromise = createInertiaApp')
+      expect(result?.code).toContain('const render = await renderPromise')
+      expect(result?.code).toContain('return render(page, renderToString)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
     })
 
     it('wraps createInertiaApp with server bootstrap for Svelte', () => {
@@ -774,12 +953,41 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
-      expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('const renderPage = (page) => ssr(page, render)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/svelte/server'")
+      expect(result?.code).toContain("import { render } from 'svelte/server'")
+      expect(result?.code).toContain('const ssr = await ssrPromise')
+      expect(result?.code).toContain('return ssr(page, render)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
+    })
+
+    it('generates SSR bootstrap without top-level await', () => {
+      mockExistsSync.mockReturnValue(false)
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+
+      plugin.configResolved!(createMockConfig(logger, false))
+
+      const frameworks = [
+        { package: '@inertiajs/vue3', promise: 'renderPromise' },
+        { package: '@inertiajs/react', promise: 'renderPromise' },
+        { package: '@inertiajs/svelte', promise: 'ssrPromise' },
+      ]
+
+      frameworks.forEach(({ package: pkg, promise }) => {
+        const code = `import { createInertiaApp } from '${pkg}'
+createInertiaApp({ resolve: (name) => name })`
+        const result = plugin.transform!(code, 'app.ts', { ssr: true })?.code
+
+        // Any `await` left at the start of a line would be a top-level await
+        expect(result).not.toMatch(/^\S.*\bawait\b/m)
+        expect(result).toContain(`${promise}.catch((error) => console.error(error))`)
+
+        // A configure failure must surface per render instead of taking the server down
+        expect(result).not.toContain('process.exit')
+      })
     })
 
     it('passes SSR config to server', () => {
@@ -794,7 +1002,7 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
+      expect(result?.code).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
     })
 
     it('uses same transform for both dev and production', () => {
@@ -809,9 +1017,9 @@ createInertiaApp({})`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('export default renderPage')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
     })
 
     it('does not apply SSR transform to client builds', () => {
@@ -907,7 +1115,11 @@ function createMockConfig(
 
 function createMockServer(
   logger: ReturnType<typeof createMockLogger>,
-  { base = '/', resolvedUrls }: { base?: string; resolvedUrls?: { local: string[]; network: string[] } } = {},
+  {
+    base = '/',
+    origin,
+    resolvedUrls,
+  }: { base?: string; origin?: string; resolvedUrls?: { local: string[]; network: string[] } } = {},
 ): ViteDevServer {
   return {
     middlewares: { use: vi.fn() },
@@ -915,7 +1127,7 @@ function createMockServer(
     ssrFixStacktrace: vi.fn(),
     environments: { ssr: { moduleGraph: { getModuleById: vi.fn() } } },
     resolvedUrls: resolvedUrls ?? { local: [`http://localhost:5173${base}`], network: [] },
-    config: { logger, base, root: '/project' },
+    config: { logger, base, root: '/project', server: { origin } },
   } as unknown as ViteDevServer
 }
 
@@ -925,6 +1137,7 @@ function createMockRequest(method: string, body: string) {
 
   return {
     method,
+    setEncoding: vi.fn(),
     on: vi.fn((event: string, callback: (...args: unknown[]) => void) => {
       if (event === 'data') {
         dataCallback = callback
@@ -935,6 +1148,10 @@ function createMockRequest(method: string, body: string) {
       }
     }),
   }
+}
+
+function createMockRequestFromChunks(method: string, chunks: Buffer[]) {
+  return Object.assign(Readable.from(chunks, { objectMode: false }), { method })
 }
 
 function createMockResponse() {

@@ -5,6 +5,7 @@ import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
+import { parsePage } from './json'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
@@ -65,6 +66,7 @@ type Port = number
 const readableToString: (readable: IncomingMessage) => Promise<string> = (readable) =>
   new Promise((resolve, reject) => {
     let data = ''
+    readable.setEncoding('utf8')
     readable.on('data', (chunk) => (data += chunk))
     readable.on('end', () => resolve(data))
     readable.on('error', (err) => reject(err))
@@ -103,7 +105,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   }
 
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
-    const page: Page = JSON.parse(await readableToString(request))
+    const page: Page = parsePage(await readableToString(request))
 
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
