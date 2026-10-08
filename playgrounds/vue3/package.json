@@ -13,7 +13,7 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-vue": "^6.0.5",
-    "@vue/server-renderer": "^3.5.29",
+    "@vue/server-renderer": "^3.5.42",
     "autosize": "^6.0.1",
     "laravel-vite-plugin": "^3.0.0",
     "marked": "^17.0.3",
