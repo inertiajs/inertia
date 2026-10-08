@@ -2487,6 +2487,68 @@ test('it discards an in-flight infinite scroll request when navigating away', as
   expect(consoleMessages.errors).toHaveLength(0)
 })
 
+test('it discards an infinite scroll request that starts while navigating away', async ({ page }) => {
+  test.setTimeout(10_000)
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/navigate-away')
+
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('User 15')).toBeVisible()
+
+  await page.locator('#leave-slowly').click()
+  await scrollToBottom(page)
+  await expect(page.getByText('Loading...')).toBeVisible()
+
+  await expect(page).toHaveURL('/infinite-scroll/navigate-away/slow-article')
+  await expect(page.getByRole('heading', { name: 'Article Header' })).toBeVisible()
+
+  await page.waitForTimeout(1000)
+
+  expect(consoleMessages.errors).toHaveLength(0)
+
+  await page.goBack()
+
+  await expect(page).toHaveURL('/infinite-scroll/navigate-away')
+  await expect(page.getByText('User 15')).toBeVisible()
+  await expect(page.getByText('User 16')).toBeHidden()
+
+  await scrollToBottom(page)
+  await expect(page.getByText('Loading...')).toBeVisible()
+  await page.waitForResponse('**/infinite-scroll/navigate-away?page=2')
+
+  await expect(page.getByText('User 16')).toBeVisible()
+  await expect(page.getByText('User 30')).toBeVisible()
+  await expect(page.getByText('Loading...')).toBeHidden()
+
+  expect(consoleMessages.errors).toHaveLength(0)
+})
+
+test('it discards an infinite scroll request that starts while navigating to the same page', async ({ page }) => {
+  test.setTimeout(10_000)
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/navigate-away')
+
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+  await expect(page.getByText('User 15')).toBeVisible()
+
+  await page.locator('#sort-slowly').click()
+  await scrollToBottom(page)
+  await expect(page.getByText('Loading...')).toBeVisible()
+
+  await expect(page).toHaveURL('/infinite-scroll/navigate-away?order=desc')
+  await expect(page.getByText('User 40')).toBeVisible()
+  await expect(page.getByText('User 26')).toBeVisible()
+
+  await page.waitForTimeout(1000)
+
+  await expect(page.getByText('User 25')).toBeHidden()
+  await expect(page.getByText('User 16')).toBeHidden()
+
+  expect(consoleMessages.errors).toHaveLength(0)
+})
+
 test('it preserves validation errors when InfiniteScroll loads more data', async ({ page }) => {
   await page.goto('/infinite-scroll/preserve-errors')
 
