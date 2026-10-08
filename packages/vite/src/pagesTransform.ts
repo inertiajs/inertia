@@ -158,8 +158,9 @@ function injectResolver(
   }
 
   if (call.options.isEmpty) {
-    result.remove(call.options.start + 1, call.options.end - 1)
-    return result.appendLeft(call.options.start + 1, ` ${resolver} `)
+    replaceRange(result, call.options.start + 1, call.options.end - 1, ` ${resolver} `)
+
+    return result
   }
 
   return result.appendLeft(call.options.start + 1, ` ${resolver},`)

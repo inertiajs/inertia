@@ -144,12 +144,12 @@ export class ParsedCode {
   /**
    * Find all `createInertiaApp()` calls, including those nested inside exports.
    */
-  get inertiaCalls(): CallExpression[] {
-    const calls: CallExpression[] = []
+  get inertiaCalls(): NodeWithPos<CallExpression>[] {
+    const calls: NodeWithPos<CallExpression>[] = []
 
     this.walkAst(this.ast, (node) => {
       if (node.type === 'CallExpression' && this.isInertiaCall(node as CallExpression)) {
-        calls.push(node as CallExpression)
+        calls.push(node as NodeWithPos<CallExpression>)
       }
     })
 
@@ -178,11 +178,9 @@ export class ParsedCode {
   /** Find a `createInertiaApp()` call that has no `pages` or `resolve` property yet. */
   get callWithoutResolver(): { callEnd: number; options?: InertiaCallOptions } | null {
     for (const call of this.inertiaCalls) {
-      const callWithPos = call as NodeWithPos<CallExpression>
-
       // Empty call: createInertiaApp()
       if (call.arguments.length === 0) {
-        return { callEnd: callWithPos.end }
+        return { callEnd: call.end }
       }
 
       // Non-object argument - can't inject resolver
@@ -202,7 +200,7 @@ export class ParsedCode {
       }
 
       return {
-        callEnd: callWithPos.end,
+        callEnd: call.end,
         options: { start: obj.start, end: obj.end, isEmpty: obj.properties.length === 0 },
       }
     }

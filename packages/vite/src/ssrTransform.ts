@@ -7,7 +7,7 @@
  */
 
 import MagicString from 'magic-string'
-import { type NodeWithPos, ParsedCode } from './astUtils'
+import { ParsedCode } from './astUtils'
 import { replaceRange } from './sourceMap'
 import type { FrameworkConfig, SSROptions } from './types'
 
@@ -55,10 +55,9 @@ export function wrapWithServerBootstrap(
 
     const result = new MagicString(code)
     // Custom templates may rewrite the call. Only map an unchanged expression.
-    const generatedCall = ParsedCode.from(ssrCode)?.inertiaCalls.find((candidate) => {
-      const { start, end } = candidate as NodeWithPos<typeof candidate>
-      return ssrCode.slice(start, end) === configureCall
-    }) as NodeWithPos<typeof call> | undefined
+    const generatedCall = ParsedCode.from(ssrCode)?.inertiaCalls.find(
+      (candidate) => ssrCode.slice(candidate.start, candidate.end) === configureCall,
+    )
 
     if (generatedCall) {
       replaceRange(result, statement.start, call.start, ssrCode.slice(0, generatedCall.start))
@@ -78,9 +77,7 @@ export function wrapWithServerBootstrap(
     const result = new MagicString(code)
 
     replaceRange(result, statement.start, callback.start, 'const renderPage = ')
-    replaceRange(
-      result,
-      callback.end,
+    result.appendLeft(
       callback.end,
       `
 
