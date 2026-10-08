@@ -379,6 +379,7 @@ export class Router {
 
   public clearHistory(): void {
     history.clear()
+    prefetchedRequests.removeAll()
   }
 
   public decryptHistory(): Promise<Page> {
