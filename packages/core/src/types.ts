@@ -907,6 +907,7 @@ export interface UseInfiniteScrollDataManager {
   fetchNext: (reloadOptions?: ReloadOptions) => void
   fetchPrevious: (reloadOptions?: ReloadOptions) => void
   removeEventListener: () => void
+  flush: () => void
 }
 
 export interface UseInfiniteScrollElementManager {
