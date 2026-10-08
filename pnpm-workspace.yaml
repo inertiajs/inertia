@@ -13,3 +13,4 @@ onlyBuiltDependencies:
 
 overrides:
   cookie: '>=0.7.0'
+  '@tailwindcss/typography>postcss-selector-parser': '^7.1.6'
