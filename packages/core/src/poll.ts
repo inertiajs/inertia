@@ -101,7 +101,7 @@ export class Poll {
 
     const remaining = this.interval - (Date.now() - this.lastPolledAt)
 
-    if (false && remaining > 0) {
+    if (remaining > 0) {
       this.timeoutId = window.setTimeout(() => {
         this.timeoutId = null
         this.resume()
