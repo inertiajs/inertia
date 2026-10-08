@@ -1,4 +1,4 @@
-import { PollOptions } from './types'
+import { PollBackgroundOption, PollOptions } from './types'
 
 type PollHooks = {
   onStart: (cancel: VoidFunction) => void
@@ -10,8 +10,8 @@ export type PollCallback = (hooks: PollHooks) => void
 export class Poll {
   protected intervalId: number | null = null
   protected timeoutId: number | null = null
-  protected throttle = false
-  protected keepAlive = false
+  protected hidden = false
+  protected background: PollBackgroundOption
   protected cb: PollCallback
   protected interval: number
   protected cbCount = 0
@@ -20,9 +20,11 @@ export class Poll {
   protected currentCancel: VoidFunction | null = null
   protected stopped = true
   protected instanceId = 0
+  protected lastPolledAt = 0
 
   constructor(interval: number, cb: PollCallback, options: PollOptions) {
-    this.keepAlive = options.keepAlive ?? false
+    this.background = options.background ?? (options.keepAlive ? 'continue' : 'throttle')
+    this.hidden = typeof document !== 'undefined' && document.hidden
     this.mode = options.mode ?? 'overlap'
 
     this.cb = cb
@@ -38,7 +40,88 @@ export class Poll {
     this.instanceId++
     this.inFlight = false
     this.currentCancel = null
+    this.clearTimers()
+  }
 
+  public start() {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    this.stop()
+    this.stopped = false
+    this.lastPolledAt = Date.now()
+
+    if (this.isPaused()) {
+      return
+    }
+
+    if (this.mode === 'rest') {
+      this.scheduleNext()
+      return
+    }
+
+    this.startInterval()
+  }
+
+  public isInBackground(hidden: boolean) {
+    if (hidden === this.hidden) {
+      return
+    }
+
+    this.hidden = hidden
+
+    if (this.isThrottled()) {
+      this.cbCount = 0
+    }
+
+    if (this.background !== 'pause') {
+      return
+    }
+
+    if (hidden) {
+      this.clearTimers()
+    } else {
+      this.resume()
+    }
+  }
+
+  protected isThrottled(): boolean {
+    return this.hidden && this.background === 'throttle'
+  }
+
+  protected isPaused(): boolean {
+    return this.hidden && this.background === 'pause'
+  }
+
+  protected resume() {
+    if (this.stopped || (this.mode === 'rest' && this.inFlight)) {
+      return
+    }
+
+    const remaining = this.interval - (Date.now() - this.lastPolledAt)
+
+    if (remaining > 0) {
+      this.timeoutId = window.setTimeout(() => {
+        this.timeoutId = null
+        this.resume()
+      }, remaining)
+
+      return
+    }
+
+    this.fire()
+
+    if (this.mode !== 'rest') {
+      this.startInterval()
+    }
+  }
+
+  protected startInterval() {
+    this.intervalId = window.setInterval(() => this.tick(), this.interval)
+  }
+
+  protected clearTimers() {
     if (this.intervalId) {
       clearInterval(this.intervalId)
       this.intervalId = null
@@ -50,32 +133,8 @@ export class Poll {
     }
   }
 
-  public start() {
-    if (typeof window === 'undefined') {
-      return
-    }
-
-    this.stop()
-    this.stopped = false
-
-    if (this.mode === 'rest') {
-      this.scheduleNext()
-      return
-    }
-
-    this.intervalId = window.setInterval(() => this.tick(), this.interval)
-  }
-
-  public isInBackground(hidden: boolean) {
-    this.throttle = this.keepAlive ? false : hidden
-
-    if (this.throttle) {
-      this.cbCount = 0
-    }
-  }
-
   protected scheduleNext() {
-    if (this.stopped) {
+    if (this.stopped || this.isPaused()) {
       return
     }
 
@@ -86,13 +145,15 @@ export class Poll {
   }
 
   protected tick() {
-    if (!this.throttle || this.cbCount % 10 === 0) {
+    const throttled = this.isThrottled()
+
+    if (!throttled || this.cbCount % 10 === 0) {
       this.fire()
     } else if (this.mode === 'rest') {
       this.scheduleNext()
     }
 
-    if (this.throttle) {
+    if (throttled) {
       this.cbCount++
     }
   }
@@ -101,6 +162,8 @@ export class Poll {
     if (this.inFlight && this.mode === 'cancel') {
       this.currentCancel?.()
     }
+
+    this.lastPolledAt = Date.now()
 
     const instance = this.instanceId
 
@@ -122,6 +185,7 @@ export class Poll {
         this.currentCancel = null
 
         if (this.mode === 'rest') {
+          this.lastPolledAt = Date.now()
           this.scheduleNext()
         }
       },

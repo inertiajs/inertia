@@ -526,7 +526,11 @@ export type ReloadOptions<T extends RequestPayload = RequestPayload> = Omit<
   'preserveScroll' | 'preserveState'
 >
 
+export type PollBackgroundOption = 'throttle' | 'pause' | 'continue'
+
 export type PollOptions = {
+  background?: PollBackgroundOption
+  /** @deprecated Use `background: 'continue'` instead. */
   keepAlive?: boolean
   autoStart?: boolean
   mode?: 'overlap' | 'cancel' | 'rest'
