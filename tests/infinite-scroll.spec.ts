@@ -2600,3 +2600,31 @@ test('it does not crash when InfiniteScroll unmounts before deferred setup runs'
   expect(consoleMessages.messages).toContain('marker destroyed')
   expect(consoleMessages.errors).toEqual([])
 })
+
+test('it does not crash or remember stale elements when InfiniteScroll unmounts right after its items change', async ({
+  page,
+}) => {
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/unmount-after-mutation')
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add User and Unmount' }).click()
+  await expect(page.locator('#status')).toHaveText('Mounted: false')
+
+  await page.waitForTimeout(400)
+
+  expect(consoleMessages.errors).toEqual([])
+
+  await page.goto('/infinite-scroll/unmount-after-mutation')
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add User and Visit Home' }).click()
+  await page.waitForURL('/')
+  await page.waitForTimeout(400)
+
+  expect(consoleMessages.errors).toEqual([])
+  expect(
+    await page.evaluate(() => window.testing.Inertia.restore('inertia:infinite-scroll-elements:users')),
+  ).toBeUndefined()
+})
