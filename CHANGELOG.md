@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.9.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.9.1...3.x)
 
 - Nothing yet
+
+## [v3.9.1](https://github.com/inertiajs/inertia/compare/v3.9.0...v3.9.1) - 2026-10-09
+
+### What's Changed
+
+* [3.x] Only send the XSRF token header to same-origin URLs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3313
+* [3.x] Use a unique IV for every encrypted history entry by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3315
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.9.0...v3.9.1
 
 ## [v3.9.0](https://github.com/inertiajs/inertia/compare/v3.8.0...v3.9.0) - 2026-10-09
 
