@@ -460,7 +460,7 @@ export class Router {
   }
 
   public decryptHistory(): Promise<Page> {
-    return history.decrypt()
+    return history.decryptInitialPage()
   }
 
   public resolveComponent(component: string, page?: Page): Promise<Component> {
