@@ -5,22 +5,23 @@ import { navigationType } from './navigationType'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
 import { SessionStorage } from './sessionStorage'
-import { LocationVisit, Page } from './types'
+import { LocationVisit } from './types'
 import { uid } from './uid'
 
 export class InitialVisit {
   public static handle(): void {
-    this.clearRememberedStateOnReload()
+    this.restoreRememberedState()
 
     const scenarios = [this.handleBackForward, this.handleLocation, this.handleDefault]
 
     scenarios.find((handler) => handler.bind(this)())
   }
 
-  protected static clearRememberedStateOnReload(): void {
-    if (navigationType.isReload()) {
-      history.deleteState(history.rememberedState)
-      history.clearInitialState(history.rememberedState)
+  protected static restoreRememberedState(): void {
+    const initialPage = history.pullInitialPage()
+
+    if (navigationType.isBackForward() && initialPage?.version === currentPage.get().version) {
+      currentPage.remember(initialPage.rememberedState ?? {})
     }
   }
 
@@ -69,31 +70,22 @@ export class InitialVisit {
       currentPage.setUrlHash(window.location.hash)
     }
 
-    history
-      .decrypt(currentPage.get())
-      .then(() => {
-        const visitId = uid()
-        const rememberedState = history.getState<Page['rememberedState']>(history.rememberedState, {})
-        const scrollRegions = history.getScrollRegions()
-        currentPage.remember(rememberedState)
+    const visitId = uid()
+    const scrollRegions = history.getScrollRegions()
 
-        currentPage
-          .set(currentPage.get(), {
-            preserveScroll: locationVisit.preserveScroll,
-            preserveState: true,
-            initialRender: true,
-            visitId,
-          })
-          .then(() => {
-            if (locationVisit.preserveScroll) {
-              Scroll.restore(scrollRegions)
-            }
-
-            this.fireInitialEvents(visitId)
-          })
+    currentPage
+      .set(currentPage.get(), {
+        preserveScroll: locationVisit.preserveScroll,
+        preserveState: true,
+        initialRender: true,
+        visitId,
       })
-      .catch(() => {
-        eventHandler.onMissingHistoryItem()
+      .then(() => {
+        if (locationVisit.preserveScroll) {
+          Scroll.restore(scrollRegions)
+        }
+
+        this.fireInitialEvents(visitId)
       })
 
     return true

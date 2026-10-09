@@ -11,12 +11,10 @@ const queue = new Queue<Promise<void>>()
 const isChromeIOS = !isServer && /CriOS/.test(window.navigator.userAgent)
 
 class History {
-  public rememberedState = 'rememberedState' as const
-  public scrollRegions = 'scrollRegions' as const
   public preserveUrl = false
   protected current: Partial<Page> = {}
-  // We need initialState for `restore`
-  protected initialState: Partial<Page> | null = null
+  // The history entry decrypted before the first render, so a back/forward load can restore its remembered state
+  protected initialPage: Page | null = null
 
   public remember(data: unknown, key: string): void {
     this.replaceState({
@@ -30,9 +28,7 @@ class History {
 
   public restore(key: string): unknown {
     if (!isServer) {
-      return this.current[this.rememberedState]?.[key] !== undefined
-        ? this.current[this.rememberedState]?.[key]
-        : this.initialState?.[this.rememberedState]?.[key]
+      return currentPage.get()?.rememberedState?.[key]
     }
   }
 
@@ -103,14 +99,24 @@ class History {
         throw new Error('Unable to decrypt history')
       }
 
-      if (this.initialState === null) {
-        this.initialState = data ?? undefined
-      } else {
-        this.current = data ?? {}
-      }
-
       return data
     })
+  }
+
+  public decryptInitialPage(): Promise<Page> {
+    return this.decrypt().then((page) => {
+      this.initialPage = page
+
+      return page
+    })
+  }
+
+  public pullInitialPage(): Page | null {
+    const page = this.initialPage
+
+    this.initialPage = null
+
+    return page
   }
 
   protected decryptPageData(pageData: ArrayBuffer | Page | null): Promise<Page | null> {
@@ -280,24 +286,6 @@ class History {
     })
   }
 
-  public getState<T>(key: keyof Page, defaultValue?: T): any {
-    return this.current?.[key] ?? defaultValue
-  }
-
-  public deleteState(key: keyof Page) {
-    if (this.current[key] !== undefined) {
-      delete this.current[key]
-      this.replaceState(this.current as Page)
-    }
-  }
-
-  public clearInitialState(key: keyof Page) {
-    if (this.initialState && this.initialState[key] !== undefined) {
-      // The initial state can be the same object as the current page, so replace it instead of mutating it
-      this.initialState = { ...this.initialState, [key]: undefined }
-    }
-  }
-
   public browserHasHistoryEntry(): boolean {
     return !isServer && !!window.history.state?.page
   }
@@ -313,10 +301,6 @@ class History {
 
   public isValidState(state: any): boolean {
     return !!state.page
-  }
-
-  public getAllState(): Page {
-    return this.current as Page
   }
 }
 
