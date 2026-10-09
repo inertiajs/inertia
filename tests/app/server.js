@@ -1217,6 +1217,30 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/encrypted-history/public', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Public page' },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/private', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Private page', token: randomUUID() },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/logout', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Logged out' },
+    clearHistory: true,
+  })
+})
+
 app.get('/history/version/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Version',
