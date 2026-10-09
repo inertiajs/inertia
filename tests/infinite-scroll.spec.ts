@@ -2601,7 +2601,9 @@ test('it does not crash when InfiniteScroll unmounts before deferred setup runs'
   expect(consoleMessages.errors).toEqual([])
 })
 
-test('it does not crash or remember stale elements when InfiniteScroll unmounts right after its items change', async ({ page }) => {
+test('it does not crash or remember stale elements when InfiniteScroll unmounts right after its items change', async ({
+  page,
+}) => {
   consoleMessages.listen(page)
 
   await page.goto('/infinite-scroll/unmount-after-mutation')
