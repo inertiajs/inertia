@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.28...2.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v2.3.29...2.x)
 
 - Nothing yet
+
+## [v2.3.29](https://github.com/inertiajs/inertia/compare/v2.3.28...v2.3.29) - 2026-10-09
+
+### What's Changed
+
+* Bump pnpm/action-setup from 6.0.10 to 6.1.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3260
+* [2.x] Flush prefetch cache on clear history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3316
+* [2.x] Use a unique IV for every encrypted history entry by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3317
+* [2.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3318
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v2.3.28...v2.3.29
 
 ## [v2.3.28](https://github.com/inertiajs/inertia/compare/v2.3.27...v2.3.28) - 2026-09-11
 
