@@ -15,8 +15,7 @@
             event.preventDefault()
             submit()
           }
-        }}
-      ></textarea>
+        }}></textarea>
     {/snippet}
   </Form>
 </div>
