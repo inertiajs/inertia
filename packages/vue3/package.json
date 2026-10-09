@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vue3",
-  "version": "3.7.1",
+  "version": "3.9.0",
   "license": "MIT",
   "description": "The Vue 3 adapter for Inertia.js",
   "contributors": [
@@ -55,7 +55,7 @@
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vue": "^3.5.29"
+    "vue": "^3.5.43"
   },
   "peerDependencies": {
     "vue": "^3.0.0"

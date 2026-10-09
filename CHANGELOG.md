@@ -7,9 +7,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.7.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.9.0...3.x)
 
 - Nothing yet
+
+## [v3.9.0](https://github.com/inertiajs/inertia/compare/v3.8.0...v3.9.0) - 2026-10-09
+
+### What's Changed
+
+* [3.x] Drain tasks added while the queue is settling by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3276
+* [3.x] Let a history restore supersede a page update that is still resolving by [@thecrazybob](https://github.com/thecrazybob) in https://github.com/inertiajs/inertia/pull/3274
+* [3.x] Add `type` to the `navigate` event detail by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3291
+* [3.x] Handle QuotaExceededError in history.replaceState by [@danielperez9430](https://github.com/danielperez9430) in https://github.com/inertiajs/inertia/pull/3280
+* [3.x] Preserve sourcemaps in Vite entry transforms by [@fouteox](https://github.com/fouteox) in https://github.com/inertiajs/inertia/pull/3257
+* [3.x] Flush the prefetch cache when clearing history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3307
+* [3.x] Discard `<InfiniteScroll>` requests that outlive the component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3308
+* [3.x] Add `background` option to pause polling in background tabs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3292
+* [3.x] Fix Svelte `<Form>` error when a focused field unmounts by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3309
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3310
+* [3.x] Stop `useRemember` from restoring an earlier page's state on new visits by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3302
+* [3.x] Fix `<InfiniteScroll>` error when unmounting right after its items change by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3312
+
+### New Contributors
+
+* [@thecrazybob](https://github.com/thecrazybob) made their first contribution in https://github.com/inertiajs/inertia/pull/3274
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.8.0...v3.9.0
+
+## [v3.8.0](https://github.com/inertiajs/inertia/compare/v3.7.1...v3.8.0) - 2026-10-01
+
+### What's Changed
+
+* [3.x] Fix multi-byte UTF-8 corruption in SSR request body parsing by [@onk](https://github.com/onk) in https://github.com/inertiajs/inertia/pull/3248
+* Bump pnpm/action-setup from 6.0.10 to 6.1.0 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3261
+* [3.x] Fix core types when Axios is not installed by [@fouteox](https://github.com/fouteox) in https://github.com/inertiajs/inertia/pull/3258
+* [3.x] Compare asset versions before restoring history on a back/forward reload by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3264
+* [3.x] Prevent a stale optimistic response from reverting a newer optimistic update by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3245
+* [3.x] Prefer server.origin when resolving SSR CSS link URLs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3268
+* [3.x] Avoid top-level await in the generated SSR bundle by [@ramonmalcolm10](https://github.com/ramonmalcolm10) in https://github.com/inertiajs/inertia/pull/3239
+* [3.x] Forward missing Form visit callbacks by [@daleweaver777](https://github.com/daleweaver777) in https://github.com/inertiajs/inertia/pull/3262
+* [3.x] Add WhenMounted component by [@evan-burrell](https://github.com/evan-burrell) in https://github.com/inertiajs/inertia/pull/3218
+* [3.x] Improve tests in CI by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3277
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3278
+* [3.x] Clean up in-flight cancelled prefetches by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3271
+* [3.x] Handle already-aborted signals in the XHR client by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3273
+* [3.x] Fix React InfiniteScroll scroll jump on Safari and CI flakiness by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3282
+* [3.x] Support big integers as native BigInt values by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3237
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3286
+* [3.x] Silence `state_referenced_locally` warning in Svelte `App` component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3287
+
+### New Contributors
+
+* [@onk](https://github.com/onk) made their first contribution in https://github.com/inertiajs/inertia/pull/3248
+* [@fouteox](https://github.com/fouteox) made their first contribution in https://github.com/inertiajs/inertia/pull/3258
+* [@ramonmalcolm10](https://github.com/ramonmalcolm10) made their first contribution in https://github.com/inertiajs/inertia/pull/3239
+* [@daleweaver777](https://github.com/daleweaver777) made their first contribution in https://github.com/inertiajs/inertia/pull/3262
+* [@evan-burrell](https://github.com/evan-burrell) made their first contribution in https://github.com/inertiajs/inertia/pull/3218
+* [@gianpieropuleo](https://github.com/gianpieropuleo) made their first contribution in https://github.com/inertiajs/inertia/pull/3271
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.7.1...v3.8.0
 
 ## [v3.7.1](https://github.com/inertiajs/inertia/compare/v3.7.0...v3.7.1) - 2026-09-11
 

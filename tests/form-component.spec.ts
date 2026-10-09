@@ -740,6 +740,20 @@ test.describe('Form Component', () => {
     expect(consoleMessages.errors).toEqual([])
   })
 
+  test('does not throw when a focused field unmounts after a successful submission', async ({ page }) => {
+    consoleMessages.listen(page)
+
+    await page.goto('/form-component/submit-on-enter')
+
+    await page.fill('#message', 'Hello')
+    await page.locator('#message').press('Enter')
+
+    const dump = await shouldBeDumpPage(page, 'post')
+
+    expect(dump.form).toEqual({ message: 'Hello' })
+    expect(consoleMessages.errors).toEqual([])
+  })
+
   test.describe('Cancel On Unmount', () => {
     test('cancels an in-flight submission when the form unmounts', async ({ page }) => {
       await page.goto('/form-component/unmount-cancel/yes')
