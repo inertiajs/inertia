@@ -14,9 +14,13 @@ onlyBuiltDependencies:
 overrides:
   cookie: '>=0.7.0'
   esbuild: '>=0.25.0 <0.26.0'
+  '@tailwindcss/typography>postcss-selector-parser': '^7.1.6'
 
 auditConfig:
   ignoreGhsas:
+    # braces: disputed upstream with no fix planned, only reachable through dev tooling (es-check, nodemon)
+    - GHSA-vfj7-8cjw-p6xm
+
     # The advisories below only affect svelte 4.x and vite 5.x, which are pinned to the
     # Svelte 4 toolchain (vite-plugin-svelte@3) we keep supporting on the 2.x line. Both
     # are on their latest 4.x/5.x release and neither line received a backported fix.
