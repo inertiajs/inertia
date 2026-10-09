@@ -1,11 +1,19 @@
 <script lang="ts">
-  import { router } from '@inertiajs/svelte'
+  import { router, useHttp } from '@inertiajs/svelte'
 
   let { safe, big, negative, nested, huge, collision, echoedType } = $props()
 
   const loadReloadData = () => router.get('/bigint/reload')
   const loadCollisionData = () => router.get('/bigint/collision')
   const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666n })
+
+  const http = useHttp({ value: 111222333444555666n })
+  let httpEcho = $state<string | null>(null)
+  const submitHttpEcho = () =>
+    http
+      .post('/api/bigint/echo')
+      .then((response: any) => (httpEcho = `${response.value} (${response.type})`))
+      .catch((error: Error) => (httpEcho = `error: ${error.message}`))
 </script>
 
 <div>
@@ -29,4 +37,9 @@
   <button onclick={loadReloadData}>Load reload data</button>
   <button onclick={loadCollisionData}>Load collision data</button>
   <button onclick={submitEcho}>Submit echo</button>
+  <button onclick={submitHttpEcho}>Submit useHttp echo</button>
+
+  {#if httpEcho}
+    <p id="http-echo">{httpEcho}</p>
+  {/if}
 </div>
