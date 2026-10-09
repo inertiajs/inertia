@@ -7,9 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.8.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.9.0...3.x)
 
 - Nothing yet
+
+## [v3.9.0](https://github.com/inertiajs/inertia/compare/v3.8.0...v3.9.0) - 2026-10-09
+
+### What's Changed
+
+* [3.x] Drain tasks added while the queue is settling by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3276
+* [3.x] Let a history restore supersede a page update that is still resolving by [@thecrazybob](https://github.com/thecrazybob) in https://github.com/inertiajs/inertia/pull/3274
+* [3.x] Add `type` to the `navigate` event detail by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3291
+* [3.x] Handle QuotaExceededError in history.replaceState by [@danielperez9430](https://github.com/danielperez9430) in https://github.com/inertiajs/inertia/pull/3280
+* [3.x] Preserve sourcemaps in Vite entry transforms by [@fouteox](https://github.com/fouteox) in https://github.com/inertiajs/inertia/pull/3257
+* [3.x] Flush the prefetch cache when clearing history by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3307
+* [3.x] Discard `<InfiniteScroll>` requests that outlive the component by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3308
+* [3.x] Add `background` option to pause polling in background tabs by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3292
+* [3.x] Fix Svelte `<Form>` error when a focused field unmounts by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3309
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3310
+* [3.x] Stop `useRemember` from restoring an earlier page's state on new visits by [@gianpieropuleo](https://github.com/gianpieropuleo) in https://github.com/inertiajs/inertia/pull/3302
+* [3.x] Fix `<InfiniteScroll>` error when unmounting right after its items change by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3312
+
+### New Contributors
+
+* [@thecrazybob](https://github.com/thecrazybob) made their first contribution in https://github.com/inertiajs/inertia/pull/3274
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.8.0...v3.9.0
 
 ## [v3.8.0](https://github.com/inertiajs/inertia/compare/v3.7.1...v3.8.0) - 2026-10-01
 
