@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const multer = require('multer')
 const { showServerStatus } = require('./server-status')
 const { getUserNames, paginateUsers } = require('./eloquent')
+const { randomUUID } = require('crypto')
 
 const app = express()
 
@@ -878,6 +879,30 @@ app.get('/history/:pageNumber', (req, res) => {
     },
     encryptHistory: req.params.pageNumber === '3' || req.params.pageNumber === '5',
     clearHistory: req.params.pageNumber === '4',
+  })
+})
+
+app.get('/encrypted-history/public', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Public page' },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/private', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Private page', token: randomUUID() },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/logout', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Logged out' },
+    clearHistory: true,
   })
 })
 

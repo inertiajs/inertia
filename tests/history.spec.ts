@@ -217,6 +217,147 @@ test('it handles bfcache restoration after history is cleared', async ({ page })
   expect(requests.requests.length).toBeGreaterThan(0)
 })
 
+test('it does not leak cleared history entries through a known plaintext', async ({ page }) => {
+  // User A opens the public page, which looks the same for every user. The page is encrypted,
+  // so its entry is stored as ciphertext in window.history.state.
+  await page.goto('/encrypted-history/public')
+  await expect(page.getByRole('heading', { name: 'Public page' })).toBeVisible()
+
+  // User A then opens the private page. Its token is random on every request, so nobody but
+  // A has ever seen this exact token. This entry is encrypted with the same key as the first.
+  const privateResponse = page.waitForResponse('/encrypted-history/private')
+  await page.getByRole('link', { exact: true, name: 'Private page' }).click()
+  await privateResponse
+  await expect(page.getByRole('heading', { name: 'Private page' })).toBeVisible()
+
+  const tokenOfUserA = await page.locator('#token').textContent()
+
+  expect(tokenOfUserA).toMatch(/^[0-9a-f-]{36}$/)
+
+  // User A logs out. The logout page responds with clearHistory, which removes the encryption
+  // key and IV from sessionStorage, so A's two entries can no longer be decrypted. The entries
+  // themselves stay in the browser history as ciphertext.
+  const logoutResponse = page.waitForResponse('/encrypted-history/logout')
+  await page.getByRole('link', { exact: true, name: 'Log out' }).click()
+  await logoutResponse
+
+  // Inertia clears the key before it renders the logout page, so once it's visible the key is gone
+  await expect(page.getByRole('heading', { name: 'Logged out' })).toBeVisible()
+
+  const keyAfterLogout = await page.evaluate(() => window.sessionStorage.getItem('historyKey'))
+
+  expect(keyAfterLogout).toBeNull()
+
+  // User B now sits down at the same browser. Going back to the private page makes Inertia try
+  // to decrypt A's entry. That fails, so Inertia visits the server to replace the entry with a
+  // fresh page. Going offline first makes that visit fail, so A's ciphertext stays in place.
+  await page.context().setOffline(true)
+
+  await page.goBack()
+  await page.waitForURL('/encrypted-history/private')
+
+  // Copy the raw ciphertext of A's private page out of history.state
+  const privateEntryOfUserA = await page.evaluate(() => {
+    const entry = window.history.state.page
+
+    return entry instanceof ArrayBuffer ? Array.from(new Uint8Array(entry)) : null
+  })
+
+  expect(privateEntryOfUserA).not.toBeNull()
+
+  await page.goBack()
+  await page.waitForURL('/encrypted-history/public')
+
+  // Copy the raw ciphertext of A's public page as well
+  const publicEntryOfUserA = await page.evaluate(() => {
+    const entry = window.history.state.page
+
+    return entry instanceof ArrayBuffer ? Array.from(new Uint8Array(entry)) : null
+  })
+
+  expect(publicEntryOfUserA).not.toBeNull()
+
+  // Back online, B opens the public page as themselves. Because it looks the same for every
+  // user, B now knows the exact plaintext that is hidden inside A's public page entry.
+  await page.context().setOffline(false)
+  await page.goto('/encrypted-history/public')
+
+  // B's own entry is encrypted under a brand new key. Inertia writes the entry to history.state
+  // before it renders the page, so once the page is visible B can decrypt it with that key,
+  // which is allowed since it's B's own entry.
+  await expect(page.getByRole('heading', { name: 'Public page' })).toBeVisible()
+
+  const publicPlaintext = await page.evaluate(async () =>
+    JSON.stringify(await (window as any).testing.Inertia.decryptHistory()),
+  )
+
+  expect(publicPlaintext).toContain('"title":"Public page"')
+
+  // The attack. A's two entries were encrypted with the same key and IV, so both were mixed
+  // with the same keystream S: the private entry is P_private xor S, and the public entry is
+  // P_public xor S. XORing the two entries cancels S out and leaves P_private xor P_public.
+  // XORing in the known P_public then leaves P_private, without ever knowing the key.
+  const publicBytes = new TextEncoder().encode(publicPlaintext)
+  const recoveredBytes = new Uint8Array(publicBytes.length)
+
+  for (let index = 0; index < publicBytes.length; index++) {
+    recoveredBytes[index] = publicBytes[index] ^ publicEntryOfUserA![index] ^ privateEntryOfUserA![index]
+  }
+
+  const recovered = new TextDecoder().decode(recoveredBytes)
+
+  console.log({ recovered })
+
+  // With a fresh IV for every entry, the two keystreams differ and this is just noise. With a
+  // shared IV, it contains A's private page, including the token that only A has seen.
+  expect(recovered).not.toContain(tokenOfUserA)
+})
+
+test('it fetches history entries that an earlier version encrypted with a shared IV from the server', async ({
+  page,
+}) => {
+  await page.goto('/encrypted-history/public')
+  await expect(page.getByRole('heading', { name: 'Public page' })).toBeVisible()
+
+  // Rewrite the current entry the way earlier versions stored it: one shared IV in
+  // sessionStorage, and the ciphertext without an IV in front of it
+  const earlierKey = await page.evaluate(async () => {
+    const currentPage = await (window as any).testing.Inertia.decryptHistory()
+    const rawKey = new Uint8Array(JSON.parse(window.sessionStorage.getItem('historyKey')!))
+    const key = await window.crypto.subtle.importKey('raw', rawKey, 'AES-GCM', false, ['encrypt'])
+    const sharedIv = window.crypto.getRandomValues(new Uint8Array(12))
+    const legacyEntry = await window.crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: sharedIv },
+      key,
+      new TextEncoder().encode(JSON.stringify(currentPage)),
+    )
+
+    window.sessionStorage.setItem('historyIv', JSON.stringify(Array.from(sharedIv)))
+    window.history.replaceState({ ...window.history.state, page: legacyEntry }, '', window.location.href)
+
+    return window.sessionStorage.getItem('historyKey')
+  })
+
+  await clickAndWaitForResponse(page, 'Private page', '/encrypted-history/private')
+  await expect(page.getByRole('heading', { name: 'Private page' })).toBeVisible()
+
+  const storageAfterUpgrade = await page.evaluate(() => ({
+    key: window.sessionStorage.getItem('historyKey'),
+    iv: window.sessionStorage.getItem('historyIv'),
+  }))
+
+  expect(storageAfterUpgrade.key).not.toBeNull()
+  expect(storageAfterUpgrade.key).not.toBe(earlierKey)
+  expect(storageAfterUpgrade.iv).toBeNull()
+
+  const publicResponse = page.waitForResponse('/encrypted-history/public')
+  await page.goBack()
+  await publicResponse
+
+  await expect(page).toHaveURL('/encrypted-history/public')
+  await expect(page.getByRole('heading', { name: 'Public page' })).toBeVisible()
+})
+
 test('will pull from server if history version is different than current version when pressing back', async ({
   page,
 }) => {
