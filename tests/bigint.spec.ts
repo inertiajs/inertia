@@ -33,6 +33,17 @@ test('it decodes integers beyond the safe range as native BigInt values without 
   await expect(page.locator('#echoed-type')).toHaveText('string')
 })
 
+test('it submits big integers through useHttp as their digits', async ({ page }) => {
+  pageLoads.watch(page)
+
+  await page.goto('/')
+  await page.evaluate(() => (window as any).testing.Inertia.visit('/bigint'))
+
+  await page.getByRole('button', { name: 'Submit useHttp echo' }).click()
+
+  await expect(page.locator('#http-echo')).toHaveText('111222333444555666 (string)')
+})
+
 ;[
   { history: 'encrypted', query: '' },
   { history: 'unencrypted', query: '?encrypt=false' },

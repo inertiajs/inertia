@@ -24,6 +24,7 @@ import {
   HttpResponseError,
   mergeDataIntoQueryString,
   objectToFormData,
+  stringifyJson,
   UseFormUtils,
 } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
@@ -201,7 +202,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       if (useFormData) {
         requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
       } else {
-        requestData = JSON.stringify(transformedData)
+        requestData = stringifyJson(transformedData)
         contentType = 'application/json'
       }
     }

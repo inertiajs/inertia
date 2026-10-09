@@ -16,6 +16,7 @@ import {
   Method,
   objectToFormData,
   Progress,
+  stringifyJson,
   UrlMethodPair,
   UseFormArguments,
   UseFormTransformCallback,
@@ -202,7 +203,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       if (useFormData) {
         requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
       } else {
-        requestData = JSON.stringify(transformedData)
+        requestData = stringifyJson(transformedData)
         contentType = 'application/json'
       }
     }
