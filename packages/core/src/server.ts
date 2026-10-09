@@ -105,7 +105,18 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   }
 
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
-    const page: Page = parsePage(await readableToString(request))
+    let page: Page
+
+    try {
+      page = parsePage(await readableToString(request))
+    } catch (e) {
+      // A body that is not a page object must not reject the request handler:
+      // nothing would catch it, and the unhandled rejection stops the server.
+      response.writeHead(400, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify({ error: `Invalid page object: ${(e as Error).message}` }))
+
+      return
+    }
 
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn
