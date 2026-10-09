@@ -151,7 +151,10 @@ test('it does not cache prefetches that are still in flight when history is clea
 
   await page.getByRole('link', { name: 'Reports' }).click()
   await expect(page.getByText('This is the reports page.')).toBeVisible()
-  await expect(requests.requests).toHaveLength(1)
+
+  // The hover timer still fires a prefetch after the click, so only count regular visits
+  const visits = requests.requests.filter((request) => request.headers().purpose !== 'prefetch')
+  await expect(visits).toHaveLength(1)
 })
 
 test('multi byte strings can be encrypted', async ({ page }) => {
