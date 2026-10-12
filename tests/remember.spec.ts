@@ -1,5 +1,5 @@
 import test, { expect } from '@playwright/test'
-import { shouldBeDumpPage } from './support'
+import { scrollElementTo, shouldBeDumpPage } from './support'
 
 test.describe('Remember (local state caching)', () => {
   test('does not remember anything as of default', async ({ page }) => {
@@ -180,6 +180,64 @@ test.describe('Remember (local state caching)', () => {
     await expect(page.locator('#name')).toHaveValue('')
     await expect(page.locator('#remember')).not.toBeChecked()
     await expect(page.locator('#untracked')).toHaveValue('')
+  })
+
+  test('it does not restore remembered data on a new visit after pressing the back button', async ({ page }) => {
+    await page.goto('remember/tabs/users')
+
+    await page.getByLabel('User One').check()
+    await page.getByLabel('User Two').check()
+    await page.getByRole('link', { name: 'Teams' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Teams' })).toBeVisible()
+
+    await page.goBack()
+
+    await expect(page).toHaveURL('remember/tabs/users')
+    await expect(page.locator('#selected')).toHaveText('2 selected')
+
+    await page.getByLabel('User One').uncheck()
+    await page.getByLabel('User Two').uncheck()
+    await page.getByRole('link', { name: 'Teams' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Teams' })).toBeVisible()
+
+    await page.getByRole('link', { name: 'Users' }).click()
+
+    await expect(page).toHaveURL('remember/tabs/users')
+    await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible()
+    await expect(page.locator('#selected')).toHaveText('0 selected')
+  })
+
+  test('it restores remembered data when returning from another website but not on a new visit', async ({ page }) => {
+    await page.goto('remember/tabs/users')
+
+    await page.getByLabel('User One').check()
+    await page.getByLabel('User Two').check()
+    await page.getByRole('button', { name: 'Toggle notes' }).click()
+    await page.getByLabel('Notes').fill('Call back')
+    await page.getByRole('link', { name: 'Navigate off-site' }).click()
+
+    await expect(page).toHaveURL('non-inertia')
+
+    await page.goBack()
+
+    await page.waitForURL('remember/tabs/users')
+    await expect(page.locator('#selected')).toHaveText('2 selected')
+
+    await page.getByLabel('User Two').uncheck()
+    await page.getByRole('button', { name: 'Toggle notes' }).click()
+
+    await expect(page.locator('#selected')).toHaveText('1 selected')
+    await expect(page.getByLabel('Notes')).toHaveValue('Call back')
+
+    await page.getByRole('link', { name: 'Users' }).click()
+
+    await expect(page.locator('#selected')).toHaveText('0 selected')
+
+    await page.getByRole('button', { name: 'Toggle notes' }).click()
+
+    await expect(page.getByLabel('Notes')).toHaveValue('')
   })
 
   test.describe('form helper', () => {
@@ -432,5 +490,27 @@ test.describe('Remember (local state caching)', () => {
 
     await expect(page.getByText('Foo: foo')).toBeVisible()
     await expect(page.getByText('Bar: 42')).toBeVisible()
+  })
+
+  test('it restores scroll regions when going back to a page that remembers state on mount', async ({ page }) => {
+    await page.goto('remember/scroll-region')
+    await expect(page.getByText('First visible row: 0')).toBeVisible()
+
+    // The initial visit restores scroll regions in an animation frame, which would undo an early scroll
+    await page.waitForTimeout(100)
+
+    await scrollElementTo(
+      page,
+      page.evaluate(() => document.querySelector('#rows')?.scrollTo(0, 3000)),
+    )
+    await expect(page.getByText('First visible row: 75')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Navigate away' }).click()
+    await shouldBeDumpPage(page, 'get')
+
+    await page.goBack()
+    await expect(page).toHaveURL('remember/scroll-region')
+    await expect(page.getByText('First visible row: 75')).toBeVisible()
+    await expect.poll(() => page.locator('#rows').evaluate((element) => element.scrollTop)).toBe(3000)
   })
 })

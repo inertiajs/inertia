@@ -10,6 +10,8 @@ defineProps<{
 <template>
   <div>
     <Link href="/article" id="leave">Leave to /article</Link>
+    <Link href="/infinite-scroll/navigate-away/slow-article" id="leave-slowly">Leave slowly to /article</Link>
+    <Link href="/infinite-scroll/navigate-away?order=desc" id="sort-slowly">Slowly sort descending</Link>
     <InfiniteScroll data="users" style="display: grid; gap: 20px">
       <UserCard v-for="user in users.data" :key="user.id" :user="user" />
 

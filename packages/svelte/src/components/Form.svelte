@@ -18,6 +18,7 @@
   import { isEqual } from 'es-toolkit'
   import { type NamedInputEvent, type ValidationConfig, type Validator } from 'laravel-precognition'
   import { onMount } from 'svelte'
+  import { on } from 'svelte/events'
   import { config } from '..'
   import useForm from '../useForm.svelte'
   import { setFormContext } from './formContext'
@@ -292,10 +293,12 @@
 
     const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-    formEvents.forEach((e) => formElement.addEventListener(e, updateDirtyState))
+    // Removing a focused field fires 'change' while the page is being destroyed, and
+    // on() runs the handler outside the reactive context so updating isDirty is allowed
+    const removeListeners = formEvents.map((e) => on(formElement, e, updateDirtyState))
 
     return () => {
-      formEvents.forEach((e) => formElement?.removeEventListener(e, updateDirtyState))
+      removeListeners.forEach((removeListener) => removeListener())
 
       if (cancelOnUnmount) {
         form.cancel()

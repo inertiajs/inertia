@@ -88,7 +88,7 @@ class PrefetchedRequests {
         },
       })
     }).then((response) => {
-      if (!navigation.isCurrent(generation)) {
+      if (!navigation.isCurrent(generation) || !this.isInFlight(params.id)) {
         return response
       }
 
@@ -145,6 +145,7 @@ class PrefetchedRequests {
 
   public removeAll(): void {
     this.cached = []
+    this.inFlightRequests = []
     this.removalTimers.forEach((removalTimer) => {
       clearTimeout(removalTimer.timer)
     })
@@ -169,6 +170,10 @@ class PrefetchedRequests {
     })
 
     this.clearTimer(params)
+  }
+
+  protected isInFlight(visitId: string): boolean {
+    return this.inFlightRequests.some((prefetching) => prefetching.params.id === visitId)
   }
 
   protected removeFromInFlight(visitId: string): void {

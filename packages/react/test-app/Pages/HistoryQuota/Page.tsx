@@ -12,6 +12,7 @@ export default ({ pageNumber, largeData }: { pageNumber: number; largeData: stri
             Page {n}
           </Link>
         ))}
+        <Link href="/history-quota/deferred">Deferred</Link>
       </div>
 
       <div style={{ height: 5000 }}></div>
