@@ -110,8 +110,7 @@ const pickAvatar = (event: Event) => {
       <pre class="mt-2 rounded-sm bg-gray-100 p-3 text-sm">
 big              {{ big }}
 Number(big)      {{ rounded }}
-big + 1n         {{ incremented }}</pre
-      >
+big + 1n         {{ incremented }}</pre>
       <p class="mt-2 text-sm text-gray-600">
         Casting to a number is what happens without this feature enabled. Arithmetic stays exact while both operands are
         BigInt values.

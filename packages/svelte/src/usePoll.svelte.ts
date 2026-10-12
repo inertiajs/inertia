@@ -6,7 +6,6 @@ export default function usePoll(
   interval: number,
   requestOptions: ReloadOptions | (() => ReloadOptions) = {},
   options: PollOptions = {
-    keepAlive: false,
     autoStart: true,
   },
 ) {

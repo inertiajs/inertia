@@ -175,7 +175,7 @@ describe('clearing history', () => {
     expect(keysHeld()).toBe(true)
   })
 
-  it('still asks when a cached prefetch is replayed a second time', async () => {
+  it('still asks on a second visit, after the first one flushed its prefetch', async () => {
     await hold(pageWith())
 
     let requests = 0
@@ -199,7 +199,7 @@ describe('clearing history', () => {
     seedKeys()
     await visit()
 
-    expect(requests).toBe(1)
+    expect(requests).toBe(2)
     expect(keysHeld()).toBe(false)
   })
 })

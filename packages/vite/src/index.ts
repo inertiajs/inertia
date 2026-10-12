@@ -18,10 +18,12 @@
 
 import { existsSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
+import remapping from '@jridgewell/remapping'
 import { glob } from 'tinyglobby'
 import type { Plugin, ViteDevServer } from 'vite'
 import { defaultFrameworks } from './frameworks/index'
 import { transformPageResolution } from './pagesTransform'
+import { generateMap } from './sourceMap'
 import { handleSSRRequest, InertiaSSROptions, resolveSSREntry, SSR_ENDPOINT, SSR_ENTRY_CANDIDATES } from './ssr'
 import { findInertiaAppExport, wrapWithServerBootstrap } from './ssrTransform'
 import type { FrameworkConfig } from './types'
@@ -145,14 +147,20 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
       }
 
       let result = code
+      let ssrMap: string | undefined
+      let pagesMap: string | undefined
 
       if (!ssrDisabled && options?.ssr && findInertiaAppExport(result)) {
-        result =
-          wrapWithServerBootstrap(
-            result,
-            { port: ssr.port, host: ssr.host, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
-            frameworks,
-          ) ?? result
+        const ssrTransform = wrapWithServerBootstrap(
+          result,
+          { port: ssr.port, host: ssr.host, cluster: ssr.cluster, formatErrors: ssr.formatErrors },
+          frameworks,
+        )
+
+        if (ssrTransform) {
+          result = ssrTransform.toString()
+          ssrMap = generateMap(ssrTransform, id)
+        }
       }
 
       const pageTransform = transformPageResolution(result, frameworks)
@@ -162,10 +170,18 @@ export default function inertia(options: InertiaPluginOptions = {}): Plugin {
           warmupPageFiles(devServer, id, pageTransform.pageGlobs).catch(() => {})
         }
 
-        return pageTransform.code
+        result = pageTransform.code.toString()
+        pagesMap = generateMap(pageTransform.code, id)
       }
 
-      return result !== code ? result : null
+      if (result === code) {
+        return null
+      }
+
+      // Ordered last transform first, which is what remapping composes from.
+      const maps = [pagesMap, ssrMap].filter((map) => map !== undefined)
+
+      return { code: result, map: remapping(maps, () => null).toString() }
     },
 
     configureServer(server) {

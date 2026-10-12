@@ -356,6 +356,7 @@ export class Router {
       },
       {
         autoStart: options.autoStart ?? true,
+        background: options.background,
         keepAlive: options.keepAlive ?? false,
         mode: options.mode,
       },
@@ -642,6 +643,7 @@ export class Router {
 
   public clearHistory(): void {
     history.clear()
+    prefetchedRequests.removeAll()
   }
 
   public decryptHistory(): Promise<Page> {

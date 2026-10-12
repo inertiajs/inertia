@@ -293,16 +293,26 @@ class History {
       const { scrollRegionLayers, ...state } = data
       const carriedLayers = 'scrollRegionLayers' in data ? scrollRegionLayers : window.history.state?.scrollRegionLayers
 
-      window.history.replaceState(
-        {
-          ...state,
-          ...(carriedLayers !== undefined && { scrollRegionLayers: carriedLayers }),
-          scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
-          documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
-        },
-        '',
-        url,
-      )
+      try {
+        window.history.replaceState(
+          {
+            ...state,
+            ...(carriedLayers !== undefined && { scrollRegionLayers: carriedLayers }),
+            scrollRegions: data.scrollRegions ?? window.history.state?.scrollRegions,
+            documentScrollPosition: data.documentScrollPosition ?? window.history.state?.documentScrollPosition,
+          },
+          '',
+          url,
+        )
+      } catch (error) {
+        if (!this.isQuotaExceededError(error)) {
+          throw error
+        }
+
+        // Unlike pushState, we don't reload here. replaceState runs on scroll, remember()
+        // and partial reloads, so a reload would discard client state mid-interaction.
+        console.error(error.message)
+      }
     })
   }
 
@@ -354,7 +364,8 @@ class History {
 
   public clearInitialState(key: keyof Page) {
     if (this.initialState && this.initialState[key] !== undefined) {
-      delete this.initialState[key]
+      // The initial state can be the same object as the current page, so replace it instead of mutating it
+      this.initialState = { ...this.initialState, [key]: undefined }
     }
   }
 

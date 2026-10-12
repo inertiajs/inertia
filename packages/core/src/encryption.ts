@@ -1,12 +1,20 @@
 import { parsePage, stringifyPage } from './json'
 import { SessionStorage } from './sessionStorage'
 
+const ivLength = 12
+
 export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
   if (typeof window === 'undefined') {
     throw new Error('Unable to encrypt history')
   }
 
-  const iv = getIv()
+  // A shared IV means an earlier version encrypted entries in this tab, so we start
+  // over with a key that has never been used with a repeated IV.
+  if (SessionStorage.exists(historySessionStorageKeys.iv)) {
+    SessionStorage.remove(historySessionStorageKeys.key)
+    SessionStorage.remove(historySessionStorageKeys.iv)
+  }
+
   const storedKey = await getKeyFromSessionStorage()
   const key = await getOrCreateKey(storedKey)
 
@@ -14,9 +22,16 @@ export const encryptHistory = async (data: any): Promise<ArrayBuffer> => {
     throw new Error('Unable to encrypt history')
   }
 
-  const encrypted = await encryptData(iv, key, data)
+  // AES-GCM must never reuse an IV under the same key, so every entry gets
+  // its own, stored in front of the ciphertext for decryption.
+  const iv = window.crypto.getRandomValues(new Uint8Array(ivLength))
+  const encrypted = new Uint8Array(await encryptData(iv, key, data))
+  const entry = new Uint8Array(iv.length + encrypted.length)
 
-  return encrypted
+  entry.set(iv)
+  entry.set(encrypted, iv.length)
+
+  return entry.buffer
 }
 
 export const historySessionStorageKeys = {
@@ -24,15 +39,18 @@ export const historySessionStorageKeys = {
   iv: 'historyIv',
 }
 
-export const decryptHistory = async (data: any): Promise<any> => {
-  const iv = getIv()
+export const decryptHistory = async (data: ArrayBuffer): Promise<any> => {
   const storedKey = await getKeyFromSessionStorage()
 
   if (!storedKey) {
     throw new Error('Unable to decrypt history')
   }
 
-  return await decryptData(iv, storedKey, data)
+  // Entries fencryptDatarsions have no IV in front of the ciphertext, so they fail
+  // the AES-GCM tag check here and are fetched from the server again instead.
+  const entry = new Uint8Array(data)
+
+  return await decryptData(entry.subarray(0, ivLength), storedKey, entry.subarray(ivLength))
 }
 
 const encryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
@@ -79,20 +97,6 @@ const decryptData = async (iv: BufferSource, key: CryptoKey, data: any) => {
   )
 
   return parsePage(new TextDecoder().decode(decrypted))
-}
-
-const getIv = (): BufferSource => {
-  const ivString = SessionStorage.get(historySessionStorageKeys.iv)
-
-  if (ivString) {
-    return new Uint8Array(ivString)
-  }
-
-  const iv = window.crypto.getRandomValues(new Uint8Array(12))
-
-  SessionStorage.set(historySessionStorageKeys.iv, Array.from(iv))
-
-  return iv
 }
 
 const createKey = async () => {

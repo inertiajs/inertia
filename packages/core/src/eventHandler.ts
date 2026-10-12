@@ -124,7 +124,7 @@ class EventHandler {
 
     return restore.install().then(() => {
       Scroll.restore(history.getScrollRegions())
-      fireNavigateEvent(currentPage.get())
+      fireNavigateEvent(currentPage.get(), { type: 'history' })
 
       this.loadDeferredPropsFor(data)
     })

@@ -32,8 +32,8 @@ export const fireBeforeUpdateEvent: GlobalEventTrigger<'beforeUpdate'> = (page) 
   return fireEvent('beforeUpdate', { detail: { page } })
 }
 
-export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, { cached = false, visitId } = {}) => {
-  return fireEvent('navigate', { detail: { page, url: addressOf(page), cached, visitId } })
+export const fireNavigateEvent: GlobalEventTrigger<'navigate'> = (page, { type, cached = false, visitId }) => {
+  return fireEvent('navigate', { detail: { page, url: addressOf(page), type, cached, visitId } })
 }
 
 export const fireClientVisitEvent: GlobalEventTrigger<'clientVisit'> = (page, { replace, visitId }) => {

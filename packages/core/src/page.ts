@@ -203,6 +203,7 @@ class CurrentPage {
 
     if (page.clearHistory) {
       history.clear()
+      prefetchedRequests.removeAll()
       page = { ...page, clearHistory: false }
     }
 
@@ -245,6 +246,9 @@ class CurrentPage {
 
     // Clear flash data from the page object, we don't want it when navigating back/forward...
     const pageForHistory = withoutFlash(page)
+
+    // A new page replaces the one we booted on, so restore() must stop falling back to its state
+    history.clearInitialState(history.rememberedState)
 
     return new Promise<boolean>((resolve) =>
       replace ? history.replaceState(pageForHistory, () => resolve(true)) : history.pushState(pageForHistory, resolve),
@@ -329,7 +333,7 @@ class CurrentPage {
     announceDeferredProps(page)
 
     if (!replace) {
-      fireNavigateEvent(page, { cached, visitId })
+      fireNavigateEvent(page, { type: 'visit', cached, visitId })
     }
 
     continueWalk()
@@ -343,6 +347,9 @@ class CurrentPage {
       preserveState?: boolean
     } = {},
   ) {
+    // A restored history entry supersedes any page update still resolving its component
+    this.componentId = {}
+
     page = withLiveOwners(page, this.baseId)
 
     this.baseGeneration++

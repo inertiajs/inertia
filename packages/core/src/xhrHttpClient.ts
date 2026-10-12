@@ -16,6 +16,10 @@ function getCookie(name: string): string | null {
   return match ? decodeURIComponent(match[3]) : null
 }
 
+function isSameOrigin(url: string): boolean {
+  return new URL(url, window.location.href).origin === window.location.origin
+}
+
 function parseHeaders(xhr: XMLHttpRequest): HttpResponseHeaders {
   const headers: HttpResponseHeaders = {}
 
@@ -117,7 +121,7 @@ export class XhrHttpClient implements HttpClient {
 
       xhr.open(config.method.toUpperCase(), url, true)
 
-      const xsrfToken = getCookie(this.xsrfCookieName)
+      const xsrfToken = isSameOrigin(url) ? getCookie(this.xsrfCookieName) : null
 
       if (xsrfToken) {
         xhr.setRequestHeader(this.xsrfHeaderName, xsrfToken)

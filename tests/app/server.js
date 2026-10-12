@@ -1281,6 +1281,46 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/encrypted-history/public', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Public page' },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/private', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Private page', token: randomUUID() },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/logout', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Logged out' },
+    clearHistory: true,
+  })
+})
+
+app.get('/history/prefetch/:page', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'History/Prefetch',
+        props: {
+          page: req.params.page,
+          loadedAt: Date.now(),
+        },
+        encryptHistory: true,
+        clearHistory: req.params.page === 'signed-out',
+      }),
+    req.params.page === 'reports' ? 500 : 0,
+  )
+})
+
 app.get('/history/version/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Version',
@@ -1309,6 +1349,25 @@ app.get('/history-version-reload', (req, res) => {
       deploy: historyVersionReloadDeploy,
     },
     version: `deploy-${historyVersionReloadDeploy}`,
+  })
+})
+
+app.get('/history-quota/deferred', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'HistoryQuota/Deferred',
+      deferredProps: {
+        default: ['largeData'],
+      },
+      props: {},
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Deferred',
+    props: {
+      largeData: 'x'.repeat(16 * 1024 * 1024),
+    },
   })
 })
 
@@ -2858,6 +2917,9 @@ app.get('/infinite-scroll/remember-state', (req, res) =>
 )
 app.get('/infinite-scroll/toggles', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Toggles'))
 app.get('/infinite-scroll/unmount-race', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/UnmountRace'))
+app.get('/infinite-scroll/unmount-after-mutation', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/UnmountAfterMutation'),
+)
 app.get('/infinite-scroll/trigger-both', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerBoth'))
 app.get('/infinite-scroll/trigger-end-buffer', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerEndBuffer'),
@@ -2910,7 +2972,8 @@ app.get('/infinite-scroll/navigate-away', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']
   const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
-  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+  const orderByDesc = req.query.order === 'desc'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, orderByDesc)
 
   const render = () =>
     inertia.render(req, res, {
@@ -2920,8 +2983,17 @@ app.get('/infinite-scroll/navigate-away', (req, res) => {
       scrollProps: { users: scrollProp },
     })
 
-  partialReload ? setTimeout(render, 1000) : render()
+  if (partialReload) {
+    setTimeout(render, 1000)
+  } else if (orderByDesc) {
+    setTimeout(render, 500)
+  } else {
+    render()
+  }
 })
+app.get('/infinite-scroll/navigate-away/slow-article', (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'Article', props: {} }), 500),
+)
 app.get('/infinite-scroll/invisible-first-child', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
 )
