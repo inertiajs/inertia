@@ -1,5 +1,6 @@
 import {
   CancelToken,
+  containsBigInt,
   Errors,
   ErrorValue,
   FormDataConvertible,
@@ -16,6 +17,7 @@ import {
   Method,
   objectToFormData,
   Progress,
+  stringifyJson,
   UrlMethodPair,
   UseFormArguments,
   UseFormTransformCallback,
@@ -203,7 +205,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       const useFormData = hasFiles(transformedData as Record<string, FormDataConvertible>)
 
       let requestUrl = url
-      let requestData: FormData | string | undefined
+      let requestData: unknown
       let contentType: string | undefined
 
       if (method === 'get') {
@@ -217,7 +219,8 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         if (useFormData) {
           requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
         } else {
-          requestData = JSON.stringify(transformedData)
+          // Mirror router visits: send an object, and serialize big integers as their digits
+          requestData = containsBigInt(transformedData) ? stringifyJson(transformedData) : transformedData
           contentType = 'application/json'
         }
       }
