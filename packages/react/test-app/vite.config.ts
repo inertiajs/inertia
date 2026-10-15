@@ -14,6 +14,7 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         unified: resolve(__dirname, 'index-unified.html'),
         auto: resolve(__dirname, 'index-auto.html'),
+        external: resolve(__dirname, 'index-external.html'),
       },
     },
   },

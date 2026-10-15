@@ -1,6 +1,7 @@
 import { cloneDeep } from 'es-toolkit'
 import { get } from 'es-toolkit/compat'
 import { HttpCancelledError } from './httpErrors'
+import { navigation } from './navigation'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
 import { Response } from './response'
@@ -27,6 +28,7 @@ class PrefetchedRequests {
     sendFunc: (params: InternalActiveVisit) => void,
     { cacheFor, cacheTags }: PrefetchOptions,
   ) {
+    const generation = navigation.generation
     const inFlight = this.findInFlight(params)
 
     if (inFlight) {
@@ -47,32 +49,46 @@ class PrefetchedRequests {
         ...params,
         onCancel: () => {
           cancelled = true
-          this.remove(params)
-          this.removeFromInFlight(params.id)
-          params.onCancel()
+
+          if (navigation.isCurrent(generation)) {
+            this.remove(params)
+            this.removeFromInFlight(params.id)
+            params.onCancel()
+          }
+
           reject(new HttpCancelledError())
         },
         onError: (error) => {
-          this.remove(params)
-          params.onError(error)
+          if (navigation.isCurrent(generation)) {
+            this.remove(params)
+            params.onError(error)
+          }
+
           reject(error)
         },
         onPrefetching(visitParams) {
-          params.onPrefetching(visitParams)
+          if (navigation.isCurrent(generation)) {
+            params.onPrefetching(visitParams)
+          }
         },
         onPrefetched(response, visit) {
-          params.onPrefetched(response, visit)
+          if (navigation.isCurrent(generation)) {
+            params.onPrefetched(response, visit)
+          }
         },
         onPrefetchResponse(response) {
           resolve(response)
         },
         onPrefetchError: (error) => {
-          this.removeFromInFlight(params.id)
+          if (navigation.isCurrent(generation)) {
+            this.removeFromInFlight(params.id)
+          }
+
           reject(error)
         },
       })
     }).then((response) => {
-      if (!this.isInFlight(params.id)) {
+      if (!navigation.isCurrent(generation) || !this.isInFlight(params.id)) {
         return response
       }
 
@@ -105,7 +121,7 @@ class PrefetchedRequests {
       return response
     })
 
-    if (!cancelled) {
+    if (!cancelled && navigation.isCurrent(generation)) {
       this.inFlightRequests.push({
         params: { ...params },
         response: promise,
@@ -115,6 +131,10 @@ class PrefetchedRequests {
     }
 
     return promise.catch((error) => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
+
       this.removeFromInFlight(params.id)
 
       if (!(error instanceof HttpCancelledError)) {
@@ -130,6 +150,12 @@ class PrefetchedRequests {
       clearTimeout(removalTimer.timer)
     })
     this.removalTimers = []
+  }
+
+  public dispose(): void {
+    this.removeAll()
+    this.inFlightRequests = []
+    this.currentUseId = null
   }
 
   public removeByTags(tags: string[]): void {
@@ -210,6 +236,7 @@ class PrefetchedRequests {
   }
 
   public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
+    const generation = navigation.generation
     const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
     this.currentUseId = id
@@ -221,7 +248,7 @@ class PrefetchedRequests {
 
     return prefetched.response.then(
       (response) => {
-        if (this.currentUseId !== id) {
+        if (!navigation.isCurrent(generation) || this.currentUseId !== id) {
           // They've since gone on to `use` a different request,
           // so we should ignore this one
           return
@@ -236,11 +263,20 @@ class PrefetchedRequests {
         return response.handle()
       },
       (error) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         if (!(error instanceof HttpCancelledError)) {
           throw error
         }
 
         consumedParams.onCancel()
+
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         consumedParams.cancelled = true
         consumedParams.onFinish(consumedParams)
       },
@@ -317,8 +353,14 @@ class PrefetchedRequests {
   }
 
   public updateCachedOncePropsFromCurrentPage(): void {
+    const generation = navigation.generation
+
     this.cached.forEach((prefetched) => {
       prefetched.response.then((response) => {
+        if (!navigation.isCurrent(generation)) {
+          return
+        }
+
         const pageResponse = response.getPageResponse()
 
         currentPage.mergeOncePropsIntoResponse(pageResponse, { force: true })

@@ -11,6 +11,7 @@ import {
   resolveServerHead,
   router,
   SharedPageProps,
+  type ExternalNavigationOptions,
   type ServerHeadOption,
 } from '@inertiajs/core'
 import {
@@ -26,6 +27,7 @@ import {
   reactive,
   ref,
   shallowRef,
+  onUnmounted,
 } from 'vue'
 import { provideHydrationContext } from './hydration'
 import { state as layoutPropsState, resetLayoutProps } from './layoutProps'
@@ -75,6 +77,7 @@ export interface InertiaAppProps<SharedProps extends PageProps = PageProps> {
   onHeadUpdate?: HeadManagerOnUpdateCallback
   defaultLayout?: (name: string, page: Page) => unknown
   serverHead?: ServerHeadOption
+  externalNavigation?: ExternalNavigationOptions
   serverRendered?: boolean
 }
 
@@ -120,6 +123,10 @@ const App: InertiaApp = defineComponent({
       type: [Boolean, String, Function] as PropType<ServerHeadOption>,
       required: false,
     },
+    externalNavigation: {
+      type: Object as PropType<ExternalNavigationOptions>,
+      required: false,
+    },
     serverRendered: {
       type: Boolean,
       required: false,
@@ -134,6 +141,7 @@ const App: InertiaApp = defineComponent({
     onHeadUpdate,
     defaultLayout,
     serverHead,
+    externalNavigation,
     serverRendered,
   }: InertiaAppProps) {
     component.value = initialComponent ? markRaw(initialComponent) : undefined
@@ -142,12 +150,12 @@ const App: InertiaApp = defineComponent({
 
     const isServer = typeof window === 'undefined'
 
-    headManager = createHeadManager(
+    const appHeadManager = (headManager = createHeadManager(
       isServer,
       (title: string) => (titleCallback ? titleCallback(title, page.value!) : title),
       onHeadUpdate || (() => {}),
       resolveServerHead(initialPage, serverHead),
-    )
+    ))
 
     // Scoped per app instance so multiple Inertia roots on one page don't clobber each other
     const hydrated = ref(!serverRendered)
@@ -156,9 +164,14 @@ const App: InertiaApp = defineComponent({
     if (!isServer) {
       onMounted(() => (hydrated.value = true))
 
-      router.init<DefineComponent>({
+      if (externalNavigation) {
+        resetLayoutProps()
+      }
+
+      const disposeRouter = router.init<DefineComponent>({
         initialPage,
         resolveComponent: resolveComponent!,
+        externalNavigation,
         swapComponent: async (options: VuePageHandlerArgs) => {
           if (!options.preserveState) {
             resetLayoutProps()
@@ -174,11 +187,20 @@ const App: InertiaApp = defineComponent({
       })
 
       const syncServerHead = (event: { detail: { page: Page } }) => {
-        headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+        appHeadManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
       }
 
-      router.on('navigate', syncServerHead)
-      router.on('clientVisit', syncServerHead)
+      const removeNavigateListener = router.on('navigate', syncServerHead)
+      const removeClientVisitListener = router.on('clientVisit', syncServerHead)
+
+      if (externalNavigation) {
+        onUnmounted(() => {
+          appHeadManager.dispose()
+          disposeRouter()
+          removeNavigateListener()
+          removeClientVisitListener()
+        })
+      }
     }
 
     return () => {
