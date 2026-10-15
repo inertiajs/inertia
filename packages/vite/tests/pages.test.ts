@@ -1,5 +1,6 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { normalizePath } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
 
@@ -217,9 +218,9 @@ export default createInertiaApp()`
       const warmedFiles = warmupRequest.mock.calls.map((call: any) => call[0]).sort()
 
       expect(warmedFiles).toEqual([
-        join(pagesDir, 'About.vue'),
-        join(pagesDir, 'Auth', 'Login.vue'),
-        join(pagesDir, 'Home.vue'),
+        normalizePath(join(pagesDir, 'About.vue')),
+        normalizePath(join(pagesDir, 'Auth', 'Login.vue')),
+        normalizePath(join(pagesDir, 'Home.vue')),
       ])
     } finally {
       cleanup()
