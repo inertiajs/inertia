@@ -110,8 +110,7 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
     try {
       page = parsePage(await readableToString(request))
     } catch (e) {
-      // A body that is not a page object must not reject the request handler:
-      // nothing would catch it, and the unhandled rejection stops the server.
+      // An aborted or malformed body would otherwise be an unhandled rejection that stops the server
       response.writeHead(400, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
       response.write(JSON.stringify({ error: `Invalid page object: ${(e as Error).message}` }))
 
