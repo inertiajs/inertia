@@ -8,7 +8,7 @@ Security fixes are provided according to the [Inertia.js support policy](https:/
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within Laravel, please send an email to the Laravel Security team at security@laravel.com. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within Inertia.js, please send an email to the Laravel Security team at security@laravel.com. All security vulnerabilities will be promptly addressed.
 
 ### Public PGP Key
 
