@@ -1,6 +1,7 @@
 import * as http from 'http'
+import * as net from 'net'
 import type { AddressInfo } from 'net'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import createSSRServer from '../src/server'
 
 const servers: http.Server[] = []
@@ -53,6 +54,39 @@ describe('SSR Server', () => {
     const health = await fetch(`${url}/health`)
 
     expect(response.status).toBe(400)
+    expect(render).not.toHaveBeenCalled()
+    expect(health.status).toBe(200)
+  })
+
+  // The adapter can disconnect while it is still sending the page, for
+  // instance when its process is killed: the request stream then errors.
+  it('handles a client that aborts while sending the page', async () => {
+    captureListeningServers()
+    const render = vi.fn(() => Promise.resolve({ body: '', head: [] }))
+    const unhandledRejection = vi.fn()
+    process.on('unhandledRejection', unhandledRejection)
+    onTestFinished(() => {
+      process.off('unhandledRejection', unhandledRejection)
+    })
+
+    createSSRServer(render, { port: 0, host: '127.0.0.1' })
+    await listening(servers[0])
+    const port = (servers[0].address() as AddressInfo).port
+    const requestReceived = new Promise<http.IncomingMessage>((resolve) => servers[0].once('request', resolve))
+
+    const socket = net.connect(port, '127.0.0.1')
+    socket.write(
+      'POST /render HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Type: application/json\r\nContent-Length: 4096\r\n\r\n{"component":',
+    )
+    const request = await requestReceived
+    const requestClosed = new Promise((resolve) => request.once('close', resolve))
+    socket.destroy()
+    await requestClosed
+    await new Promise((resolve) => setImmediate(resolve))
+
+    const health = await fetch(`http://127.0.0.1:${port}/health`)
+
+    expect(unhandledRejection).not.toHaveBeenCalled()
     expect(render).not.toHaveBeenCalled()
     expect(health.status).toBe(200)
   })
