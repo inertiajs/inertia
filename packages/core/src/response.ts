@@ -11,6 +11,7 @@ import {
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { interceptors } from './interceptors'
 import { parsePage } from './json'
@@ -260,6 +261,12 @@ export class Response {
 
     this.requestParams.setPreserveOptions(pageResponse)
 
+    const queryMethodData = this.queryMethodData(pageResponse)
+
+    if (queryMethodData) {
+      pageResponse.queryMethodData = queryMethodData
+    }
+
     pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     this.requestParams.all().onBeforeUpdate(pageResponse)
@@ -273,6 +280,25 @@ export class Response {
       cached: this.requestParams.all().cached,
       visitId: this.requestParams.all().id,
     })
+  }
+
+  protected queryMethodData(pageResponse: Page): Page['queryMethodData'] {
+    const { method, data, url, preserveUrl } = this.requestParams.all()
+
+    // Redirects (e.g. after a failed validation) are followed with GET,
+    // so their pages don't carry the QUERY request data.
+    const wasRenderedByQuery =
+      method === 'query' &&
+      !isFormData(data) &&
+      isSameUrlWithoutHash(hrefToUrl(pageResponse.url), url) &&
+      Object.keys(pageResponse.props.errors ?? {}).length === 0
+
+    if (!wasRenderedByQuery) {
+      return undefined
+    }
+
+    // Like reload data on a GET page, it becomes part of the page unless the URL is preserved (e.g. infinite scroll).
+    return this.requestParams.isQueryMethodReload() && preserveUrl ? currentPage.get().queryMethodData : data
   }
 
   protected getDataFromResponse(response: any): any {

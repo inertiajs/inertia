@@ -2399,6 +2399,55 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+const renderQueryVisitsSearch = (req, res) => {
+  const term = req.body?.term ?? null
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'QueryVisits/Search',
+      props: { term, reloadedAt: null },
+      deferredProps: { default: ['results'] },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'QueryVisits/Search',
+        props: {
+          results: req.headers['x-inertia-partial-data'].includes('results')
+            ? `Results for: ${term ?? 'nothing'}`
+            : undefined,
+          reloadedAt: req.headers['x-inertia-partial-data'].includes('reloadedAt') ? Date.now() : undefined,
+        },
+      }),
+    req.headers['x-slow'] ? 1000 : 0,
+  )
+}
+
+app.get('/query-visits/search', renderQueryVisitsSearch)
+app.get('/query-visits/search-elsewhere', renderQueryVisitsSearch)
+app.query('/query-visits/search', renderQueryVisitsSearch)
+
+const renderQueryVisitsInfiniteScroll = (req, res) => {
+  const term = req.body?.term ?? null
+  const page = parseInt(req.body?.page ?? req.query.page ?? 1)
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40)
+
+  inertia.render(req, res, {
+    component: 'QueryVisits/InfiniteScroll',
+    props: {
+      term,
+      users: { ...paginated, data: paginated.data.map((user) => ({ ...user, name: `${term ?? 'Any'} ${user.name}` })) },
+    },
+    mergeProps: ['users.data'],
+    scrollProps: { users: scrollProp },
+  })
+}
+
+app.get('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+app.query('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+
 app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
 app.get('/infinite-scroll-with-link', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),

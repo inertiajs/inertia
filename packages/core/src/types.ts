@@ -257,6 +257,8 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   /** @internal */
   rememberedState: Record<string, unknown>
   /** @internal */
+  queryMethodData?: Record<string, FormDataConvertible>
+  /** @internal */
   optimisticUpdatedAt?: Record<string, number>
 }
 
@@ -564,6 +566,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
   poll?: boolean
+  queryMethodReload?: boolean
   cached?: boolean
 }
 
