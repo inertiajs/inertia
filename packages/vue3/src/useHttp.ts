@@ -17,6 +17,7 @@ import {
   Method,
   objectToFormData,
   Progress,
+  stringifyJson,
   UrlMethodPair,
   UseFormArguments,
   UseFormTransformCallback,
@@ -208,7 +209,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           config.get('form.forceIndicesArrayFormatInFormData') ? 'indices' : 'brackets',
         )
       } else {
-        requestData = JSON.stringify(transformedData)
+        requestData = stringifyJson(transformedData)
         contentType = 'application/json'
       }
     }

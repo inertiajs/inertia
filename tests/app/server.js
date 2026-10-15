@@ -286,6 +286,8 @@ app.post('/bigint/echo', (req, res) =>
   }),
 )
 
+app.post('/api/bigint/echo', (req, res) => res.json({ value: req.body.value, type: typeof req.body.value }))
+
 // createInertiaApp (unified) test routes
 app.get('/unified', (req, res) =>
   inertia.renderUnified(req, res, {
