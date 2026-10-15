@@ -43,12 +43,17 @@ jobs:
 
   vite-plugin:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Vite Plugin (Vite ${{ matrix.vite }})
+    name: Vite Plugin (Vite ${{ matrix.vite }}${{ matrix.os == 'windows-latest' && ', Windows' || '' }})
     timeout-minutes: 15
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-24.04]
         vite: ['7', '8']
+        include:
+          - os: windows-latest
+            vite: '8'
+            tests: tests/css.test.ts
 
     steps:
       - name: Checkout
@@ -74,7 +79,8 @@ jobs:
         run: pnpm --filter './packages/vite' add -D vite@^${{ matrix.vite }}.0.0
 
       - name: Build Inertia
+        if: runner.os != 'Windows'
         run: pnpm -r --filter './packages/{core,vite}' build
 
       - name: Test Vite Plugin
-        run: pnpm --filter './packages/vite' test
+        run: pnpm --filter './packages/vite' test ${{ matrix.tests }}
