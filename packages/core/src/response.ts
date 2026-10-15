@@ -49,9 +49,29 @@ export class Response {
   }
 
   public async handlePrefetch() {
-    if (isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
-      this.handle()
+    if (!isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
+      return
     }
+
+    if (!this.isSafeToApplyPrefetch()) {
+      return
+    }
+
+    this.handle()
+  }
+
+  /**
+   * A prefetch the user never asked for must not navigate them. Only apply it to the
+   * current page when it is a plain Inertia response for the component already shown;
+   * redirects (e.g. an expired session sending us to login), location visits and
+   * errors are left to the visit that actually consumes the cached response.
+   */
+  protected isSafeToApplyPrefetch(): boolean {
+    if (!this.isInertiaResponse() || this.isHttpException() || this.hasStatus(409)) {
+      return false
+    }
+
+    return this.getPageResponse().component === currentPage.get().component
   }
 
   public async handle() {
