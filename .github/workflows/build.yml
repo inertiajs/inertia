@@ -77,8 +77,12 @@ jobs:
       - name: Override Vite version
         run: pnpm --filter './packages/vite' add -D vite@^${{ matrix.vite }}.0.0
 
+      - name: Use Bash for package scripts
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "pnpm_config_script_shell=C:/Program Files/Git/bin/bash.exe" >> "$GITHUB_ENV"
+
       - name: Build Inertia
-        if: runner.os != 'Windows'
         run: pnpm -r --filter './packages/{core,vite}' build
 
       - name: Test Vite Plugin
