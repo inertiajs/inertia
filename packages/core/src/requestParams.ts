@@ -76,6 +76,10 @@ export class RequestParams {
     return this.params.poll === true
   }
 
+  public isQueryMethodReload() {
+    return this.params.queryMethodReload === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,
@@ -205,6 +209,7 @@ export class RequestParams {
   /**
    * Async visits run in the background, so only a sync visit to another URL leaves the page.
    * Partial visits update the page they're on, so for those only another path counts.
+   * A full QUERY visit may carry a different body to the same URL, so it always leaves the page.
    */
   public leavesPage(pageUrl: URL, destinationUrl: URL): boolean {
     if (this.params.async) {
@@ -213,6 +218,6 @@ export class RequestParams {
 
     return this.isPartial()
       ? !isSameUrlWithoutQueryOrHash(destinationUrl, pageUrl)
-      : !isSameUrlWithoutHash(destinationUrl, pageUrl)
+      : this.params.method === 'query' || !isSameUrlWithoutHash(destinationUrl, pageUrl)
   }
 }

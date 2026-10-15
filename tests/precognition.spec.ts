@@ -65,8 +65,9 @@ integrations.forEach((integration) => {
       await page.fill('input[name="name"]', 'ab')
       await page.locator('input[name="name"]').blur()
 
-      expect((await validationRequest).method()).toBe('QUERY')
-      expect((await validationRequest).url()).toMatch(/\/precognition\/default$/)
+      const request = await validationRequest
+      await expect(request.method()).toEqual('QUERY')
+      await expect(request.url()).toMatch(/\/precognition\/default$/)
       await expect(page.getByText('The name must be at least 3 characters.')).toBeVisible()
 
       await page.fill('input[name="name"]', 'John Doe')
@@ -81,11 +82,12 @@ integrations.forEach((integration) => {
 
       await expect(page).toHaveURL('/precognition/default')
 
-      const dump = await page.evaluate(() => (window as any)._inertia_request_dump)
+      // @ts-ignore
+      const dump = await page.evaluate(() => window._inertia_request_dump)
 
-      expect(dump.method).toBe('query')
-      expect(dump.headers['precognition']).toBeUndefined()
-      expect(dump.form).toEqual({ name: 'John Doe', email: 'john@example.com' })
+      await expect(dump.method).toEqual('query')
+      await expect(dump.headers['precognition']).toBeUndefined()
+      await expect(dump.form).toEqual({ name: 'John Doe', email: 'john@example.com' })
     })
 
     test(prefix + 'validates multiple fields independently', async ({ page }) => {
