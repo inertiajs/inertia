@@ -14,6 +14,7 @@ test.describe('Form Helper', () => {
       { method: 'put', label: 'PUT' },
       { method: 'patch', label: 'PATCH' },
       { method: 'delete', label: 'DELETE' },
+      { method: 'query', label: 'QUERY' },
       { method: 'post', label: 'SUBMIT' },
       { method: 'post', label: 'SUBMIT OBJECT' },
     ] as const

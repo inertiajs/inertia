@@ -37,6 +37,12 @@
     })
   }
 
+  const queryMethod = () => {
+    router.query('/dump/query', {
+      foo: 'query',
+    })
+  }
+
   const qsafDefault = () => {
     router.visit('/dump/get', {
       data: { a: ['b', 'c'] },
@@ -74,6 +80,7 @@
   <a href={'#'} onclick={putMethod} class="put">PUT Link</a>
   <a href={'#'} onclick={patchMethod} class="patch">PATCH Link</a>
   <a href={'#'} onclick={deleteMethod} class="delete">DELETE Link</a>
+  <a href={'#'} onclick={queryMethod} class="query">QUERY Link</a>
 
   <a href={'#'} onclick={qsafDefault} class="qsaf-default">QSAF Defaults</a>
   <a href={'#'} onclick={qsafIndices} class="qsaf-indices">QSAF Indices</a>

@@ -14,6 +14,9 @@
   <button use:inertia={{ method: 'delete', href: '/dump/delete', data: { bar: 'delete' } }} class="delete"
     >DELETE Link</button
   >
+  <button use:inertia={{ method: 'query', href: '/dump/query', data: { baz: 'query' } }} class="query"
+    >QUERY Link</button
+  >
 
   <a href="/dump/get" use:inertia={{ data: { a: ['b', 'c'] } }} class="qsaf-default">QSAF Defaults</a>
   <a href="/dump/get" use:inertia={{ data: { a: ['b', 'c'] }, queryStringArrayFormat: 'indices' }} class="qsaf-indices"

@@ -35,8 +35,8 @@ importers:
         specifier: ^1.33.0
         version: 1.48.1
       laravel-precognition:
-        specifier: ^2.1.0
-        version: 2.1.0(axios@1.20.0)
+        specifier: ^2.1.1
+        version: 2.1.1(axios@1.20.0)
     devDependencies:
       '@types/node':
         specifier: ^24.10.13
@@ -69,8 +69,8 @@ importers:
         specifier: ^1.33.0
         version: 1.48.1
       laravel-precognition:
-        specifier: ^2.1.0
-        version: 2.1.0(axios@1.20.0)
+        specifier: ^2.1.1
+        version: 2.1.1(axios@1.20.0)
     devDependencies:
       '@types/react':
         specifier: ^19.2.14
@@ -149,8 +149,8 @@ importers:
         specifier: ^1.33.0
         version: 1.48.1
       laravel-precognition:
-        specifier: ^2.1.0
-        version: 2.1.0(axios@1.20.0)
+        specifier: ^2.1.1
+        version: 2.1.1(axios@1.20.0)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^7.0.1
@@ -275,8 +275,8 @@ importers:
         specifier: ^1.33.0
         version: 1.48.1
       laravel-precognition:
-        specifier: ^2.1.0
-        version: 2.1.0(axios@1.20.0)
+        specifier: ^2.1.1
+        version: 2.1.1(axios@1.20.0)
     devDependencies:
       axios:
         specifier: ^1.20.0
@@ -2007,8 +2007,8 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
-  laravel-precognition@2.1.0:
-    resolution: {integrity: sha512-W9ZobjRAReiIawSWxXUPR6q+Bvq5seO6tn+scdURl/JKOFKveXvR4Sno2KxGqQt2cI81nh8Vt2cFlaOMqXqLNw==}
+  laravel-precognition@2.1.1:
+    resolution: {integrity: sha512-Wg05+puJ5qiNsE8rdO5JmSiqQ2xcEf7442AIZiDhZg1JyPOePv5SSCu0fO7z7LqmJcPMxNNuOIcZd6UatEmYug==}
     peerDependencies:
       axios: ^1.4.0
     peerDependenciesMeta:
@@ -4078,7 +4078,7 @@ snapshots:
 
   known-css-properties@0.37.0: {}
 
-  laravel-precognition@2.1.0(axios@1.20.0):
+  laravel-precognition@2.1.1(axios@1.20.0):
     dependencies:
       es-toolkit: 1.48.1
     optionalDependencies:
