@@ -143,6 +143,14 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
+  public query<T extends RequestPayload = RequestPayload>(
+    url: URL | string | UrlMethodPair,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'query', data })
+  }
+
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
     return this.doReload(options)
   }
@@ -380,8 +388,8 @@ export class Router {
   ) {
     const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
 
-    if (method !== 'get') {
-      throw new Error('Prefetch requests must use the GET method')
+    if (method !== 'get' && method !== 'query') {
+      throw new Error('Prefetch requests must use the GET or QUERY method')
     }
 
     const visit: PendingVisit = this.getPendingVisit(href, {
@@ -395,8 +403,9 @@ export class Router {
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
     const currentUrl = window.location.origin + window.location.pathname + window.location.search
 
-    if (visitUrl === currentUrl) {
-      // Don't prefetch the current page, you're already on it
+    if (method === 'get' && visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it. A QUERY request carries
+      // its data in the body, so the same URL may still return a different page.
       return
     }
 

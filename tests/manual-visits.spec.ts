@@ -384,6 +384,7 @@ test.describe('Method', () => {
     { method: 'put', label: 'PUT' },
     { method: 'patch', label: 'PATCH' },
     { method: 'delete', label: 'DELETE' },
+    { method: 'query', label: 'QUERY' },
   ] as const
 
   data.forEach(({ method, label }) => {
@@ -459,6 +460,7 @@ test.describe('Data', () => {
       { method: 'put', label: 'PUT', form: { foo: 'put' } },
       { method: 'patch', label: 'PATCH', form: { bar: 'patch' } },
       { method: 'delete', label: 'DELETE', form: { baz: 'delete' } },
+      { method: 'query', label: 'QUERY', form: { foo: 'query' } },
     ] as const
 
     data.forEach(({ method, label, form }) => {
