@@ -256,7 +256,7 @@ export class Response {
     this.preserveOptimisticProps(pageResponse)
     this.preserveEqualProps(pageResponse)
 
-    await this.setRememberedState(pageResponse)
+    this.setRememberedState(pageResponse)
 
     this.requestParams.setPreserveOptions(pageResponse)
 
@@ -624,8 +624,8 @@ export class Response {
     return item && typeof item === 'object' && property in item
   }
 
-  protected async setRememberedState(pageResponse: Page): Promise<void> {
-    const rememberedState = await history.getState<Page['rememberedState']>(history.rememberedState, {})
+  protected setRememberedState(pageResponse: Page): void {
+    const rememberedState = currentPage.get().rememberedState
 
     if (
       this.requestParams.all().preserveState &&
