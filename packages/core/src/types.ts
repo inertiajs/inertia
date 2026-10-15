@@ -207,7 +207,7 @@ export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}
 
 export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
-export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'query'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 

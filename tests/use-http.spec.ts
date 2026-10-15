@@ -215,6 +215,18 @@ test.describe('useHttp', () => {
       await expect(page.locator('#patch-result')).toContainText('Name: Patched Name')
       await expect(page.locator('#patch-result')).toContainText('Email: patched@example.com')
     })
+
+    test('it makes QUERY requests with the data in the body', async ({ page }) => {
+      await page.goto('/use-http/methods')
+
+      await page.fill('#query-name', 'John')
+      await page.click('#query-button')
+
+      await expect(page.locator('#query-result')).toBeVisible()
+      await expect(page.locator('#query-result')).toContainText('QUERY Success')
+      await expect(page.locator('#query-result')).toContainText('Name: John')
+      await expect(page.locator('#query-result')).toContainText('Query String: {}')
+    })
   })
 
   test.describe('Transform', () => {
