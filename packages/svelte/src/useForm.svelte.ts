@@ -22,7 +22,7 @@ import type {
   UseFormWithPrecognitionArguments,
   VisitOptions,
 } from '@inertiajs/core'
-import { router, UseFormUtils } from '@inertiajs/core'
+import { UseFormUtils } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
 import type { NamedInputEvent, PrecognitionPath, ValidationConfig, Validator } from 'laravel-precognition'
 import useFormState, { type FormStateWithPrecognition, type InternalPrecognitionState } from './useFormState.svelte'
@@ -162,6 +162,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     setRememberExcludeKeys,
     resetBeforeSubmit,
     finishProcessing,
+    layer,
   } = useFormState<TForm>({
     data,
     rememberKey,
@@ -231,9 +232,9 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     pendingOptimisticCallback = null
 
     if (method === 'delete') {
-      router.delete(url, { ..._options, data: transformedData })
+      layer.delete(url, { ..._options, data: transformedData })
     } else {
-      router[method](url, transformedData, _options)
+      layer[method](url, transformedData, _options)
     }
   }
 

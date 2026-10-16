@@ -2,6 +2,7 @@ import { ReloadOptions, router } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { computed, defineComponent, h, nextTick, onUnmounted, PropType, ref, SlotsType, watch } from 'vue'
 import { usePage } from './app'
+import { useLayerId } from './useLayer'
 
 export default defineComponent({
   name: 'WhenVisible',
@@ -30,6 +31,7 @@ export default defineComponent({
     },
   },
   setup(props, { slots }) {
+    const layerId = useLayerId()
     const loaded = ref(false)
     const fetching = ref(false)
     const observer = ref<IntersectionObserver | null>(null)
@@ -76,6 +78,7 @@ export default defineComponent({
           const reloadParams = getReloadParams()
 
           router.reload({
+            layerId,
             ...reloadParams,
             onStart: (e) => {
               fetching.value = true

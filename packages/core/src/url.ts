@@ -12,7 +12,7 @@ import type {
 } from './types'
 
 export function hrefToUrl(href: string | URL): URL {
-  return new URL(href.toString(), typeof window === 'undefined' ? undefined : window.location.toString())
+  return new URL(href.toString(), typeof window === 'undefined' ? 'http://ssr.inertia' : window.location.toString())
 }
 
 export const transformUrlAndData = (

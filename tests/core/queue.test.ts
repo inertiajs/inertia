@@ -98,10 +98,7 @@ test.describe('queue.ts', () => {
       release = resolve
     })
     let settled = false
-    const first = queue.add(() => {})
-    const completion = first.then(() => {
-      settled = true
-    })
+    queue.add(() => {})
 
     await Promise.resolve()
 
@@ -109,9 +106,12 @@ test.describe('queue.ts', () => {
     const taskStarted = new Promise<void>((resolve) => {
       started = resolve
     })
-    queue.add(() => {
+    const second = queue.add(() => {
       started()
       return pending
+    })
+    const completion = second.then(() => {
+      settled = true
     })
 
     await taskStarted
@@ -147,9 +147,8 @@ test.describe('queue.ts', () => {
 
     await Promise.resolve()
 
-    queue.add(() => Promise.reject(error))
-
-    await expect(first).rejects.toBe(error)
+    await expect(queue.add(() => Promise.reject(error))).rejects.toBe(error)
+    await first
     await queue.add(() => {})
   })
 })

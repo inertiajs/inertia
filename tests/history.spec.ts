@@ -214,6 +214,26 @@ test('it handles bfcache restoration after history is cleared', async ({ page })
   expect(requests.requests.length).toBeGreaterThan(0)
 })
 
+test('a non-serializable prop does not break the visit or block the history queue', async ({ page }) => {
+  await page.goto('/history/non-serializable')
+
+  await page.getByRole('button', { name: 'Push a function prop' }).click()
+
+  await expect(page).toHaveURL('/history/non-serializable/target')
+  await expect(page.getByText('Target page')).toBeVisible()
+
+  // The function is dropped from history state, the rest of the props are kept
+  const historyState = await page.evaluate(() => window.history.state)
+  await expect(historyState.page.props.message).toBe('Target page')
+  await expect(historyState.page.props.onAction).toBeUndefined()
+
+  // The client visit queue must still process visits after the function prop was dropped
+  await page.getByRole('button', { name: 'Client visit' }).click()
+
+  await expect(page).toHaveURL('/history/non-serializable/landed')
+  await expect(page.getByText('Client visit landed')).toBeVisible()
+})
+
 test('it does not leak cleared history entries through a known plaintext', async ({ page }) => {
   // User A opens the public page, which looks the same for every user. The page is encrypted,
   // so its entry is stored as ciphertext in window.history.state.

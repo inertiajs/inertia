@@ -1,7 +1,9 @@
 <script lang="ts">
   import { router, type ReloadOptions } from '@inertiajs/core'
   import { get } from 'es-toolkit/compat'
-  import { usePage } from '../page.svelte'
+  import { layerId, usePage } from '../page.svelte'
+
+  const currentLayerId = layerId()
 
   interface Props {
     data?: string | string[]
@@ -42,6 +44,7 @@
         const reloadParams = getReloadParams()
 
         router.reload({
+          layerId: currentLayerId,
           ...reloadParams,
           onStart: (event) => {
             fetching = true

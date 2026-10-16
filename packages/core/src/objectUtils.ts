@@ -97,3 +97,84 @@ export const setPathPreservingIdentity = <T>(target: T, path: string, value: unk
 
   return copyAlongPath(target, 0) as T
 }
+
+const isStructuredCloneable = (value: unknown): boolean => {
+  const type = typeof value
+
+  return type !== 'function' && type !== 'symbol'
+}
+
+const isNativelyCloneable = (value: object): boolean =>
+  value instanceof Date ||
+  value instanceof RegExp ||
+  value instanceof Error ||
+  value instanceof ArrayBuffer ||
+  ArrayBuffer.isView(value) ||
+  (typeof Blob !== 'undefined' && value instanceof Blob)
+
+export const toStructuredCloneable = <T>(value: T): T => {
+  const seen = new WeakMap<object, unknown>()
+
+  const copy = (node: unknown): unknown => {
+    if (node === null || typeof node !== 'object') {
+      return node
+    }
+
+    if (seen.has(node)) {
+      return seen.get(node)
+    }
+
+    if (isNativelyCloneable(node)) {
+      return node
+    }
+
+    if (Array.isArray(node)) {
+      const result: unknown[] = []
+      seen.set(node, result)
+
+      // Not forEach(), which skips holes and would shift every later index.
+      for (const item of node) {
+        result.push(isStructuredCloneable(item) ? copy(item) : null)
+      }
+
+      return result
+    }
+
+    if (node instanceof Set) {
+      const result = new Set()
+      seen.set(node, result)
+      node.forEach((item) => {
+        if (isStructuredCloneable(item)) {
+          result.add(copy(item))
+        }
+      })
+
+      return result
+    }
+
+    if (node instanceof Map) {
+      const result = new Map()
+      seen.set(node, result)
+      node.forEach((item, key) => {
+        if (isStructuredCloneable(key) && isStructuredCloneable(item)) {
+          result.set(copy(key), copy(item))
+        }
+      })
+
+      return result
+    }
+
+    const result: Record<string, unknown> = {}
+    seen.set(node, result)
+
+    Object.entries(node).forEach(([key, item]) => {
+      if (isStructuredCloneable(item)) {
+        result[key] = copy(item)
+      }
+    })
+
+    return result
+  }
+
+  return copy(value) as T
+}

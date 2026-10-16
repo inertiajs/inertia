@@ -19,13 +19,29 @@ export {
   createLayoutPropsStore,
   isPropsObject,
   isPropsObjectOrCallback,
+  layoutProps,
   normalizeLayouts,
+  resolveLayouts,
+  type DefaultLayout,
   type LayoutCallbackReturn,
   type LayoutDefinition,
   type LayoutPropsStore,
+  type LayoutSlot,
+  type SetLayoutProps,
+  emptyLayoutSlot,
 } from './layout'
+export { createLayerApi, type LayerApi } from './router'
+export { layerDialogAttributes, mountLayerDialog } from './layers/dialog'
+export { topPageOf } from './layers'
+export { layerIdOf } from './layers/render'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
-export { isPathOrSubPath, partialReloadRequestsProp, partialReloadRequestsSomeProps } from './partialReload'
+export { resolveInitialApp } from './layers/walk'
+export {
+  isPathOrSubPath,
+  partialReloadFillsDeferred,
+  partialReloadRequestsProp,
+  partialReloadRequestsSomeProps,
+} from './partialReload'
 export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
 export { buildSSRBody } from './ssrUtils'

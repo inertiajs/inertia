@@ -1,6 +1,7 @@
 import { ReloadOptions, router } from '@inertiajs/core'
 import { get } from 'es-toolkit/compat'
 import { createElement, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useLayerId } from './useLayer'
 import usePage from './usePage'
 
 interface WhenVisibleSlotProps {
@@ -22,6 +23,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
   as = as ?? 'div'
   fallback = fallback ?? null
 
+  const layerId = useLayerId()
   const pageProps = usePage().props
   const keys = useMemo(() => (data ? (Array.isArray(data) ? data : [data]) : []), [data])
 
@@ -73,6 +75,7 @@ const WhenVisible = ({ children, data, params, buffer, as, always, fallback }: W
         const reloadParams = getReloadParamsRef.current()
 
         router.reload({
+          layerId,
           ...reloadParams,
           onStart: (e) => {
             fetching.current = true
