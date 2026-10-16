@@ -41,6 +41,38 @@ test.describe('Deferred Props Cancellation', () => {
     expect(completedFromB).toHaveLength(3)
   })
 
+  test('it cancels in-flight deferred props when pushing a different URL', async ({ page }) => {
+    const cancelledFromA: string[] = []
+    const completedFromA: string[] = []
+
+    page.on('requestfailed', (req) => {
+      if (req.url().includes('/a') && req.headers()['x-inertia-partial-data']) {
+        cancelledFromA.push(req.headers()['x-inertia-partial-data'])
+      }
+    })
+
+    page.on('response', (res) => {
+      const prop = res.request().headers()['x-inertia-partial-data']
+      if (prop && res.status() === 200 && res.url().includes('/a')) {
+        completedFromA.push(prop)
+      }
+    })
+
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
+    await expect(page.getByText('Loading users...')).toBeVisible()
+
+    // Push a client-side URL before deferred props complete
+    await page.getByRole('button', { name: 'Push Page B' }).click()
+    await expect(page).toHaveURL(/rapid-navigation\/b$/)
+
+    // Deferred props are reloaded for the pushed URL
+    await expect(page.getByText('users data for b')).toBeVisible()
+
+    // A's requests were cancelled
+    expect(cancelledFromA).toHaveLength(3)
+    expect(completedFromA).toHaveLength(0)
+  })
+
   test('it does not cancel deferred props for same-URL operations', async ({ page }) => {
     const cancelled: string[] = []
 
