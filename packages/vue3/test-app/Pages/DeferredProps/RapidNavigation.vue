@@ -52,4 +52,6 @@ const handleOnBeforeClick = () => {
   <button @click="router.visit(`/deferred-props/rapid-navigation/${id}?foo=bar`)">Add query param</button>
 
   <button @click="router.prefetch('/deferred-props/page-1')">Prefetch Page 1</button>
+
+  <button @click="router.push({ url: '/deferred-props/rapid-navigation/b' })">Push Page B</button>
 </template>
