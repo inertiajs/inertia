@@ -504,6 +504,13 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.post('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server', errors: { foo: 'The foo field is required.' } },
+  }),
+)
+
 app.get('/client-side-visit/props', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Props',

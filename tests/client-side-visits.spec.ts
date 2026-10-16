@@ -138,6 +138,22 @@ test('pushes the page client side', async ({ page, browserName }) => {
   await expect(historyLength).toBe(browserName === 'firefox' ? 2 : 3)
 })
 
+test('pushes the page client side after a preserveUrl visit with errors', async ({ page }) => {
+  await page.goto('/client-side-visit')
+
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        (window as any).testing.Inertia.post('/client-side-visit', {}, { preserveUrl: true, onFinish: resolve }),
+      ),
+  )
+
+  await page.getByRole('button', { name: 'Push', exact: true }).click()
+
+  await expect(page).toHaveURL('/client-side-visit-2')
+  await expect(page.getByText('baz from client')).toBeVisible()
+})
+
 test('it pairs client-side push visitId with navigate', async ({ page }) => {
   pageLoads.watch(page)
 
