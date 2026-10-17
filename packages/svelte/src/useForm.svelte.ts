@@ -131,7 +131,7 @@ export default function useForm<TForm extends FormDataType<TForm> & ValidateForm
   data: TForm | (() => TForm),
 ): InertiaPrecognitiveFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm> & ValidateFormData<TForm>>(
-  rememberKey: string,
+  rememberKey: string | null | undefined,
   data: TForm | (() => TForm),
 ): InertiaFormStore<TForm>
 export default function useForm<TForm extends FormDataType<TForm> & ValidateFormData<TForm>>(
