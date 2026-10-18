@@ -22,10 +22,6 @@ export default () => {
         email: string
       }
       tags: string[]
-      items: Array<{
-        product_id: number
-        quantity: number
-      }>
       document?: File
     },
     MixedContentResponse
@@ -36,7 +32,6 @@ export default () => {
       email: '',
     },
     tags: [],
-    items: [{ product_id: 1034, quantity: 2 }],
     document: undefined,
   })
 

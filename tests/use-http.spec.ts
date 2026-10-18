@@ -424,21 +424,6 @@ test.describe('useHttp', () => {
       expect(mixedRequest?.headers()['content-type']).toContain('multipart/form-data')
     })
 
-    test('it uses indexed keys for arrays of objects in FormData', async ({ page }) => {
-      await page.goto('/use-http/mixed-content')
-
-      await page.fill('#mixed-tags', 'important, urgent')
-      await page.setInputFiles('#mixed-document', {
-        name: 'report.pdf',
-        mimeType: 'application/pdf',
-        buffer: Buffer.from('PDF content here'),
-      })
-      await page.click('#mixed-button')
-
-      await expect(page.locator('#mixed-result')).toContainText('"tags":["important","urgent"]')
-      await expect(page.locator('#mixed-result')).toContainText('"items":[{"product_id":"1034","quantity":"2"}]')
-    })
-
     test('it sends nested data without files as JSON', async ({ page }) => {
       await page.goto('/use-http/mixed-content')
 

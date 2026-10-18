@@ -1,6 +1,5 @@
 import {
   CancelToken,
-  config,
   Errors,
   ErrorValue,
   FormDataConvertible,
@@ -216,12 +215,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         requestUrl = urlWithParams
       } else {
         if (useFormData) {
-          requestData = objectToFormData(
-            transformedData as Record<string, FormDataConvertible>,
-            new FormData(),
-            null,
-            config.get('form.forceIndicesArrayFormatInFormData') ? 'indices' : 'brackets',
-          )
+          requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
         } else {
           requestData = JSON.stringify(transformedData)
           contentType = 'application/json'
