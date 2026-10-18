@@ -43,16 +43,12 @@ jobs:
 
   vite-plugin:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Vite Plugin (Vite ${{ matrix.vite }}${{ matrix.os == 'windows-latest' && ', Windows' || '' }})
+    name: Vite Plugin (Vite ${{ matrix.vite }})
     timeout-minutes: 15
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        os: [ubuntu-24.04]
         vite: ['7', '8']
-        include:
-          - os: windows-latest
-            vite: '8'
 
     steps:
       - name: Checkout
@@ -76,11 +72,6 @@ jobs:
 
       - name: Override Vite version
         run: pnpm --filter './packages/vite' add -D vite@^${{ matrix.vite }}.0.0
-
-      - name: Use Bash for package scripts
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "pnpm_config_script_shell=C:/Program Files/Git/bin/bash.exe" >> "$GITHUB_ENV"
 
       - name: Build Inertia
         run: pnpm -r --filter './packages/{core,vite}' build

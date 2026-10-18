@@ -16,7 +16,6 @@
  */
 
 import { resolve } from 'node:path'
-import { normalizePath } from 'vite'
 import type { EnvironmentModuleNode, ViteDevServer } from 'vite'
 
 export function collectCSSFromModuleGraph(server: ViteDevServer, entry: string): string[] {
@@ -37,8 +36,7 @@ export function collectCSSFromModuleGraph(server: ViteDevServer, entry: string):
   const basePrefix = base === '/' ? '' : base.replace(/\/$/, '')
 
   return cssModules.map(({ url, id }) => {
-    const path = url.startsWith('/') ? url : `/${url}`
-    const href = `${origin}${basePrefix}${path}`
+    const href = `${origin}${basePrefix}${url}`
     const devId = id ? ` data-vite-dev-id="${id}"` : ''
 
     return `<link rel="stylesheet" href="${href}"${devId}>`
@@ -46,7 +44,7 @@ export function collectCSSFromModuleGraph(server: ViteDevServer, entry: string):
 }
 
 function resolveEntryModule(server: ViteDevServer, entry: string): EnvironmentModuleNode | undefined {
-  const resolvedEntry = normalizePath(resolve(server.config.root, entry))
+  const resolvedEntry = resolve(server.config.root, entry)
 
   return server.environments.ssr.moduleGraph.getModuleById(resolvedEntry)
 }

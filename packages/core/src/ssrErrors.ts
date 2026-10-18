@@ -256,11 +256,10 @@ const colors = {
 }
 
 function makeRelative(path: string, root?: string): string {
-  const normalizedPath = path.replace(/\\/g, '/')
-  const base = (root ?? process.cwd()).replace(/\\/g, '/')
+  const base = root ?? process.cwd()
 
-  if (normalizedPath.startsWith(base + '/')) {
-    return normalizedPath.slice(base.length + 1)
+  if (path.startsWith(base + '/')) {
+    return path.slice(base.length + 1)
   }
 
   return path
