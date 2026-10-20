@@ -12,6 +12,18 @@
       router.visit('/deferred-props/page-2')
     }
   }
+
+  let reloadStatus = $state('idle')
+
+  function reloadUsersAndPush() {
+    router.reload({
+      only: ['users'],
+      onSuccess: () => (reloadStatus = 'succeeded'),
+      onCancel: () => (reloadStatus = 'cancelled'),
+    })
+
+    router.push({ url: '/deferred-props/rapid-navigation/b', preserveState: true })
+  }
 </script>
 
 <div>Page: {id}</div>
@@ -51,3 +63,7 @@
 <button onclick={() => router.prefetch('/deferred-props/page-1')}>Prefetch Page 1</button>
 
 <button onclick={() => router.push({ url: '/deferred-props/rapid-navigation/b' })}>Push Page B</button>
+
+<button onclick={reloadUsersAndPush}>Reload users and push Page B</button>
+
+<div>Reload: {reloadStatus}</div>

@@ -61,12 +61,22 @@ test.describe('Deferred Props Cancellation', () => {
     await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Push Page B' }).click()
+    await page.getByRole('button', { name: 'Push Page B', exact: true }).click()
     await expect(page).toHaveURL(/rapid-navigation\/b$/)
     await expect(page.getByText('users data for b')).toBeVisible()
 
     expect(cancelledFromA).toHaveLength(3)
     expect(completedFromA).toHaveLength(0)
+  })
+
+  test('it reports an in-flight partial reload as cancelled when pushing a different URL', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
+    await expect(page.getByText('users data for a')).toBeVisible()
+    await expect(page.getByText('Reload: idle')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Reload users and push Page B' }).click()
+    await expect(page).toHaveURL(/rapid-navigation\/b$/)
+    await expect(page.getByText('Reload: cancelled')).toBeVisible()
   })
 
   test('it does not cancel deferred props for same-URL operations', async ({ page }) => {
