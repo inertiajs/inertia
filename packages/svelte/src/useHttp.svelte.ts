@@ -18,6 +18,7 @@ import type {
   UseHttpSubmitOptions,
 } from '@inertiajs/core'
 import {
+  config,
   hasFiles,
   http,
   HttpCancelledError,
@@ -200,7 +201,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       requestUrl = urlWithParams
     } else {
       if (useFormData) {
-        requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
+        requestData = objectToFormData(
+          transformedData as Record<string, FormDataConvertible>,
+          new FormData(),
+          null,
+          config.get('form.forceIndicesArrayFormatInFormData') ? 'indices' : 'brackets',
+        )
       } else {
         requestData = JSON.stringify(transformedData)
         contentType = 'application/json'
