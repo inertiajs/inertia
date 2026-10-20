@@ -61,14 +61,10 @@ test.describe('Deferred Props Cancellation', () => {
     await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
     await expect(page.getByText('Loading users...')).toBeVisible()
 
-    // Push a client-side URL before deferred props complete
     await page.getByRole('button', { name: 'Push Page B' }).click()
     await expect(page).toHaveURL(/rapid-navigation\/b$/)
-
-    // Deferred props are reloaded for the pushed URL
     await expect(page.getByText('users data for b')).toBeVisible()
 
-    // A's requests were cancelled
     expect(cancelledFromA).toHaveLength(3)
     expect(completedFromA).toHaveLength(0)
   })
