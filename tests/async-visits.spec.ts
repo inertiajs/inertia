@@ -71,12 +71,22 @@ test.describe('Async visits', () => {
     const inFlight = page.waitForRequest(
       (req) => req.url().includes('/async-visits/reload-origin') && !!req.headers()['x-repro-delay'],
     )
-    await page.getByRole('button', { name: 'Reload' }).click()
+    await page.getByRole('button', { name: 'Reload', exact: true }).click()
     await inFlight
 
     await page.getByRole('link', { name: 'Go to C' }).click()
     await expect(page.getByText('Page: C')).toBeVisible()
 
     await expect.poll(() => cancelled.length).toBe(1)
+  })
+
+  test('it discards a reload of the previous query string that lands after a visit to a new one', async ({ page }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Visit page 2 and reload' }).click()
+
+    await expect(page.getByText('Reload: finished')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
   })
 })

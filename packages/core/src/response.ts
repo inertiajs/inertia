@@ -312,7 +312,15 @@ export class Response {
 
     // We have the same component, let's double-check the URL
     // If we're no longer on the same path name (e.g. /users/1 -> /users/2), we should not set the page
-    return originatingUrl.origin === currentPageUrl.origin && originatingUrl.pathname === currentPageUrl.pathname
+    if (originatingUrl.origin !== currentPageUrl.origin || originatingUrl.pathname !== currentPageUrl.pathname) {
+      return false
+    }
+
+    // A reload of the originating page is stale once the user has moved to another query string (e.g. ?page=1 -> ?page=2)
+    return (
+      !isSameUrlWithoutHash(this.requestParams.all().url, originatingUrl) ||
+      isSameUrlWithoutHash(originatingUrl, currentPageUrl)
+    )
   }
 
   protected pageUrl(pageResponse: Page) {
