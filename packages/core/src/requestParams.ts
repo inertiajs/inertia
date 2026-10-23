@@ -5,9 +5,11 @@ import {
   HttpRequestHeaders,
   InternalActiveVisit,
   Page,
+  PendingVisit,
   PreserveStateOption,
   VisitCallbacks,
 } from './types'
+import { isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash } from './url'
 
 export class RequestParams {
   protected callbacks: {
@@ -16,6 +18,8 @@ export class RequestParams {
   }[] = []
 
   protected params: InternalActiveVisit
+
+  protected pageUrlRewritten = false
 
   constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
@@ -60,7 +64,7 @@ export class RequestParams {
   }
 
   public isPartial() {
-    return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
+    return RequestParams.isPartialVisit(this.params)
   }
 
   public isPrefetch(): boolean {
@@ -97,6 +101,14 @@ export class RequestParams {
 
   public wasCancelledAtAll() {
     return this.params.cancelled || this.params.interrupted
+  }
+
+  public markPageUrlRewritten() {
+    this.pageUrlRewritten = true
+  }
+
+  public wasPageUrlRewritten() {
+    return this.pageUrlRewritten
   }
 
   public onFinish() {
@@ -199,5 +211,23 @@ export class RequestParams {
     }
 
     return value
+  }
+
+  /**
+   * Async visits run in the background, so only a sync visit to another URL leaves the page.
+   * Partial visits update the page they're on, so for those only another path counts.
+   */
+  public static leavesPage(visit: PendingVisit, pageUrl: URL, destinationUrl: URL): boolean {
+    if (visit.async) {
+      return false
+    }
+
+    return RequestParams.isPartialVisit(visit)
+      ? !isSameUrlWithoutQueryOrHash(destinationUrl, pageUrl)
+      : !isSameUrlWithoutHash(destinationUrl, pageUrl)
+  }
+
+  protected static isPartialVisit(visit: PendingVisit): boolean {
+    return visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
   }
 }

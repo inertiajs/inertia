@@ -1,4 +1,5 @@
 import { Request } from './request'
+import { isSameUrlWithoutHash } from './url'
 
 export class RequestStream {
   protected requests: Request[] = []
@@ -51,6 +52,12 @@ export class RequestStream {
 
   protected shouldCancel(): boolean {
     return this.interruptible && this.requests.length >= this.maxConcurrent
+  }
+
+  public markPageUrlRewritten(pageUrl: URL): void {
+    this.requests
+      .filter((request) => !request.isPrefetch() && isSameUrlWithoutHash(request.getUrl(), pageUrl))
+      .forEach((request) => request.markPageUrlRewritten())
   }
 
   public hasPendingOptimistic(): boolean {
