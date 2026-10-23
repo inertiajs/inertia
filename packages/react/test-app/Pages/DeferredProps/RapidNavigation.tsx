@@ -1,4 +1,5 @@
 import { Deferred, Link, router, usePage } from '@inertiajs/react'
+import { useState } from 'react'
 
 const Users = () => {
   const { users } = usePage<{ users?: { text: string } }>().props
@@ -17,6 +18,17 @@ const Activity = () => {
 
 export default () => {
   const { id } = usePage<{ id: string }>().props
+  const [reloadStatus, setReloadStatus] = useState('idle')
+
+  const reloadUsersAndPush = () => {
+    router.reload({
+      only: ['users'],
+      onSuccess: () => setReloadStatus('succeeded'),
+      onCancel: () => setReloadStatus('cancelled'),
+    })
+
+    router.push({ url: '/deferred-props/rapid-navigation/b', preserveState: true })
+  }
 
   return (
     <>
@@ -55,6 +67,12 @@ export default () => {
       <button onClick={() => router.visit(`/deferred-props/rapid-navigation/${id}?foo=bar`)}>Add query param</button>
 
       <button onClick={() => router.prefetch('/deferred-props/page-1')}>Prefetch Page 1</button>
+
+      <button onClick={() => router.push({ url: '/deferred-props/rapid-navigation/b' })}>Push Page B</button>
+
+      <button onClick={reloadUsersAndPush}>Reload users and push Page B</button>
+
+      <div>Reload: {reloadStatus}</div>
     </>
   )
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Deferred, Link, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 
 defineProps<{
   id: string
@@ -13,6 +14,18 @@ const handleOnBeforeClick = () => {
   if (shouldNavigate) {
     router.visit('/deferred-props/page-2')
   }
+}
+
+const reloadStatus = ref('idle')
+
+const reloadUsersAndPush = () => {
+  router.reload({
+    only: ['users'],
+    onSuccess: () => (reloadStatus.value = 'succeeded'),
+    onCancel: () => (reloadStatus.value = 'cancelled'),
+  })
+
+  router.push({ url: '/deferred-props/rapid-navigation/b', preserveState: true })
 }
 </script>
 
@@ -52,4 +65,10 @@ const handleOnBeforeClick = () => {
   <button @click="router.visit(`/deferred-props/rapid-navigation/${id}?foo=bar`)">Add query param</button>
 
   <button @click="router.prefetch('/deferred-props/page-1')">Prefetch Page 1</button>
+
+  <button @click="router.push({ url: '/deferred-props/rapid-navigation/b' })">Push Page B</button>
+
+  <button @click="reloadUsersAndPush">Reload users and push Page B</button>
+
+  <div>Reload: {{ reloadStatus }}</div>
 </template>

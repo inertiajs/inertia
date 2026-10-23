@@ -224,6 +224,16 @@ export class Router {
     }
   }
 
+  protected cancelAsyncRequestsFor(pageUrl: URL): void {
+    // Cancel in-flight requests aimed at the page we're navigating away from
+    // (deferred props, partial reloads, plain reloads), but leave prefetches,
+    // optimistic requests, and background async visits to other pages untouched
+    this.asyncRequestStream.cancelInFlight(
+      (request) =>
+        !request.isPrefetch() && !request.isOptimistic() && isSameUrlWithoutQueryOrHash(request.getUrl(), pageUrl),
+    )
+  }
+
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
     return polls.add(
       interval,
@@ -286,15 +296,7 @@ export class Router {
       : isSameUrlWithoutHash(visit.url, currentPageUrl)
 
     if (!isSamePage) {
-      // Cancel in-flight requests aimed at the page we're navigating away from
-      // (deferred props, partial reloads, plain reloads), but leave prefetches,
-      // optimistic requests, and background async visits to other pages untouched
-      this.asyncRequestStream.cancelInFlight(
-        (request) =>
-          !request.isPrefetch() &&
-          !request.isOptimistic() &&
-          isSameUrlWithoutQueryOrHash(request.getUrl(), currentPageUrl),
-      )
+      this.cancelAsyncRequestsFor(currentPageUrl)
     }
 
     // Interrupt in-flight requests before taking the optimistic snapshot
@@ -599,6 +601,12 @@ export class Router {
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     const visitId = this.createVisitId()
+
+    const currentPageUrl = hrefToUrl(current.url)
+
+    if (!isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), currentPageUrl)) {
+      this.cancelAsyncRequestsFor(currentPageUrl)
+    }
 
     return currentPage
       .set(page, {
