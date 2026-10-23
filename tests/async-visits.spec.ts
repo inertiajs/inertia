@@ -160,7 +160,9 @@ test.describe('Async visits', () => {
     await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
   })
 
-  test('it lets an async visit to another query string set its URL after a client visit changed it', async ({ page }) => {
+  test('it lets an async visit to another query string set its URL after a client visit changed it', async ({
+    page,
+  }) => {
     await page.goto('/async-visits/reload-origin')
     await expect(page.getByText('Page: Reload Origin')).toBeVisible()
 

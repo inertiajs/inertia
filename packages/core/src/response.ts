@@ -282,7 +282,7 @@ export class Response {
 
     // A client visit may have changed the query string while this request was in flight
     const keepsCurrentUrl =
-      this.requestParams.wasPageUrlRewritten() && isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
+      this.requestParams.keepsCurrentUrl() && isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
 
     this.requestParams.setPreserveOptions(pageResponse)
 

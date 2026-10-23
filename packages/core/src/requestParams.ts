@@ -19,7 +19,11 @@ export class RequestParams {
 
   protected params: InternalActiveVisit
 
-  protected pageUrlRewritten = false
+  /**
+   * Set when a query-only client visit, like the URL updates of <InfiniteScroll>, changes the URL while this
+   * request is in flight. Its response then keeps that URL instead of putting the previous query string back.
+   */
+  protected shouldKeepCurrentUrl = false
 
   constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
@@ -103,12 +107,12 @@ export class RequestParams {
     return this.params.cancelled || this.params.interrupted
   }
 
-  public markPageUrlRewritten() {
-    this.pageUrlRewritten = true
+  public keepCurrentUrl() {
+    this.shouldKeepCurrentUrl = true
   }
 
-  public wasPageUrlRewritten() {
-    return this.pageUrlRewritten
+  public keepsCurrentUrl() {
+    return this.shouldKeepCurrentUrl
   }
 
   public onFinish() {
