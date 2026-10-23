@@ -1248,6 +1248,21 @@ app.get('/encrypted-history/logout', (req, res) => {
   })
 })
 
+app.get('/history/held-deferred/:page', (req, res) => {
+  if (req.params.page !== 'post' || !req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'History/HeldDeferred',
+      props: { page: req.params.page },
+      ...(req.params.page === 'post' && { deferredProps: { default: ['comments'] } }),
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'History/HeldDeferred',
+    props: { page: req.params.page, comments: 'Comments loaded' },
+  })
+})
+
 app.get('/history/prefetch/:page', (req, res) => {
   setTimeout(
     () =>
@@ -1933,6 +1948,14 @@ app.get('/async-visits/reload-origin', (req, res) => {
 
   setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/ReloadOrigin' }), delay)
 })
+
+app.post('/async-visits/reload-origin', (req, res) => res.redirect(303, '/async-visits/page-c'))
+
+app.post('/async-visits/reload-origin/like', (req, res) => res.redirect(303, '/async-visits/reload-origin'))
+
+app.get('/async-visits/reload-origin/redirect', (req, res) =>
+  res.status(409).header('X-Inertia-Redirect', '/async-visits/reload-origin').send(''),
+)
 
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {

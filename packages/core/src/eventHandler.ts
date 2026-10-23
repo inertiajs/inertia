@@ -95,6 +95,10 @@ class EventHandler {
       return this.onMissingHistoryItem()
     }
 
+    // Cancel ongoing requests except prefetch requests before decrypting,
+    // so a response that arrives in the meantime can't replace the restored page
+    router.cancelAll({ prefetch: false })
+
     history
       .decrypt(state.page)
       .then((data) => {
@@ -102,9 +106,6 @@ class EventHandler {
           this.onMissingHistoryItem()
           return
         }
-
-        // Cancel ongoing requests except prefetch requests
-        router.cancelAll({ prefetch: false })
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())

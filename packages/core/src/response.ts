@@ -2,6 +2,7 @@ import { isEqual } from 'es-toolkit'
 import { get, set } from 'es-toolkit/compat'
 import { router } from '.'
 import dialog from './dialog'
+import { eventHandler } from './eventHandler'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
@@ -20,7 +21,7 @@ import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
-import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
 
@@ -72,6 +73,10 @@ export class Response {
     this.requestParams.runCallbacks()
     this.processed = true
 
+    if (this.requestParams.wasCancelledAtAll()) {
+      return
+    }
+
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
     }
@@ -97,6 +102,10 @@ export class Response {
 
     try {
       await this.setPage()
+
+      if (this.requestParams.wasCancelledAtAll()) {
+        return
+      }
 
       const { flash } = currentPage.get()
 
@@ -248,7 +257,7 @@ export class Response {
     const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
-      return Promise.resolve()
+      return
     }
 
     this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
@@ -260,12 +269,32 @@ export class Response {
 
     await this.setRememberedState(pageResponse)
 
+    // The request may have been cancelled while the response was being prepared,
+    // for example when the user navigated back or a visit to another page committed
+    if (this.requestParams.wasCancelledAtAll()) {
+      return
+    }
+
+    // A redirect decides where the visit lands, so we compare against the page the server returned
+    const currentPageUrl = hrefToUrl(currentPage.get().url)
+    const responseUrl = hrefToUrl(pageResponse.url)
+    const leavesPage = RequestParams.leavesPage(this.requestParams.all(), currentPageUrl, responseUrl)
+
+    // A client visit may have changed the query string while this request was in flight
+    const keepsCurrentUrl =
+      this.requestParams.wasPageUrlRewritten() && isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
+
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+    pageResponse.url = history.preserveUrl || keepsCurrentUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     this.requestParams.all().onBeforeUpdate(pageResponse)
     fireBeforeUpdateEvent(pageResponse)
+
+    if (leavesPage) {
+      // Requests for the page we're leaving can still start while the visit is in flight, like a poll tick
+      eventHandler.fireInternalEvent('leavePage', currentPageUrl)
+    }
 
     return currentPage.set(pageResponse, {
       replace: this.requestParams.all().replace,
