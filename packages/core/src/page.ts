@@ -103,9 +103,6 @@ class CurrentPage {
       // Clear flash data from the page object, we don't want it when navigating back/forward...
       const pageForHistory = { ...page, flash: {} }
 
-      // A new page replaces the one we booted on, so restore() must stop falling back to its state
-      history.clearInitialState(history.rememberedState)
-
       return new Promise<void>((resolve) =>
         replace ? history.replaceState(pageForHistory, resolve) : history.pushState(pageForHistory, resolve),
       ).then(() => {
