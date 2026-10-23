@@ -2422,6 +2422,9 @@ app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res,
 app.get('/infinite-scroll/reverse-short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ReverseShortContent', 40, true, 5),
 )
+app.get('/infinite-scroll/reverse-pinned-to-bottom', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ReversePinnedToBottom', 40, true, 5),
+)
 app.get('/infinite-scroll/manual-reverse', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
 )
