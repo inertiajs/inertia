@@ -54,8 +54,8 @@ export class Request {
     return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }
 
-  public markPageUrlRewritten(): void {
-    this.requestParams.markPageUrlRewritten()
+  public keepCurrentUrl(): void {
+    this.requestParams.keepCurrentUrl()
   }
 
   public async send() {

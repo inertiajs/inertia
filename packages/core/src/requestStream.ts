@@ -54,10 +54,10 @@ export class RequestStream {
     return this.interruptible && this.requests.length >= this.maxConcurrent
   }
 
-  public markPageUrlRewritten(pageUrl: URL): void {
+  public keepCurrentUrlFor(pageUrl: URL): void {
     this.requests
       .filter((request) => !request.isPrefetch() && isSameUrlWithoutHash(request.getUrl(), pageUrl))
-      .forEach((request) => request.markPageUrlRewritten())
+      .forEach((request) => request.keepCurrentUrl())
   }
 
   public hasPendingOptimistic(): boolean {
