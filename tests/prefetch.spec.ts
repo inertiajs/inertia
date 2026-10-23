@@ -306,6 +306,34 @@ test.describe('UrlMethodPair prefetch support', () => {
   })
 })
 
+test('can prefetch QUERY links to the current page keyed by their data', async ({ page }) => {
+  await page.goto('prefetch/query')
+  await expect(page.locator('#results')).toHaveText('Results for: nothing')
+
+  requests.listen(page)
+
+  const applePrefetch = page.waitForResponse((response) => response.request().method() === 'QUERY')
+  await page.getByRole('button', { name: 'Search Apple' }).hover()
+  const appleResponse = await applePrefetch
+
+  expect(appleResponse.request().headers().purpose).toBe('prefetch')
+  expect(appleResponse.request().postDataJSON()).toEqual({ term: 'apple' })
+
+  const bananaPrefetch = page.waitForResponse((response) => response.request().method() === 'QUERY')
+  await page.getByRole('button', { name: 'Search Banana' }).hover()
+  const bananaResponse = await bananaPrefetch
+
+  expect(bananaResponse.request().postDataJSON()).toEqual({ term: 'banana' })
+
+  await page.getByRole('button', { name: 'Search Apple' }).click()
+  await expect(page.locator('#results')).toHaveText('Results for: apple')
+
+  await page.getByRole('button', { name: 'Search Banana' }).click()
+  await expect(page.locator('#results')).toHaveText('Results for: banana')
+
+  await expect(requests.requests).toHaveLength(2)
+})
+
 test.describe('cancelled prefetches', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {

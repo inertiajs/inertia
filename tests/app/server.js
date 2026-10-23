@@ -747,7 +747,7 @@ app.post('/form-helper/events/errors', (req, res) => {
 //
 const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email)
 
-app.post('/precognition/default', upload.any(), (req, res) => {
+const precognitionDefault = (req, res) => {
   if (!req.headers['precognition']) {
     return renderDump(req, res)
   }
@@ -794,7 +794,10 @@ app.post('/precognition/default', upload.any(), (req, res) => {
     },
     !!req.query['slow'] ? 2000 : 250,
   )
-})
+}
+
+app.post('/precognition/default', upload.any(), precognitionDefault)
+app.query('/precognition/default', upload.any(), precognitionDefault)
 
 app.post('/precognition/transform-keys', upload.any(), (req, res) => {
   if (!req.headers['precognition']) {
@@ -1032,7 +1035,7 @@ app.post('/precognition/error-sync', upload.any(), (req, res) => {
   }, 100)
 })
 
-const methods = ['get', 'post', 'put', 'patch', 'delete']
+const methods = ['get', 'post', 'put', 'patch', 'delete', 'query']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
     component: 'Dump',
@@ -1166,6 +1169,12 @@ app.get('/prefetch/cancelled', (req, res) => inertia.render(req, res, { componen
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))
+app.get('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: null } }),
+)
+app.query('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: req.body.term } }),
+)
 app.get('/prefetch/navigate-event/cached', (req, res) =>
   inertia.render(req, res, { component: 'Prefetch/NavigateEventTarget', props: { label: 'cached' } }),
 )
@@ -2397,6 +2406,55 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+const renderQueryVisitsSearch = (req, res) => {
+  const term = req.body?.term ?? null
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'QueryVisits/Search',
+      props: { term, reloadedAt: null },
+      deferredProps: { default: ['results'] },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'QueryVisits/Search',
+        props: {
+          results: req.headers['x-inertia-partial-data'].includes('results')
+            ? `Results for: ${term ?? 'nothing'}`
+            : undefined,
+          reloadedAt: req.headers['x-inertia-partial-data'].includes('reloadedAt') ? Date.now() : undefined,
+        },
+      }),
+    req.headers['x-slow'] ? 1000 : 0,
+  )
+}
+
+app.get('/query-visits/search', renderQueryVisitsSearch)
+app.get('/query-visits/search-elsewhere', renderQueryVisitsSearch)
+app.query('/query-visits/search', renderQueryVisitsSearch)
+
+const renderQueryVisitsInfiniteScroll = (req, res) => {
+  const term = req.body?.term ?? null
+  const page = parseInt(req.body?.page ?? req.query.page ?? 1)
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40)
+
+  inertia.render(req, res, {
+    component: 'QueryVisits/InfiniteScroll',
+    props: {
+      term,
+      users: { ...paginated, data: paginated.data.map((user) => ({ ...user, name: `${term ?? 'Any'} ${user.name}` })) },
+    },
+    mergeProps: ['users.data'],
+    scrollProps: { users: scrollProp },
+  })
+}
+
+app.get('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+app.query('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+
 app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
 app.get('/infinite-scroll-with-link', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),
@@ -3323,6 +3381,14 @@ app.patch('/api/users/:id', upload.none(), (req, res) => {
       name: req.body.name,
       email: req.body.email,
     },
+  })
+})
+
+app.query('/api/users/search', (req, res) => {
+  res.json({
+    method: req.method,
+    name: req.body.name,
+    query: req.query,
   })
 })
 

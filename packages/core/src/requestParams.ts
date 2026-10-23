@@ -75,6 +75,10 @@ export class RequestParams {
     return this.params.poll === true
   }
 
+  public isQueryMethodReload() {
+    return this.params.queryMethodReload === true
+  }
+
   public onCancelToken(cb: VoidFunction) {
     this.params.onCancelToken({
       cancel: cb,

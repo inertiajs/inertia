@@ -30,6 +30,10 @@
   const deleteMethod = () => {
     router.delete('/dump/delete')
   }
+
+  const queryMethod = () => {
+    router.query('/dump/query')
+  }
 </script>
 
 <div>
@@ -42,4 +46,5 @@
   <a href={'#'} onclick={putMethod} class="put">PUT Link</a>
   <a href={'#'} onclick={patchMethod} class="patch">PATCH Link</a>
   <a href={'#'} onclick={deleteMethod} class="delete">DELETE Link</a>
+  <a href={'#'} onclick={queryMethod} class="query">QUERY Link</a>
 </div>

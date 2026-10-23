@@ -75,6 +75,7 @@ test.describe('methods', () => {
     { method: 'put', label: 'PUT', el: 'button' },
     { method: 'patch', label: 'PATCH', el: 'button' },
     { method: 'delete', label: 'DELETE', el: 'button' },
+    { method: 'query', label: 'QUERY', el: 'button' },
     { method: 'post', label: 'OBJECT', el: 'button' },
     { method: 'post', label: 'OBJECT METHOD OVERRIDE', el: 'button' },
   ] as const
@@ -144,6 +145,7 @@ test.describe('data', () => {
       { method: 'put', label: 'PUT', form: { baz: 'put' } },
       { method: 'patch', label: 'PATCH', form: { foo: 'patch' } },
       { method: 'delete', label: 'DELETE', form: { bar: 'delete' } },
+      { method: 'query', label: 'QUERY', form: { baz: 'query' } },
     ] as const
 
     data.forEach(({ method, label, form }) => {
@@ -1034,6 +1036,7 @@ test.describe('"as" attribute', () => {
     { method: 'put', label: 'PUT' },
     { method: 'patch', label: 'PATCH' },
     { method: 'delete', label: 'DELETE' },
+    { method: 'query', label: 'QUERY' },
   ] as const
 
   data.forEach(({ method, label }) => {
