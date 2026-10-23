@@ -14,6 +14,7 @@
         Page {n}
       </Link>
     {/each}
+    <Link href="/history-quota/deferred">Deferred</Link>
   </div>
 
   <div style="height: 5000px"></div>

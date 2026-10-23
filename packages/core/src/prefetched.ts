@@ -72,6 +72,10 @@ class PrefetchedRequests {
         },
       })
     }).then((response) => {
+      if (!this.isInFlight(params.id)) {
+        return response
+      }
+
       this.remove(params)
 
       const pageResponse = response.getPageResponse()
@@ -121,6 +125,7 @@ class PrefetchedRequests {
 
   public removeAll(): void {
     this.cached = []
+    this.inFlightRequests = []
     this.removalTimers.forEach((removalTimer) => {
       clearTimeout(removalTimer.timer)
     })
@@ -139,6 +144,10 @@ class PrefetchedRequests {
     })
 
     this.clearTimer(params)
+  }
+
+  protected isInFlight(visitId: string): boolean {
+    return this.inFlightRequests.some((prefetching) => prefetching.params.id === visitId)
   }
 
   protected removeFromInFlight(visitId: string): void {

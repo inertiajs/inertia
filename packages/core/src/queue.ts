@@ -7,10 +7,20 @@ export default class Queue<T> {
     return this.process()
   }
 
-  public process() {
-    this.processingPromise ??= this.processNext().finally(() => {
-      this.processingPromise = null
-    })
+  public process(): Promise<void> {
+    this.processingPromise ??= this.processNext().then(
+      () => {
+        this.processingPromise = null
+
+        if (this.items.length > 0) {
+          return this.process()
+        }
+      },
+      (error) => {
+        this.processingPromise = null
+        throw error
+      },
+    )
 
     return this.processingPromise
   }

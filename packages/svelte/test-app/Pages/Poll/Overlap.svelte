@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { PollOptions } from '@inertiajs/core'
   import { usePoll } from '@inertiajs/svelte'
 
   let { mode, time } = $props<{ mode: string; time: number }>()
@@ -8,7 +9,7 @@
 
   // svelte-ignore state_referenced_locally
   const initialMode = mode
-  const options: { mode?: 'overlap' | 'cancel' | 'rest'; keepAlive?: boolean } = {}
+  const options: PollOptions = {}
 
   if (initialMode === 'overlap' || initialMode === 'cancel' || initialMode === 'rest') {
     options.mode = initialMode
@@ -16,6 +17,12 @@
 
   if (params.get('keepAlive') === '1') {
     options.keepAlive = true
+  }
+
+  const background = params.get('background')
+
+  if (background === 'throttle' || background === 'pause' || background === 'continue') {
+    options.background = background
   }
 
   const { start, stop } = usePoll(interval, {}, options)

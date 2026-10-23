@@ -254,6 +254,21 @@ describe('SSR Errors', () => {
       expect(sourceLine).not.toContain('/Users/dev/project')
     })
 
+    it('makes Windows paths relative to provided root', () => {
+      const error = new Error('window is not defined')
+      error.stack = `Error: window is not defined
+    at setup (D:\\dev\\project\\resources\\js\\Pages\\Dashboard.vue:25:13)`
+
+      const classified = classifySSRError(error)
+
+      for (const root of ['D:/dev/project', 'D:\\dev\\project']) {
+        const output = formatConsoleError(classified, root)
+        const sourceLine = output.split('\n').find((line) => line.includes('Source:'))
+
+        expect(sourceLine).toContain('Source: resources/js/Pages/Dashboard.vue:25:13')
+      }
+    })
+
     it('returns one-liner when formatErrors is false', () => {
       const classified = classifySSRError(new Error('window is not defined'), 'Dashboard')
       const output = formatConsoleError(classified, undefined, false)

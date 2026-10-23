@@ -108,7 +108,7 @@ class EventHandler {
 
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())
-          fireNavigateEvent(currentPage.get())
+          fireNavigateEvent(currentPage.get(), { type: 'history' })
 
           const pendingDeferred: Record<string, string[]> = {}
           const pageProps = currentPage.get().props
