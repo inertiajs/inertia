@@ -43,7 +43,13 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import { hrefToUrl, isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
+import {
+  hrefToUrl,
+  isSameUrlWithoutHash,
+  isSameUrlWithoutQueryOrHash,
+  isUrlMethodPair,
+  transformUrlAndData,
+} from './url'
 
 const noop = () => {}
 
