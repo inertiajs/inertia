@@ -1518,6 +1518,24 @@ test.describe('URL query string management', () => {
 })
 
 test.describe('Scroll position preservation', () => {
+  test('it keeps a scroll position the page changed while loading previous pages in reverse mode', async ({ page }) => {
+    requests.listen(page)
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.goto('/infinite-scroll/reverse-pinned-to-bottom') // 40 users, 5 per page, DESC
+
+    const container = page.locator('[data-testid="scroll-container"]')
+
+    // The page pins the container to its bottom on every mutation, so it should still be there once the
+    // previous pages it loaded to fill the container have been restored
+    await expect.poll(() => container.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true)
+    await expect.poll(() => infiniteScrollRequests().length).toBeGreaterThan(0)
+    await page.waitForTimeout(500)
+
+    const distanceFromBottom = await container.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop)
+
+    expect(distanceFromBottom).toBeLessThan(1)
+  })
+
   test('it maintains scroll position when loading previous pages', async ({ page }) => {
     requests.listen(page)
     await page.goto('/infinite-scroll/trigger-both?page=3')
