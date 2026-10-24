@@ -1,4 +1,5 @@
 import { getElementsInViewportFromCollection } from '../domUtils'
+import { navigation } from '../navigation'
 
 /**
  * When loading content "before" the current viewport (e.g. loading page 1 when viewing page 2),
@@ -14,11 +15,21 @@ export const useInfiniteScrollPreservation = (options: {
   getItemsElement: () => HTMLElement
 }) => {
   const createCallbacks = () => {
+    const generation = navigation.generation
     let referenceElement: Element | null = null
     let referenceElementTop: number = 0
 
     const captureScrollPosition = () => {
+      if (!navigation.isCurrent(generation)) {
+        return
+      }
+
       const scrollableContainer = options.getScrollableParent()
+
+      if (navigation.external && !scrollableContainer) {
+        return
+      }
+
       const itemsElement = options.getItemsElement()
 
       // Find the first visible element to use as a reference point
@@ -46,7 +57,7 @@ export const useInfiniteScrollPreservation = (options: {
       const restore = () => {
         attempts++
 
-        if (restored || attempts > 10) {
+        if (restored || attempts > 10 || !navigation.isCurrent(generation)) {
           return false
         }
 
@@ -70,7 +81,7 @@ export const useInfiniteScrollPreservation = (options: {
         // in the same visual position as before the update
         if (scrollableContainer) {
           scrollableContainer.scrollTo({ top: scrollableContainer.scrollTop + adjustment })
-        } else {
+        } else if (!navigation.external) {
           window.scrollTo(0, window.scrollY + adjustment)
         }
 
