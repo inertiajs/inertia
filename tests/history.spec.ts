@@ -303,8 +303,6 @@ test('it does not leak cleared history entries through a known plaintext', async
 
   const recovered = new TextDecoder().decode(recoveredBytes)
 
-  console.log({ recovered })
-
   // With a fresh IV for every entry, the two keystreams differ and this is just noise. With a
   // shared IV, it contains A's private page, including the token that only A has seen.
   expect(recovered).not.toContain(tokenOfUserA)

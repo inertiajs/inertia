@@ -283,6 +283,16 @@ export class Router {
     }
   }
 
+  protected cancelAsyncRequestsFor(pageUrl: URL): void {
+    // Cancel in-flight requests aimed at the page we're navigating away from
+    // (deferred props, partial reloads, plain reloads), but leave prefetches,
+    // optimistic requests, and background async visits to other pages untouched
+    this.asyncRequestStream.cancelInFlight(
+      (request) =>
+        !request.isPrefetch() && !request.isOptimistic() && isSameUrlWithoutQueryOrHash(request.getUrl(), pageUrl),
+    )
+  }
+
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
     const generation = navigation.generation
 
@@ -378,15 +388,7 @@ export class Router {
       : isSameUrlWithoutHash(visit.url, currentPageUrl)
 
     if (!isSamePage) {
-      // Cancel in-flight requests aimed at the page we're navigating away from
-      // (deferred props, partial reloads, plain reloads), but leave prefetches,
-      // optimistic requests, and background async visits to other pages untouched
-      this.asyncRequestStream.cancelInFlight(
-        (request) =>
-          !request.isPrefetch() &&
-          !request.isOptimistic() &&
-          isSameUrlWithoutQueryOrHash(request.getUrl(), currentPageUrl),
-      )
+      this.cancelAsyncRequestsFor(currentPageUrl)
 
       if (!navigation.isCurrent(generation)) {
         return
@@ -767,6 +769,16 @@ export class Router {
 
     if (!navigation.isCurrent(generation)) {
       return Promise.resolve()
+    }
+
+    const currentPageUrl = hrefToUrl(current.url)
+
+    if (!isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), currentPageUrl)) {
+      this.cancelAsyncRequestsFor(currentPageUrl)
+
+      if (!navigation.isCurrent(generation)) {
+        return Promise.resolve()
+      }
     }
 
     return currentPage

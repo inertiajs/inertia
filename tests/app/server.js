@@ -547,6 +547,13 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.post('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server', errors: { foo: 'The foo field is required.' } },
+  }),
+)
+
 app.get('/client-side-visit/props', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Props',
@@ -2470,6 +2477,9 @@ app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
 app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
 app.get('/infinite-scroll/reverse-short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ReverseShortContent', 40, true, 5),
+)
+app.get('/infinite-scroll/reverse-pinned-to-bottom', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ReversePinnedToBottom', 40, true, 5),
 )
 app.get('/infinite-scroll/manual-reverse', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),

@@ -157,63 +157,63 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
-    await this.setPage()
-
-    if (!navigation.isCurrent(this.navigationGeneration)) {
-      return
-    }
-
-    const { flash } = currentPage.get()
-
-    if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
-      fireFlashEvent(flash)
+    try {
+      await this.setPage()
 
       if (!navigation.isCurrent(this.navigationGeneration)) {
         return
       }
 
-      this.requestParams.all().onFlash(flash)
-    }
+      const { flash } = currentPage.get()
 
-    if (!navigation.isCurrent(this.navigationGeneration)) {
-      return
-    }
+      if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
+        fireFlashEvent(flash)
 
-    const errors = currentPage.get().props.errors || {}
+        if (!navigation.isCurrent(this.navigationGeneration)) {
+          return
+        }
 
-    if (Object.keys(errors).length > 0) {
-      const scopedErrors = this.getScopedErrors(errors)
-
-      fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
+        this.requestParams.all().onFlash(flash)
+      }
 
       if (!navigation.isCurrent(this.navigationGeneration)) {
         return
       }
 
-      return this.requestParams.all().onError(scopedErrors)
+      const errors = currentPage.get().props.errors || {}
+
+      if (Object.keys(errors).length > 0) {
+        const scopedErrors = this.getScopedErrors(errors)
+
+        fireErrorEvent(scopedErrors, { page: currentPage.get(), visitId: this.requestParams.all().id })
+
+        if (!navigation.isCurrent(this.navigationGeneration)) {
+          return
+        }
+
+        return this.requestParams.all().onError(scopedErrors)
+      }
+
+      router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
+
+      if (!this.wasPrefetched) {
+        // We end up here other than from the prefetch cache, so we assume this response is
+        // newer than the cached one and therefore flush the cache.
+        router.flush(currentPage.get().url)
+      }
+
+      fireSuccessEvent(currentPage.get(), { visitId: this.requestParams.all().id })
+
+      if (!navigation.isCurrent(this.navigationGeneration)) {
+        return
+      }
+
+      await this.requestParams.all().onSuccess(currentPage.get())
+    } finally {
+      if (navigation.isCurrent(this.navigationGeneration)) {
+        history.preserveUrl = false
+      }
     }
-
-    router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
-
-    if (!this.wasPrefetched) {
-      // We end up here other than from the prefetch cache, so we assume this response is
-      // newer than the cached one and therefore flush the cache.
-      router.flush(currentPage.get().url)
-    }
-
-    fireSuccessEvent(currentPage.get(), { visitId: this.requestParams.all().id })
-
-    if (!navigation.isCurrent(this.navigationGeneration)) {
-      return
-    }
-
-    await this.requestParams.all().onSuccess(currentPage.get())
-
-    if (!navigation.isCurrent(this.navigationGeneration)) {
-      return
-    }
-
-    history.preserveUrl = false
   }
 
   protected async handleExternalNavigation(destination: Page): Promise<void> {

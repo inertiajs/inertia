@@ -16,7 +16,6 @@ export const useInfiniteScrollPreservation = (options: {
 }) => {
   const createCallbacks = () => {
     const generation = navigation.generation
-    let currentScrollTop: number
     let referenceElement: Element | null = null
     let referenceElementTop: number = 0
 
@@ -32,9 +31,6 @@ export const useInfiniteScrollPreservation = (options: {
       }
 
       const itemsElement = options.getItemsElement()
-
-      // Capture current scroll position
-      currentScrollTop = scrollableContainer ? scrollableContainer.scrollTop : window.scrollY
 
       // Find the first visible element to use as a reference point
       // This element will help us calculate how much the content shifted after the update
@@ -84,7 +80,7 @@ export const useInfiniteScrollPreservation = (options: {
         // Adjust scroll position to compensate for the movement, keeping the reference element
         // in the same visual position as before the update
         if (scrollableContainer) {
-          scrollableContainer.scrollTo({ top: currentScrollTop + adjustment })
+          scrollableContainer.scrollTo({ top: scrollableContainer.scrollTop + adjustment })
         } else if (!navigation.external) {
           window.scrollTo(0, window.scrollY + adjustment)
         }
