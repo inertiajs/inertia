@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { router, useHttp } from '@inertiajs/vue3'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   safe: number
@@ -21,6 +21,14 @@ const loadReloadData = () => router.get('/bigint/reload')
 const loadCollisionData = () => router.get('/bigint/collision')
 
 const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666n })
+
+const http = useHttp({ value: 111222333444555666n })
+const httpEcho = ref<string | null>(null)
+const submitHttpEcho = () =>
+  http
+    .post('/api/bigint/echo')
+    .then((response: any) => (httpEcho.value = `${response.value} (${response.type})`))
+    .catch((error: Error) => (httpEcho.value = `error: ${error.message}`))
 </script>
 
 <template>
@@ -56,5 +64,8 @@ const submitEcho = () => router.post('/bigint/echo', { value: 111222333444555666
     <button @click="loadReloadData">Load reload data</button>
     <button @click="loadCollisionData">Load collision data</button>
     <button @click="submitEcho">Submit echo</button>
+    <button @click="submitHttpEcho">Submit useHttp echo</button>
+
+    <p v-if="httpEcho" id="http-echo">{{ httpEcho }}</p>
   </div>
 </template>
