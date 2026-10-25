@@ -508,6 +508,36 @@ test.describe('preserve scroll', () => {
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
   })
 
+  test('restores the document scroll position when pressing the back button right after scrolling', async ({
+    page,
+  }) => {
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
+
+    await expect(page).toHaveURL('/links/preserve-scroll-false-page-two?foo=bar')
+    await expect(page.getByText('Foo is now bar')).toBeVisible()
+
+    await page.evaluate(() => {
+      // Block the main thread past the scroll debounce so the pending save fires after popstate
+      window.addEventListener(
+        'popstate',
+        () => {
+          const until = performance.now() + 150
+          while (performance.now() < until) {}
+        },
+        { once: true },
+      )
+      window.scrollTo(0, 20)
+    })
+    await page.goBack()
+
+    await expect(page).toHaveURL('/links/preserve-scroll-false')
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
+  })
+
   test('does not restore untracked scroll regions when returning true from a preserveScroll callback', async ({
     page,
   }) => {
