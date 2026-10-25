@@ -29,6 +29,8 @@ const startBothLong = () => {
   start('a', 2000, true)
   start('b', 2000)
 }
+
+const cancelA = () => tokenA?.cancel()
 </script>
 
 <template>
@@ -38,7 +40,7 @@ const startBothLong = () => {
     <button id="short-then-long-button" @click="startShortThenLong">Start short A, then long B</button>
     <button id="both-long-button" @click="startBothLong">Start long A, then long B</button>
     <button id="cancel-button" @click="http.cancel()">Cancel</button>
-    <button id="cancel-a-button" @click="tokenA?.cancel()">Cancel A by its token</button>
+    <button id="cancel-a-button" @click="cancelA">Cancel A by its token</button>
     <div id="log">{{ log.join(', ') }}</div>
   </div>
 </template>
