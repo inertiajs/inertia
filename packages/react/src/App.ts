@@ -166,10 +166,12 @@ export default function App<SharedProps extends PageProps = PageProps>({
 
     const removeNavigateListener = router.on('navigate', syncServerHead)
     const removeClientVisitListener = router.on('clientVisit', syncServerHead)
+    const removeSuccessListener = router.on('success', syncServerHead)
 
     return () => {
       removeNavigateListener()
       removeClientVisitListener()
+      removeSuccessListener()
     }
   }, [])
 

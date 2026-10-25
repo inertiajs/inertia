@@ -179,6 +179,7 @@ const App: InertiaApp = defineComponent({
 
       router.on('navigate', syncServerHead)
       router.on('clientVisit', syncServerHead)
+      router.on('success', syncServerHead)
     }
 
     return () => {

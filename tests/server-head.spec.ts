@@ -59,6 +59,20 @@ test.describe('server head', () => {
     await expect(robots).toHaveCount(0)
   })
 
+  test('it re-syncs server head elements after a visit that stays on the same URL', async ({ page }) => {
+    await page.goto('/server-head/keyed?withServerHead')
+    await page.waitForFunction(
+      () => document.querySelector('title[data-inertia="title"]')?.textContent === 'Keyed Head A',
+    )
+
+    await clickAndWaitForResponse(page, 'Submit to the same URL', null, 'button')
+
+    await expect(page).toHaveTitle('Keyed Head Submitted')
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', 'Keyed description submitted')
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(0)
+    await expect(page).toHaveURL(/\/server-head\/keyed\?withServerHead$/)
+  })
+
   test('it builds head elements from a callback when serverHead is a function', async ({ page }) => {
     await page.goto('/server-head?withServerHeadCallback')
     await page.waitForSelector('title[data-inertia="server-head-0"]', { state: 'attached' })

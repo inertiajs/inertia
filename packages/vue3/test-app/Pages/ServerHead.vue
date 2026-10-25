@@ -14,6 +14,10 @@ function replaceHead() {
     '<meta data-inertia="description" name="description" content="Replaced description">',
   ])
 }
+
+function submitToSameUrl() {
+  router.post(window.location.href)
+}
 </script>
 
 <template>
@@ -25,6 +29,7 @@ function replaceHead() {
     <p id="foo">{{ foo }}</p>
     <button @click="router.reload({ only: ['foo'] })">Reload foo</button>
     <button @click="replaceHead">Replace head client-side</button>
+    <button @click="submitToSameUrl">Submit to the same URL</button>
     <Link :href="next">Next server head page</Link>
   </div>
 </template>

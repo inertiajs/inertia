@@ -16,5 +16,6 @@
   <p id="foo">{foo}</p>
   <button onclick={() => router.reload({ only: ['foo'] })}>Reload foo</button>
   <button onclick={replaceHead}>Replace head client-side</button>
+  <button onclick={() => router.post(window.location.href)}>Submit to the same URL</button>
   <Link href={next}>Next server head page</Link>
 </div>

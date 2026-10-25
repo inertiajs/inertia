@@ -223,6 +223,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
     router.on('navigate', syncServerHead)
     router.on('clientVisit', syncServerHead)
+    router.on('success', syncServerHead)
   }
 
   if (progress) {
