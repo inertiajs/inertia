@@ -516,17 +516,16 @@ test.describe('preserve scroll', () => {
     await expect(page).toHaveURL('/links/preserve-scroll-false-page-two?foo=bar')
     await expect(page.getByText('Foo is now bar')).toBeVisible()
 
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          window.addEventListener('scroll', () => resolve(), { once: true })
+          window.scrollTo(0, 20)
+        }),
+    )
     await page.evaluate(() => {
-      // Block the main thread past the scroll debounce so the pending save fires after popstate
-      window.addEventListener(
-        'popstate',
-        () => {
-          const until = performance.now() + 150
-          while (performance.now() < until) {}
-        },
-        { once: true },
-      )
-      window.scrollTo(0, 20)
+      // Delay the scroll restore past the scroll debounce, like on a slow device
+      window.requestAnimationFrame = (callback) => window.setTimeout(() => callback(performance.now()), 200)
     })
     await page.goBack()
 
