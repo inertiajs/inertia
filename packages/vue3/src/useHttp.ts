@@ -157,10 +157,13 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     resetDefaultsCalledInOnSuccess()
     resetBeforeSubmit()
 
-    abortController = new AbortController()
+    // Each request keeps its own controller, so its token and its signal stay
+    // tied to it after a newer request takes the shared variable.
+    const controller = new AbortController()
+    abortController = controller
 
     const cancelToken: CancelToken = {
-      cancel: () => abortController?.abort(),
+      cancel: () => controller.abort(),
     }
 
     options.onCancelToken?.(cancelToken)
@@ -223,7 +226,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           ...(contentType ? { 'Content-Type': contentType } : {}),
           ...options.headers,
         },
-        signal: abortController.signal,
+        signal: controller.signal,
         onUploadProgress: (event: HttpProgressEvent) => {
           form.progress = event
           options.onProgress?.(event)
@@ -284,7 +287,10 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       throw error
     } finally {
       finishProcessing()
-      abortController = null
+      // A newer request may own the variable by now, so clear it only if it is still ours.
+      if (abortController === controller) {
+        abortController = null
+      }
       options.onFinish?.()
     }
   }

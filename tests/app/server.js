@@ -3332,6 +3332,12 @@ app.get('/api/slow', (req, res) => {
   }, 2000)
 })
 
+app.get('/api/delayed', (req, res) => {
+  setTimeout(() => {
+    res.json({ result: req.query.name })
+  }, Number(req.query.delay))
+})
+
 app.post('/api/error', upload.none(), (req, res) => {
   res.status(500).json({ message: 'Internal server error' })
 })
