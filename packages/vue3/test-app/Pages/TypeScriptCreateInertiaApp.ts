@@ -1,7 +1,9 @@
 // This file is used for checking the TypeScript implementation; there is no Playwright test depending on it.
+import type { InertiaAppSSRResponse, Page } from '@inertiajs/core'
 import { createInertiaApp } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
-import { createApp, h } from 'vue'
+import { createApp, createSSRApp, defineComponent, h } from 'vue'
+import { renderToString } from 'vue/server-renderer'
 
 declare module '@inertiajs/core' {
   export interface InertiaConfig {
@@ -31,3 +33,13 @@ createInertiaApp({
       .mount(el)
   },
 })
+
+// SSR should accept a custom root ID and retain the SSR response type.
+export const renderPage = (page: Page): Promise<InertiaAppSSRResponse> =>
+  createInertiaApp({
+    id: 'custom-root',
+    page,
+    render: renderToString,
+    resolve: () => defineComponent({ render: () => null }),
+    setup: ({ App, props, plugin }) => createSSRApp({ render: () => h(App, props) }).use(plugin),
+  })
