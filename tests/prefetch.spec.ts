@@ -1,4 +1,4 @@
-import { expect, Page, test } from '@playwright/test'
+import { expect, Page, Route, test } from '@playwright/test'
 import { consoleMessages, requests } from './support'
 
 const isPrefetchPage = async (page: Page, id: number) => {
@@ -862,4 +862,106 @@ test('can use prefetched requests with preserveState', async ({ page }) => {
   await page.getByRole('button', { name: 'Load Page 2 (preserveState: true)' }).click()
   await expect(page.getByText('Current Page: 2')).toBeVisible()
   await expect(requests.requests.length).toBe(0)
+})
+
+test.describe('prefetch responses for the current page', () => {
+  // These scenarios span several visits, which can exceed the default timeout on slower machines
+  test.describe.configure({ timeout: 10_000 })
+
+  // Stands in for a login page: a different component that an expired session would redirect to
+  const redirectToHome = (route: Route) => route.continue({ url: new URL('/', route.request().url()).toString() })
+
+  const holdPrefetch = async (page: Page, url: string, respond: (route: Route) => Promise<void>) => {
+    let release!: () => void
+    let resolveArrived!: () => void
+    const released = new Promise<void>((resolve) => (release = resolve))
+    const arrived = new Promise<void>((resolve) => (resolveArrived = resolve))
+
+    await page.route(url, async (route) => {
+      if (route.request().headers().purpose !== 'prefetch') {
+        return route.continue()
+      }
+
+      resolveArrived()
+      await released
+      await respond(route)
+    })
+
+    return { arrived, release }
+  }
+
+  // Start a prefetch for page 2 and navigate back to page 2 before it resolves,
+  // so the prefetch response arrives while page 2 is the current page.
+  const goBackWhilePrefetching = async (page: Page, respond: (route: Route) => Promise<void>) => {
+    await page.goto('prefetch/swr/2')
+    await page.getByRole('link', { name: '1s Expired (Number)', exact: true }).click()
+    await isPrefetchSwrPage(page, 3)
+
+    const { arrived, release } = await holdPrefetch(page, '**/prefetch/swr/2', respond)
+    await page.getByRole('link', { name: '1s Expired', exact: true }).hover()
+    await arrived
+
+    await page.goBack()
+    await isPrefetchSwrPage(page, 2)
+    const lastLoaded = await page.locator('#last-loaded').textContent()
+
+    const finished = page.waitForEvent('requestfinished', (request) => request.headers().purpose === 'prefetch')
+    release()
+    await finished
+
+    return { lastLoaded }
+  }
+
+  test('caches a prefetch response for the current component', async ({ page }) => {
+    const { lastLoaded } = await goBackWhilePrefetching(page, (route) => route.continue())
+
+    requests.listen(page)
+    await page.getByRole('link', { name: '1s Expired', exact: true }).click()
+
+    await expect(page.locator('#last-loaded')).not.toHaveText(lastLoaded!)
+    await isPrefetchSwrPage(page, 2)
+    await expect(requests.requests.length).toBe(0)
+  })
+
+  test('does not navigate when the prefetch was redirected to another component', async ({ page }) => {
+    const { lastLoaded } = await goBackWhilePrefetching(page, redirectToHome)
+
+    await page.waitForTimeout(200)
+    await isPrefetchSwrPage(page, 2)
+    await expect(page.locator('#last-loaded')).toHaveText(lastLoaded!)
+  })
+
+  test('does not perform a location visit for a prefetch', async ({ page }) => {
+    const { lastLoaded } = await goBackWhilePrefetching(page, (route) =>
+      route.fulfill({ status: 409, headers: { 'X-Inertia-Location': '/' } }),
+    )
+
+    await page.waitForTimeout(200)
+    await isPrefetchSwrPage(page, 2)
+    await expect(page.locator('#last-loaded')).toHaveText(lastLoaded!)
+  })
+
+  test('does not show the error dialog for a failed prefetch', async ({ page }) => {
+    await goBackWhilePrefetching(page, (route) =>
+      route.fulfill({ status: 500, contentType: 'text/html', body: '<p>Server error</p>' }),
+    )
+
+    await page.waitForTimeout(200)
+    await expect(page.locator('dialog#inertia-error-dialog')).toHaveCount(0)
+    await isPrefetchSwrPage(page, 2)
+  })
+
+  test('a visit consuming a redirected prefetch still follows the redirect', async ({ page }) => {
+    await page.goto('prefetch/swr/3')
+
+    const { arrived, release } = await holdPrefetch(page, '**/prefetch/swr/2', redirectToHome)
+    await page.getByRole('link', { name: '1s Expired', exact: true }).hover()
+    await arrived
+
+    await page.getByRole('link', { name: '1s Expired', exact: true }).click()
+    release()
+
+    await page.waitForURL('/')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+  })
 })
