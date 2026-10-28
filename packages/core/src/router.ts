@@ -592,6 +592,7 @@ export class Router {
 
     const page = {
       ...current,
+      clearHistory: false,
       ...pageParams,
       flash: flash ?? {},
       props: props as Page['props'],
