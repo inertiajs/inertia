@@ -566,3 +566,59 @@ test('instant visit adopting an in-flight prefetch preserves the deferred once p
   await expect(page.getByText('Loading foo...')).not.toBeVisible()
   await expect(page.getByText(fooText)).toBeVisible()
 })
+
+test('instant visit reuses a remembered once prop that is also shared', async ({ page }) => {
+  await page.goto('/once-props/instant/a?shared=1')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  const responsePromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
+
+  await page.evaluate(() =>
+    window.testing.Inertia.visit('/once-props/instant/b?shared=1', { component: 'OnceProps/InstantPageB' }),
+  )
+
+  await responsePromise
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('instant visit adopting an in-flight prefetch preserves a once prop that is also shared', async ({ page }) => {
+  await page.goto('/once-props/instant/a?shared=1')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
+
+  await page.evaluate(() => window.testing.Inertia.prefetch('/once-props/instant/b?shared=1', { method: 'get' }, {}))
+  await page.evaluate(() =>
+    window.testing.Inertia.visit('/once-props/instant/b?shared=1', { component: 'OnceProps/InstantPageB' }),
+  )
+
+  await prefetchPromise
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('instant visit preserves a once prop that pageProps copies from the shared props', async ({ page }) => {
+  await page.goto('/once-props/instant/a?shared=1')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
+
+  await page.evaluate(() => window.testing.Inertia.prefetch('/once-props/instant/b?shared=1', { method: 'get' }, {}))
+  await page.evaluate(() =>
+    window.testing.Inertia.visit('/once-props/instant/b?shared=1', {
+      component: 'OnceProps/InstantPageB',
+      pageProps: (props, sharedProps) => sharedProps,
+    }),
+  )
+
+  await prefetchPromise
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.getByText(fooText)).toBeVisible()
+})
