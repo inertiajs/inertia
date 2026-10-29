@@ -71,7 +71,9 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
     [
       hasHost ? `${url.protocol}//${url.host}` : '',
       hasAbsolutePath ? url.pathname : '',
-      hasRelativePath ? url.pathname.substring(hasRelativePathWithDotPrefix ? 0 : 1) : '',
+      hasRelativePath
+        ? url.pathname.substring(hasRelativePathWithDotPrefix || typeof window !== 'undefined' ? 0 : 1)
+        : '',
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),

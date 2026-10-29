@@ -8,4 +8,6 @@
   <a use:inertia href="../../method"> Up two levels and open method </a>
 
   <a use:inertia href="../../../"> Up three levels </a>
+
+  <a use:inertia href="sub"> Down one level </a>
 </div>
