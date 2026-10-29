@@ -84,6 +84,12 @@ class CurrentPage {
 
     const componentId = this.componentId
 
+    // Cached responses may hold data from before the history was cleared, so they're dropped right away,
+    // even if this page is cancelled while resolving. The encryption keys are only cleared once it's applied.
+    if (page.clearHistory) {
+      prefetchedRequests.removeAll()
+    }
+
     return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId || isCancelled()) {
         // Component has changed or the visit was cancelled since we started resolving this component, bail
@@ -92,7 +98,6 @@ class CurrentPage {
 
       if (page.clearHistory) {
         history.clear()
-        prefetchedRequests.removeAll()
       }
 
       page.rememberedState ??= {}

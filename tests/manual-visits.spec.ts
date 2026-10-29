@@ -118,7 +118,30 @@ test.describe('Auto-cancellation', () => {
     await expect(page.getByText('Status: Encrypted page')).toBeVisible()
     await expect(page).toHaveURL('/visits/interrupted-visit/encrypted')
 
-    expect(requests.requests).toHaveLength(0)
+    expect(
+      requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/encrypted')),
+    ).toHaveLength(0)
+  })
+
+  test('it does not use a prefetched page once a page that clears the history has arrived', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit/encrypted')
+
+    await page.evaluate(() => window.testing.Inertia.prefetch('/visits/interrupted-visit/home'))
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/home') !== null)
+
+    await page.getByRole('link', { name: 'Open the history clearing page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    requests.listen(page)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/home', { async: true }))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    expect(
+      requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/home')),
+    ).toHaveLength(1)
   })
 })
 
