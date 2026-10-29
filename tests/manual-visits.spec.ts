@@ -131,6 +131,23 @@ test.describe('Auto-cancellation', () => {
     expect(consoleMessages.messages).toContain('success')
   })
 
+  test('it does not apply an interrupted prefetched visit whose component is still resolving', async ({ page }) => {
+    const prefetchResponse = page.waitForResponse('**/visits/interrupted-visit/prefetched')
+    await page.goto('/visits/interrupted-visit')
+    await prefetchResponse
+
+    await page.getByRole('link', { name: 'Open the prefetched held page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.getByRole('button', { name: 'Post comment' }).click()
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('Status: Comment posted')).toBeVisible()
+    await expect(page.getByText('Signed in as John')).toBeVisible()
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+  })
+
   test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {
     await page.goto('/visits/interrupted-visit/encrypted')
     await expect(page.getByText('Status: Encrypted page')).toBeVisible()

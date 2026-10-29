@@ -289,6 +289,7 @@ export class Router {
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+      prefetchedRequests.interruptInFlight()
     }
 
     let optimisticId: number | null = null

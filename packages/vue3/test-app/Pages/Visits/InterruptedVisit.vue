@@ -14,6 +14,7 @@ const releaseHeldComponent = () => window.releaseHeldComponent?.()
     <div>Status: {{ status }}</div>
 
     <Link href="/visits/interrupted-visit/held">Open the held page</Link>
+    <Link href="/visits/interrupted-visit/prefetched" prefetch="mount">Open the prefetched held page</Link>
     <Link href="/visits/interrupted-visit/clear-history">Open the history clearing page</Link>
     <button @click="postComment">Post comment</button>
     <button @click="releaseHeldComponent">Release held component</button>

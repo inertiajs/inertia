@@ -146,6 +146,12 @@ export class Response {
     this.requestParams.merge(params)
   }
 
+  public interrupt(): void {
+    if (!this.requestParams.wasCancelledAtAll()) {
+      this.requestParams.markAsCancelled({ cancelled: false, interrupted: true })
+    }
+  }
+
   public getPageResponse(): Page {
     const data = this.getDataFromResponse(this.response.data)
 

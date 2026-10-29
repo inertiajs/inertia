@@ -688,6 +688,9 @@ app.post('/visits/interrupted-visit', (req, res) =>
 app.get('/visits/interrupted-visit/held', (req, res) =>
   inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
 )
+app.get('/visits/interrupted-visit/prefetched', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
 app.get('/visits/interrupted-visit/encrypted', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/InterruptedVisit',

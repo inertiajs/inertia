@@ -21,6 +21,7 @@ class PrefetchedRequests {
   protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
   protected currentUseId: string | null = null
+  protected responseInUse: Response | null = null
 
   public add(
     params: ActiveVisit,
@@ -233,7 +234,13 @@ class PrefetchedRequests {
         // (generally a prefetch="click" request with no specified cache value)
         this.removeSingleUseItems(params)
 
-        return response.handle()
+        this.responseInUse = response
+
+        return response.handle().finally(() => {
+          if (this.responseInUse === response) {
+            this.responseInUse = null
+          }
+        })
       },
       (error) => {
         if (!(error instanceof HttpCancelledError)) {
@@ -245,6 +252,16 @@ class PrefetchedRequests {
         consumedParams.onFinish(consumedParams)
       },
     )
+  }
+
+  /**
+   * A cached response isn't part of the sync request stream, so a newer sync visit interrupts it here,
+   * like an in-flight request. One that's still waiting for its prefetch to arrive is ignored.
+   */
+  public interruptInFlight(): void {
+    this.currentUseId = null
+    this.responseInUse?.interrupt()
+    this.responseInUse = null
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {
