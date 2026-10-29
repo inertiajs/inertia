@@ -20,8 +20,7 @@ class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
   protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
-  protected currentUseId: string | null = null
-  protected responseInUse: Response | null = null
+  protected currentUse: { id: string; async: boolean; response: Response | null } | null = null
 
   public add(
     params: ActiveVisit,
@@ -213,7 +212,7 @@ class PrefetchedRequests {
   public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
     const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-    this.currentUseId = id
+    this.currentUse = { id, async: params.async, response: null }
 
     const consumedParams: InternalActiveVisit = {
       ...params,
@@ -222,7 +221,7 @@ class PrefetchedRequests {
 
     return prefetched.response.then(
       (response) => {
-        if (this.currentUseId !== id) {
+        if (this.currentUse?.id !== id) {
           // They've since gone on to `use` a different request,
           // so we should ignore this one
           return
@@ -234,11 +233,11 @@ class PrefetchedRequests {
         // (generally a prefetch="click" request with no specified cache value)
         this.removeSingleUseItems(params)
 
-        this.responseInUse = response
+        this.currentUse.response = response
 
         return response.handle().finally(() => {
-          if (this.responseInUse === response) {
-            this.responseInUse = null
+          if (this.currentUse?.id === id) {
+            this.currentUse = null
           }
         })
       },
@@ -255,13 +254,16 @@ class PrefetchedRequests {
   }
 
   /**
-   * A cached response isn't part of the sync request stream, so a newer sync visit or cancelAll()
-   * interrupts it here, like an in-flight request. One that's still waiting for its prefetch is ignored.
+   * A cached response isn't part of a request stream, so the router interrupts it here, like an in-flight
+   * request of the stream its visit belongs to. One that's still waiting for its prefetch is ignored.
    */
-  public interruptInFlight(): void {
-    this.currentUseId = null
-    this.responseInUse?.interrupt()
-    this.responseInUse = null
+  public interruptInFlight({ async }: { async: boolean }): void {
+    if (this.currentUse?.async !== async) {
+      return
+    }
+
+    this.currentUse.response?.interrupt()
+    this.currentUse = null
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {

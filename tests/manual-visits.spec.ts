@@ -158,6 +158,7 @@ test.describe('Auto-cancellation', () => {
 
     const slowResponse = page.waitForResponse('**/visits/interrupted-visit/slow')
     await page.getByRole('link', { name: 'Open the slow prefetched page' }).click()
+    await page.waitForFunction(() => window.testing.Inertia.getPrefetching('/visits/interrupted-visit/slow') !== null)
 
     await page.goBack()
     await page.waitForURL('/visits/interrupted-visit')
@@ -168,6 +169,35 @@ test.describe('Auto-cancellation', () => {
 
     await expect(page).toHaveURL('/visits/interrupted-visit')
     await expect(page.getByText('Status: Opened the slow page')).not.toBeVisible()
+  })
+
+  test('it only cancels a prefetched async visit when async requests are cancelled', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/prefetched') !== null)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/prefetched', { async: true }))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => window.testing.Inertia.cancelAll({ async: false }))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('This is the held page.')).toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit/prefetched')
+
+    await page.goto('/visits/interrupted-visit')
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/prefetched') !== null)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/prefetched', { async: true }))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => window.testing.Inertia.cancelAll({ sync: false }))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    // Responses are applied one at a time, so this reload only finishes after the cancelled visit was handled
+    await page.evaluate(() => new Promise((resolve) => window.testing.Inertia.reload({ onFinish: resolve })))
+
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
   })
 
   test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {

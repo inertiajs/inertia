@@ -215,11 +215,12 @@ export class Router {
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
+      prefetchedRequests.interruptInFlight({ async: true })
     }
 
     if (sync) {
       this.syncRequestStream.cancelInFlight()
-      prefetchedRequests.interruptInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
   }
 
@@ -290,7 +291,7 @@ export class Router {
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
-      prefetchedRequests.interruptInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
 
     let optimisticId: number | null = null
