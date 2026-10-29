@@ -100,6 +100,26 @@ test.describe('Auto-cancellation', () => {
     await expect(page.getByText('This is the held page.')).not.toBeVisible()
     await expect(page).toHaveURL('/visits/interrupted-visit')
   })
+
+  test('it keeps the encrypted history when an interrupted visit would have cleared it', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit/encrypted')
+    await expect(page.getByText('Status: Encrypted page')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Open the history clearing page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit'))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+
+    requests.listen(page)
+
+    await page.goBack()
+    await expect(page.getByText('Status: Encrypted page')).toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit/encrypted')
+
+    expect(requests.requests).toHaveLength(0)
+  })
 })
 
 test.describe('Method', () => {

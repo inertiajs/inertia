@@ -11,6 +11,7 @@
   <div>Status: {status}</div>
 
   <Link href="/visits/interrupted-visit/held">Open the held page</Link>
+  <Link href="/visits/interrupted-visit/clear-history">Open the history clearing page</Link>
   <button onclick={postComment}>Post comment</button>
   <button onclick={() => window.releaseHeldComponent?.()}>Release held component</button>
 </div>

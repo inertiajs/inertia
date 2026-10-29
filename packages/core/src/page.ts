@@ -84,15 +84,15 @@ class CurrentPage {
 
     const componentId = this.componentId
 
-    if (page.clearHistory) {
-      history.clear()
-      prefetchedRequests.removeAll()
-    }
-
     return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId || isCancelled()) {
         // Component has changed or the visit was cancelled since we started resolving this component, bail
         return
+      }
+
+      if (page.clearHistory) {
+        history.clear()
+        prefetchedRequests.removeAll()
       }
 
       page.rememberedState ??= {}

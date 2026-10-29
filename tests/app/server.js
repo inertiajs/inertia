@@ -688,6 +688,16 @@ app.post('/visits/interrupted-visit', (req, res) =>
 app.get('/visits/interrupted-visit/held', (req, res) =>
   inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
 )
+app.get('/visits/interrupted-visit/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Encrypted page' },
+    encryptHistory: true,
+  }),
+)
+app.get('/visits/interrupted-visit/clear-history', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld', clearHistory: true }),
+)
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
