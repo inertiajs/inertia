@@ -12,6 +12,9 @@ export default ({ user, status }: { user: string; status: string }) => {
       <Link href="/visits/interrupted-visit/prefetched" prefetch="mount">
         Open the prefetched held page
       </Link>
+      <Link href="/visits/interrupted-visit/slow" prefetch="click">
+        Open the slow prefetched page
+      </Link>
       <Link href="/visits/interrupted-visit/clear-history">Open the history clearing page</Link>
       <button onClick={postComment}>Post comment</button>
       <button onClick={() => window.releaseHeldComponent?.()}>Release held component</button>

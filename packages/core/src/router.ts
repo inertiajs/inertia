@@ -219,6 +219,7 @@ export class Router {
 
     if (sync) {
       this.syncRequestStream.cancelInFlight()
+      prefetchedRequests.interruptInFlight()
     }
   }
 

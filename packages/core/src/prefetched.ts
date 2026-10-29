@@ -255,8 +255,8 @@ class PrefetchedRequests {
   }
 
   /**
-   * A cached response isn't part of the sync request stream, so a newer sync visit interrupts it here,
-   * like an in-flight request. One that's still waiting for its prefetch to arrive is ignored.
+   * A cached response isn't part of the sync request stream, so a newer sync visit or cancelAll()
+   * interrupts it here, like an in-flight request. One that's still waiting for its prefetch is ignored.
    */
   public interruptInFlight(): void {
     this.currentUseId = null

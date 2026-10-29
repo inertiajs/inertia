@@ -132,9 +132,8 @@ test.describe('Auto-cancellation', () => {
   })
 
   test('it does not apply an interrupted prefetched visit whose component is still resolving', async ({ page }) => {
-    const prefetchResponse = page.waitForResponse('**/visits/interrupted-visit/prefetched')
     await page.goto('/visits/interrupted-visit')
-    await prefetchResponse
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/prefetched') !== null)
 
     await page.getByRole('link', { name: 'Open the prefetched held page' }).click()
     await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
@@ -146,6 +145,29 @@ test.describe('Auto-cancellation', () => {
     await expect(page.getByText('Signed in as John')).toBeVisible()
     await expect(page.getByText('This is the held page.')).not.toBeVisible()
     await expect(page).toHaveURL('/visits/interrupted-visit')
+  })
+
+  test('it does not apply a prefetched visit that is still in flight when the back button is pressed', async ({
+    page,
+  }) => {
+    await page.goto('/visits/interrupted-visit')
+
+    // Gives the back button an entry within the app to return to
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit?again=1'))
+    await page.waitForURL('/visits/interrupted-visit?again=1')
+
+    const slowResponse = page.waitForResponse('**/visits/interrupted-visit/slow')
+    await page.getByRole('link', { name: 'Open the slow prefetched page' }).click()
+
+    await page.goBack()
+    await page.waitForURL('/visits/interrupted-visit')
+    await slowResponse
+
+    // Responses are applied one at a time, so this reload only finishes after the slow response was handled
+    await page.evaluate(() => new Promise((resolve) => window.testing.Inertia.reload({ onFinish: resolve })))
+
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+    await expect(page.getByText('Status: Opened the slow page')).not.toBeVisible()
   })
 
   test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {
