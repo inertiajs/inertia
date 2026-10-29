@@ -291,12 +291,6 @@ export class Router {
       return
     }
 
-    const currentPageUrl = hrefToUrl(currentPage.get().url)
-
-    if (RequestParams.leavesPage(visit, currentPageUrl, visit.url)) {
-      this.cancelAsyncRequestsFor(currentPageUrl)
-    }
-
     // Interrupt in-flight requests before taking the optimistic snapshot
     // so that any previous optimistic state is restored first
     if (!visit.async) {

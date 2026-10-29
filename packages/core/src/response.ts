@@ -291,11 +291,6 @@ export class Response {
     this.requestParams.all().onBeforeUpdate(pageResponse)
     fireBeforeUpdateEvent(pageResponse)
 
-    if (leavesPage) {
-      // Requests for the page we're leaving can still start while the visit is in flight, like a poll tick
-      eventHandler.fireInternalEvent('leavePage', currentPageUrl)
-    }
-
     const visit = this.requestParams.all()
 
     return currentPage.set(pageResponse, {
@@ -306,6 +301,12 @@ export class Response {
       cached: visit.cached,
       visitId: visit.id,
       isCancelled: () => this.requestParams.wasCancelledAtAll(),
+      onCommit: () => {
+        // The page is only left once it's replaced, a dropped visit leaves its requests running
+        if (leavesPage) {
+          eventHandler.fireInternalEvent('leavePage', currentPageUrl)
+        }
+      },
     })
   }
 

@@ -56,6 +56,7 @@ class CurrentPage {
       initialRender = false,
       visitId,
       isCancelled = () => false,
+      onCommit = () => {},
     }: {
       replace?: boolean
       preserveScroll?: boolean
@@ -65,6 +66,7 @@ class CurrentPage {
       initialRender?: boolean
       visitId?: string
       isCancelled?: () => boolean
+      onCommit?: () => void
     } = {},
   ): Promise<void> {
     const previousPendingDeferredProps = this.pendingDeferredProps
@@ -104,6 +106,8 @@ class CurrentPage {
         // Component has changed or the visit was cancelled since we started resolving this component, bail
         return
       }
+
+      onCommit()
 
       if (page.clearHistory) {
         history.clear()

@@ -232,4 +232,34 @@ test.describe('Deferred Props Cancellation', () => {
     // No requests were cancelled (hash-only change)
     expect(cancelled).toHaveLength(0)
   })
+
+  test('it loads the deferred props again when a visit away is interrupted by a visit that stays', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
+    await expect(page.getByText('Loading bar...')).toBeVisible()
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/sleep')
+      window.testing.Inertia.visit('/deferred-props/page-1', { only: ['foo'] })
+    })
+
+    await expect(page.getByText('foo value')).toBeVisible()
+    await expect(page.getByText('bar value')).toBeVisible()
+  })
+
+  test('it loads the deferred props again when a visit away is dropped while its page loads', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
+    await expect(page.getByText('Loading bar...')).toBeVisible()
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/held'))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/deferred-props/page-1', { only: ['foo'] })
+      window.releaseHeldComponent!()
+    })
+
+    await expect(page.getByText('foo value')).toBeVisible()
+    await expect(page.getByText('bar value')).toBeVisible()
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
+  })
 })
