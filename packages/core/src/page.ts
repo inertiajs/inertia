@@ -55,6 +55,7 @@ class CurrentPage {
       cached = false,
       initialRender = false,
       visitId,
+      isCancelled = () => false,
     }: {
       replace?: boolean
       preserveScroll?: boolean
@@ -63,6 +64,7 @@ class CurrentPage {
       cached?: boolean
       initialRender?: boolean
       visitId?: string
+      isCancelled?: () => boolean
     } = {},
   ): Promise<void> {
     if (Object.keys(page.deferredProps || {}).length) {
@@ -88,8 +90,8 @@ class CurrentPage {
     }
 
     return this.resolve(page.component, page).then((component) => {
-      if (componentId !== this.componentId) {
-        // Component has changed since we started resolving this component, bail
+      if (componentId !== this.componentId || isCancelled()) {
+        // Component has changed or the visit was cancelled since we started resolving this component, bail
         return
       }
 

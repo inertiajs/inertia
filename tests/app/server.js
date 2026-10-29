@@ -673,6 +673,21 @@ app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
+app.get('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'No comments yet' },
+  }),
+)
+app.post('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Comment posted' },
+  }),
+)
+app.get('/visits/interrupted-visit/held', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {

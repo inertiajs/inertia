@@ -27,6 +27,7 @@ declare global {
     _plugin_global_props: object
     resolverReceivedPage: Page | null
     releaseHeldResponse?: () => void
+    releaseHeldComponent?: () => void
   }
 
   interface ImportMeta {

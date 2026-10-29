@@ -296,13 +296,16 @@ export class Response {
       eventHandler.fireInternalEvent('leavePage', currentPageUrl)
     }
 
+    const visit = this.requestParams.all()
+
     return currentPage.set(pageResponse, {
-      replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll as boolean,
-      preserveState: this.requestParams.all().preserveState as boolean,
-      viewTransition: this.requestParams.all().viewTransition,
-      cached: this.requestParams.all().cached,
-      visitId: this.requestParams.all().id,
+      replace: visit.replace,
+      preserveScroll: visit.preserveScroll as boolean,
+      preserveState: visit.preserveState as boolean,
+      viewTransition: visit.viewTransition,
+      cached: visit.cached,
+      visitId: visit.id,
+      isCancelled: () => this.requestParams.wasCancelledAtAll(),
     })
   }
 

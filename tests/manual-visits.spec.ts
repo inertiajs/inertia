@@ -84,6 +84,22 @@ test.describe('Auto-cancellation', () => {
     await expect(consoleMessages.messages[1]).toBe('cancelled')
     await expect(consoleMessages.messages[2]).toBe('started')
   })
+
+  test('it does not apply an interrupted visit whose component is still resolving', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+    await expect(page.getByText('Signed in as John')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Open the held page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.getByRole('button', { name: 'Post comment' }).click()
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('Status: Comment posted')).toBeVisible()
+    await expect(page.getByText('Signed in as John')).toBeVisible()
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+  })
 })
 
 test.describe('Method', () => {
