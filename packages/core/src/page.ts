@@ -67,6 +67,8 @@ class CurrentPage {
       isCancelled?: () => boolean
     } = {},
   ): Promise<void> {
+    const previousPendingDeferredProps = this.pendingDeferredProps
+
     if (Object.keys(page.deferredProps || {}).length) {
       this.pendingDeferredProps = {
         deferredProps: page.deferredProps,
@@ -80,6 +82,8 @@ class CurrentPage {
       }
     }
 
+    const pendingDeferredProps = this.pendingDeferredProps
+
     this.componentId = {}
 
     const componentId = this.componentId
@@ -92,6 +96,11 @@ class CurrentPage {
 
     return this.resolve(page.component, page).then((component) => {
       if (componentId !== this.componentId || isCancelled()) {
+        // A newer page may still load our deferred props, but those of a cancelled visit shouldn't outlive it
+        if (isCancelled() && this.pendingDeferredProps === pendingDeferredProps) {
+          this.pendingDeferredProps = previousPendingDeferredProps
+        }
+
         // Component has changed or the visit was cancelled since we started resolving this component, bail
         return
       }

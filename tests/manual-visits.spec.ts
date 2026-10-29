@@ -143,6 +143,48 @@ test.describe('Auto-cancellation', () => {
       requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/home')),
     ).toHaveLength(1)
   })
+
+  test('it does not load the deferred props of a dropped visit on a later page', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/deferred'))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      const release = window.releaseHeldComponent!
+      window.releaseHeldComponent = undefined
+      window.testing.Inertia.cancelAll()
+      release()
+    })
+
+    requests.listen(page)
+
+    await page.evaluate(() =>
+      window.testing.Inertia.visit('/visits/interrupted-visit/deferred', { component: 'Visits/InterruptedVisitHeld' }),
+    )
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      const release = window.releaseHeldComponent!
+      window.releaseHeldComponent = undefined
+      release()
+    })
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    const deferredRequests = () =>
+      requests.requests.filter((request) => request.headers()['x-inertia-partial-data'] === 'comments')
+
+    expect(deferredRequests()).toHaveLength(0)
+
+    const deferredResponse = page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'comments',
+    )
+    await page.evaluate(() => window.releaseHeldComponent!())
+    await deferredResponse
+
+    await expect(page.getByText('This is the held page.')).toBeVisible()
+    expect(deferredRequests()).toHaveLength(1)
+  })
 })
 
 test.describe('Method', () => {
