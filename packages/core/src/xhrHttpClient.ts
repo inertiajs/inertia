@@ -8,16 +8,12 @@ import {
   HttpResponse,
   HttpResponseHeaders,
 } from './types'
-import { mergeDataIntoQueryString } from './url'
+import { isSameOrigin, mergeDataIntoQueryString } from './url'
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'))
 
   return match ? decodeURIComponent(match[3]) : null
-}
-
-function isSameOrigin(url: string): boolean {
-  return new URL(url, window.location.href).origin === window.location.origin
 }
 
 function parseHeaders(xhr: XMLHttpRequest): HttpResponseHeaders {

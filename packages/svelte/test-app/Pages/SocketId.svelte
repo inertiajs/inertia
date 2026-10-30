@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { router, socketId } from '@inertiajs/svelte'
+  import { router, socketId, useHttp } from '@inertiajs/svelte'
   import { onDestroy } from 'svelte'
 
   let { socketIdHeader }: { socketIdHeader: string | null } = $props()
 
   let resolved = $state<string | null>(null)
+  const external = useHttp({})
 
   const registerResolver = () => {
     socketId.resolveUsing(() => 'socket-abc-123')
@@ -52,4 +53,5 @@
   <button onclick={reload}>Reload</button>
   <button onclick={visitDump}>Visit Dump Page</button>
   <button onclick={visitDumpWithOwnSocketId}>Send Own Socket Id</button>
+  <button onclick={() => external.get('https://external.example/socket-id')}>Cross-origin HTTP</button>
 </div>

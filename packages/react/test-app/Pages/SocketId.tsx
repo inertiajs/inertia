@@ -1,8 +1,9 @@
-import { router, socketId } from '@inertiajs/react'
+import { router, socketId, useHttp } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 
 export default ({ socketIdHeader }: { socketIdHeader: string | null }) => {
   const [resolved, setResolved] = useState<string | null>(null)
+  const external = useHttp({})
 
   useEffect(() => {
     return () => socketId.resolveUsing(null)
@@ -52,6 +53,7 @@ export default ({ socketIdHeader }: { socketIdHeader: string | null }) => {
       <button onClick={reload}>Reload</button>
       <button onClick={visitDump}>Visit Dump Page</button>
       <button onClick={visitDumpWithOwnSocketId}>Send Own Socket Id</button>
+      <button onClick={() => external.get('https://external.example/socket-id')}>Cross-origin HTTP</button>
     </div>
   )
 }

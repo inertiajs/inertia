@@ -87,4 +87,38 @@ test.describe('Socket id', () => {
 
     expect(await request.headerValue('x-socket-id')).toBeNull()
   })
+
+  test('it does not send the socket id to other origins', async ({ page }) => {
+    const externalRequests: Record<string, string>[] = []
+
+    await page.route('https://external.example/**', async (route) => {
+      if (route.request().method() !== 'OPTIONS') {
+        externalRequests.push(route.request().headers())
+      }
+
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': '*',
+          'Access-Control-Allow-Headers': '*',
+        },
+        body: '{}',
+      })
+    })
+
+    pageLoads.watch(page)
+    await page.goto('/socket-id')
+
+    await page.getByRole('button', { name: 'Register Resolver' }).click()
+    await expect(page.locator('#resolved')).toHaveText('socket-abc-123')
+
+    await page.getByRole('button', { name: 'Cross-origin HTTP' }).click()
+    await expect.poll(() => externalRequests.length).toBe(1)
+
+    expect(externalRequests[0]['x-socket-id']).toBeUndefined()
+
+    await reload(page)
+    await expect(page.locator('#header')).toHaveText('socket-abc-123')
+  })
 })

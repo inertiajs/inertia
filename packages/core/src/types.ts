@@ -147,8 +147,8 @@ export type LiveOptions = {
 export type LiveOption = AnyLiveTransport | LiveOptions
 
 /**
- * Only the adapters that wire live props accept this, so it is intersected into
- * their app options rather than living on the shared ones.
+ * Intersected into each adapter's app options rather than living on the shared
+ * ones, since an adapter has to wire live props itself before it can accept it.
  */
 export type LiveAppOption = {
   live?: LiveOption

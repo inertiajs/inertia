@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { router, socketId } from '@inertiajs/vue3'
+import { router, socketId, useHttp } from '@inertiajs/vue3'
 import { onUnmounted, ref } from 'vue'
 
 defineProps<{ socketIdHeader: string | null }>()
 
 const resolved = ref<string | null>(null)
+const external = useHttp({})
 
 function registerResolver() {
   socketId.resolveUsing(() => 'socket-abc-123')
@@ -53,5 +54,6 @@ onUnmounted(() => socketId.resolveUsing(null))
     <button @click="reload">Reload</button>
     <button @click="visitDump">Visit Dump Page</button>
     <button @click="visitDumpWithOwnSocketId">Send Own Socket Id</button>
+    <button @click="external.get('https://external.example/socket-id')">Cross-origin HTTP</button>
   </div>
 </template>
