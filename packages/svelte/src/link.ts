@@ -54,7 +54,7 @@ function link(
   initialParams: ActionParameters = {},
 ): ActionReturn<ActionParameters, ActionAttributes> {
   let inFlightCount = 0
-  let hoverTimeout: NodeJS.Timeout
+  let hoverTimeout: ReturnType<typeof setTimeout>
 
   // Variables initialized and controlled by the "update" function
   let prefetchModes: LinkPrefetchOption[] = []
