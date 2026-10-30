@@ -702,14 +702,16 @@ export class Router {
     const onceProps: NonNullable<Page['onceProps']> = {}
 
     Object.entries(current.onceProps ?? {}).forEach(([key, onceProp]) => {
-      if (get(props, onceProp.prop) !== undefined) {
-        // The visit provided its own value, so we can't claim to remember the once prop
-        return
-      }
-
       const currentValue = get(current.props, onceProp.prop)
 
       if (currentValue === undefined) {
+        return
+      }
+
+      const providedValue = get(props, onceProp.prop)
+
+      if (providedValue !== undefined && !isEqual(providedValue, currentValue)) {
+        // The visit provided a different value, so we can't claim to remember the once prop
         return
       }
 

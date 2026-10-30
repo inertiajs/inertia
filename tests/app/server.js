@@ -3275,6 +3275,7 @@ app.get('/once-props/instant/:page', (req, res) => {
       },
       deferredProps: deferFoo ? { default: ['foo'] } : {},
       onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      sharedProps: req.query.shared === '1' ? ['foo'] : [],
     })
   }, delay)
 })
