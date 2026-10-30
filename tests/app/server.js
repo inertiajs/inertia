@@ -688,6 +688,9 @@ app.post('/visits/interrupted-visit', (req, res) =>
 app.get('/visits/interrupted-visit/held', (req, res) =>
   inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
 )
+app.get('/visits/interrupted-visit/prefetched', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
 app.get('/visits/interrupted-visit/encrypted', (req, res) =>
   inertia.render(req, res, {
     component: 'Visits/InterruptedVisit',
@@ -706,6 +709,16 @@ app.get('/visits/interrupted-visit/deferred', (req, res) =>
       ? { props: { comments: 'Comments loaded' } }
       : { deferredProps: { default: ['comments'] } }),
   }),
+)
+app.get('/visits/interrupted-visit/slow', (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/InterruptedVisit',
+        props: { user: 'John', status: 'Opened the slow page' },
+      }),
+    1000,
+  ),
 )
 
 app.post('/remember/form-helper/default', (req, res) =>

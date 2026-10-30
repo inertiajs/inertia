@@ -61,6 +61,9 @@ export class Response {
   }
 
   public async process() {
+    // A cached response is processed again for every visit that uses it
+    this.pageApplied = false
+
     if (this.requestParams.all().prefetch) {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
@@ -144,6 +147,12 @@ export class Response {
 
   public mergeParams(params: ActiveVisit) {
     this.requestParams.merge(params)
+  }
+
+  public interrupt(): void {
+    if (!this.requestParams.wasCancelledAtAll()) {
+      this.requestParams.markAsCancelled({ cancelled: false, interrupted: true })
+    }
   }
 
   public getPageResponse(): Page {
