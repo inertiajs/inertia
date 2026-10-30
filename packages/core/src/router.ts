@@ -43,13 +43,7 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import {
-  hrefToUrl,
-  isSameUrlWithoutHash,
-  isSameUrlWithoutQueryOrHash,
-  isUrlMethodPair,
-  transformUrlAndData,
-} from './url'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 const noop = () => {}
 
@@ -93,6 +87,10 @@ export class Router {
 
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
       this.loadDeferredProps(deferredProps)
+    })
+
+    eventHandler.on('leavePage', (pageUrl: URL) => {
+      this.cancelAsyncRequestsFor(pageUrl)
     })
 
     eventHandler.on('historyQuotaExceeded', (url) => {
@@ -224,10 +222,11 @@ export class Router {
     }
   }
 
+  /**
+   * Cancels the in-flight requests for a page we're leaving, like deferred props, partial reloads and polls.
+   * Prefetches, optimistic requests, and background async visits to other pages are left untouched.
+   */
   protected cancelAsyncRequestsFor(pageUrl: URL): void {
-    // Cancel in-flight requests aimed at the page we're navigating away from
-    // (deferred props, partial reloads, plain reloads), but leave prefetches,
-    // optimistic requests, and background async visits to other pages untouched
     this.asyncRequestStream.cancelInFlight(
       (request) =>
         !request.isPrefetch() && !request.isOptimistic() && isSameUrlWithoutQueryOrHash(request.getUrl(), pageUrl),
@@ -284,19 +283,6 @@ export class Router {
     // If either of these return false, we don't want to continue
     if (events.onBefore(visit) === false || !fireBeforeEvent(visit)) {
       return
-    }
-
-    const currentPageUrl = hrefToUrl(currentPage.get().url)
-    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
-
-    // For partial reloads, only compare the base URL (origin + pathname) to allow
-    // concurrent requests with different query params to the same page
-    const isSamePage = isPartialReload
-      ? isSameUrlWithoutQueryOrHash(visit.url, currentPageUrl)
-      : isSameUrlWithoutHash(visit.url, currentPageUrl)
-
-    if (!isSamePage) {
-      this.cancelAsyncRequestsFor(currentPageUrl)
     }
 
     // Interrupt in-flight requests before taking the optimistic snapshot

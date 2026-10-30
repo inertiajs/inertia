@@ -196,7 +196,7 @@ export const useInfiniteScrollData = (options: {
   const fetchPrevious = (reloadOptions?: ReloadOptions): void => fetchPage('previous', reloadOptions)
   const fetchNext = (reloadOptions?: ReloadOptions): void => fetchPage('next', reloadOptions)
 
-  // A request that started while navigating away isn't cancelled by the router, so we cancel it here.
+  // The router only cancels this request when a visit leaves the page, so we also cancel it on unmount.
   // Its callbacks may still run when the response already arrived, and those should not touch the DOM.
   const flush = () => {
     flushed = true

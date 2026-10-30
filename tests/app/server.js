@@ -673,6 +673,40 @@ app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
+app.get('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'No comments yet' },
+  }),
+)
+app.post('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Comment posted' },
+  }),
+)
+app.get('/visits/interrupted-visit/held', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
+app.get('/visits/interrupted-visit/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Encrypted page' },
+    encryptHistory: true,
+  }),
+)
+app.get('/visits/interrupted-visit/clear-history', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld', clearHistory: true }),
+)
+app.get('/visits/interrupted-visit/home', (req, res) => inertia.render(req, res, { component: 'Home' }))
+app.get('/visits/interrupted-visit/deferred', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisitHeld',
+    ...(req.headers['x-inertia-partial-data']
+      ? { props: { comments: 'Comments loaded' } }
+      : { deferredProps: { default: ['comments'] } }),
+  }),
+)
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
@@ -1245,6 +1279,21 @@ app.get('/encrypted-history/logout', (req, res) => {
     component: 'EncryptedHistory/Page',
     props: { title: 'Logged out' },
     clearHistory: true,
+  })
+})
+
+app.get('/history/held-deferred/:page', (req, res) => {
+  if (req.params.page !== 'post' || !req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'History/HeldDeferred',
+      props: { page: req.params.page },
+      ...(req.params.page === 'post' && { deferredProps: { default: ['comments'] } }),
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'History/HeldDeferred',
+    props: { page: req.params.page, comments: 'Comments loaded' },
   })
 })
 
@@ -1933,6 +1982,14 @@ app.get('/async-visits/reload-origin', (req, res) => {
 
   setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/ReloadOrigin' }), delay)
 })
+
+app.post('/async-visits/reload-origin', (req, res) => res.redirect(303, '/async-visits/page-c'))
+
+app.post('/async-visits/reload-origin/like', (req, res) => res.redirect(303, '/async-visits/reload-origin'))
+
+app.get('/async-visits/reload-origin/redirect', (req, res) =>
+  res.status(409).header('X-Inertia-Redirect', '/async-visits/reload-origin').send(''),
+)
 
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {

@@ -84,6 +84,137 @@ test.describe('Auto-cancellation', () => {
     await expect(consoleMessages.messages[1]).toBe('cancelled')
     await expect(consoleMessages.messages[2]).toBe('started')
   })
+
+  test('it does not apply an interrupted visit whose component is still resolving', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+    await expect(page.getByText('Signed in as John')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Open the held page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.getByRole('button', { name: 'Post comment' }).click()
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('Status: Comment posted')).toBeVisible()
+    await expect(page.getByText('Signed in as John')).toBeVisible()
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+  })
+
+  test('it still reports success for a visit whose page was applied before a newer visit interrupted it', async ({
+    page,
+  }) => {
+    await page.goto('/visits/interrupted-visit')
+
+    consoleMessages.listen(page)
+
+    // Holding the encryption of the history entry keeps the visit between applying its page and finishing
+    await page.evaluate(() => {
+      const encrypt = window.crypto.subtle.encrypt.bind(window.crypto.subtle)
+
+      window.crypto.subtle.encrypt = (...args) =>
+        new Promise((resolve) => ((window as any).releaseEncryption = resolve)).then(() => encrypt(...args))
+    })
+
+    await page.evaluate(() =>
+      window.testing.Inertia.visit('/visits/interrupted-visit/encrypted', { onSuccess: () => console.log('success') }),
+    )
+    await page.waitForFunction(() => (window as any).releaseEncryption !== undefined)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/visits/interrupted-visit')
+      ;(window as any).releaseEncryption()
+    })
+
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+    expect(consoleMessages.messages).toContain('success')
+  })
+
+  test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit/encrypted')
+    await expect(page.getByText('Status: Encrypted page')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Open the history clearing page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit'))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+
+    requests.listen(page)
+
+    await page.goBack()
+    await expect(page.getByText('Status: Encrypted page')).toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit/encrypted')
+
+    expect(
+      requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/encrypted')),
+    ).toHaveLength(1)
+  })
+
+  test('it does not use a prefetched page once a page that clears the history has arrived', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit/encrypted')
+
+    await page.evaluate(() => window.testing.Inertia.prefetch('/visits/interrupted-visit/home'))
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/home') !== null)
+
+    await page.getByRole('link', { name: 'Open the history clearing page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    requests.listen(page)
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/home', { async: true }))
+    await page.getByRole('button', { name: 'Release held component' }).click()
+
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
+
+    expect(
+      requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/home')),
+    ).toHaveLength(1)
+  })
+
+  test('it does not load the deferred props of a dropped visit on a later page', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/deferred'))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      const release = window.releaseHeldComponent!
+      window.releaseHeldComponent = undefined
+      window.testing.Inertia.cancelAll()
+      release()
+    })
+
+    requests.listen(page)
+
+    await page.evaluate(() =>
+      window.testing.Inertia.visit('/visits/interrupted-visit/deferred', { component: 'Visits/InterruptedVisitHeld' }),
+    )
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      const release = window.releaseHeldComponent!
+      window.releaseHeldComponent = undefined
+      release()
+    })
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    const deferredRequests = () =>
+      requests.requests.filter((request) => request.headers()['x-inertia-partial-data'] === 'comments')
+
+    expect(deferredRequests()).toHaveLength(0)
+
+    const deferredResponse = page.waitForResponse(
+      (response) => response.request().headers()['x-inertia-partial-data'] === 'comments',
+    )
+    await page.evaluate(() => window.releaseHeldComponent!())
+    await deferredResponse
+
+    await expect(page.getByText('This is the held page.')).toBeVisible()
+    expect(deferredRequests()).toHaveLength(1)
+  })
 })
 
 test.describe('Method', () => {

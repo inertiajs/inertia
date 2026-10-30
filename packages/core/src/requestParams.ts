@@ -8,6 +8,7 @@ import {
   PreserveStateOption,
   VisitCallbacks,
 } from './types'
+import { isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash } from './url'
 
 export class RequestParams {
   protected callbacks: {
@@ -199,5 +200,19 @@ export class RequestParams {
     }
 
     return value
+  }
+
+  /**
+   * Async visits run in the background, so only a sync visit to another URL leaves the page.
+   * Partial visits update the page they're on, so for those only another path counts.
+   */
+  public leavesPage(pageUrl: URL, destinationUrl: URL): boolean {
+    if (this.params.async) {
+      return false
+    }
+
+    return this.isPartial()
+      ? !isSameUrlWithoutQueryOrHash(destinationUrl, pageUrl)
+      : !isSameUrlWithoutHash(destinationUrl, pageUrl)
   }
 }
