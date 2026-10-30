@@ -626,4 +626,23 @@ test.describe('useHttp', () => {
     await expect(page.locator('#no-content-success')).toBeVisible()
     await expect(page.locator('#no-content-response')).toContainText('Response: null')
   })
+
+  test('it cancels the newest request after an older one has finished', async ({ page }) => {
+    await page.goto('/use-http/overlapping-cancel')
+
+    await page.click('#short-then-long-button')
+    await expect(page.locator('#log')).toHaveText('a: done')
+
+    await page.click('#cancel-button')
+    await expect(page.locator('#log')).toHaveText('a: done, b: HttpCancelledError')
+  })
+
+  test('it cancels only its own request with a cancel token', async ({ page }) => {
+    await page.goto('/use-http/overlapping-cancel')
+
+    await page.click('#both-long-button')
+    await page.click('#cancel-a-button')
+
+    await expect(page.locator('#log')).toHaveText('a: HttpCancelledError, b: done')
+  })
 })

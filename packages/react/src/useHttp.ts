@@ -175,10 +175,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         resetBeforeSubmit()
       }
 
-      abortController.current = new AbortController()
+      const controller = new AbortController()
+      abortController.current = controller
 
       const cancelToken: CancelToken = {
-        cancel: () => abortController.current?.abort(),
+        cancel: () => controller.abort(),
       }
 
       options.onCancelToken?.(cancelToken)
@@ -239,7 +240,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
             ...(contentType ? { 'Content-Type': contentType } : {}),
             ...options.headers,
           },
-          signal: abortController.current.signal,
+          signal: controller.signal,
           onUploadProgress: (event: HttpProgressEvent) => {
             if (isMounted.current) {
               setProgress(event)
@@ -311,7 +312,10 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           finishProcessing()
         }
 
-        abortController.current = null
+        if (abortController.current === controller) {
+          abortController.current = null
+        }
+
         options.onFinish?.()
       }
     },
