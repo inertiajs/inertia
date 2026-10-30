@@ -154,8 +154,11 @@ describe('actionCable', () => {
     expect(actionCable({ consumer: fake.consumer }).transport.eventName).toBeUndefined()
   })
 
-  it('leaves the socket id to core unless one is given, since Action Cable issues none', () => {
-    expect(actionCable({ consumer: fake.consumer }).transport.socketId).toBeUndefined()
+  it('issues a stable socket id per tab unless one is given, since Action Cable issues none', () => {
+    const generated = actionCable({ consumer: fake.consumer }).transport.socketId!()
+
+    expect(generated).toEqual(expect.any(String))
+    expect(actionCable({ consumer: fake.consumer }).transport.socketId!()).toBe(generated)
     expect(actionCable({ consumer: fake.consumer, socketId: () => 'mine' }).transport.socketId!()).toBe('mine')
   })
 

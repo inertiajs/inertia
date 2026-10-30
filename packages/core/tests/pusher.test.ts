@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { pusher, type PusherChannel, type PusherClient } from '../src/pusher'
-import type { LiveChannel } from '../src/types'
-
-const orders: LiveChannel = { name: 'orders.1', type: 'private' }
-const stats: LiveChannel = { name: 'stats', type: 'public' }
+import { orders, stats } from './liveHarness'
 
 const fakeClient = () => {
   const channels = new Map<string, PusherChannel & { bind: ReturnType<typeof vi.fn> }>()

@@ -2,7 +2,7 @@ import { router, socketId, useHttp } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
 
 export default ({ socketIdHeader }: { socketIdHeader: string | null }) => {
-  const [resolved, setResolved] = useState<string | null>(null)
+  const [resolved, setResolved] = useState<string | null>(() => socketId.resolve())
   const external = useHttp({})
 
   useEffect(() => {

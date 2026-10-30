@@ -109,7 +109,7 @@ export default ({
       <button onClick={() => setCancel((value) => !value)}>Toggle Cancel: {String(cancel)}</button>
       <button onClick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
-      <Link href="/socket-id">Leave</Link>
+      <Link href="/">Leave</Link>
     </div>
   )
 }

@@ -23,9 +23,7 @@ export interface PusherClient {
 
 export type PusherOptions = {
   client: PusherClient
-  throttle?: number
-  pauseWhenHidden?: boolean
-}
+} & Omit<LiveOptions, 'transport'>
 
 /**
  * Covers Reverb, Soketi and Ably as well as Pusher itself, since they all speak

@@ -50,6 +50,6 @@ onMounted(showLog)
     <button @click="router.reload({ data: { drop: 'stats' } })">Drop Stats</button>
     <button @click="router.reload({ data: { swap: '1' } })">Swap Events</button>
 
-    <Link href="/socket-id">Leave</Link>
+    <Link href="/">Leave</Link>
   </div>
 </template>

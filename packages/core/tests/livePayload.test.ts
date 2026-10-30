@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ActiveVisit, LiveChannel, LiveEventHandler, LiveProp, Page } from '../src/types'
-import { listeners, orders, reports, stubBrowser } from './liveHarness'
+import { listeners, orders, ordersPage, partialData, reports, settle, stubBrowser } from './liveHarness'
 
 const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = {}) => {
   const requests = stubBrowser()
@@ -14,24 +14,16 @@ const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = 
   let swaps = 0
 
   router.init({
-    initialPage: {
-      component: 'Orders',
-      url: '/orders',
-      version: '1',
+    initialPage: ordersPage({
       props: {
         order: { id: 1, total: '1.00' },
         stats: { count: 1 },
         activity: ['created'],
         unrelated: 'untouched',
       },
-      flash: {},
       liveProps,
-      rememberedState: {},
-      rescuedProps: [],
-      clearHistory: false,
-      encryptHistory: false,
       ...page,
-    } as Page,
+    }),
     swapComponent: () => {
       swaps++
       return Promise.resolve()
@@ -53,8 +45,6 @@ const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = 
   const visit = (only: string[]): ActiveVisit =>
     ({ id: 'refresh', url: new URL('http://localhost/orders'), only, except: [], reset: [] }) as ActiveVisit
 
-  const settle = () => new Promise((resolve) => setTimeout(resolve, 80))
-
   // The initial visit swaps and fetches deferred props of its own accord. Let
   // it finish, so everything counted below belongs to the broadcast.
   await settle()
@@ -72,8 +62,8 @@ const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = 
     scrollProps: () => currentPage.get().scrollProps,
     writes: () => swaps,
     requests: () => requests,
-    reloaded: () => requests.map((request) => request.headers['X-Inertia-Partial-Data']),
-    initiallyReloaded: () => initialRequests.map((request) => request.headers['X-Inertia-Partial-Data']),
+    reloaded: () => partialData(requests),
+    initiallyReloaded: () => partialData(initialRequests),
     startRefreshing: (only: string[]) => trackPropRefresh(visit(only)),
     stopRefreshing: (only: string[]) => untrackPropRefresh(visit(only)),
     navigateTo: (component: string, url: string) => router.push({ component, url, props: { order: 'other page' } }),

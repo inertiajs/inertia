@@ -63,6 +63,10 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
   let statusCallback: ((connected: boolean) => void) | null = null
   let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
 
+  // Echo connects the moment it is first resolved, and the socket id is read on
+  // every request, so it only comes from an instance a live prop already uses
+  let subscribedInstance: EchoInstance | null = null
+
   const resolve = (): EchoInstance => {
     if (!echoIsConfigured()) {
       throw new Error(
@@ -101,6 +105,7 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
       echoChannel.listen(name, handler)
 
+      subscribedInstance = instance
       watchConnection(instance)
 
       // Echo offers no way to unbind this, but leaving the channel discards the
@@ -117,10 +122,14 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
         if (channels.release(channel)) {
           instance.leaveChannel(liveChannelName(channel))
         }
+
+        if (!channels.hasAny()) {
+          subscribedInstance = null
+        }
       }
     },
 
-    socketId: () => (echoIsConfigured() ? (echo().socketId() ?? null) : null),
+    socketId: () => subscribedInstance?.socketId() ?? null,
 
     onStatusChange(callback) {
       statusCallback = callback
@@ -139,10 +148,8 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 }
 
 export type EchoOptions = {
-  throttle?: number
-  pauseWhenHidden?: boolean
   resolve?: () => EchoInstance
-}
+} & Omit<LiveOptions, 'transport'>
 
 /**
  * An adapter supplies the bindings for its own `@laravel/echo-*` package.

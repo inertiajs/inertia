@@ -1,6 +1,5 @@
 import { toPath } from 'es-toolkit/compat'
 import { router } from '.'
-import { clientSocketId } from './clientSocketId'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
 import { liveChannelKey } from './liveChannel'
@@ -85,7 +84,7 @@ const propValues = (payload: unknown): Record<string, unknown> => {
  * The event name a channel transport's message carries, unless the transport
  * reads it from somewhere of its own.
  */
-export const liveEventName = (payload: unknown): string | undefined => envelope(payload)?.event
+const liveEventName = (payload: unknown): string | undefined => envelope(payload)?.event
 
 /**
  * Every page swap diffs the server's live props against the active
@@ -121,10 +120,11 @@ class Live {
     this.throttle = options.throttle ?? DEFAULT_THROTTLE
     this.pauseWhenHidden = options.pauseWhenHidden ?? true
 
-    // A broadcaster that issues no socket id of its own still needs one, since
-    // that is what an event it caused is recognised by. Either way it is only a
-    // default, so a resolver the app chose itself is left alone.
-    socketId.resolveUsingDefault(this.transport.socketId ?? clientSocketId)
+    // A default only, so a resolver the app chose itself is left alone. Bound,
+    // since a transport written as a class reads its connection off `this`.
+    if (this.transport.socketId) {
+      socketId.resolveUsingDefault(this.transport.socketId.bind(this.transport))
+    }
 
     eventHandler.on('pageUpdated', (page: Page) => this.sync(page))
 

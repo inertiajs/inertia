@@ -1,7 +1,6 @@
+import type { LiveEnvelope } from '@inertiajs/core'
 import { Head, router, useHttp, useProp } from '@inertiajs/react'
 import { useEffect, useRef, useState } from 'react'
-
-type LivePayload = { __inertia?: { props?: Record<string, unknown> } }
 
 export default ({
   order,
@@ -20,7 +19,7 @@ export default ({
   const activityProp = useProp('activity')
 
   const [triggeredAt, setTriggeredAt] = useState('never')
-  const [reloads, setReloads] = useState(0)
+  const [partialReloads, setPartialReloads] = useState(0)
   const [events, setEvents] = useState(0)
   const [lastRequest, setLastRequest] = useState('none')
   const [log, setLog] = useState<{ id: number; line: string }[]>([])
@@ -32,8 +31,7 @@ export default ({
   const note = (message: string) =>
     setLog((entries) => [{ id: ++logId.current, line: `${stamp()} ${message}` }, ...entries].slice(0, 12))
 
-  // A plain HTTP call rather than a visit, so it never touches the page. Every
-  // Inertia request the demo makes from here on is a live reload and nothing else
+  // A plain HTTP call rather than a visit, so it never touches the page
   const triggers = useHttp<Record<string, never>, { triggeredAt: string }>({})
 
   const trigger = (url: string) =>
@@ -46,7 +44,7 @@ export default ({
       router.on('live', (event) => {
         setEvents((count) => count + 1)
 
-        const carried = Object.keys((event.detail.payload as LivePayload)?.__inertia?.props ?? {})
+        const carried = Object.keys((event.detail.payload as LiveEnvelope)?.__inertia?.props ?? {})
         const how = carried.length > 0 ? `carrying [${carried.join(', ')}]` : 'carrying nothing'
 
         note(`event ${event.detail.event.split('\\').pop()} to [${event.detail.props.join(', ')}] ${how}`)
@@ -55,15 +53,15 @@ export default ({
         const { only, reset, prefetch } = event.detail.visit
         const requested = [...only, ...reset]
 
-        // A full page load asks for nothing in particular, and a prefetch is
-        // aimed at another page, so neither is a live reload
+        // A full page load asks for nothing in particular, and a prefetch is aimed
+        // at another page, so neither is a partial reload
         if (prefetch || requested.length === 0) {
           return
         }
 
-        setReloads((count) => count + 1)
+        setPartialReloads((count) => count + 1)
         setLastRequest(`only=[${requested.join(', ')}]`)
-        note(`live reload only=[${requested.join(', ')}]`)
+        note(`partial reload only=[${requested.join(', ')}]`)
       }),
     ]
 
@@ -195,10 +193,10 @@ export default ({
               <span className="text-slate-500">broadcast events received</span> {events}
             </div>
             <div>
-              <span className="text-slate-500">live reloads</span> {reloads}
+              <span className="text-slate-500">partial reloads</span> {partialReloads}
             </div>
             <div>
-              <span className="text-slate-500">last live request</span> <code>{lastRequest}</code>
+              <span className="text-slate-500">last partial request</span> <code>{lastRequest}</code>
             </div>
           </dl>
 

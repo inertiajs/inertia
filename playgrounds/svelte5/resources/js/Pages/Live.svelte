@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { LiveEnvelope } from '@inertiajs/core'
   import { router, useHttp, useProp } from '@inertiajs/svelte'
   import { onDestroy, onMount } from 'svelte'
 
@@ -16,13 +17,11 @@
     socketIdHeader: string | null
   } = $props()
 
-  type LivePayload = { __inertia?: { props?: Record<string, unknown> } }
-
   const orderProp = useProp('order')
   const activityProp = useProp('activity')
 
   let triggeredAt = $state('never')
-  let reloads = $state(0)
+  let partialReloads = $state(0)
   let events = $state(0)
   let lastRequest = $state('none')
   let log = $state<{ id: number; line: string }[]>([])
@@ -35,8 +34,7 @@
     log = [{ id: ++logId, line: `${stamp()} ${message}` }, ...log].slice(0, 12)
   }
 
-  // A plain HTTP call rather than a visit, so it never touches the page. Every
-  // Inertia request the demo makes from here on is a live reload and nothing else
+  // A plain HTTP call rather than a visit, so it never touches the page
   const triggers = useHttp<Record<string, never>, { triggeredAt: string }>({})
 
   const trigger = (url: string) =>
@@ -51,7 +49,7 @@
       router.on('live', (event) => {
         events++
 
-        const carried = Object.keys((event.detail.payload as LivePayload)?.__inertia?.props ?? {})
+        const carried = Object.keys((event.detail.payload as LiveEnvelope)?.__inertia?.props ?? {})
         const how = carried.length > 0 ? `carrying [${carried.join(', ')}]` : 'carrying nothing'
 
         note(`event ${event.detail.event.split('\\').pop()} to [${event.detail.props.join(', ')}] ${how}`)
@@ -60,15 +58,15 @@
         const { only, reset, prefetch } = event.detail.visit
         const requested = [...only, ...reset]
 
-        // A full page load asks for nothing in particular, and a prefetch is
-        // aimed at another page, so neither is a live reload
+        // A full page load asks for nothing in particular, and a prefetch is aimed
+        // at another page, so neither is a partial reload
         if (prefetch || requested.length === 0) {
           return
         }
 
-        reloads++
+        partialReloads++
         lastRequest = `only=[${requested.join(', ')}]`
-        note(`live reload only=[${requested.join(', ')}]`)
+        note(`partial reload only=[${requested.join(', ')}]`)
       }),
     ]
   })
@@ -164,8 +162,8 @@
       <div><span class="text-slate-500">last trigger at</span> {triggeredAt}</div>
       <div><span class="text-slate-500">socket id the server saw</span> {socketIdHeader ?? 'none'}</div>
       <div><span class="text-slate-500">broadcast events received</span> {events}</div>
-      <div><span class="text-slate-500">live reloads</span> {reloads}</div>
-      <div><span class="text-slate-500">last live request</span> <code>{lastRequest}</code></div>
+      <div><span class="text-slate-500">partial reloads</span> {partialReloads}</div>
+      <div><span class="text-slate-500">last partial request</span> <code>{lastRequest}</code></div>
     </dl>
 
     <div class="rounded-lg bg-slate-900 p-4 font-mono text-xs text-slate-100">

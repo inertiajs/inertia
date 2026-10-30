@@ -498,7 +498,7 @@ Route::get('/ssr-debug/localstorage', fn () => inertia('SsrDebug/LocalStorageErr
 | Live props demo
 |--------------------------------------------------------------------------
 |
-| Broadcasts over Reverb. Open two browser windows side by side, or trigger
+| `composer dev` starts Reverb. Open two browser windows side by side, or trigger
 | the events from the terminal with `php artisan live:broadcast`.
 |
 */
@@ -507,7 +507,7 @@ Route::get('/live', function () {
     // Private channels need an authenticated user before Laravel will authorize
     // the subscription, and the playground has no real login
     if (! Auth::check()) {
-        Auth::loginUsingId(User::first()->id);
+        Auth::login(User::first() ?? User::factory()->create());
     }
 
     return Inertia::render('Live', [

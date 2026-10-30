@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { LiveEnvelope } from '@inertiajs/core'
 import { Head, router, useHttp, useProp } from '@inertiajs/vue3'
 import { onMounted, onUnmounted, ref } from 'vue'
 
@@ -10,13 +11,11 @@ defineProps<{
   socketIdHeader: string | null
 }>()
 
-type LivePayload = { __inertia?: { props?: Record<string, unknown> } }
-
 const { loading: orderLoading } = useProp('order')
 const { loading: activityLoading } = useProp('activity')
 
 const triggeredAt = ref('never')
-const reloads = ref(0)
+const partialReloads = ref(0)
 const events = ref(0)
 const lastRequest = ref('none')
 const log = ref<{ id: number; line: string }[]>([])
@@ -29,8 +28,7 @@ const note = (message: string) => {
   log.value = [{ id: ++logId, line: `${stamp()} ${message}` }, ...log.value].slice(0, 12)
 }
 
-// A plain HTTP call rather than a visit, so it never touches the page. Every
-// Inertia request the demo makes from here on is a live reload and nothing else
+// A plain HTTP call rather than a visit, so it never touches the page
 const triggers = useHttp<Record<string, never>, { triggeredAt: string }>({})
 
 const trigger = (url: string) =>
@@ -45,7 +43,7 @@ onMounted(() => {
     router.on('live', (event) => {
       events.value++
 
-      const carried = Object.keys((event.detail.payload as LivePayload)?.__inertia?.props ?? {})
+      const carried = Object.keys((event.detail.payload as LiveEnvelope)?.__inertia?.props ?? {})
       const how = carried.length > 0 ? `carrying [${carried.join(', ')}]` : 'carrying nothing'
 
       note(`event ${event.detail.event.split('\\').pop()} to [${event.detail.props.join(', ')}] ${how}`)
@@ -54,15 +52,15 @@ onMounted(() => {
       const { only, reset, prefetch } = event.detail.visit
       const requested = [...only, ...reset]
 
-      // A full page load asks for nothing in particular, and a prefetch is
-      // aimed at another page, so neither is a live reload
+      // A full page load asks for nothing in particular, and a prefetch is aimed
+      // at another page, so neither is a partial reload
       if (prefetch || requested.length === 0) {
         return
       }
 
-      reloads.value++
+      partialReloads.value++
       lastRequest.value = `only=[${requested.join(', ')}]`
-      note(`live reload only=[${requested.join(', ')}]`)
+      note(`partial reload only=[${requested.join(', ')}]`)
     }),
   ]
 })
@@ -158,9 +156,9 @@ onUnmounted(() => {
         <div><span class="text-slate-500">last trigger at</span> {{ triggeredAt }}</div>
         <div><span class="text-slate-500">socket id the server saw</span> {{ socketIdHeader ?? 'none' }}</div>
         <div><span class="text-slate-500">broadcast events received</span> {{ events }}</div>
-        <div><span class="text-slate-500">live reloads</span> {{ reloads }}</div>
+        <div><span class="text-slate-500">partial reloads</span> {{ partialReloads }}</div>
         <div>
-          <span class="text-slate-500">last live request</span> <code>{{ lastRequest }}</code>
+          <span class="text-slate-500">last partial request</span> <code>{{ lastRequest }}</code>
         </div>
       </dl>
 

@@ -58,13 +58,23 @@ test.describe('Echo transport', () => {
     await expect(page.locator('#stats')).toHaveText(stats!)
     await expect(page.locator('#socket-id-header')).toHaveText('echo-socket-id')
 
+    const room = await page.locator('#room').textContent()
     const roomResponse = page.waitForResponse('**/echo-transport**')
     await emit(page, 'presence-rooms.1', 'App\\Events\\RoomUpdated')
     await roomResponse
+    await expect(page.locator('#room')).not.toHaveText(room!)
 
+    const secret = await page.locator('#secret').textContent()
+    const secretResponse = page.waitForResponse('**/echo-transport**')
+    await emit(page, 'private-encrypted-secrets.1', 'App\\Events\\SecretUpdated')
+    await secretResponse
+    await expect(page.locator('#secret')).not.toHaveText(secret!)
+
+    const news = await page.locator('#news').textContent()
     const newsResponse = page.waitForResponse('**/echo-transport**')
     await emit(page, 'news', 'news.published')
     await newsResponse
+    await expect(page.locator('#news')).not.toHaveText(news!)
   })
 
   test('it stops listening without leaving a channel another live prop still needs', async ({ page }) => {
@@ -74,8 +84,6 @@ test.describe('Echo transport', () => {
     const dropped = page.waitForResponse('**/echo-transport**')
     await page.getByRole('button', { name: 'Drop Stats' }).click()
     await dropped
-
-    await page.getByRole('button', { name: 'Show Log' }).click()
 
     const log = await echoLog(page)
 
@@ -98,8 +106,6 @@ test.describe('Echo transport', () => {
     const swapped = page.waitForResponse('**/echo-transport**')
     await page.getByRole('button', { name: 'Swap Events' }).click()
     await swapped
-
-    await page.getByRole('button', { name: 'Show Log' }).click()
 
     const log = await echoLog(page)
 
@@ -131,7 +137,7 @@ test.describe('Echo transport', () => {
     expect(warnings[0]).toContain('Inertia could not subscribe to the live channel "private-orders.1".')
   })
 
-  test('it watches the connection of the Echo instance configureEcho handed out last', async ({ page }) => {
+  test('it watches the connection of the Echo instance resolved last', async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/echo-transport')
 
@@ -178,7 +184,7 @@ test.describe('Echo transport', () => {
     await page.goto('/echo-transport')
 
     await page.getByRole('link', { name: 'Leave' }).click()
-    await expect(page.locator('h1')).toHaveText('Socket Id')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
 
     const log = await echoLog(page)
 

@@ -203,7 +203,7 @@ test.describe('Live props', () => {
     await leading
 
     await page.getByRole('link', { name: 'Leave' }).click()
-    await expect(page.locator('h1')).toHaveText('Socket Id')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
 
     await page.goBack()
     await expect(page.locator('h1')).toHaveText('Live Props')
@@ -378,7 +378,7 @@ test.describe('Live props', () => {
     await expect(page.locator('#subscription-count')).toHaveText('8')
 
     await page.getByRole('link', { name: 'Leave' }).click()
-    await expect(page.locator('h1')).toHaveText('Socket Id')
+    await expect(page.getByText('This is the Test App Entrypoint page')).toBeVisible()
 
     expect(await page.evaluate(() => window.__inertiaLive.subscriptions())).toEqual([])
 
@@ -395,6 +395,7 @@ test.describe('Live props', () => {
     await response
 
     await expect(page.locator('#order')).not.toHaveText(order!)
+    await expect(page.locator('#socket-id-header')).toHaveText('fake-socket-id')
   })
 
   test('it reloads every live prop after the transport reconnects', async ({ page }) => {

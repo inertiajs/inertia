@@ -9,11 +9,11 @@ use App\Models\ChatMessage;
 use App\Models\Todo;
 use App\Models\User;
 use App\Support\LiveDemo;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -636,7 +636,7 @@ Route::get('/ssr-debug/non-existent', fn () => inertia('SsrDebug/NonExistentComp
 | Live props demo
 |--------------------------------------------------------------------------
 |
-| Broadcasts over Reverb. Open two browser windows side by side, or trigger
+| `composer dev` starts Reverb. Open two browser windows side by side, or trigger
 | the events from the terminal with `php artisan live:broadcast`.
 |
 */
@@ -645,7 +645,7 @@ Route::get('/live', function () {
     // Private channels need an authenticated user before Laravel will authorize
     // the subscription, and the playground has no real login
     if (! Auth::check()) {
-        Auth::loginUsingId(User::first()->id);
+        Auth::login(User::first() ?? User::factory()->create());
     }
 
     return Inertia::render('Live', [

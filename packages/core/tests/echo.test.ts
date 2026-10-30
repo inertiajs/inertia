@@ -1,8 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createEchoTransport, type EchoChannel, type EchoInstance } from '../src/echo'
-import type { LiveChannel } from '../src/types'
-
-const orders: LiveChannel = { name: 'orders.1', type: 'private' }
+import { orders } from './liveHarness'
 
 const fakeEcho = (label: string, log: string[]) => {
   const channels = new Map<string, EchoChannel>()
@@ -30,7 +28,7 @@ const fakeEcho = (label: string, log: string[]) => {
       channels.delete(name)
       log.push(`${label} leave ${name}`)
     },
-    socketId: () => null,
+    socketId: () => `${label}-socket`,
     connector: { onConnectionChange: () => () => {} },
   }
 
@@ -53,5 +51,34 @@ describe('echo transport', () => {
     stop()
 
     expect(log).toEqual(['first stopListening private-orders.1 .OrderUpdated', 'first leave private-orders.1'])
+  })
+
+  it('reads the socket id only from an instance a live prop already uses', () => {
+    const log: string[] = []
+    const instance = fakeEcho('echo', log)
+    const resolveEcho = vi.fn(() => instance)
+
+    const transport = createEchoTransport({ echo: resolveEcho, echoIsConfigured: () => true })
+
+    // Resolving Echo connects it, which a request on a page without live props must not do
+    expect(transport.socketId!()).toBeNull()
+    expect(resolveEcho).not.toHaveBeenCalled()
+
+    const stop = transport.subscribe(orders, 'OrderUpdated', () => {})
+
+    expect(transport.socketId!()).toBe('echo-socket')
+
+    stop()
+
+    expect(transport.socketId!()).toBeNull()
+  })
+
+  it('asks for configureEcho() when a live prop subscribes before Echo is configured', () => {
+    const resolveEcho = vi.fn(() => fakeEcho('echo', []))
+    const transport = createEchoTransport({ echo: resolveEcho, echoIsConfigured: () => false })
+
+    expect(transport.socketId!()).toBeNull()
+    expect(() => transport.subscribe(orders, 'OrderUpdated', () => {})).toThrow('Echo has not been configured')
+    expect(resolveEcho).not.toHaveBeenCalled()
   })
 })

@@ -107,6 +107,6 @@ onUnmounted(() => {
     <button @click="cancel = !cancel">Toggle Cancel: {{ cancel }}</button>
     <button @click="router.reload({ only: ['plain'] })">Reload Plain</button>
 
-    <Link href="/socket-id">Leave</Link>
+    <Link href="/">Leave</Link>
   </div>
 </template>

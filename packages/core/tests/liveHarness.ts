@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
-import type { LiveChannel, LiveProp } from '../src/types'
+import type { LiveChannel, LiveProp, Page } from '../src/types'
 
-type Request = { url: string; headers: Record<string, string> }
+export type Request = { url: string; headers: Record<string, string> }
 
 /**
  * Enough of a browser for the real router to run in Node. Requests never
@@ -70,6 +70,31 @@ export const stubBrowser = (): Request[] => {
 
   return requests
 }
+
+/**
+ * The page the router boots on, at the URL `stubBrowser()` puts the window on.
+ */
+export const ordersPage = (page: Partial<Page> = {}): Page =>
+  ({
+    component: 'Orders',
+    url: '/orders',
+    version: '1',
+    props: {},
+    flash: {},
+    rememberedState: {},
+    rescuedProps: [],
+    clearHistory: false,
+    encryptHistory: false,
+    ...page,
+  }) as Page
+
+/**
+ * Long enough for the live engine's collect window and the swap that follows.
+ */
+export const settle = () => new Promise((resolve) => setTimeout(resolve, 80))
+
+export const partialData = (requests: Request[]): string[] =>
+  requests.map((request) => request.headers['X-Inertia-Partial-Data'])
 
 export const orders: LiveChannel = { name: 'orders.1', type: 'private' }
 export const reports: LiveChannel = { name: 'reports', type: 'public' }

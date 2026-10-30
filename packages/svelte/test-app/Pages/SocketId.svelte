@@ -4,7 +4,7 @@
 
   let { socketIdHeader }: { socketIdHeader: string | null } = $props()
 
-  let resolved = $state<string | null>(null)
+  let resolved = $state<string | null>(socketId.resolve())
   const external = useHttp({})
 
   const registerResolver = () => {

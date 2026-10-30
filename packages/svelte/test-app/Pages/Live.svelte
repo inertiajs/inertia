@@ -116,5 +116,5 @@
   <button onclick={() => (cancel = !cancel)}>Toggle Cancel: {cancel}</button>
   <button onclick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
 
-  <a href="/socket-id" use:inertia>Leave</a>
+  <a href="/" use:inertia>Leave</a>
 </div>

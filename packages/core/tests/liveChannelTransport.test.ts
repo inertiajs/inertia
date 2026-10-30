@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { LiveChannel, LiveEventHandler, LiveProp, Page } from '../src/types'
-import { listeners, orders, reports, stubBrowser, withEvent } from './liveHarness'
+import type { LiveChannel, LiveEventHandler, LiveProp } from '../src/types'
+import { listeners, orders, ordersPage, partialData, reports, settle, stubBrowser, withEvent } from './liveHarness'
 
 const setup = async (
   liveProps: Record<string, LiveProp>,
@@ -18,18 +18,7 @@ const setup = async (
   const unsubscribed: string[] = []
 
   router.init({
-    initialPage: {
-      component: 'Orders',
-      url: '/orders',
-      version: '1',
-      props: { order: { id: 1 }, stats: { count: 1 }, activity: ['created'] },
-      flash: {},
-      liveProps,
-      rememberedState: {},
-      rescuedProps: [],
-      clearHistory: false,
-      encryptHistory: false,
-    } as Page,
+    initialPage: ordersPage({ props: { order: { id: 1 }, stats: { count: 1 }, activity: ['created'] }, liveProps }),
     swapComponent: () => Promise.resolve(),
     resolveComponent: (name) => name,
   })
@@ -52,8 +41,6 @@ const setup = async (
     pauseWhenHidden: false,
   })
 
-  const settle = () => new Promise((resolve) => setTimeout(resolve, 80))
-
   await settle()
   requests.length = 0
 
@@ -67,7 +54,8 @@ const setup = async (
     // the `pageUpdated` the live engine syncs on
     setLiveProps: (next: Record<string, LiveProp>) =>
       currentPage.set({ ...currentPage.get(), liveProps: next }, { preserveState: true }),
-    reloaded: () => requests.map((request) => request.headers['X-Inertia-Partial-Data']),
+    props: () => currentPage.get().props,
+    reloaded: () => partialData(requests),
   }
 }
 
@@ -112,6 +100,8 @@ describe('channel transports', () => {
     live.emit(orders, withEvent('order.updated', { props: { order: { id: 2 }, activity: ['forged'] } }))
     await live.settle()
 
+    expect(live.props().order).toEqual({ id: 2 })
+    expect(live.props().activity).toEqual(['created'])
     expect(live.reloaded()).toEqual([])
   })
 

@@ -1,3 +1,4 @@
+import { clientSocketId } from './clientSocketId'
 import { warnRejectedLiveChannel } from './liveChannel'
 import { LiveChannel, LiveChannelTransport, LiveOptions, SocketIdResolver } from './types'
 
@@ -44,16 +45,16 @@ export type ActionCableOptions = {
   identifier?: (channel: LiveChannel) => ActionCableIdentifier
   eventName?: (payload: unknown) => string | undefined
   socketId?: SocketIdResolver
-  throttle?: number
-  pauseWhenHidden?: boolean
-}
+} & Omit<LiveOptions, 'transport'>
 
 export const actionCable = ({
   consumer,
   channel = 'InertiaChannel',
   identifier = defaultIdentifier(channel),
   eventName,
-  socketId,
+  // Action Cable issues no socket id and cannot exclude a connection, so each
+  // tab sends its own and drops the events the server says it caused
+  socketId = clientSocketId,
   ...options
 }: ActionCableOptions): LiveOptions => {
   let statusCallback: ((connected: boolean) => void) | null = null

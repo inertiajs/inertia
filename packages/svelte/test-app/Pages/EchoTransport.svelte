@@ -56,5 +56,5 @@
   <button onclick={() => router.reload({ data: { drop: 'stats' } })}>Drop Stats</button>
   <button onclick={() => router.reload({ data: { swap: '1' } })}>Swap Events</button>
 
-  <a href="/socket-id" use:inertia>Leave</a>
+  <a href="/" use:inertia>Leave</a>
 </div>

@@ -62,7 +62,7 @@ class BroadcastLiveDemo extends Command
     {
         $times = (int) $this->option('times');
 
-        foreach (range(1, $times) as $i) {
+        for ($i = 1; $i <= $times; $i++) {
             LiveDemo::advanceOrder("burst {$i}");
 
             broadcast(new OrderUpdated);

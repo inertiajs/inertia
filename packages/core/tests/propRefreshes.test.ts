@@ -7,8 +7,8 @@ import {
   trackPropRefresh,
   untrackPropRefresh,
 } from '../src/propRefreshes'
-import type { ActiveVisit, Page } from '../src/types'
-import { stubBrowser } from './liveHarness'
+import type { ActiveVisit } from '../src/types'
+import { ordersPage, settle, stubBrowser } from './liveHarness'
 
 const filter = (only: string[] = [], except: string[] = [], reset: string[] = []) => ({ only, except, reset })
 
@@ -183,25 +183,14 @@ describe('pending deferred props', () => {
     const { propRefreshes } = await import('../src/propRefreshes')
 
     router.init({
-      initialPage: {
-        component: 'Orders',
-        url: '/orders',
-        version: '1',
-        props: {},
-        deferredProps: { default: ['report'] },
-        flash: {},
-        rememberedState: {},
-        rescuedProps: [],
-        clearHistory: false,
-        encryptHistory: false,
-      } as Page,
+      initialPage: ordersPage({ deferredProps: { default: ['report'] } }),
       swapComponent: () => Promise.resolve(),
       resolveComponent: (name) => name,
     })
 
     expect(propRefreshes.isRefreshing('report')).toBe(true)
 
-    await new Promise((resolve) => setTimeout(resolve, 80))
+    await settle()
 
     expect(requests).toHaveLength(0)
     expect(propRefreshes.isRefreshing('report')).toBe(false)

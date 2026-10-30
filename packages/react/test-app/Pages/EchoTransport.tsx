@@ -52,7 +52,7 @@ export default ({
       <button onClick={() => router.reload({ data: { drop: 'stats' } })}>Drop Stats</button>
       <button onClick={() => router.reload({ data: { swap: '1' } })}>Swap Events</button>
 
-      <Link href="/socket-id">Leave</Link>
+      <Link href="/">Leave</Link>
     </div>
   )
 }

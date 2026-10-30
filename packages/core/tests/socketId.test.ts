@@ -4,7 +4,6 @@ import type { LiveTransport } from '../src/types'
 const setup = async () => {
   const { socketId } = await import('../src/socketId')
   const { configureLive } = await import('../src/live')
-  const { clientSocketId } = await import('../src/clientSocketId')
 
   vi.stubGlobal('window', { setTimeout, clearTimeout, addEventListener: () => {}, removeEventListener: () => {} })
   vi.stubGlobal('document', { addEventListener: () => {}, removeEventListener: () => {}, hidden: false })
@@ -12,7 +11,7 @@ const setup = async () => {
   const channelTransport = { subscribeToChannel: () => () => {} }
   const eventTransport: LiveTransport = { subscribe: () => () => {}, socketId: () => 'from-transport' }
 
-  return { socketId, configureLive, clientSocketId, channelTransport, eventTransport }
+  return { socketId, configureLive, channelTransport, eventTransport }
 }
 
 describe('socket id', () => {
@@ -21,14 +20,32 @@ describe('socket id', () => {
     vi.unstubAllGlobals()
   })
 
-  it('gives a transport that issues no socket id one of its own', async () => {
-    const { socketId, configureLive, clientSocketId } = await setup()
+  it('sends no socket id for a transport that issues none', async () => {
+    const { socketId, configureLive, channelTransport } = await setup()
+
+    configureLive({ transport: channelTransport })
 
     expect(socketId.resolve()).toBeNull()
+  })
 
-    configureLive({ transport: { subscribeToChannel: () => () => {} } })
+  it('reads the socket id off a transport written as a class', async () => {
+    const { socketId, configureLive } = await setup()
 
-    expect(socketId.resolve()).toBe(clientSocketId())
+    class ClassTransport {
+      protected connection = { id: '123.456' }
+
+      public subscribe() {
+        return () => {}
+      }
+
+      public socketId() {
+        return this.connection.id
+      }
+    }
+
+    configureLive({ transport: new ClassTransport() })
+
+    expect(socketId.resolve()).toBe('123.456')
   })
 
   it('prefers a socket id the transport issues itself', async () => {

@@ -4,7 +4,7 @@ import { onUnmounted, ref } from 'vue'
 
 defineProps<{ socketIdHeader: string | null }>()
 
-const resolved = ref<string | null>(null)
+const resolved = ref<string | null>(socketId.resolve())
 const external = useHttp({})
 
 function registerResolver() {

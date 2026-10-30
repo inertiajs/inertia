@@ -92,6 +92,20 @@ app.get('/ssr/when-mounted', (req, res) =>
   }),
 )
 
+app.get('/ssr/use-prop', (req, res) => {
+  const partial = !!req.headers['x-inertia-partial-component']
+
+  setTimeout(
+    () =>
+      inertia.renderSSR(req, res, {
+        component: 'SSR/UseProp',
+        props: partial ? { orders: 'orders-loaded' } : {},
+        deferredProps: partial ? {} : { default: ['orders'] },
+      }),
+    partial ? 500 : 0,
+  )
+})
+
 app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
@@ -3646,21 +3660,31 @@ app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })
 
+// The partial reload rule the useProp and live routes filter their props and
+// manifests by: a prop is sent when it, an ancestor or a descendant is
+// requested, and it isn't excepted
+const partialReloadFilter = (req) => {
+  const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
+  const except = (req.headers['x-inertia-partial-except'] || '').split(',').filter(Boolean)
+
+  const related = (prop, candidate) =>
+    prop === candidate || prop.startsWith(`${candidate}.`) || candidate.startsWith(`${prop}.`)
+
+  const wants = (prop) =>
+    (only.length === 0 || only.some((candidate) => related(prop, candidate))) &&
+    !except.some((candidate) => related(prop, candidate))
+
+  return { only, related, wants }
+}
+
 // useProp loading state. Reloads are deliberately slow so the loading flag is
 // observable, and `delay` lets a test overlap two requests for the same prop.
 // Props are filtered by the partial headers, so an untouched prop keeps its value.
 app.get('/use-prop', (req, res) => {
   const isPartial = !!req.headers['x-inertia-partial-component']
-  const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
-  const except = (req.headers['x-inertia-partial-except'] || '').split(',').filter(Boolean)
+  const { only, related, wants } = partialReloadFilter(req)
   const delay = parseInt(req.query.delay || '0', 10) || (isPartial ? 500 : 0)
   const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
-
-  const related = (prop, candidate) =>
-    prop === candidate || prop.startsWith(`${candidate}.`) || candidate.startsWith(`${prop}.`)
-  const wants = (prop) =>
-    (only.length === 0 || only.some((candidate) => related(prop, candidate))) &&
-    !except.some((candidate) => related(prop, candidate))
 
   const props = {}
 
@@ -3770,8 +3794,7 @@ const liveProps = {
 }
 
 app.get('/live', (req, res) => {
-  const requested = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
-  const wants = (prop) => requested.length === 0 || requested.includes(prop)
+  const { only: requested, wants } = partialReloadFilter(req)
   const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
 
   // Only reloads are slowed, so `delay` holds a partial in flight long enough
@@ -3858,8 +3881,7 @@ const echoLiveProps = (drop, swap) => {
 }
 
 app.get('/echo-transport', (req, res) => {
-  const requested = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
-  const wants = (prop) => requested.length === 0 || requested.includes(prop)
+  const { wants } = partialReloadFilter(req)
   const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
 
   inertia.render(req, res, {
