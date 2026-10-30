@@ -101,6 +101,36 @@ test.describe('Auto-cancellation', () => {
     await expect(page).toHaveURL('/visits/interrupted-visit')
   })
 
+  test('it still reports success for a visit whose page was applied before a newer visit interrupted it', async ({
+    page,
+  }) => {
+    await page.goto('/visits/interrupted-visit')
+
+    consoleMessages.listen(page)
+
+    // Holding the encryption of the history entry keeps the visit between applying its page and finishing
+    await page.evaluate(() => {
+      const encrypt = window.crypto.subtle.encrypt.bind(window.crypto.subtle)
+
+      window.crypto.subtle.encrypt = (...args) =>
+        new Promise((resolve) => ((window as any).releaseEncryption = resolve)).then(() => encrypt(...args))
+    })
+
+    await page.evaluate(() =>
+      window.testing.Inertia.visit('/visits/interrupted-visit/encrypted', { onSuccess: () => console.log('success') }),
+    )
+    await page.waitForFunction(() => (window as any).releaseEncryption !== undefined)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/visits/interrupted-visit')
+      ;(window as any).releaseEncryption()
+    })
+
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+    await expect(page).toHaveURL('/visits/interrupted-visit')
+    expect(consoleMessages.messages).toContain('success')
+  })
+
   test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {
     await page.goto('/visits/interrupted-visit/encrypted')
     await expect(page.getByText('Status: Encrypted page')).toBeVisible()

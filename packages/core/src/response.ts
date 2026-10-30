@@ -28,6 +28,7 @@ const queue = new Queue<Promise<boolean | void>>()
 export class Response {
   protected wasPrefetched = false
   protected processed = false
+  protected pageApplied = false
 
   constructor(
     protected requestParams: RequestParams,
@@ -103,7 +104,8 @@ export class Response {
     try {
       await this.setPage()
 
-      if (this.requestParams.wasCancelledAtAll()) {
+      // A visit that's cancelled before its page is applied reports nothing, but once the page is shown it still does
+      if (this.requestParams.wasCancelledAtAll() && !this.pageApplied) {
         return
       }
 
@@ -300,6 +302,8 @@ export class Response {
       visitId: visit.id,
       isCancelled: () => this.requestParams.wasCancelledAtAll(),
       onCommit: () => {
+        this.pageApplied = true
+
         // The page is only left once it's replaced, a dropped visit leaves its requests running
         if (leavesPage) {
           eventHandler.fireInternalEvent('leavePage', currentPageUrl)
