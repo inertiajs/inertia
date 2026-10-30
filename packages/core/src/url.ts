@@ -120,6 +120,10 @@ export function resolveUrlMethodPairComponent(pair: UrlMethodPair): string | nul
   return pair.component
 }
 
+export function isSameOrigin(url: string): boolean {
+  return new URL(url, window.location.href).origin === window.location.origin
+}
+
 export function urlHasProtocol(url: string): boolean {
   return /^([a-z][a-z0-9+.-]*:)?\/\/[^/]/i.test(url)
 }

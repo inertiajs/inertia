@@ -34,6 +34,9 @@ export default function Layout({ children, padding = true }: { children: React.R
         <Link href="/poll" className="hover:underline">
           Poll
         </Link>
+        <Link href="/live" className="hover:underline">
+          Live
+        </Link>
         <Link href="/chat" className="hover:underline">
           Chat
         </Link>

@@ -33,6 +33,11 @@
     "./server": {
       "types": "./dist/server.d.ts",
       "svelte": "./dist/server.js"
+    },
+    "./echo": {
+      "types": "./dist/echo.d.ts",
+      "svelte": "./dist/echo.js",
+      "import": "./dist/echo.js"
     }
   },
   "scripts": {
@@ -45,10 +50,12 @@
     "package": "svelte-package --input src"
   },
   "devDependencies": {
+    "@laravel/echo-svelte": "^2.4.0",
     "@sveltejs/package": "^3.0.1",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "axios": "^1.20.0",
     "es-check": "9.5.3",
+    "laravel-echo": "^2.4.0",
     "publint": "^0.3.17",
     "svelte": "^5.57.3",
     "svelte-check": "^4.4.8",
@@ -57,11 +64,17 @@
     "vite": "^8.3.5"
   },
   "peerDependencies": {
-    "svelte": "^5.0.0"
+    "svelte": "^5.0.0",
+    "@laravel/echo-svelte": "^2.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "es-toolkit": "^1.33.0",
     "laravel-precognition": "^2.1.1"
+  },
+  "peerDependenciesMeta": {
+    "@laravel/echo-svelte": {
+      "optional": true
+    }
   }
 }

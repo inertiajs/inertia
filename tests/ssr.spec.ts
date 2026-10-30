@@ -120,6 +120,23 @@ test.describe('SSR', () => {
   })
 })
 
+test.describe('SSR useProp', () => {
+  test('it hydrates a deferred prop as not loading, then marks it loading until it arrives', async ({ page }) => {
+    const html = await (await page.request.get('/ssr/use-prop')).text()
+
+    expect(html).toContain('loading: false')
+
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/use-prop')
+
+    await expect(page.locator('#orders')).toHaveText('orders: none, loading: true')
+    await expect(page.locator('#orders')).toHaveText('orders: orders-loaded, loading: false')
+
+    expect(consoleMessages.messages.filter((message) => message.includes('Hydration'))).toHaveLength(0)
+  })
+})
+
 test.describe('SSR WhenMounted', () => {
   test('it renders the fallback instead of the children on the server', async ({ page }) => {
     const response = await page.request.get('/ssr/when-mounted')

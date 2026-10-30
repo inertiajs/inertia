@@ -11,6 +11,7 @@
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.5.0",
         "laravel/framework": "^13.0",
+        "laravel/reverb": "^1.11",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
@@ -50,7 +51,7 @@
         "dev": [
             "Composer\\Config::disableProcessTimeout",
             "@php artisan view:clear",
-            "pnpx concurrently -c \"#93c5fd,#c4b5fd\" \"php artisan serve\" \"pnpm run dev\" --names=server,vite"
+            "pnpx concurrently -c \"#93c5fd,#c4b5fd,#86efac\" \"php artisan serve\" \"pnpm run dev\" \"php artisan reverb:start\" --names=server,vite,reverb"
         ]
     },
     "extra": {
