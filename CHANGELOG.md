@@ -7,9 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.9.1...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.10.0...3.x)
 
 - Nothing yet
+
+## [v3.10.0](https://github.com/inertiajs/inertia/compare/v3.9.1...v3.10.0) - 2026-10-30
+
+### What's Changed
+
+* Bump the github-actions group with 2 updates by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3326
+* [3.x] Respect `forceIndicesArrayFormatInFormData` in `useHttp` by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3329
+* [3.x] Declare `@types/react` and `@types/react-dom` as optional peer dependencies by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3321
+* fix(vite): restore SSR stylesheet links on Windows by [@diaeai](https://github.com/diaeai) in https://github.com/inertiajs/inertia/pull/3323
+* [3.x] Reject malformed SSR render requests instead of crashing the server by [@fouteox](https://github.com/fouteox) in https://github.com/inertiajs/inertia/pull/3314
+* [3.x] Reset `history.preserveUrl` when a `preserveUrl` visit returns errors by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3332
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3342
+* [3.x] Fix `InfiniteScroll` restoring a stale container scroll position by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3343
+* [3.x] Cancel in-flight async requests when a client-side visit leaves the page by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3333
+* Bump stefanzweifel/git-auto-commit-action from 7.2.0 to 7.2.1 in the github-actions group by [@dependabot](https://github.com/dependabot)[bot] in https://github.com/inertiajs/inertia/pull/3351
+* [3.x] Prevent stale responses from reverting navigations by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3344
+* [3.x] Interrupt visits served from the prefetch cache by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3360
+* [3.x] Support the `QUERY` HTTP method by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3328
+* [3.x] Keep each useHttp request's AbortController, so cancel() and cancel tokens hit the right request by [@nurdism](https://github.com/nurdism) in https://github.com/inertiajs/inertia/pull/3346
+* [3.x] Resolve relative `Link` and `Form` URLs against the current page by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3358
+* [3.x] Bump dependencies and drop SvelteKit from the Svelte adapter by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3365
+* [3.x] Cancel pending scroll position saves on history navigation by [@lazerg](https://github.com/lazerg) in https://github.com/inertiajs/inertia/pull/3348
+* [3.x] Don't clear history again on a client-side visit from a page that cleared it by [@thecrazybob](https://github.com/thecrazybob) in https://github.com/inertiajs/inertia/pull/3355
+* [3.x] Keep shared once props on instant visits by [@thecrazybob](https://github.com/thecrazybob) in https://github.com/inertiajs/inertia/pull/3356
+* [3.x] Accept a nullish remember key in useForm by [@mokevnin](https://github.com/mokevnin) in https://github.com/inertiajs/inertia/pull/3279
+
+### New Contributors
+
+* [@diaeai](https://github.com/diaeai) made their first contribution in https://github.com/inertiajs/inertia/pull/3323
+* [@nurdism](https://github.com/nurdism) made their first contribution in https://github.com/inertiajs/inertia/pull/3346
+* [@mokevnin](https://github.com/mokevnin) made their first contribution in https://github.com/inertiajs/inertia/pull/3279
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.9.1...v3.10.0
 
 ## [v3.9.1](https://github.com/inertiajs/inertia/compare/v3.9.0...v3.9.1) - 2026-10-09
 
