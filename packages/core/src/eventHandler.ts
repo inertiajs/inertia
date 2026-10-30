@@ -14,15 +14,18 @@ class EventHandler {
     listener: (...args: any[]) => void
   }[] = []
 
+  protected onWindowScroll = debounce(() => Scroll.onWindowScroll(), 100)
+  protected onScroll = debounce((event: Event) => Scroll.onScroll(event), 100)
+
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
       window.addEventListener('pageshow', this.handlePageshowEvent.bind(this))
-      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
+      window.addEventListener('scroll', this.onWindowScroll, true)
     }
 
     if (typeof document !== 'undefined') {
-      document.addEventListener('scroll', debounce(Scroll.onScroll.bind(Scroll), 100), true)
+      document.addEventListener('scroll', this.onScroll, true)
     }
   }
 
@@ -79,6 +82,9 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
+    this.onWindowScroll.cancel()
+    this.onScroll.cancel()
+
     const state = event.state || null
 
     if (state === null) {
@@ -95,6 +101,10 @@ class EventHandler {
       return this.onMissingHistoryItem()
     }
 
+    // Cancel ongoing requests except prefetch requests before decrypting,
+    // so a response that arrives in the meantime can't replace the restored page
+    router.cancelAll({ prefetch: false })
+
     history
       .decrypt(state.page)
       .then((data) => {
@@ -103,12 +113,9 @@ class EventHandler {
           return
         }
 
-        // Cancel ongoing requests except prefetch requests
-        router.cancelAll({ prefetch: false })
-
         currentPage.setQuietly(data, { preserveState: false }).then(() => {
           Scroll.restore(history.getScrollRegions())
-          fireNavigateEvent(currentPage.get())
+          fireNavigateEvent(currentPage.get(), { type: 'history' })
 
           const pendingDeferred: Record<string, string[]> = {}
           const pageProps = currentPage.get().props

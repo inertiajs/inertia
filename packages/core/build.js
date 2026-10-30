@@ -33,6 +33,7 @@ const builds = [
   { entryPoints: ['src/echo.ts'], format: 'esm', outfile: 'dist/echo.js', platform: 'browser' },
   { entryPoints: ['src/pusher.ts'], format: 'esm', outfile: 'dist/pusher.js', platform: 'browser' },
   { entryPoints: ['src/actionCable.ts'], format: 'esm', outfile: 'dist/actionCable.js', platform: 'browser' },
+  { entryPoints: ['src/json.ts'], format: 'esm', outfile: 'dist/json.js', platform: 'node' },
 ]
 
 builds.forEach(async (build) => {

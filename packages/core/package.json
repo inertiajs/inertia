@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/core",
-  "version": "3.7.1",
+  "version": "3.9.1",
   "license": "MIT",
   "description": "A framework for creating server-driven single page apps.",
   "contributors": [
@@ -48,6 +48,10 @@
     "./actionCable": {
       "types": "./types/actionCable.d.ts",
       "import": "./dist/actionCable.js"
+    },
+    "./json": {
+      "types": "./types/json.d.ts",
+      "import": "./dist/json.js"
     }
   },
   "typesVersions": {
@@ -66,6 +70,9 @@
       ],
       "actionCable": [
         "types/actionCable.d.ts"
+      ],
+      "json": [
+        "types/json.d.ts"
       ]
     }
   },
@@ -82,7 +89,7 @@
   "dependencies": {
     "@jridgewell/trace-mapping": "^0.3.31",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.0.0"
+    "laravel-precognition": "^2.1.1"
   },
   "peerDependencies": {
     "axios": "^1.15.2"
@@ -94,11 +101,11 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.13",
-    "axios": "^1.17.0",
+    "axios": "^1.20.0",
     "es-check": "^9.6.4",
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   }
 }

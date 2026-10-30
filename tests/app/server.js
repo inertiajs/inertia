@@ -75,6 +75,16 @@ app.get('/ssr/page2', (req, res) =>
   }),
 )
 
+app.get('/ssr/bigint', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/BigInt',
+    props: {
+      big: 900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+    },
+  }),
+)
+
 app.get('/ssr/when-mounted', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/WhenMounted',
@@ -200,6 +210,79 @@ app.get('/when-mounted', (req, res) =>
   inertia.render(req, res, {
     component: 'WhenMounted',
     props: {},
+  }),
+)
+
+// Big integer test routes
+app.get('/bigint', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 900719925474099988n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+    encryptHistory: req.query.encrypt !== 'false',
+  }),
+)
+
+app.get('/bigint/reload', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 100,
+      big: 123456789012345678n,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
+    encryptHistory: req.query.encrypt !== 'false',
+  }),
+)
+
+app.get('/bigint/collision', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+  }),
+)
+
+app.get('/bigint/unflagged', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: 1,
+      negative: -1,
+      huge: 2,
+      nested: { deep: [1, 2] },
+      collision: { $bigint: '123' },
+    },
+    preserveBigIntegers: false,
+    encryptHistory: true,
+  }),
+)
+
+app.post('/bigint/echo', (req, res) =>
+  inertia.render(req, res, {
+    component: 'BigInt',
+    props: {
+      safe: 42,
+      big: req.body.value,
+      echoedType: typeof req.body.value,
+      negative: -900719925474099988n,
+      nested: { deep: [900719925474099988n, 2n] },
+      huge: 9223372036854775807n,
+    },
   }),
 )
 
@@ -421,6 +504,13 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.post('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server', errors: { foo: 'The foo field is required.' } },
+  }),
+)
+
 app.get('/client-side-visit/props', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Props',
@@ -583,6 +673,53 @@ app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
+app.get('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'No comments yet' },
+  }),
+)
+app.post('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Comment posted' },
+  }),
+)
+app.get('/visits/interrupted-visit/held', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
+app.get('/visits/interrupted-visit/prefetched', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
+app.get('/visits/interrupted-visit/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Encrypted page' },
+    encryptHistory: true,
+  }),
+)
+app.get('/visits/interrupted-visit/clear-history', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld', clearHistory: true }),
+)
+app.get('/visits/interrupted-visit/home', (req, res) => inertia.render(req, res, { component: 'Home' }))
+app.get('/visits/interrupted-visit/deferred', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisitHeld',
+    ...(req.headers['x-inertia-partial-data']
+      ? { props: { comments: 'Comments loaded' } }
+      : { deferredProps: { default: ['comments'] } }),
+  }),
+)
+app.get('/visits/interrupted-visit/slow', (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/InterruptedVisit',
+        props: { user: 'John', status: 'Opened the slow page' },
+      }),
+    1000,
+  ),
+)
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
@@ -657,7 +794,7 @@ app.post('/form-helper/events/errors', (req, res) => {
 //
 const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email)
 
-app.post('/precognition/default', upload.any(), (req, res) => {
+const precognitionDefault = (req, res) => {
   if (!req.headers['precognition']) {
     return renderDump(req, res)
   }
@@ -704,7 +841,10 @@ app.post('/precognition/default', upload.any(), (req, res) => {
     },
     !!req.query['slow'] ? 2000 : 250,
   )
-})
+}
+
+app.post('/precognition/default', upload.any(), precognitionDefault)
+app.query('/precognition/default', upload.any(), precognitionDefault)
 
 app.post('/precognition/transform-keys', upload.any(), (req, res) => {
   if (!req.headers['precognition']) {
@@ -942,7 +1082,7 @@ app.post('/precognition/error-sync', upload.any(), (req, res) => {
   }, 100)
 })
 
-const methods = ['get', 'post', 'put', 'patch', 'delete']
+const methods = ['get', 'post', 'put', 'patch', 'delete', 'query']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
     component: 'Dump',
@@ -1076,6 +1216,12 @@ app.get('/prefetch/cancelled', (req, res) => inertia.render(req, res, { componen
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))
+app.get('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: null } }),
+)
+app.query('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: req.body.term } }),
+)
 app.get('/prefetch/navigate-event/cached', (req, res) =>
   inertia.render(req, res, { component: 'Prefetch/NavigateEventTarget', props: { label: 'cached' } }),
 )
@@ -1134,6 +1280,61 @@ app.get('/history/:pageNumber', (req, res) => {
   })
 })
 
+app.get('/encrypted-history/public', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Public page' },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/private', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Private page', token: randomUUID() },
+    encryptHistory: true,
+  })
+})
+
+app.get('/encrypted-history/logout', (req, res) => {
+  inertia.render(req, res, {
+    component: 'EncryptedHistory/Page',
+    props: { title: 'Logged out' },
+    clearHistory: true,
+  })
+})
+
+app.get('/history/held-deferred/:page', (req, res) => {
+  if (req.params.page !== 'post' || !req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'History/HeldDeferred',
+      props: { page: req.params.page },
+      ...(req.params.page === 'post' && { deferredProps: { default: ['comments'] } }),
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'History/HeldDeferred',
+    props: { page: req.params.page, comments: 'Comments loaded' },
+  })
+})
+
+app.get('/history/prefetch/:page', (req, res) => {
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'History/Prefetch',
+        props: {
+          page: req.params.page,
+          loadedAt: Date.now(),
+        },
+        encryptHistory: true,
+        clearHistory: req.params.page === 'signed-out',
+      }),
+    req.params.page === 'reports' ? 500 : 0,
+  )
+})
+
 app.get('/history/version/:pageNumber', (req, res) => {
   inertia.render(req, res, {
     component: 'History/Version',
@@ -1162,6 +1363,25 @@ app.get('/history-version-reload', (req, res) => {
       deploy: historyVersionReloadDeploy,
     },
     version: `deploy-${historyVersionReloadDeploy}`,
+  })
+})
+
+app.get('/history-quota/deferred', (req, res) => {
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'HistoryQuota/Deferred',
+      deferredProps: {
+        default: ['largeData'],
+      },
+      props: {},
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'HistoryQuota/Deferred',
+    props: {
+      largeData: 'x'.repeat(16 * 1024 * 1024),
+    },
   })
 })
 
@@ -1785,6 +2005,14 @@ app.get('/async-visits/reload-origin', (req, res) => {
   setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/ReloadOrigin' }), delay)
 })
 
+app.post('/async-visits/reload-origin', (req, res) => res.redirect(303, '/async-visits/page-c'))
+
+app.post('/async-visits/reload-origin/like', (req, res) => res.redirect(303, '/async-visits/reload-origin'))
+
+app.get('/async-visits/reload-origin/redirect', (req, res) =>
+  res.status(409).header('X-Inertia-Redirect', '/async-visits/reload-origin').send(''),
+)
+
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -2248,6 +2476,55 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+const renderQueryVisitsSearch = (req, res) => {
+  const term = req.body?.term ?? null
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'QueryVisits/Search',
+      props: { term, reloadedAt: null },
+      deferredProps: { default: ['results'] },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'QueryVisits/Search',
+        props: {
+          results: req.headers['x-inertia-partial-data'].includes('results')
+            ? `Results for: ${term ?? 'nothing'}`
+            : undefined,
+          reloadedAt: req.headers['x-inertia-partial-data'].includes('reloadedAt') ? Date.now() : undefined,
+        },
+      }),
+    req.headers['x-slow'] ? 1000 : 0,
+  )
+}
+
+app.get('/query-visits/search', renderQueryVisitsSearch)
+app.get('/query-visits/search-elsewhere', renderQueryVisitsSearch)
+app.query('/query-visits/search', renderQueryVisitsSearch)
+
+const renderQueryVisitsInfiniteScroll = (req, res) => {
+  const term = req.body?.term ?? null
+  const page = parseInt(req.body?.page ?? req.query.page ?? 1)
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40)
+
+  inertia.render(req, res, {
+    component: 'QueryVisits/InfiniteScroll',
+    props: {
+      term,
+      users: { ...paginated, data: paginated.data.map((user) => ({ ...user, name: `${term ?? 'Any'} ${user.name}` })) },
+    },
+    mergeProps: ['users.data'],
+    scrollProps: { users: scrollProp },
+  })
+}
+
+app.get('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+app.query('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+
 app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
 app.get('/infinite-scroll-with-link', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),
@@ -2259,6 +2536,9 @@ app.get('/infinite-scroll/remember-state', (req, res) =>
 )
 app.get('/infinite-scroll/toggles', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Toggles'))
 app.get('/infinite-scroll/unmount-race', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/UnmountRace'))
+app.get('/infinite-scroll/unmount-after-mutation', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/UnmountAfterMutation'),
+)
 app.get('/infinite-scroll/trigger-both', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerBoth'))
 app.get('/infinite-scroll/trigger-end-buffer', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/TriggerEndBuffer'),
@@ -2269,6 +2549,9 @@ app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
 app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
 app.get('/infinite-scroll/reverse-short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ReverseShortContent', 40, true, 5),
+)
+app.get('/infinite-scroll/reverse-pinned-to-bottom', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ReversePinnedToBottom', 40, true, 5),
 )
 app.get('/infinite-scroll/manual-reverse', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
@@ -2311,7 +2594,8 @@ app.get('/infinite-scroll/navigate-away', (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1
   const partialReload = !!req.headers['x-inertia-partial-data']
   const shouldAppend = req.headers['x-inertia-infinite-scroll-merge-intent'] !== 'prepend'
-  const { paginated, scrollProp } = paginateUsers(page, 15, 40, false)
+  const orderByDesc = req.query.order === 'desc'
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40, orderByDesc)
 
   const render = () =>
     inertia.render(req, res, {
@@ -2321,8 +2605,17 @@ app.get('/infinite-scroll/navigate-away', (req, res) => {
       scrollProps: { users: scrollProp },
     })
 
-  partialReload ? setTimeout(render, 1000) : render()
+  if (partialReload) {
+    setTimeout(render, 1000)
+  } else if (orderByDesc) {
+    setTimeout(render, 500)
+  } else {
+    render()
+  }
 })
+app.get('/infinite-scroll/navigate-away/slow-article', (req, res) =>
+  setTimeout(() => inertia.render(req, res, { component: 'Article', props: {} }), 500),
+)
 app.get('/infinite-scroll/invisible-first-child', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InvisibleFirstChild'),
 )
@@ -2982,6 +3275,7 @@ app.get('/once-props/instant/:page', (req, res) => {
       },
       deferredProps: deferFoo ? { default: ['foo'] } : {},
       onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      sharedProps: req.query.shared === '1' ? ['foo'] : [],
     })
   }, delay)
 })
@@ -3161,10 +3455,24 @@ app.patch('/api/users/:id', upload.none(), (req, res) => {
   })
 })
 
+app.query('/api/users/search', (req, res) => {
+  res.json({
+    method: req.method,
+    name: req.body.name,
+    query: req.query,
+  })
+})
+
 app.get('/api/slow', (req, res) => {
   setTimeout(() => {
     res.json({ result: 'slow response' })
   }, 2000)
+})
+
+app.get('/api/delayed', (req, res) => {
+  setTimeout(() => {
+    res.json({ result: req.query.name })
+  }, Number(req.query.delay))
 })
 
 app.post('/api/error', upload.none(), (req, res) => {

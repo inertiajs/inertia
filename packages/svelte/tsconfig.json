@@ -1,5 +1,4 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -11,15 +10,21 @@
     "strict": true,
     "declaration": true,
     "declarationDir": "dist",
+    "rootDir": "src",
 
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
     "module": "ES2022",
+    "moduleDetection": "force",
     "moduleResolution": "Bundler",
     "verbatimModuleSyntax": true,
+    "isolatedModules": true,
 
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "preserveConstEnums": true,
     "removeComments": true
-  }
+  },
+  "include": ["src"]
 }

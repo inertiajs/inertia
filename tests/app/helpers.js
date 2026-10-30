@@ -5,20 +5,47 @@ const package = process.env.PACKAGE || 'vue3'
 
 const ssr = require('./ssr')
 
-const buildPageData = (req, data) => ({
-  component: req.path
-    .slice(1)
-    .split('/')
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join('/')
-    .split('-')
-    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
-    .join(''),
-  props: {},
-  url: req.originalUrl,
-  version: null,
-  ...data,
-})
+const encodeBigInts = (value) => {
+  if (typeof value === 'bigint') {
+    return { $bigint: value.toString() }
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(encodeBigInts)
+  }
+
+  if (value !== null && typeof value === 'object' && value.constructor === Object) {
+    return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, encodeBigInts(nested)]))
+  }
+
+  return value
+}
+
+const buildPageData = (req, data) => {
+  const page = encodeBigInts({
+    component: req.path
+      .slice(1)
+      .split('/')
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join('/')
+      .split('-')
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join(''),
+    props: {},
+    url: req.originalUrl,
+    version: null,
+    ...data,
+  })
+
+  // Stands in for the Laravel opt-in by flagging pages that carry markers. A
+  // route can pass `preserveBigIntegers: false` to act like an app that builds
+  // its own markers.
+  if (page.preserveBigIntegers === undefined && JSON.stringify(page).includes('"$bigint"')) {
+    page.preserveBigIntegers = true
+  }
+
+  return page
+}
 
 const processPartialProps = (req, data) => {
   const partialDataHeader = req.headers['x-inertia-partial-data'] || ''

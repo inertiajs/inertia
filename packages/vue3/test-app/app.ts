@@ -43,6 +43,11 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
+    }
+
     return pages[`./Pages/${name}.vue`]
   },
   setup({ el, App, props, plugin }) {

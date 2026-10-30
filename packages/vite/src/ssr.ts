@@ -21,6 +21,7 @@
 import { existsSync } from 'node:fs'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { resolve } from 'node:path'
+import { parsePage } from '@inertiajs/core/json'
 import { classifySSRError, formatConsoleError } from '@inertiajs/core/ssrErrors'
 import type { ResolvedConfig, ViteDevServer } from 'vite'
 import { collectCSSFromModuleGraph } from './css'
@@ -179,7 +180,7 @@ function readRequestBody<T>(req: IncomingMessage): Promise<T> {
       }
 
       try {
-        resolve(JSON.parse(data))
+        resolve(parsePage(data))
       } catch (error) {
         reject(new Error(`Invalid JSON in request body: ${error instanceof Error ? error.message : 'Unknown error'}`))
       }

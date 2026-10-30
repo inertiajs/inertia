@@ -5,6 +5,7 @@ import { availableParallelism } from 'node:os'
 import path from 'node:path'
 import * as process from 'process'
 import { originalPositionFor, TraceMap } from '@jridgewell/trace-mapping'
+import { parsePage } from './json'
 import { classifySSRError, formatConsoleError, setSourceMapResolver } from './ssrErrors'
 import { InertiaAppResponse, Page } from './types'
 
@@ -104,7 +105,17 @@ export default (render: AppCallback, options?: Port | ServerOptions): AppCallbac
   }
 
   const handleRender = async (request: IncomingMessage, response: ServerResponse) => {
-    const page: Page = JSON.parse(await readableToString(request))
+    let page: Page
+
+    try {
+      page = parsePage(await readableToString(request))
+    } catch (e) {
+      // An aborted or malformed body would otherwise be an unhandled rejection that stops the server
+      response.writeHead(400, { 'Content-Type': 'application/json', Server: 'Inertia.js SSR' })
+      response.write(JSON.stringify({ error: `Invalid page object: ${(e as Error).message}` }))
+
+      return
+    }
 
     // Suppress framework warnings during render (they clutter the output)
     const originalWarn = console.warn

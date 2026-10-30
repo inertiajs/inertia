@@ -66,4 +66,50 @@ test.describe('XSRF Token', () => {
     expect(dump.headers['x-xsrf-token']).toBeUndefined()
     expect(dump.headers['x-my-xsrf-token']).toBeUndefined()
   })
+
+  test('it does not send X-XSRF-TOKEN header to other origins', async ({ page, context }) => {
+    await context.addCookies([
+      {
+        name: 'XSRF-TOKEN',
+        value: 'test-xsrf-token-value',
+        domain: 'localhost',
+        path: '/',
+      },
+    ])
+
+    const externalRequests: Record<string, string>[] = []
+
+    await page.route('https://external.example/**', async (route) => {
+      if (route.request().method() !== 'OPTIONS') {
+        externalRequests.push(route.request().headers())
+      }
+
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': '*',
+          'Access-Control-Allow-Headers': '*',
+        },
+        body: '{}',
+      })
+    })
+
+    await page.goto('/xsrf/cross-origin')
+
+    await page.getByRole('button', { name: 'Cross-origin HTTP' }).click()
+    await expect.poll(() => externalRequests.length).toBe(1)
+
+    await page.getByRole('button', { name: 'Cross-origin Link' }).click()
+    await expect.poll(() => externalRequests.length).toBe(2)
+
+    expect(externalRequests[0]['x-xsrf-token']).toBeUndefined()
+    expect(externalRequests[1]['x-xsrf-token']).toBeUndefined()
+
+    await page.goto('/xsrf/cross-origin')
+    await page.getByRole('button', { name: 'Same-origin Link' }).click()
+
+    const dump = await shouldBeDumpPage(page, 'post')
+    expect(dump.headers['x-xsrf-token']).toBe('test-xsrf-token-value')
+  })
 })

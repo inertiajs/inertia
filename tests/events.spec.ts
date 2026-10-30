@@ -162,7 +162,9 @@ test.describe('Events', () => {
       const navigateMessages = await waitForGlobalMessages(page, 'inertia:navigate', 2)
 
       await expect(typeof navigateMessages[0].detail.visitId).toBe('string')
+      await expect(navigateMessages[0].detail.type).toBe('visit')
       await expect(navigateMessages[1].detail.visitId).toBeUndefined()
+      await expect(navigateMessages[1].detail.type).toBe('history')
     })
   })
 
@@ -873,4 +875,33 @@ test.describe('Lifecycles', () => {
       await expect(messages[16]).toBe('CANCELLING!')
     })
   })
+})
+
+test('it includes how the page was reached in the navigate event', async ({ page }) => {
+  const navigateTypes = () => page.evaluate(() => (window as any).navigateTypes)
+
+  await page.addInitScript(() => {
+    ;(window as any).navigateTypes = []
+
+    document.addEventListener('inertia:navigate', (event: CustomEvent) => {
+      ;(window as any).navigateTypes.push(event.detail.type)
+    })
+  })
+
+  await page.goto('/events')
+  await expect.poll(navigateTypes).toEqual(['initial'])
+
+  await page.getByRole('link', { exact: true, name: 'Navigate Event' }).click()
+  await expect.poll(navigateTypes).toEqual(['initial', 'visit'])
+
+  await page.goBack()
+  await expect.poll(navigateTypes).toEqual(['initial', 'visit', 'history'])
+
+  await page.reload()
+  await expect.poll(navigateTypes).toEqual(['initial'])
+
+  await page.goto('/non-inertia')
+  await page.goBack()
+  await page.waitForURL('/events')
+  await expect.poll(navigateTypes).toEqual(['history'])
 })

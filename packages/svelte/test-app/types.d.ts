@@ -35,6 +35,8 @@ declare global {
       log(): string[]
       swap(): void
     }
+    releaseHeldResponse?: () => void
+    releaseHeldComponent?: () => void
   }
 
   interface ImportMeta {

@@ -215,6 +215,18 @@ test.describe('useHttp', () => {
       await expect(page.locator('#patch-result')).toContainText('Name: Patched Name')
       await expect(page.locator('#patch-result')).toContainText('Email: patched@example.com')
     })
+
+    test('it makes QUERY requests with the data in the body', async ({ page }) => {
+      await page.goto('/use-http/methods')
+
+      await page.fill('#query-name', 'John')
+      await page.click('#query-button')
+
+      await expect(page.locator('#query-result')).toBeVisible()
+      await expect(page.locator('#query-result')).toContainText('QUERY Success')
+      await expect(page.locator('#query-result')).toContainText('Name: John')
+      await expect(page.locator('#query-result')).toContainText('Query String: {}')
+    })
   })
 
   test.describe('Transform', () => {
@@ -424,6 +436,21 @@ test.describe('useHttp', () => {
       expect(mixedRequest?.headers()['content-type']).toContain('multipart/form-data')
     })
 
+    test('it uses indexed keys for arrays of objects in FormData', async ({ page }) => {
+      await page.goto('/use-http/mixed-content')
+
+      await page.fill('#mixed-tags', 'important, urgent')
+      await page.setInputFiles('#mixed-document', {
+        name: 'report.pdf',
+        mimeType: 'application/pdf',
+        buffer: Buffer.from('PDF content here'),
+      })
+      await page.click('#mixed-button')
+
+      await expect(page.locator('#mixed-result')).toContainText('"tags":["important","urgent"]')
+      await expect(page.locator('#mixed-result')).toContainText('"items":[{"product_id":"1034","quantity":"2"}]')
+    })
+
     test('it sends nested data without files as JSON', async ({ page }) => {
       await page.goto('/use-http/mixed-content')
 
@@ -598,5 +625,24 @@ test.describe('useHttp', () => {
 
     await expect(page.locator('#no-content-success')).toBeVisible()
     await expect(page.locator('#no-content-response')).toContainText('Response: null')
+  })
+
+  test('it cancels the newest request after an older one has finished', async ({ page }) => {
+    await page.goto('/use-http/overlapping-cancel')
+
+    await page.click('#short-then-long-button')
+    await expect(page.locator('#log')).toHaveText('a: done')
+
+    await page.click('#cancel-button')
+    await expect(page.locator('#log')).toHaveText('a: done, b: HttpCancelledError')
+  })
+
+  test('it cancels only its own request with a cancel token', async ({ page }) => {
+    await page.goto('/use-http/overlapping-cancel')
+
+    await page.click('#both-long-button')
+    await page.click('#cancel-a-button')
+
+    await expect(page.locator('#log')).toHaveText('a: HttpCancelledError, b: done')
   })
 })

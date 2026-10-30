@@ -19,10 +19,10 @@
     "laravel-echo": "^2.4.0",
     "laravel-vite-plugin": "^3.0.0",
     "pusher-js": "^8.6.0",
-    "svelte": "^5.56.4",
+    "svelte": "^5.57.3",
     "svelte-check": "^4.4.3",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
-    "vite": "^8.0.16"
+    "vite": "^8.3.5"
   }
 }

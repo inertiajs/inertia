@@ -5,9 +5,9 @@
     "serve:watch": "nodemon server.js"
   },
   "devDependencies": {
-    "body-parser": "^2.2.2",
+    "body-parser": "^2.4.0",
     "express": "^5.2.1",
-    "multer": "^2.3.0",
+    "multer": "^2.5.0",
     "nodemon": "^3.1.14"
   }
 }

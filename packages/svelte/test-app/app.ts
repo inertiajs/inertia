@@ -43,7 +43,12 @@ createInertiaApp({
   }),
   page: window.initialPage,
   resolve: async (name, page) => {
-    const pages = import.meta.glob<ResolvedComponent>('./Pages/**/*.svelte', { eager: true })
+    const pages = import.meta.glob<ResolvedComponent>(['./Pages/**/*.svelte', '!./Pages/SSR/Async.svelte'], {
+      eager: true,
+    })
+    // Lazy, since importing an async-compiled component enables Svelte's async mode for every page,
+    // and tests without SVELTE_ASYNC rely on sync rendering
+    const asyncPages = import.meta.glob<ResolvedComponent>('./Pages/SSR/Async.svelte')
 
     if (page) {
       window.resolverReceivedPage = page
@@ -55,7 +60,14 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
-    return pages[`./Pages/${name}.svelte`] as ResolvedComponent
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
+    }
+
+    const path = `./Pages/${name}.svelte`
+
+    return (pages[path] ?? (await asyncPages[path]?.())) as ResolvedComponent
   },
   setup({ el, App, props }) {
     const isServerRendered = el?.hasAttribute('data-server-rendered')

@@ -22,6 +22,10 @@
     form.delete('/dump/delete')
   }
 
+  const queryForm = () => {
+    form.query('/dump/query')
+  }
+
   const submitForm = () => {
     form.submit('post', '/dump/post')
   }
@@ -48,6 +52,7 @@
   <button onclick={putForm} class="put">PUT form</button>
   <button onclick={patchForm} class="patch">PATCH form</button>
   <button onclick={deleteForm} class="delete">DELETE form</button>
+  <button onclick={queryForm} class="query">QUERY form</button>
   <button onclick={submitForm} class="submit">SUBMIT form</button>
   <button onclick={submitFormObject} class="submit-object">SUBMIT OBJECT form</button>
 </div>

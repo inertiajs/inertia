@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream'
-import type { ResolvedConfig, ViteDevServer } from 'vite'
+import { normalizePath, type ResolvedConfig, type ViteDevServer } from 'vite'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
 
@@ -21,7 +21,7 @@ describe('SSR', () => {
 
   describe('entry detection', () => {
     it('uses explicit string entry when file exists', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('custom/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('custom/ssr.ts'))
 
       const plugin = inertia({ ssr: 'custom/ssr.ts' })
       const logger = createMockLogger()
@@ -32,7 +32,7 @@ describe('SSR', () => {
     })
 
     it('uses explicit object entry when file exists', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('custom/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('custom/ssr.ts'))
 
       const plugin = inertia({ ssr: { entry: 'custom/ssr.ts' } })
       const logger = createMockLogger()
@@ -58,7 +58,7 @@ describe('SSR', () => {
 
       for (const entry of entries) {
         vi.clearAllMocks()
-        mockExistsSync.mockImplementation((path: string) => path.endsWith(entry))
+        mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith(entry))
 
         const plugin = inertia()
         const logger = createMockLogger()
@@ -70,7 +70,7 @@ describe('SSR', () => {
     })
 
     it('auto-detects non-Laravel SSR entries', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('src/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('src/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -81,7 +81,7 @@ describe('SSR', () => {
     })
 
     it('auto-detects app.ts as fallback SSR entry', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/app.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/app.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -106,7 +106,7 @@ describe('SSR', () => {
 
   describe('dev server', () => {
     it('adds middleware when entry exists', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -120,7 +120,7 @@ describe('SSR', () => {
     })
 
     it('disables Nagle on accepted HTTP server sockets', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -158,7 +158,7 @@ describe('SSR', () => {
 
   describe('middleware', () => {
     it('ignores non-POST requests', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -176,7 +176,7 @@ describe('SSR', () => {
     })
 
     it('renders page and returns JSON response', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -205,8 +205,39 @@ describe('SSR', () => {
       )
     })
 
+    it('revives big integer markers when the page opted in', async () => {
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
+
+      const plugin = inertia()
+      const logger = createMockLogger()
+      const server = createMockServer(logger)
+      const render = vi.fn().mockResolvedValue({ head: [], body: '' })
+
+      server.ssrLoadModule.mockResolvedValue({ default: render })
+
+      plugin.configResolved!(createMockConfig(logger, false))
+      plugin.configureServer!(server)
+
+      const middleware = server.middlewares.use.mock.calls[0][1]
+      const page = { component: 'Test', props: { id: { $bigint: '900719925474099988' } } }
+
+      await middleware(
+        createMockRequest('POST', JSON.stringify({ ...page, preserveBigIntegers: true })),
+        createMockResponse(),
+        vi.fn(),
+      )
+
+      expect(render).toHaveBeenCalledWith(expect.objectContaining({ props: { id: 900719925474099988n } }))
+
+      await middleware(createMockRequest('POST', JSON.stringify(page)), createMockResponse(), vi.fn())
+
+      expect(render).toHaveBeenLastCalledWith(
+        expect.objectContaining({ props: { id: { $bigint: '900719925474099988' } } }),
+      )
+    })
+
     it('returns 500 when module does not export render function', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -228,7 +259,7 @@ describe('SSR', () => {
     })
 
     it('returns 500 when render returns invalid response', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -251,7 +282,7 @@ describe('SSR', () => {
     })
 
     it('applies source maps to errors', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -276,7 +307,7 @@ describe('SSR', () => {
     })
 
     it('returns structured error response with type and hint', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -307,7 +338,7 @@ describe('SSR', () => {
     })
 
     it('includes component name in error response', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -332,7 +363,7 @@ describe('SSR', () => {
     })
 
     it('logs error with hint to console', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -359,7 +390,7 @@ describe('SSR', () => {
     })
 
     it('includes stack trace when formatErrors is enabled', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia({ ssr: { formatErrors: true } })
       const logger = createMockLogger()
@@ -385,7 +416,7 @@ describe('SSR', () => {
     })
 
     it('throws raw error when formatErrors is disabled', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia({ ssr: { formatErrors: false } })
       const logger = createMockLogger()
@@ -408,7 +439,7 @@ describe('SSR', () => {
     })
 
     it('returns 500 with helpful message when request body is empty', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -430,7 +461,7 @@ describe('SSR', () => {
     })
 
     it('returns 500 with helpful message when request body is invalid JSON', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -452,7 +483,7 @@ describe('SSR', () => {
     })
 
     it('reassembles multi-byte UTF-8 characters split across chunk boundaries', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -485,7 +516,7 @@ describe('SSR', () => {
 
   describe('CSS collection', () => {
     it('prepends CSS link tags from module graph to head', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -508,7 +539,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -534,7 +565,7 @@ describe('SSR', () => {
     })
 
     it('traverses nested module imports to find CSS', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -557,7 +588,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -582,7 +613,7 @@ describe('SSR', () => {
     })
 
     it('detects preprocessor stylesheets like SCSS and Less', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -605,7 +636,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -631,7 +662,7 @@ describe('SSR', () => {
     })
 
     it('does not collect CSS sub-dependencies imported via @import', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -654,7 +685,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -679,7 +710,7 @@ describe('SSR', () => {
     })
 
     it('uses network URL when local resolvedUrls is empty', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -699,7 +730,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -724,7 +755,7 @@ describe('SSR', () => {
     })
 
     it('prefers server.origin over resolvedUrls', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -745,7 +776,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -770,7 +801,7 @@ describe('SSR', () => {
     })
 
     it('ignores the placeholder origin set by the Laravel Vite plugin', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -791,7 +822,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -816,7 +847,7 @@ describe('SSR', () => {
     })
 
     it('does not duplicate base path in CSS link URLs', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -834,7 +865,7 @@ describe('SSR', () => {
       }
 
       server.environments.ssr.moduleGraph.getModuleById.mockImplementation((id: string) =>
-        id === '/project/resources/js/ssr.ts' ? entryModule : undefined,
+        id.endsWith('/project/resources/js/ssr.ts') ? entryModule : undefined,
       )
       server.ssrLoadModule.mockResolvedValue({
         default: vi.fn().mockResolvedValue({
@@ -859,7 +890,7 @@ describe('SSR', () => {
     })
 
     it('returns no CSS links when entry module is not in graph', async () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia()
       const logger = createMockLogger()
@@ -900,14 +931,14 @@ describe('SSR', () => {
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/vue3/server'")
-      expect(result).toContain("import { renderToString } from 'vue/server-renderer'")
-      expect(result).toContain('const renderPromise = createInertiaApp')
-      expect(result).toContain('const render = await renderPromise')
-      expect(result).toContain('return render(page, renderToString)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/vue3/server'")
+      expect(result?.code).toContain("import { renderToString } from 'vue/server-renderer'")
+      expect(result?.code).toContain('const renderPromise = createInertiaApp')
+      expect(result?.code).toContain('const render = await renderPromise')
+      expect(result?.code).toContain('return render(page, renderToString)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
     })
 
     it('wraps createInertiaApp with server bootstrap for Svelte', () => {
@@ -922,13 +953,13 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({ resolve: (name) => name })`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain("import createServer from '@inertiajs/svelte/server'")
-      expect(result).toContain("import { render } from 'svelte/server'")
-      expect(result).toContain('const ssr = await ssrPromise')
-      expect(result).toContain('return ssr(page, render)')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
-      expect(result).toContain('export default renderPage')
+      expect(result?.code).toContain("import createServer from '@inertiajs/svelte/server'")
+      expect(result?.code).toContain("import { render } from 'svelte/server'")
+      expect(result?.code).toContain('const ssr = await ssrPromise')
+      expect(result?.code).toContain('return ssr(page, render)')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
     })
 
     it('generates SSR bootstrap without top-level await', () => {
@@ -948,7 +979,7 @@ createInertiaApp({ resolve: (name) => name })`
       frameworks.forEach(({ package: pkg, promise }) => {
         const code = `import { createInertiaApp } from '${pkg}'
 createInertiaApp({ resolve: (name) => name })`
-        const result = String(plugin.transform!(code, 'app.ts', { ssr: true }))
+        const result = plugin.transform!(code, 'app.ts', { ssr: true })?.code
 
         // Any `await` left at the start of a line would be a top-level await
         expect(result).not.toMatch(/^\S.*\bawait\b/m)
@@ -971,7 +1002,7 @@ createInertiaApp({ resolve: (name) => name })`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
+      expect(result?.code).toContain('createServer(renderPage, {"port":13715,"cluster":true})')
     })
 
     it('uses same transform for both dev and production', () => {
@@ -986,9 +1017,9 @@ createInertiaApp({})`
 createInertiaApp({})`
       const result = plugin.transform!(code, 'app.ts', { ssr: true })
 
-      expect(result).toContain('export default renderPage')
-      expect(result).toContain('if (import.meta.env.PROD)')
-      expect(result).toContain('createServer(renderPage)')
+      expect(result?.code).toContain('export default renderPage')
+      expect(result?.code).toContain('if (import.meta.env.PROD)')
+      expect(result?.code).toContain('createServer(renderPage)')
     })
 
     it('does not apply SSR transform to client builds', () => {
@@ -1023,7 +1054,7 @@ createInertiaApp({ resolve: (name) => name })`
 
   describe('ssr: false', () => {
     it('does not add middleware when ssr is disabled', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia({ ssr: false })
       const logger = createMockLogger()
@@ -1037,7 +1068,7 @@ createInertiaApp({ resolve: (name) => name })`
     })
 
     it('does not apply SSR transform when ssr is disabled', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia({ ssr: false })
       const logger = createMockLogger()
@@ -1052,7 +1083,7 @@ createInertiaApp({ resolve: (name) => name })`
     })
 
     it('does not configure SSR build options when ssr is disabled', () => {
-      mockExistsSync.mockImplementation((path: string) => path.endsWith('resources/js/ssr.ts'))
+      mockExistsSync.mockImplementation((path: string) => normalizePath(path).endsWith('resources/js/ssr.ts'))
 
       const plugin = inertia({ ssr: false })
       const logger = createMockLogger()

@@ -31,6 +31,11 @@ export default () => {
     router.delete('/dump/delete', { data: { baz: 'delete' } })
   }
 
+  const queryMethod = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.query('/dump/query', { foo: 'query' })
+  }
+
   const qsafDefault = (e: React.MouseEvent) => {
     e.preventDefault()
     router.visit('/dump/get', { data: { a: ['b', 'c'] } })
@@ -77,6 +82,9 @@ export default () => {
       </a>
       <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
+      </a>
+      <a href="#" onClick={queryMethod} className="query">
+        QUERY Link
       </a>
 
       <a href="#" onClick={qsafDefault} className="qsaf-default">

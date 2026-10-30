@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/react",
-  "version": "3.7.1",
+  "version": "3.9.1",
   "license": "MIT",
   "description": "The React adapter for Inertia.js",
   "contributors": [
@@ -61,7 +61,7 @@
     "@laravel/echo-react": "^2.4.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "axios": "^1.17.0",
+    "axios": "^1.20.0",
     "es-check": "^9.6.1",
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
@@ -71,18 +71,26 @@
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "@laravel/echo-react": "^2.0.0"
   },
-  "dependencies": {
-    "@inertiajs/core": "workspace:*",
-    "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.0.0"
-  },
   "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    },
+    "@types/react-dom": {
+      "optional": true
+    },
     "@laravel/echo-react": {
       "optional": true
     }
+  },
+  "dependencies": {
+    "@inertiajs/core": "workspace:*",
+    "es-toolkit": "^1.33.0",
+    "laravel-precognition": "^2.1.1"
   }
 }

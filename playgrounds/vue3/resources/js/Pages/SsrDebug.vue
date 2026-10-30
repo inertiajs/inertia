@@ -69,6 +69,5 @@ ReferenceError: window is not defined
 Hint: The global window object doesn't exist in Node.js.
 Wrap browser-specific code in a onMounted/useEffect/onMount
 lifecycle hook, or check "typeof window !== 'undefined'"
-before using it.</pre
-  >
+before using it.</pre>
 </template>

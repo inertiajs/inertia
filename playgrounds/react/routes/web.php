@@ -3,6 +3,7 @@
 use App\Events\ActivityLogged;
 use App\Events\OrderPushed;
 use App\Events\OrderUpdated;
+use App\Http\Requests\BigIntegerFormRequest;
 use App\Http\Requests\PrecognitionFormRequest;
 use App\Models\ChatMessage;
 use App\Models\Todo;
@@ -581,4 +582,47 @@ Route::post('/live/reset', function () {
     broadcast(new ActivityLogged);
 
     return ['triggeredAt' => now()->format('H:i:s')];
+});
+
+Route::get('/big-integers', function () {
+    return inertia('BigIntegers', [
+        'safe' => 42,
+        'big' => 900719925474099988,
+        'negative' => -900719925474099988,
+        'maximum' => PHP_INT_MAX,
+        'boundary' => 9007199254740991,
+        'order' => [
+            'id' => 1234567890123456789,
+            'lines' => [
+                ['sku' => 'A-1', 'reference' => 900719925474099988],
+                ['sku' => 'B-2', 'reference' => 900719925474099989],
+            ],
+        ],
+        'wrapped' => (object) ['id' => 900719925474099988],
+    ]);
+});
+
+$bigIntegerDebug = fn (mixed $value): array => [
+    'received' => $value,
+    'type' => get_debug_type($value),
+];
+
+Route::post('/big-integers/echo', function (Request $request) use ($bigIntegerDebug) {
+    return Inertia::flash($bigIntegerDebug($request->input('id')))->back();
+});
+
+Route::post('/big-integers/validate', function (BigIntegerFormRequest $request) use ($bigIntegerDebug) {
+    return Inertia::flash($bigIntegerDebug($request->input('account_id')))->back();
+})->middleware([HandlePrecognitiveRequests::class]);
+
+Route::post('/big-integers/upload', function (Request $request) use ($bigIntegerDebug) {
+    $request->validate([
+        'account_id' => ['required', 'integer', 'min:1'],
+        'avatar' => ['required', 'file'],
+    ]);
+
+    return Inertia::flash([
+        ...$bigIntegerDebug($request->input('account_id')),
+        'avatar' => $request->file('avatar')->getClientOriginalName(),
+    ])->back();
 });

@@ -9,6 +9,7 @@ import {
 import { http } from './http'
 import { HttpCancelledError, HttpResponseError } from './httpErrors'
 import { interceptors } from './interceptors'
+import { containsBigInt, stringifyJson } from './json'
 import { page as currentPage } from './page'
 import { trackPropRefresh, untrackPropRefresh } from './propRefreshes'
 import { RequestParams } from './requestParams'
@@ -92,6 +93,12 @@ export class Request {
         signal: this.cancelToken.signal,
         headers: this.getHeaders(),
         onUploadProgress: this.onProgress.bind(this),
+      }
+
+      // The HTTP clients would throw on a BigInt, so those bodies are encoded here
+      if (containsBigInt(config.data)) {
+        config.data = stringifyJson(config.data)
+        config.headers = { 'Content-Type': 'application/json', ...config.headers }
       }
 
       processedConfig = await interceptors.processRequest(this.requestParams.all(), config)
