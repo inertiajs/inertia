@@ -11,12 +11,19 @@ const { loading: userEmailLoading } = useProp<string>('user.email')
 
 const { value: orders, loading: ordersLoading, loaded: ordersLoaded } = useProp<string>('orders')
 
+const ordersLoadingOnMount = ordersLoading.value
+
 const reloadUsers = () => router.reload({ only: ['users'] })
 const reloadUserName = () => router.reload({ only: ['user.name'] })
 const reloadEverything = () => router.reload({ data: { delay: 500 } })
 const reloadExceptUsers = () => router.reload({ except: ['users'] })
 const resetUsers = () => router.reload({ reset: ['users'] })
 const cancelUsers = () => router.reload({ only: ['users'], onCancelToken: ({ cancel }) => cancel() })
+
+const visitWhilePrefetching = () => {
+  router.prefetch('/use-prop', { data: { delay: 800 } })
+  setTimeout(() => router.get('/use-prop', { delay: 800 }), 100)
+}
 
 function reloadUsersTwice() {
   router.reload({ only: ['users'], data: { delay: 300 } })
@@ -60,6 +67,11 @@ function reloadUsersTwice() {
         >, loaded:
         <span id="orders-loaded">{{ ordersLoaded }}</span>
       </dd>
+
+      <dt>orders on mount</dt>
+      <dd>
+        loading: <span id="orders-loading-on-mount">{{ ordersLoadingOnMount }}</span>
+      </dd>
     </dl>
 
     <button @click="reloadUsers">Reload Users</button>
@@ -69,5 +81,6 @@ function reloadUsersTwice() {
     <button @click="resetUsers">Reset Users</button>
     <button @click="reloadUsersTwice">Reload Users Twice</button>
     <button @click="cancelUsers">Cancel Users Immediately</button>
+    <button @click="visitWhilePrefetching">Visit While Prefetching</button>
   </div>
 </template>

@@ -4,6 +4,7 @@ import { eventHandler } from './eventHandler'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { prefetchedRequests } from './prefetched'
+import { trackPendingDeferredProps } from './propRefreshes'
 import { Scroll } from './scroll'
 import { Component, FlashData, Page, PageEvent, PageHandler, PageResolver, RouterInitParams, Visit } from './types'
 import { hrefToUrl, isSameUrlWithoutHash } from './url'
@@ -236,6 +237,7 @@ class CurrentPage {
   protected assignPage(page: Page): void {
     this.page = page
 
+    trackPendingDeferredProps(page)
     eventHandler.fireInternalEvent('pageUpdated', page)
   }
 

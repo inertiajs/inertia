@@ -194,6 +194,26 @@ test.describe('Live props', () => {
     await expect(page.locator('#throttled')).toHaveText(throttled!)
   })
 
+  test('it does not carry a throttle over to the next page', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+
+    const leading = page.waitForResponse('**/live')
+    await emit(page, 'throttled', THROTTLED_EVENT)
+    await leading
+
+    await page.getByRole('link', { name: 'Leave' }).click()
+    await expect(page.locator('h1')).toHaveText('Socket Id')
+
+    await page.goBack()
+    await expect(page.locator('h1')).toHaveText('Live Props')
+
+    // The server gives this prop a 5s throttle, which the previous visit used up
+    const response = page.waitForResponse('**/live', { timeout: 1500 })
+    await emit(page, 'throttled', THROTTLED_EVENT)
+    await response
+  })
+
   test('it honors the throttle set on the app, and lets a prop override it', async ({ page }) => {
     test.setTimeout(15_000)
 

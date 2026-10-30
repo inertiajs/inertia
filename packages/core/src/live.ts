@@ -223,9 +223,11 @@ class Live {
 
     // Values are collected for the page they arrived on. A page swap leaves
     // them meaningless, even where the new page happens to declare the same
-    // prop, so they go rather than land on data they never described.
+    // prop, so they go rather than land on data they never described. Throttle
+    // windows go with them, since the new page owes nothing for the old one.
     if (this.incomingPage !== pageKey(page)) {
       this.incoming.clear()
+      this.flushedAt.clear()
       this.incomingPage = pageKey(page)
     }
 

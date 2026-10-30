@@ -1,6 +1,9 @@
+import { get } from 'es-toolkit/compat'
 import { RefreshFilter, visitRefreshesProp } from './partialReload'
-import { ActiveVisit } from './types'
+import { InternalActiveVisit, Page } from './types'
 import { isSameUrlWithoutQueryOrHash } from './url'
+
+const PENDING_DEFERRED = 'pending-deferred'
 
 const activeVisits = new Map<string, RefreshFilter>()
 const listeners = new Set<VoidFunction>()
@@ -13,7 +16,7 @@ const notify = (): void => {
  * Prefetches and requests aimed at another page are ignored, since neither
  * refreshes the props you're looking at.
  */
-export const trackPropRefresh = (visit: ActiveVisit): void => {
+export const trackPropRefresh = (visit: InternalActiveVisit): void => {
   if (typeof window === 'undefined' || visit.prefetch) {
     return
   }
@@ -22,12 +25,38 @@ export const trackPropRefresh = (visit: ActiveVisit): void => {
     return
   }
 
+  // The request that loads the deferred props claims them from here on
+  if (visit.deferredProps) {
+    activeVisits.delete(PENDING_DEFERRED)
+  }
+
   activeVisits.set(visit.id, { only: visit.only, except: visit.except, reset: visit.reset })
 
   notify()
 }
 
-export const untrackPropRefresh = (visit: ActiveVisit): void => {
+/**
+ * A page's deferred props are only requested once it has rendered, so the ones
+ * still missing count as refreshing until that request takes over.
+ */
+export const trackPendingDeferredProps = (page: Page): void => {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const pending = Object.values(page.deferredProps ?? {})
+    .flat()
+    .filter((prop) => get(page.props, prop) === undefined)
+
+  if (pending.length > 0) {
+    activeVisits.set(PENDING_DEFERRED, { only: pending, except: [], reset: [] })
+    notify()
+  } else if (activeVisits.delete(PENDING_DEFERRED)) {
+    notify()
+  }
+}
+
+export const untrackPropRefresh = (visit: InternalActiveVisit): void => {
   if (activeVisits.delete(visit.id)) {
     notify()
   }

@@ -6,6 +6,7 @@ test.describe('useProp', () => {
     pageLoads.watch(page)
     await gotoPageAndWaitForContent(page, '/use-prop')
 
+    await expect(page.locator('#orders-loading-on-mount')).toHaveText('true')
     await expect(page.locator('#orders-value')).toHaveText('none')
     await expect(page.locator('#orders-loading')).toHaveText('true')
     await expect(page.locator('#orders-loaded')).toHaveText('false')
@@ -120,5 +121,30 @@ test.describe('useProp', () => {
 
     await slowResponse
     await expect(page.locator('#users-loading')).toHaveText('false')
+  })
+
+  test('it marks props as loading while a visit waits on an in-flight prefetch', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/use-prop')
+    await expect(page.locator('#orders-loaded')).toHaveText('true')
+
+    const visits: string[] = []
+
+    page.on('request', (request) => {
+      if (request.url().includes('delay=800') && !request.headers()['x-inertia-partial-data']) {
+        visits.push(request.url())
+      }
+    })
+
+    const response = page.waitForResponse((response) => response.url().includes('delay=800'))
+
+    await page.getByRole('button', { name: 'Visit While Prefetching' }).click()
+
+    await expect(page.locator('#stats-loading')).toHaveText('true')
+
+    await response
+    await expect(page.locator('#stats-loading')).toHaveText('false')
+
+    expect(visits).toHaveLength(1)
   })
 })

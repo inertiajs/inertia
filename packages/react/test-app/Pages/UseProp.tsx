@@ -1,4 +1,5 @@
 import { router, useProp } from '@inertiajs/react'
+import { useState } from 'react'
 
 export default () => {
   const users = useProp<string>('users')
@@ -6,6 +7,7 @@ export default () => {
   const userName = useProp<string>('user.name')
   const userEmail = useProp<string>('user.email')
   const orders = useProp<string>('orders')
+  const [ordersLoadingOnMount] = useState(orders.loading)
 
   const reloadUsers = () => router.reload({ only: ['users'] })
   const reloadUserName = () => router.reload({ only: ['user.name'] })
@@ -13,6 +15,11 @@ export default () => {
   const reloadExceptUsers = () => router.reload({ except: ['users'] })
   const resetUsers = () => router.reload({ reset: ['users'] })
   const cancelUsers = () => router.reload({ only: ['users'], onCancelToken: ({ cancel }) => cancel() })
+
+  const visitWhilePrefetching = () => {
+    router.prefetch('/use-prop', { data: { delay: 800 } })
+    setTimeout(() => router.get('/use-prop', { delay: 800 }), 100)
+  }
 
   const reloadUsersTwice = () => {
     router.reload({ only: ['users'], data: { delay: 300 } })
@@ -54,6 +61,11 @@ export default () => {
           <span id="orders-loading">{String(orders.loading)}</span>, loaded:{' '}
           <span id="orders-loaded">{String(orders.loaded)}</span>
         </dd>
+
+        <dt>orders on mount</dt>
+        <dd>
+          loading: <span id="orders-loading-on-mount">{String(ordersLoadingOnMount)}</span>
+        </dd>
       </dl>
 
       <button onClick={reloadUsers}>Reload Users</button>
@@ -63,6 +75,7 @@ export default () => {
       <button onClick={resetUsers}>Reset Users</button>
       <button onClick={reloadUsersTwice}>Reload Users Twice</button>
       <button onClick={cancelUsers}>Cancel Users Immediately</button>
+      <button onClick={visitWhilePrefetching}>Visit While Prefetching</button>
     </div>
   )
 }

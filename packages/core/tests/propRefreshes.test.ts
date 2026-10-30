@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { visitRefreshesProp } from '../src/partialReload'
-import { propRefreshes, trackPropRefresh, untrackPropRefresh } from '../src/propRefreshes'
-import type { ActiveVisit } from '../src/types'
+import { propRefreshes, trackPendingDeferredProps, trackPropRefresh, untrackPropRefresh } from '../src/propRefreshes'
+import type { ActiveVisit, InternalActiveVisit, Page } from '../src/types'
 
 const filter = (only: string[] = [], except: string[] = [], reset: string[] = []) => ({ only, except, reset })
 
@@ -57,6 +57,7 @@ describe('propRefreshes', () => {
   })
 
   afterEach(() => {
+    trackPendingDeferredProps({ props: {} } as Page)
     untrackPropRefresh(makeVisit({ id: 'visit-1' }))
     untrackPropRefresh(makeVisit({ id: 'visit-2' }))
     vi.unstubAllGlobals()
@@ -126,5 +127,32 @@ describe('propRefreshes', () => {
     trackPropRefresh(makeVisit())
 
     expect(listener).toHaveBeenCalledTimes(2)
+  })
+
+  it('counts deferred props still missing from the page as refreshing until their request starts', () => {
+    trackPendingDeferredProps({
+      props: { users: ['John'] },
+      deferredProps: { default: ['users', 'stats'], other: ['user.name'] },
+    } as unknown as Page)
+
+    expect(propRefreshes.isRefreshing('users')).toBe(false)
+    expect(propRefreshes.isRefreshing('stats')).toBe(true)
+    expect(propRefreshes.isRefreshing('user')).toBe(true)
+
+    trackPropRefresh({ ...makeVisit({ only: ['stats'] }), deferredProps: true } as InternalActiveVisit)
+
+    expect(propRefreshes.isRefreshing('stats')).toBe(true)
+    expect(propRefreshes.isRefreshing('user')).toBe(false)
+
+    untrackPropRefresh(makeVisit())
+
+    expect(propRefreshes.isRefreshing('stats')).toBe(false)
+  })
+
+  it('forgets pending deferred props once a page without them takes over', () => {
+    trackPendingDeferredProps({ props: {}, deferredProps: { default: ['stats'] } } as unknown as Page)
+    trackPendingDeferredProps({ props: {}, deferredProps: {} } as unknown as Page)
+
+    expect(propRefreshes.isRefreshing('stats')).toBe(false)
   })
 })
