@@ -5,7 +5,6 @@ import {
   HttpRequestHeaders,
   InternalActiveVisit,
   Page,
-  PendingVisit,
   PreserveStateOption,
   VisitCallbacks,
 } from './types'
@@ -18,12 +17,6 @@ export class RequestParams {
   }[] = []
 
   protected params: InternalActiveVisit
-
-  /**
-   * Set when a query-only client visit, like the URL updates of <InfiniteScroll>, changes the URL while this
-   * request is in flight. Its response then keeps that URL instead of putting the previous query string back.
-   */
-  protected shouldKeepCurrentUrl = false
 
   constructor(params: InternalActiveVisit) {
     if (!params.prefetch) {
@@ -68,7 +61,7 @@ export class RequestParams {
   }
 
   public isPartial() {
-    return RequestParams.isPartialVisit(this.params)
+    return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
   }
 
   public isPrefetch(): boolean {
@@ -105,14 +98,6 @@ export class RequestParams {
 
   public wasCancelledAtAll() {
     return this.params.cancelled || this.params.interrupted
-  }
-
-  public keepCurrentUrl() {
-    this.shouldKeepCurrentUrl = true
-  }
-
-  public keepsCurrentUrl() {
-    return this.shouldKeepCurrentUrl
   }
 
   public onFinish() {
@@ -221,17 +206,13 @@ export class RequestParams {
    * Async visits run in the background, so only a sync visit to another URL leaves the page.
    * Partial visits update the page they're on, so for those only another path counts.
    */
-  public static leavesPage(visit: PendingVisit, pageUrl: URL, destinationUrl: URL): boolean {
-    if (visit.async) {
+  public leavesPage(pageUrl: URL, destinationUrl: URL): boolean {
+    if (this.params.async) {
       return false
     }
 
-    return RequestParams.isPartialVisit(visit)
+    return this.isPartial()
       ? !isSameUrlWithoutQueryOrHash(destinationUrl, pageUrl)
       : !isSameUrlWithoutHash(destinationUrl, pageUrl)
-  }
-
-  protected static isPartialVisit(visit: PendingVisit): boolean {
-    return visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
   }
 }

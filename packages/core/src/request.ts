@@ -54,10 +54,6 @@ export class Request {
     return this.isOptimistic() && (!this.response || !this.response.isProcessed())
   }
 
-  public keepCurrentUrl(): void {
-    this.requestParams.keepCurrentUrl()
-  }
-
   public async send() {
     this.requestParams.onCancelToken(() => {
       // Once the response has arrived it's too late to cancel, the page is already being updated

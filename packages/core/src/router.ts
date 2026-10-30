@@ -43,13 +43,7 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import {
-  hrefToUrl,
-  isSameUrlWithoutHash,
-  isSameUrlWithoutQueryOrHash,
-  isUrlMethodPair,
-  transformUrlAndData,
-} from './url'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 const noop = () => {}
 
@@ -598,9 +592,6 @@ export class Router {
 
     if (!isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), currentPageUrl)) {
       this.cancelAsyncRequestsFor(currentPageUrl)
-    } else if (!isSameUrlWithoutHash(hrefToUrl(page.url), currentPageUrl)) {
-      // A query-only client visit keeps the page, so refreshes of it that are in flight keep its new URL
-      this.asyncRequestStream.keepCurrentUrlFor(currentPageUrl)
     }
 
     return currentPage

@@ -257,7 +257,7 @@ export class Response {
     const pageResponse = this.getPageResponse()
 
     if (!this.shouldSetPage(pageResponse)) {
-      return
+      return Promise.resolve()
     }
 
     this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
@@ -278,11 +278,9 @@ export class Response {
     // A redirect decides where the visit lands, so we compare against the page the server returned
     const currentPageUrl = hrefToUrl(currentPage.get().url)
     const responseUrl = hrefToUrl(pageResponse.url)
-    const leavesPage = RequestParams.leavesPage(this.requestParams.all(), currentPageUrl, responseUrl)
+    const leavesPage = this.requestParams.leavesPage(currentPageUrl, responseUrl)
 
-    // A client visit may have changed the query string while this request was in flight
-    const keepsCurrentUrl =
-      this.requestParams.keepsCurrentUrl() && isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
+    const keepsCurrentUrl = this.keepsCurrentUrl(currentPageUrl, responseUrl)
 
     this.requestParams.setPreserveOptions(pageResponse)
 
@@ -346,6 +344,26 @@ export class Response {
     // We have the same component, let's double-check the URL
     // If we're no longer on the same path name (e.g. /users/1 -> /users/2), we should not set the page
     return originatingUrl.origin === currentPageUrl.origin && originatingUrl.pathname === currentPageUrl.pathname
+  }
+
+  /**
+   * A client visit, like the URL updates of <InfiniteScroll>, may change the query string while a reload of the
+   * page is in flight. The reload then keeps that URL instead of putting the previous query string back.
+   */
+  protected keepsCurrentUrl(currentPageUrl: URL, responseUrl: URL): boolean {
+    const visit = this.requestParams.all()
+
+    if (!visit.async) {
+      return false
+    }
+
+    const originatingUrl = hrefToUrl(this.originatingPage.url)
+
+    const reloadsOriginatingPage = isSameUrlWithoutHash(visit.url, originatingUrl)
+    const urlChangedSince = !isSameUrlWithoutHash(currentPageUrl, originatingUrl)
+    const landsOnCurrentPath = isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
+
+    return reloadsOriginatingPage && urlChangedSince && landsOnCurrentPath
   }
 
   protected pageUrl(pageResponse: Page) {
