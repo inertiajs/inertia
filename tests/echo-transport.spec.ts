@@ -1,5 +1,5 @@
 import { expect, Page, test } from '@playwright/test'
-import { pageLoads } from './support'
+import { consoleMessages, pageLoads } from './support'
 
 const ORDER_EVENT = 'App\\Events\\OrderUpdated'
 const STATS_EVENT = 'App\\Events\\StatsUpdated'
@@ -115,6 +115,20 @@ test.describe('Echo transport', () => {
     await response
 
     await expect(page.locator('#order')).not.toHaveText(order!)
+  })
+
+  test('it warns once when the broadcaster rejects a channel', async ({ page }) => {
+    consoleMessages.listen(page)
+    pageLoads.watch(page)
+    await page.goto('/echo-transport')
+
+    await page.evaluate(() => window.__inertiaEcho.reject('private-orders.1', { status: 403 }))
+
+    // Two props share the channel, so a warning per listener would show up twice
+    const warnings = consoleMessages.messages.filter((message) => message.includes('live channel'))
+
+    expect(warnings).toHaveLength(1)
+    expect(warnings[0]).toContain('Inertia could not subscribe to the live channel "private-orders.1".')
   })
 
   test('it watches the connection of the Echo instance configureEcho handed out last', async ({ page }) => {

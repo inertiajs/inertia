@@ -31,6 +31,7 @@ declare global {
     __inertiaLive: FakeLiveTransportControls
     __inertiaEcho: {
       emit(channel: string, event: string, payload?: unknown): void
+      reject(channel: string, status?: unknown): void
       status(status: string): void
       log(): string[]
       swap(): void

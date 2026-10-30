@@ -1,4 +1,4 @@
-import { createLiveChannelTracker, liveChannelName } from './liveChannel'
+import { createLiveChannelTracker, liveChannelName, warnRejectedLiveChannel } from './liveChannel'
 import { LiveChannel, LiveChannelType, LiveOptions, LiveTransport } from './types'
 
 /**
@@ -26,6 +26,7 @@ export interface EchoInstance {
 export interface EchoChannel {
   listen(event: string, callback: (payload: unknown) => void): unknown
   stopListening(event: string, callback: (payload: unknown) => void): unknown
+  error(callback: (status: unknown) => void): unknown
 }
 
 export type EchoTransportConfig = {
@@ -96,9 +97,17 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
       // Echo joins on demand, so there is nothing to do when this is the first
       // listener. Leaving is another matter.
-      subscriberFor(channel)(instance, channel.name).listen(name, handler)
+      const echoChannel = subscriberFor(channel)(instance, channel.name)
+
+      echoChannel.listen(name, handler)
+
       watchConnection(instance)
-      channels.acquire(channel)
+
+      // Echo offers no way to unbind this, but leaving the channel discards the
+      // channel object along with it, so binding once per join is enough
+      if (channels.acquire(channel)) {
+        echoChannel.error((status: unknown) => warnRejectedLiveChannel(liveChannelName(channel), status))
+      }
 
       return () => {
         const current = resolve()

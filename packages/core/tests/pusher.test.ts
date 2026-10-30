@@ -87,6 +87,34 @@ describe('pusher', () => {
     expect(fake.log).toContain('unsubscribe private-orders.1')
   })
 
+  it('warns once per channel when the subscription is rejected, and stops watching once it leaves', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { transport } = pusher({ client: fake.client })
+
+    const stopOrder = transport.subscribe(orders, 'OrderUpdated', () => {})
+    const stopNotes = transport.subscribe(orders, 'NotesUpdated', () => {})
+
+    const channel = fake.channel('private-orders.1')!
+    const errorBindings = channel.bind.mock.calls.filter(([event]) => event === 'pusher:subscription_error')
+
+    expect(errorBindings).toHaveLength(1)
+
+    const onRejected = errorBindings[0][1]
+    onRejected({ status: 403 })
+
+    expect(warn).toHaveBeenCalledWith('Inertia could not subscribe to the live channel "private-orders.1".', {
+      status: 403,
+    })
+
+    stopOrder()
+    expect(channel.unbind).not.toHaveBeenCalledWith('pusher:subscription_error', onRejected)
+
+    stopNotes()
+    expect(channel.unbind).toHaveBeenCalledWith('pusher:subscription_error', onRejected)
+
+    warn.mockRestore()
+  })
+
   it('counts channels separately, so leaving one leaves the others alone', () => {
     const { transport } = pusher({ client: fake.client })
 

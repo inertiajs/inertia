@@ -17,6 +17,14 @@ export const liveChannelName = (channel: LiveChannel): string => {
 export const liveChannelKey = (channel: LiveChannel): string => `${channel.type}:${channel.name}`
 
 /**
+ * A rejected subscription leaves its props quietly stale, so it is worth a
+ * warning even though there is nothing to recover.
+ */
+export const warnRejectedLiveChannel = (name: string, reason?: unknown): void => {
+  console.warn(`Inertia could not subscribe to the live channel "${name}".`, ...(reason === undefined ? [] : [reason]))
+}
+
+/**
  * Counted by type and name, so a public channel called `private-orders.1` stays
  * distinct from a private `orders.1`.
  */
@@ -24,8 +32,15 @@ export const createLiveChannelTracker = () => {
   const counts = new Map<string, number>()
 
   return {
-    acquire(channel: LiveChannel): void {
-      counts.set(liveChannelKey(channel), (counts.get(liveChannelKey(channel)) ?? 0) + 1)
+    /**
+     * Add a listener. Returns true when it is the first on the channel.
+     */
+    acquire(channel: LiveChannel): boolean {
+      const count = (counts.get(liveChannelKey(channel)) ?? 0) + 1
+
+      counts.set(liveChannelKey(channel), count)
+
+      return count === 1
     },
 
     /**

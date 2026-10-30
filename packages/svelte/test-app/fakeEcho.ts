@@ -15,6 +15,7 @@ type Listener = {
 class FakeChannel {
   protected formatter = new EventFormatter(NAMESPACE)
   protected listeners: Listener[] = []
+  protected errorCallbacks: CallableFunction[] = []
 
   constructor(
     public name: string,
@@ -42,8 +43,18 @@ class FakeChannel {
     return this
   }
 
+  public error(callback: CallableFunction): this {
+    this.errorCallbacks.push(callback)
+
+    return this
+  }
+
   public emit(event: string, payload: unknown): void {
     this.listeners.filter((listener) => listener.event === event).forEach((listener) => listener.callback(payload))
+  }
+
+  public reject(status: unknown): void {
+    this.errorCallbacks.forEach((callback) => callback(status))
   }
 }
 
@@ -92,6 +103,10 @@ class FakeEcho {
     this.channels.get(channel)?.emit(event, payload)
   }
 
+  public reject(channel: string, status: unknown): void {
+    this.channels.get(channel)?.reject(status)
+  }
+
   public status(status: string): void {
     this.statusCallbacks.forEach((callback) => callback(status))
   }
@@ -111,6 +126,7 @@ let instance = new FakeEcho()
 if (typeof window !== 'undefined') {
   window.__inertiaEcho = {
     emit: (channel, event, payload = null) => instance.emit(channel, event, payload),
+    reject: (channel, status = null) => instance.reject(channel, status),
     status: (status) => instance.status(status),
     log: () => [...instance.log],
 

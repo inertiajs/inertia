@@ -1,4 +1,4 @@
-import { createLiveChannelTracker, liveChannelName } from './liveChannel'
+import { createLiveChannelTracker, liveChannelName, warnRejectedLiveChannel } from './liveChannel'
 import { LiveOptions, LiveTransport } from './types'
 
 export interface PusherChannel {
@@ -33,6 +33,7 @@ export type PusherOptions = {
  */
 export const pusher = ({ client, ...options }: PusherOptions): LiveOptions => {
   const channels = createLiveChannelTracker()
+  const rejectionHandlers = new Map<string, (status: unknown) => void>()
 
   const transport: LiveTransport = {
     subscribe(channel, event, handler) {
@@ -40,8 +41,16 @@ export const pusher = ({ client, ...options }: PusherOptions): LiveOptions => {
 
       // Pusher hands back the channel it already holds, so subscribing per
       // listener is safe and leaves nothing to undo if this throws
-      client.subscribe(name).bind(event, handler)
-      channels.acquire(channel)
+      const pusherChannel = client.subscribe(name)
+
+      pusherChannel.bind(event, handler)
+
+      if (channels.acquire(channel)) {
+        const onRejected = (status: unknown) => warnRejectedLiveChannel(name, status)
+
+        pusherChannel.bind('pusher:subscription_error', onRejected)
+        rejectionHandlers.set(name, onRejected)
+      }
 
       return () => {
         client.channel(name)?.unbind(event, handler)
@@ -49,6 +58,13 @@ export const pusher = ({ client, ...options }: PusherOptions): LiveOptions => {
         // Unbinding the handler leaves the channel itself subscribed, so the
         // last listener has to leave it as well
         if (channels.release(channel)) {
+          const onRejected = rejectionHandlers.get(name)
+
+          if (onRejected) {
+            client.channel(name)?.unbind('pusher:subscription_error', onRejected)
+            rejectionHandlers.delete(name)
+          }
+
           client.unsubscribe(name)
         }
       }

@@ -124,7 +124,7 @@ describe('actionCable', () => {
     expect(fake.log.filter((entry) => entry.includes('"stream":"stats"'))).toHaveLength(3)
   })
 
-  it('resolves a consumer given as a function on every subscribe', () => {
+  it('resolves a consumer given as a function once, on the first subscribe', () => {
     const resolve = vi.fn(() => fake.consumer)
     const { transport } = actionCable({ consumer: resolve })
 
@@ -133,7 +133,18 @@ describe('actionCable', () => {
     transport.subscribeToChannel(orders, () => {})
     transport.subscribeToChannel(stats, () => {})
 
-    expect(resolve).toHaveBeenCalledTimes(2)
+    expect(resolve).toHaveBeenCalledTimes(1)
+  })
+
+  it('warns when the server rejects the subscription', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    actionCable({ consumer: fake.consumer }).transport.subscribeToChannel(orders, () => {})
+    fake.at(fake.keyFor(orders))!.rejected?.()
+
+    expect(warn).toHaveBeenCalledWith('Inertia could not subscribe to the live channel "orders.1".')
+
+    warn.mockRestore()
   })
 
   it('hands its event name resolver to core rather than reading events itself', () => {
@@ -165,5 +176,26 @@ describe('actionCable', () => {
     fake.disconnect(orders)
 
     expect(statuses).toEqual([false, true])
+  })
+
+  it('ignores a disconnect from a subscription it closed itself', () => {
+    const statuses: boolean[] = []
+    const { transport } = actionCable({ consumer: fake.consumer })
+
+    transport.onStatusChange!((connected) => statuses.push(connected))
+
+    const stopOrders = transport.subscribeToChannel(orders, () => {})
+    const ordersMixin = fake.at(fake.keyFor(orders))!
+
+    fake.connect(orders)
+
+    // AnyCable calls `disconnected` on an unsubscribed channel while the socket stays open
+    stopOrders()
+    ordersMixin.disconnected?.()
+
+    transport.subscribeToChannel(stats, () => {})
+    fake.connect(stats)
+
+    expect(statuses).toEqual([true, true])
   })
 })

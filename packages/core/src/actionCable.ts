@@ -1,3 +1,4 @@
+import { warnRejectedLiveChannel } from './liveChannel'
 import { LiveChannel, LiveChannelTransport, LiveOptions, SocketIdResolver } from './types'
 
 export type ActionCableIdentifier = { channel: string } & Record<string, unknown>
@@ -6,6 +7,7 @@ export interface ActionCableSubscriptionMixin {
   connected?(): void
   disconnected?(): void
   received?(payload: unknown): void
+  rejected?(): void
 }
 
 export interface ActionCableSubscription {
@@ -55,13 +57,20 @@ export const actionCable = ({
   ...options
 }: ActionCableOptions): LiveOptions => {
   let statusCallback: ((connected: boolean) => void) | null = null
+  let resolvedConsumer: ActionCableConsumer | null = null
 
+  /**
+   * Resolved once, since every `createConsumer()` opens a socket of its own,
+   * and lazily, since it reads the document and so cannot run during SSR.
+   */
   const resolveConsumer = (): ActionCableConsumer => {
-    return typeof consumer === 'function' ? consumer() : consumer
+    return (resolvedConsumer ??= typeof consumer === 'function' ? consumer() : consumer)
   }
 
   const transport: LiveChannelTransport = {
     subscribeToChannel(liveChannel, handler) {
+      let closed = false
+
       const subscription = resolveConsumer().subscriptions.create(identifier(liveChannel), {
         received: handler,
 
@@ -69,12 +78,23 @@ export const actionCable = ({
           statusCallback?.(true)
         },
 
+        // AnyCable reports a subscription we closed ourselves as disconnected
+        // while the socket stays open, which would read as a reconnect later
         disconnected() {
-          statusCallback?.(false)
+          if (!closed) {
+            statusCallback?.(false)
+          }
+        },
+
+        rejected() {
+          warnRejectedLiveChannel(liveChannel.name)
         },
       })
 
-      return () => subscription.unsubscribe()
+      return () => {
+        closed = true
+        subscription.unsubscribe()
+      }
     },
 
     eventName,
