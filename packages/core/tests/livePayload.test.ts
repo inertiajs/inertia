@@ -60,7 +60,7 @@ const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = 
   await settle()
 
   swaps = 0
-  requests.length = 0
+  const initialRequests = requests.splice(0)
 
   return {
     emit: (channel: LiveChannel, event: string, payload: unknown) =>
@@ -73,6 +73,7 @@ const setup = async (liveProps: Record<string, LiveProp>, page: Partial<Page> = 
     writes: () => swaps,
     requests: () => requests,
     reloaded: () => requests.map((request) => request.headers['X-Inertia-Partial-Data']),
+    initiallyReloaded: () => initialRequests.map((request) => request.headers['X-Inertia-Partial-Data']),
     startRefreshing: (only: string[]) => trackPropRefresh(visit(only)),
     stopRefreshing: (only: string[]) => untrackPropRefresh(visit(only)),
     navigateTo: (component: string, url: string) => router.push({ component, url, props: { order: 'other page' } }),
@@ -171,6 +172,20 @@ describe('live prop payloads', () => {
     await live.settle()
 
     expect(live.reloaded()).toEqual(['order'])
+  })
+
+  it('does not load deferred props again when a value lands before they arrive', async () => {
+    const live = await setup({ order: listeners(orders, 'OrderUpdated') }, { deferredProps: { default: ['report'] } })
+
+    // The stubbed request never answers, so the deferred props are still on their way
+    expect(live.initiallyReloaded()).toEqual(['report'])
+
+    live.emit(orders, 'OrderUpdated', { __inertia: { props: { order: { id: 1, total: '99.00' } } } })
+
+    await live.settle()
+
+    expect(live.props().order).toEqual({ id: 1, total: '99.00' })
+    expect(live.reloaded()).toEqual([])
   })
 
   it('reloads the props of the subscription the payload left out', async () => {

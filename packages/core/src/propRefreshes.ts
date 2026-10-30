@@ -36,15 +36,15 @@ export const trackPropRefresh = (visit: InternalActiveVisit): void => {
 }
 
 /**
- * A page's deferred props are only requested once it has rendered, so the ones
- * still missing count as refreshing until that request takes over.
+ * Deferred props are only requested once their page has rendered, so the ones
+ * a page is about to load count as refreshing until that request takes over.
  */
-export const trackPendingDeferredProps = (page: Page): void => {
+export const trackPendingDeferredProps = (page: Page, deferredProps: Page['deferredProps']): void => {
   if (typeof window === 'undefined') {
     return
   }
 
-  const pending = Object.values(page.deferredProps ?? {})
+  const pending = Object.values(deferredProps ?? {})
     .flat()
     .filter((prop) => get(page.props, prop) === undefined)
 

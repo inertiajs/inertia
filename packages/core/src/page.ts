@@ -34,7 +34,11 @@ class CurrentPage {
     resolveComponent,
     onFlash,
   }: RouterInitParams<ComponentType>) {
-    this.assignPage({ ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] })
+    // The initial visit loads the first page's deferred props once it renders
+    this.assignPage(
+      { ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] },
+      initialPage.deferredProps,
+    )
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.onFlashCallback = onFlash
@@ -55,6 +59,7 @@ class CurrentPage {
       viewTransition = false,
       cached = false,
       initialRender = false,
+      clientSide = false,
       visitId,
       isCancelled = () => false,
       onCommit = () => {},
@@ -65,6 +70,7 @@ class CurrentPage {
       viewTransition?: Visit['viewTransition']
       cached?: boolean
       initialRender?: boolean
+      clientSide?: boolean
       visitId?: string
       isCancelled?: () => boolean
       onCommit?: () => void
@@ -72,7 +78,11 @@ class CurrentPage {
   ): Promise<void> {
     const previousPendingDeferredProps = this.pendingDeferredProps
 
-    if (Object.keys(page.deferredProps || {}).length) {
+    // A client-side visit to the same page carries its deferred props along.
+    // Those are already loading, so only the page that brought them loads them.
+    const carriesDeferredProps = clientSide && page.component === this.page.component && page.url === this.page.url
+
+    if (!carriesDeferredProps && Object.keys(page.deferredProps || {}).length) {
       this.pendingDeferredProps = {
         deferredProps: page.deferredProps,
         component: page.component,
@@ -133,7 +143,7 @@ class CurrentPage {
         }
 
         this.cleared = false
-        this.assignPage(page)
+        this.assignPage(page, this.deferredPropsToLoadFor(page))
 
         if (this.hasOnceProps()) {
           prefetchedRequests.updateCachedOncePropsFromCurrentPage()
@@ -172,12 +182,10 @@ class CurrentPage {
             Scroll.reset()
           }
 
-          if (
-            this.pendingDeferredProps &&
-            this.pendingDeferredProps.component === page.component &&
-            this.pendingDeferredProps.url === page.url
-          ) {
-            eventHandler.fireInternalEvent('loadDeferredProps', this.pendingDeferredProps.deferredProps)
+          const deferredProps = this.deferredPropsToLoadFor(page)
+
+          if (deferredProps) {
+            eventHandler.fireInternalEvent('loadDeferredProps', deferredProps)
           }
 
           this.pendingDeferredProps = null
@@ -234,11 +242,19 @@ class CurrentPage {
    * deliberately do not, except `merge()`, which takes a `Partial<Page>` and is
    * handed a whole page by `history.replaceState`.
    */
-  protected assignPage(page: Page): void {
+  protected assignPage(page: Page, deferredProps?: Page['deferredProps']): void {
     this.page = page
 
-    trackPendingDeferredProps(page)
+    trackPendingDeferredProps(page, deferredProps)
     eventHandler.fireInternalEvent('pageUpdated', page)
+  }
+
+  protected deferredPropsToLoadFor(page: Page): Page['deferredProps'] {
+    const pending = this.pendingDeferredProps
+
+    return pending && pending.component === page.component && pending.url === page.url
+      ? pending.deferredProps
+      : undefined
   }
 
   public merge(data: Partial<Page>): void {

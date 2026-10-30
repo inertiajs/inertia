@@ -625,6 +625,7 @@ export class Router {
         preserveScroll,
         preserveState,
         viewTransition,
+        clientSide: true,
         visitId,
       })
       .then(() => {
