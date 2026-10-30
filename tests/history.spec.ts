@@ -170,6 +170,28 @@ test('it does not cache prefetches that are still in flight when history is clea
   await expect(requests.requests).toHaveLength(1)
 })
 
+test('it does not clear history again on a client-side visit from a page that cleared it', async ({ page }) => {
+  await page.goto('/history/prefetch/home')
+
+  await clickAndWaitForResponse(page, 'Sign out', '/history/prefetch/signed-out')
+  await expect(page.getByText('This is the signed-out page.')).toBeVisible()
+
+  await page.evaluate(() =>
+    window.testing.Inertia.push({
+      url: '/history/prefetch/signed-out?step=2',
+      props: (props) => ({ ...props, page: 'next step' }),
+    }),
+  )
+  await expect(page.getByText('This is the next step page.')).toBeVisible()
+
+  requests.listen(page)
+
+  await page.goBack()
+  await page.waitForURL('/history/prefetch/signed-out')
+  await expect(page.getByText('This is the signed-out page.')).toBeVisible()
+  await expect(requests.requests).toHaveLength(0)
+})
+
 test('multi byte strings can be encrypted', async ({ page }) => {
   await clickAndWaitForResponse(page, 'Page 5', '/history/5')
 
