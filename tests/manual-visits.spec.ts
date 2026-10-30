@@ -171,6 +171,70 @@ test.describe('Auto-cancellation', () => {
     await expect(page.getByText('Status: Opened the slow page')).not.toBeVisible()
   })
 
+  test('it finishes a visit that was waiting for its prefetch when a newer visit interrupts it', async ({ page }) => {
+    let releasePrefetch!: () => void
+    const prefetchHeld = new Promise<void>((resolve) => (releasePrefetch = resolve))
+
+    await page.route('**/visits/interrupted-visit/slow', async (route) => {
+      await prefetchHeld
+      await route.continue()
+    })
+
+    await page.goto('/visits/interrupted-visit')
+
+    consoleMessages.listen(page)
+
+    await page.evaluate(() => window.testing.Inertia.prefetch('/visits/interrupted-visit/slow'))
+    await page.waitForFunction(() => window.testing.Inertia.getPrefetching('/visits/interrupted-visit/slow') !== null)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/visits/interrupted-visit/slow', {
+        onCancel: () => console.log('cancel'),
+        onFinish: () => console.log('finish'),
+      })
+      window.testing.Inertia.visit('/visits/interrupted-visit')
+    })
+
+    await expect.poll(() => consoleMessages.messages).toEqual(['cancel', 'finish'])
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+
+    releasePrefetch()
+  })
+
+  test('it does not report success for a second visit from the prefetch cache that was dropped', async ({ page }) => {
+    await page.goto('/visits/interrupted-visit')
+    await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/prefetched') !== null)
+
+    await page.getByRole('link', { name: 'Open the prefetched held page' }).click()
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+    await page.evaluate(() => window.releaseHeldComponent!())
+    await expect(page.getByText('This is the held page.')).toBeVisible()
+
+    await page.goBack()
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+
+    consoleMessages.listen(page)
+
+    await page.evaluate(() => {
+      window.releaseHeldComponent = undefined
+      window.testing.Inertia.visit('/visits/interrupted-visit/prefetched', { onSuccess: () => console.log('success') })
+    })
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/visits/interrupted-visit')
+      window.releaseHeldComponent!()
+    })
+
+    await expect(page.getByText('Status: No comments yet')).toBeVisible()
+
+    // Responses are applied one at a time, so this reload only finishes after the dropped visit was handled
+    await page.evaluate(() => new Promise((resolve) => window.testing.Inertia.reload({ onFinish: resolve })))
+
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
+    expect(consoleMessages.messages).not.toContain('success')
+  })
+
   test('it only cancels a prefetched async visit when async requests are cancelled', async ({ page }) => {
     await page.goto('/visits/interrupted-visit')
     await page.waitForFunction(() => window.testing.Inertia.getCached('/visits/interrupted-visit/prefetched') !== null)

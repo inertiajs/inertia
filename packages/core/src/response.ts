@@ -61,6 +61,9 @@ export class Response {
   }
 
   public async process() {
+    // A cached response is processed again for every visit that uses it
+    this.pageApplied = false
+
     if (this.requestParams.all().prefetch) {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
