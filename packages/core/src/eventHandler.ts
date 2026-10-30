@@ -14,15 +14,18 @@ class EventHandler {
     listener: (...args: any[]) => void
   }[] = []
 
+  protected onWindowScroll = debounce(() => Scroll.onWindowScroll(), 100)
+  protected onScroll = debounce((event: Event) => Scroll.onScroll(event), 100)
+
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
       window.addEventListener('pageshow', this.handlePageshowEvent.bind(this))
-      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
+      window.addEventListener('scroll', this.onWindowScroll, true)
     }
 
     if (typeof document !== 'undefined') {
-      document.addEventListener('scroll', debounce(Scroll.onScroll.bind(Scroll), 100), true)
+      document.addEventListener('scroll', this.onScroll, true)
     }
   }
 
@@ -79,6 +82,9 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
+    this.onWindowScroll.cancel()
+    this.onScroll.cancel()
+
     const state = event.state || null
 
     if (state === null) {
