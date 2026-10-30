@@ -1,4 +1,4 @@
-import { CancelToken } from '@inertiajs/core'
+import type { CancelToken } from '@inertiajs/core'
 import { useHttp } from '@inertiajs/react'
 import { useRef, useState } from 'react'
 

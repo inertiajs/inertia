@@ -174,8 +174,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
         resetBeforeSubmit()
       }
 
-      // Each request keeps its own controller, so its token and its signal stay
-      // tied to it after a newer request takes the shared ref.
       const controller = new AbortController()
       abortController.current = controller
 
@@ -313,7 +311,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           finishProcessing()
         }
 
-        // A newer request may own the ref by now, so clear it only if it is still ours.
         if (abortController.current === controller) {
           abortController.current = null
         }

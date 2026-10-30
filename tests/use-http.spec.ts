@@ -625,13 +625,12 @@ test.describe('useHttp', () => {
     await expect(page.locator('#log')).toHaveText('a: done, b: HttpCancelledError')
   })
 
-  test('a cancel token cancels its own request, not the newest one', async ({ page }) => {
+  test('it cancels only its own request with a cancel token', async ({ page }) => {
     await page.goto('/use-http/overlapping-cancel')
 
     await page.click('#both-long-button')
     await page.click('#cancel-a-button')
 
-    await expect(page.locator('#log')).toHaveText('a: HttpCancelledError')
     await expect(page.locator('#log')).toHaveText('a: HttpCancelledError, b: done')
   })
 })

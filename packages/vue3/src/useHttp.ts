@@ -157,8 +157,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     resetDefaultsCalledInOnSuccess()
     resetBeforeSubmit()
 
-    // Each request keeps its own controller, so its token and its signal stay
-    // tied to it after a newer request takes the shared variable.
     const controller = new AbortController()
     abortController = controller
 
@@ -287,7 +285,6 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       throw error
     } finally {
       finishProcessing()
-      // A newer request may own the variable by now, so clear it only if it is still ours.
       if (abortController === controller) {
         abortController = null
       }
