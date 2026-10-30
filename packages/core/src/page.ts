@@ -90,9 +90,8 @@ class CurrentPage {
 
     const componentId = this.componentId
 
-    // Cached responses may hold data from before the history was cleared, so they're dropped right away,
-    // even if this page is cancelled while resolving. The encryption keys are only cleared once it's applied.
     if (page.clearHistory) {
+      history.clear()
       prefetchedRequests.removeAll()
     }
 
@@ -108,10 +107,6 @@ class CurrentPage {
       }
 
       onCommit()
-
-      if (page.clearHistory) {
-        history.clear()
-      }
 
       page.rememberedState ??= {}
 

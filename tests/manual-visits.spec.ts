@@ -101,7 +101,7 @@ test.describe('Auto-cancellation', () => {
     await expect(page).toHaveURL('/visits/interrupted-visit')
   })
 
-  test('it keeps the encrypted history when an interrupted visit would have cleared it', async ({ page }) => {
+  test('it clears the history even when the visit that asked for it is interrupted', async ({ page }) => {
     await page.goto('/visits/interrupted-visit/encrypted')
     await expect(page.getByText('Status: Encrypted page')).toBeVisible()
 
@@ -120,7 +120,7 @@ test.describe('Auto-cancellation', () => {
 
     expect(
       requests.requests.filter((request) => request.url().includes('/visits/interrupted-visit/encrypted')),
-    ).toHaveLength(0)
+    ).toHaveLength(1)
   })
 
   test('it does not use a prefetched page once a page that clears the history has arrived', async ({ page }) => {
