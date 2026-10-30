@@ -1335,6 +1335,13 @@ test.describe('path traversal', () => {
     await page.getByRole('link', { name: 'Up three levels' }).click()
     await expect(page).toHaveURL('/')
   })
+
+  test('it goes one level down with a relative path', async ({ page }) => {
+    await page.goto('/links/sub/')
+
+    await page.getByRole('link', { name: 'Down one level' }).click()
+    await expect(page).toHaveURL('/links/sub/sub')
+  })
 })
 
 test.describe('link targets', () => {
