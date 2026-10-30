@@ -44,6 +44,11 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
+    }
+
     const path = `./Pages/${name}.svelte`
 
     return (pages[path] ?? (await asyncPages[path]?.())) as ResolvedComponent

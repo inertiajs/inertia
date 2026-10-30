@@ -1,5 +1,6 @@
 import {
   CancelToken,
+  config,
   Errors,
   ErrorValue,
   FormDataConvertible,
@@ -53,6 +54,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   put(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   patch(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   delete(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  query(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   optimistic(callback: (currentData: TForm) => Partial<TForm>): this
@@ -156,10 +158,11 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     resetDefaultsCalledInOnSuccess()
     resetBeforeSubmit()
 
-    abortController = new AbortController()
+    const controller = new AbortController()
+    abortController = controller
 
     const cancelToken: CancelToken = {
-      cancel: () => abortController?.abort(),
+      cancel: () => controller.abort(),
     }
 
     options.onCancelToken?.(cancelToken)
@@ -200,7 +203,12 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       requestUrl = urlWithParams
     } else {
       if (useFormData) {
-        requestData = objectToFormData(transformedData as Record<string, FormDataConvertible>)
+        requestData = objectToFormData(
+          transformedData as Record<string, FormDataConvertible>,
+          new FormData(),
+          null,
+          config.get('form.forceIndicesArrayFormatInFormData') ? 'indices' : 'brackets',
+        )
       } else {
         requestData = JSON.stringify(transformedData)
         contentType = 'application/json'
@@ -217,7 +225,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
           ...(contentType ? { 'Content-Type': contentType } : {}),
           ...options.headers,
         },
-        signal: abortController.signal,
+        signal: controller.signal,
         onUploadProgress: (event: HttpProgressEvent) => {
           form.progress = event
           options.onProgress?.(event)
@@ -278,7 +286,9 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
       throw error
     } finally {
       finishProcessing()
-      abortController = null
+      if (abortController === controller) {
+        abortController = null
+      }
       options.onFinish?.()
     }
   }
@@ -301,6 +311,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     put: createSubmitMethod('put'),
     patch: createSubmitMethod('patch'),
     delete: createSubmitMethod('delete'),
+    query: createSubmitMethod('query'),
 
     cancel() {
       if (abortController) {

@@ -1518,6 +1518,24 @@ test.describe('URL query string management', () => {
 })
 
 test.describe('Scroll position preservation', () => {
+  test('it keeps a container pinned to the bottom when loading previous pages in reverse mode', async ({ page }) => {
+    requests.listen(page)
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await page.goto('/infinite-scroll/reverse-pinned-to-bottom') // 40 users, 5 per page, DESC
+
+    const container = page.locator('[data-testid="scroll-container"]')
+
+    // The page pins the container to its bottom on every mutation, so it should still be there once the
+    // previous pages it loaded to fill the container have been restored
+    await expect.poll(() => container.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true)
+    await expect.poll(() => infiniteScrollRequests().length).toBeGreaterThan(0)
+    await page.waitForTimeout(500)
+
+    const distanceFromBottom = await container.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop)
+
+    expect(distanceFromBottom).toBeLessThan(1)
+  })
+
   test('it maintains scroll position when loading previous pages', async ({ page }) => {
     requests.listen(page)
     await page.goto('/infinite-scroll/trigger-both?page=3')
@@ -2599,4 +2617,32 @@ test('it does not crash when InfiniteScroll unmounts before deferred setup runs'
   expect(consoleMessages.messages).toContain('marker mounted')
   expect(consoleMessages.messages).toContain('marker destroyed')
   expect(consoleMessages.errors).toEqual([])
+})
+
+test('it does not crash or remember stale elements when InfiniteScroll unmounts right after its items change', async ({
+  page,
+}) => {
+  consoleMessages.listen(page)
+
+  await page.goto('/infinite-scroll/unmount-after-mutation')
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add User and Unmount' }).click()
+  await expect(page.locator('#status')).toHaveText('Mounted: false')
+
+  await page.waitForTimeout(400)
+
+  expect(consoleMessages.errors).toEqual([])
+
+  await page.goto('/infinite-scroll/unmount-after-mutation')
+  await expect(page.getByText('User 1', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Add User and Visit Home' }).click()
+  await page.waitForURL('/')
+  await page.waitForTimeout(400)
+
+  expect(consoleMessages.errors).toEqual([])
+  expect(
+    await page.evaluate(() => window.testing.Inertia.restore('inertia:infinite-scroll-elements:users')),
+  ).toBeUndefined()
 })

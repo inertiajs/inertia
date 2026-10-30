@@ -19,3 +19,5 @@ auditConfig:
   ignoreGhsas:
     # braces: disputed upstream with no fix planned, only reachable through dev tooling (es-check, nodemon)
     - GHSA-vfj7-8cjw-p6xm
+    # deepmerge: no patched release exists yet, only reachable through dev tooling (@sveltejs/vite-plugin-svelte)
+    - GHSA-gcqx-w48m-w2h4

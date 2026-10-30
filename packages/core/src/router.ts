@@ -4,6 +4,7 @@ import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils'
@@ -24,7 +25,6 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
-  Method,
   OptimisticCallback,
   Page,
   PageFlashData,
@@ -43,13 +43,7 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import {
-  hrefToUrl,
-  isSameUrlWithoutHash,
-  isSameUrlWithoutQueryOrHash,
-  isUrlMethodPair,
-  transformUrlAndData,
-} from './url'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 const noop = () => {}
 
@@ -93,6 +87,10 @@ export class Router {
 
     eventHandler.on('loadDeferredProps', (deferredProps: Page['deferredProps']) => {
       this.loadDeferredProps(deferredProps)
+    })
+
+    eventHandler.on('leavePage', (pageUrl: URL) => {
+      this.cancelAsyncRequestsFor(pageUrl)
     })
 
     eventHandler.on('historyQuotaExceeded', (url) => {
@@ -145,6 +143,14 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
+  public query<T extends RequestPayload = RequestPayload>(
+    url: URL | string | UrlMethodPair,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'query', data })
+  }
+
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
     return this.doReload(options)
   }
@@ -159,8 +165,15 @@ export class Router {
       return
     }
 
+    // A page rendered by a QUERY visit is reloaded with the same request body, unless another method is given.
+    const queryMethodData = options.method || isFormData(options.data) ? undefined : currentPage.get().queryMethodData
+    const queryMethodOptions = queryMethodData
+      ? { method: 'query' as const, data: { ...queryMethodData, ...options.data } as T, queryMethodReload: true }
+      : {}
+
     return this.visit(window.location.href, {
       ...options,
+      ...queryMethodOptions,
       preserveScroll: true,
       preserveState: true,
       async: true,
@@ -217,11 +230,24 @@ export class Router {
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
+      prefetchedRequests.interruptInFlight({ async: true })
     }
 
     if (sync) {
       this.syncRequestStream.cancelInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
+  }
+
+  /**
+   * Cancels the in-flight requests for a page we're leaving, like deferred props, partial reloads and polls.
+   * Prefetches, optimistic requests, and background async visits to other pages are left untouched.
+   */
+  protected cancelAsyncRequestsFor(pageUrl: URL): void {
+    this.asyncRequestStream.cancelInFlight(
+      (request) =>
+        !request.isPrefetch() && !request.isOptimistic() && isSameUrlWithoutQueryOrHash(request.getUrl(), pageUrl),
+    )
   }
 
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
@@ -276,31 +302,11 @@ export class Router {
       return
     }
 
-    const currentPageUrl = hrefToUrl(currentPage.get().url)
-    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
-
-    // For partial reloads, only compare the base URL (origin + pathname) to allow
-    // concurrent requests with different query params to the same page
-    const isSamePage = isPartialReload
-      ? isSameUrlWithoutQueryOrHash(visit.url, currentPageUrl)
-      : isSameUrlWithoutHash(visit.url, currentPageUrl)
-
-    if (!isSamePage) {
-      // Cancel in-flight requests aimed at the page we're navigating away from
-      // (deferred props, partial reloads, plain reloads), but leave prefetches,
-      // optimistic requests, and background async visits to other pages untouched
-      this.asyncRequestStream.cancelInFlight(
-        (request) =>
-          !request.isPrefetch() &&
-          !request.isOptimistic() &&
-          isSameUrlWithoutQueryOrHash(request.getUrl(), currentPageUrl),
-      )
-    }
-
     // Interrupt in-flight requests before taking the optimistic snapshot
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
 
     let optimisticId: number | null = null
@@ -387,12 +393,6 @@ export class Router {
     options: VisitOptions = {},
     prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
-    const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
-
-    if (method !== 'get') {
-      throw new Error('Prefetch requests must use the GET method')
-    }
-
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       async: true,
@@ -401,11 +401,16 @@ export class Router {
       viewTransition: false,
     })
 
+    if (visit.method !== 'get' && visit.method !== 'query') {
+      throw new Error('Prefetch requests must use the GET or QUERY method')
+    }
+
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
     const currentUrl = window.location.origin + window.location.pathname + window.location.search
 
-    if (visitUrl === currentUrl) {
-      // Don't prefetch the current page, you're already on it
+    if (visit.method === 'get' && visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it. A QUERY request carries
+      // its data in the body, so the same URL may still return a different page.
       return
     }
 
@@ -590,15 +595,29 @@ export class Router {
 
     const page = {
       ...current,
+      clearHistory: false,
       ...pageParams,
       flash: flash ?? {},
       props: props as Page['props'],
+    }
+
+    if (
+      page.component !== current.component ||
+      !isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), hrefToUrl(current.url))
+    ) {
+      delete page.queryMethodData
     }
 
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, page)
 
     const visitId = this.createVisitId()
+
+    const currentPageUrl = hrefToUrl(current.url)
+
+    if (!isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), currentPageUrl)) {
+      this.cancelAsyncRequestsFor(currentPageUrl)
+    }
 
     return currentPage
       .set(page, {

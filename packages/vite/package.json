@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/vite",
-  "version": "3.8.0",
+  "version": "3.9.1",
   "license": "MIT",
   "description": "Vite plugin for Inertia.js with SSR dev mode support.",
   "contributors": [
@@ -51,7 +51,7 @@
     "esbuild": "^0.28.1",
     "esbuild-node-externals": "^1.23.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.11"
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
   }
 }

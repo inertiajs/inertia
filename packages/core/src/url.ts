@@ -57,8 +57,9 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
   const hasRelativePathWithDotPrefix = /^[.]{1,2}([/]|$)/.test(href.toString())
   const hasSearch = href.toString().includes('?') || hasDataForQueryString
   const hasHash = href.toString().includes('#')
+  const isServer = typeof window === 'undefined'
 
-  const url = new URL(href.toString(), typeof window === 'undefined' ? 'http://localhost' : window.location.toString())
+  const url = new URL(href.toString(), isServer ? 'http://localhost' : window.location.toString())
 
   if (hasDataForQueryString) {
     // If the original URL contains indices notation (e.g. [0], [1]), preserve it.
@@ -71,7 +72,7 @@ export function mergeDataIntoQueryString<T extends RequestPayload>(
     [
       hasHost ? `${url.protocol}//${url.host}` : '',
       hasAbsolutePath ? url.pathname : '',
-      hasRelativePath ? url.pathname.substring(hasRelativePathWithDotPrefix ? 0 : 1) : '',
+      hasRelativePath ? url.pathname.substring(isServer && !hasRelativePathWithDotPrefix ? 1 : 0) : '',
       hasSearch ? url.search : '',
       hasHash ? url.hash : '',
     ].join(''),
