@@ -107,7 +107,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
   data: TForm | (() => TForm),
 ): UseHttpPrecognitiveProps<TForm, TResponse>
 export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
-  rememberKey: string,
+  rememberKey: string | null | undefined,
   data: TForm | (() => TForm),
 ): UseHttp<TForm, TResponse>
 export default function useHttp<TForm extends FormDataType<TForm>, TResponse = unknown>(
