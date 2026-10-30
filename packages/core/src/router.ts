@@ -4,6 +4,7 @@ import { progress } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils'
@@ -24,7 +25,6 @@ import {
   GlobalEventNames,
   GlobalEventResult,
   InFlightPrefetch,
-  Method,
   OptimisticCallback,
   Page,
   PageFlashData,
@@ -143,6 +143,14 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
+  public query<T extends RequestPayload = RequestPayload>(
+    url: URL | string | UrlMethodPair,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'query', data })
+  }
+
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
     return this.doReload(options)
   }
@@ -157,8 +165,15 @@ export class Router {
       return
     }
 
+    // A page rendered by a QUERY visit is reloaded with the same request body, unless another method is given.
+    const queryMethodData = options.method || isFormData(options.data) ? undefined : currentPage.get().queryMethodData
+    const queryMethodOptions = queryMethodData
+      ? { method: 'query' as const, data: { ...queryMethodData, ...options.data } as T, queryMethodReload: true }
+      : {}
+
     return this.visit(window.location.href, {
       ...options,
+      ...queryMethodOptions,
       preserveScroll: true,
       preserveState: true,
       async: true,
@@ -378,12 +393,6 @@ export class Router {
     options: VisitOptions = {},
     prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
-    const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
-
-    if (method !== 'get') {
-      throw new Error('Prefetch requests must use the GET method')
-    }
-
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       async: true,
@@ -392,11 +401,16 @@ export class Router {
       viewTransition: false,
     })
 
+    if (visit.method !== 'get' && visit.method !== 'query') {
+      throw new Error('Prefetch requests must use the GET or QUERY method')
+    }
+
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
     const currentUrl = window.location.origin + window.location.pathname + window.location.search
 
-    if (visitUrl === currentUrl) {
-      // Don't prefetch the current page, you're already on it
+    if (visit.method === 'get' && visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it. A QUERY request carries
+      // its data in the body, so the same URL may still return a different page.
       return
     }
 
@@ -584,6 +598,13 @@ export class Router {
       ...pageParams,
       flash: flash ?? {},
       props: props as Page['props'],
+    }
+
+    if (
+      page.component !== current.component ||
+      !isSameUrlWithoutQueryOrHash(hrefToUrl(page.url), hrefToUrl(current.url))
+    ) {
+      delete page.queryMethodData
     }
 
     const preserveScroll = RequestParams.resolvePreserveOption(params.preserveScroll ?? false, page)

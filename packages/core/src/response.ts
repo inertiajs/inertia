@@ -12,6 +12,7 @@ import {
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { interceptors } from './interceptors'
 import { parsePage } from './json'
@@ -51,7 +52,10 @@ export class Response {
   }
 
   public async handlePrefetch() {
-    if (isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
+    const { method, url } = this.requestParams.all()
+
+    // A QUERY prefetch may carry a different body than the current page, so it's only used once visited
+    if (method !== 'query' && isSameUrlWithoutHash(url, window.location)) {
       this.handle()
     }
   }
@@ -295,6 +299,12 @@ export class Response {
 
     this.requestParams.setPreserveOptions(pageResponse)
 
+    const queryMethodData = this.queryMethodData(pageResponse)
+
+    if (queryMethodData) {
+      pageResponse.queryMethodData = queryMethodData
+    }
+
     pageResponse.url = history.preserveUrl || keepsCurrentUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     this.requestParams.all().onBeforeUpdate(pageResponse)
@@ -319,6 +329,25 @@ export class Response {
         }
       },
     })
+  }
+
+  protected queryMethodData(pageResponse: Page): Page['queryMethodData'] {
+    const { method, data, url, preserveUrl } = this.requestParams.all()
+
+    // Redirects (e.g. after a failed validation) are followed with GET,
+    // so their pages don't carry the QUERY request data.
+    const wasRenderedByQuery =
+      method === 'query' &&
+      !isFormData(data) &&
+      isSameUrlWithoutHash(hrefToUrl(pageResponse.url), url) &&
+      Object.keys(pageResponse.props.errors ?? {}).length === 0
+
+    if (!wasRenderedByQuery) {
+      return undefined
+    }
+
+    // Like reload data on a GET page, it becomes part of the page unless the URL is preserved (e.g. infinite scroll).
+    return this.requestParams.isQueryMethodReload() && preserveUrl ? currentPage.get().queryMethodData : data
   }
 
   protected getDataFromResponse(response: any): any {

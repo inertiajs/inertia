@@ -59,6 +59,7 @@ export interface UseHttpProps<TForm extends object, TResponse = unknown> {
   put(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   patch(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   delete(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
+  query(url: string, options?: UseHttpSubmitOptions<TResponse, TForm>): Promise<TResponse>
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   optimistic(callback: (currentData: TForm) => Partial<TForm>): this
@@ -311,6 +312,7 @@ export default function useHttp<TForm extends FormDataType<TForm>, TResponse = u
     put: createSubmitMethod('put'),
     patch: createSubmitMethod('patch'),
     delete: createSubmitMethod('delete'),
+    query: createSubmitMethod('query'),
     cancel,
     dontRemember(...keys: FormDataKeys<TForm>[]) {
       setRememberExcludeKeys(keys)
