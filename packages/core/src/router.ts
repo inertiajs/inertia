@@ -11,6 +11,7 @@ import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
+import { clearPendingDeferredProps } from './propRefreshes'
 import Queue from './queue'
 import { Request } from './request'
 import { RequestParams } from './requestParams'
@@ -893,5 +894,9 @@ export class Router {
         this.doReload({ only: props, deferredProps: true, preserveErrors: true })
       })
     }
+
+    // Each reload that started now claims its own props, and one a `before`
+    // listener cancelled never will, so the page's claim ends here either way
+    clearPendingDeferredProps()
   }
 }

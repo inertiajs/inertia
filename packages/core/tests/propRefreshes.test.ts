@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { visitRefreshesProp } from '../src/partialReload'
-import { propRefreshes, trackPendingDeferredProps, trackPropRefresh, untrackPropRefresh } from '../src/propRefreshes'
-import type { ActiveVisit, InternalActiveVisit, Page } from '../src/types'
+import {
+  clearPendingDeferredProps,
+  propRefreshes,
+  setPendingDeferredProps,
+  trackPropRefresh,
+  untrackPropRefresh,
+} from '../src/propRefreshes'
+import type { ActiveVisit, Page } from '../src/types'
+import { stubBrowser } from './liveHarness'
 
 const filter = (only: string[] = [], except: string[] = [], reset: string[] = []) => ({ only, except, reset })
 
@@ -57,7 +64,7 @@ describe('propRefreshes', () => {
   })
 
   afterEach(() => {
-    trackPendingDeferredProps({ props: {} } as Page, undefined)
+    clearPendingDeferredProps()
     untrackPropRefresh(makeVisit({ id: 'visit-1' }))
     untrackPropRefresh(makeVisit({ id: 'visit-2' }))
     vi.unstubAllGlobals()
@@ -129,17 +136,15 @@ describe('propRefreshes', () => {
     expect(listener).toHaveBeenCalledTimes(2)
   })
 
-  it('counts deferred props still missing from the page as refreshing until their request starts', () => {
-    trackPendingDeferredProps({ props: { users: ['John'] } } as unknown as Page, {
-      default: ['users', 'stats'],
-      other: ['user.name'],
-    })
+  it('counts deferred props still missing from the page as refreshing until their requests start', () => {
+    setPendingDeferredProps({ users: ['John'] }, { default: ['users', 'stats'], other: ['user.name'] })
 
     expect(propRefreshes.isRefreshing('users')).toBe(false)
     expect(propRefreshes.isRefreshing('stats')).toBe(true)
     expect(propRefreshes.isRefreshing('user')).toBe(true)
 
-    trackPropRefresh({ ...makeVisit({ only: ['stats'] }), deferredProps: true } as InternalActiveVisit)
+    trackPropRefresh(makeVisit({ only: ['stats'] }))
+    clearPendingDeferredProps()
 
     expect(propRefreshes.isRefreshing('stats')).toBe(true)
     expect(propRefreshes.isRefreshing('user')).toBe(false)
@@ -150,9 +155,55 @@ describe('propRefreshes', () => {
   })
 
   it('forgets pending deferred props once a page that loads none takes over', () => {
-    trackPendingDeferredProps({ props: {} } as Page, { default: ['stats'] })
-    trackPendingDeferredProps({ props: {} } as Page, undefined)
+    setPendingDeferredProps({}, { default: ['stats'] })
+    setPendingDeferredProps({}, undefined)
 
     expect(propRefreshes.isRefreshing('stats')).toBe(false)
+  })
+})
+
+describe('pending deferred props', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('stops counting deferred props as refreshing when a before listener cancels their request', async () => {
+    const requests = stubBrowser()
+
+    vi.stubGlobal('document', {
+      ...document,
+      dispatchEvent: (event: Event) => event.type !== 'inertia:before',
+    })
+
+    const { router } = await import('../src/index')
+    const { propRefreshes } = await import('../src/propRefreshes')
+
+    router.init({
+      initialPage: {
+        component: 'Orders',
+        url: '/orders',
+        version: '1',
+        props: {},
+        deferredProps: { default: ['report'] },
+        flash: {},
+        rememberedState: {},
+        rescuedProps: [],
+        clearHistory: false,
+        encryptHistory: false,
+      } as Page,
+      swapComponent: () => Promise.resolve(),
+      resolveComponent: (name) => name,
+    })
+
+    expect(propRefreshes.isRefreshing('report')).toBe(true)
+
+    await new Promise((resolve) => setTimeout(resolve, 80))
+
+    expect(requests).toHaveLength(0)
+    expect(propRefreshes.isRefreshing('report')).toBe(false)
   })
 })
