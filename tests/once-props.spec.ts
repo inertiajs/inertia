@@ -572,13 +572,11 @@ test('instant visit reuses a remembered once prop that is also shared', async ({
 
   const fooText = await page.locator('#foo').innerText()
 
-  const responsePromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
+  await page.getByRole('button', { name: 'Instant visit to Shared Page B', exact: true }).click()
 
-  await page.evaluate(() =>
-    window.testing.Inertia.visit('/once-props/instant/b?shared=1', { component: 'OnceProps/InstantPageB' }),
-  )
+  await expect(page.getByText(fooText)).toBeVisible()
 
-  await responsePromise
+  await page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
 
   await expect(page.getByText('Bar: bar-b')).toBeVisible()
   await expect(page.getByText(fooText)).toBeVisible()
@@ -591,10 +589,8 @@ test('instant visit adopting an in-flight prefetch preserves a once prop that is
 
   const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
 
-  await page.evaluate(() => window.testing.Inertia.prefetch('/once-props/instant/b?shared=1', { method: 'get' }, {}))
-  await page.evaluate(() =>
-    window.testing.Inertia.visit('/once-props/instant/b?shared=1', { component: 'OnceProps/InstantPageB' }),
-  )
+  await page.getByRole('button', { name: 'Prefetch Shared Page B' }).click()
+  await page.getByRole('button', { name: 'Instant visit to Shared Page B', exact: true }).click()
 
   await prefetchPromise
 
@@ -609,16 +605,27 @@ test('instant visit preserves a once prop that pageProps copies from the shared 
 
   const prefetchPromise = page.waitForResponse((response) => response.url().includes('/once-props/instant/b?shared=1'))
 
-  await page.evaluate(() => window.testing.Inertia.prefetch('/once-props/instant/b?shared=1', { method: 'get' }, {}))
-  await page.evaluate(() =>
-    window.testing.Inertia.visit('/once-props/instant/b?shared=1', {
-      component: 'OnceProps/InstantPageB',
-      pageProps: (props, sharedProps) => sharedProps,
-    }),
-  )
+  await page.getByRole('button', { name: 'Prefetch Shared Page B' }).click()
+  await page.getByRole('button', { name: 'Instant visit to Shared Page B with shared page props' }).click()
 
   await prefetchPromise
 
   await expect(page.getByText('Bar: bar-b')).toBeVisible()
   await expect(page.getByText(fooText)).toBeVisible()
+})
+
+test('instant visit loads a fresh once prop when pageProps provides a different value', async ({ page }) => {
+  await page.goto('/once-props/instant/a')
+
+  const fooText = await page.locator('#foo').innerText()
+
+  await page.getByRole('button', { name: 'Instant visit with provided foo' }).click()
+
+  await expect(page.getByText('Foo: foo-provided')).toBeVisible()
+
+  await page.waitForResponse((response) => response.url().includes('/once-props/instant/b'))
+
+  await expect(page.getByText('Bar: bar-b')).toBeVisible()
+  await expect(page.locator('#foo')).toContainText('Foo: foo-b-')
+  await expect(page.getByText(fooText)).not.toBeVisible()
 })
