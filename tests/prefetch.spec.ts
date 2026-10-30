@@ -324,6 +324,7 @@ test('can prefetch QUERY links to the current page keyed by their data', async (
   const bananaResponse = await bananaPrefetch
 
   expect(bananaResponse.request().postDataJSON()).toEqual({ term: 'banana' })
+  await expect(page.locator('#results')).toHaveText('Results for: nothing')
 
   await page.getByRole('button', { name: 'Search Apple' }).click()
   await expect(page.locator('#results')).toHaveText('Results for: apple')
