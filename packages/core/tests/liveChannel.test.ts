@@ -37,18 +37,25 @@ describe('createLiveChannelTracker', () => {
     expect(channels.hasAny()).toBe(false)
   })
 
-  it('counts a public channel separately from a private one of the same name', () => {
+  it('counts channels the broadcaster files under the same name as one', () => {
     const channels = tracker()
 
-    channels.acquire(channel('public', 'private-orders.1'))
-    channels.acquire(channel('private', 'orders.1'))
+    expect(channels.acquire(channel('public', 'private-orders.1'))).toBe(true)
+    expect(channels.acquire(channel('private', 'orders.1'))).toBe(false)
 
-    // Both are stored as `private-orders.1` by the broadcaster, so counting by
-    // name alone would release one while the other still has a listener
-    expect(channels.release(channel('public', 'private-orders.1'))).toBe(true)
-    expect(channels.hasAny()).toBe(true)
+    expect(channels.release(channel('public', 'private-orders.1'))).toBe(false)
     expect(channels.release(channel('private', 'orders.1'))).toBe(true)
     expect(channels.hasAny()).toBe(false)
+  })
+
+  it('keeps channels of different types apart when their names differ on the wire', () => {
+    const channels = tracker()
+
+    channels.acquire(channel('private'))
+    channels.acquire(channel('presence'))
+
+    expect(channels.release(channel('private'))).toBe(true)
+    expect(channels.hasAny()).toBe(true)
   })
 
   it('treats releasing an unknown channel as the last one out', () => {

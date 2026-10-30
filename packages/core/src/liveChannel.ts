@@ -25,8 +25,9 @@ export const warnRejectedLiveChannel = (name: string, reason?: unknown): void =>
 }
 
 /**
- * Counted by type and name, so a public channel called `private-orders.1` stays
- * distinct from a private `orders.1`.
+ * Counted by the name the broadcaster files a channel under, since that is what
+ * it joins and leaves. A public `private-orders.1` and a private `orders.1` are
+ * one channel to Echo and Pusher, so they share a count.
  */
 export const createLiveChannelTracker = () => {
   const counts = new Map<string, number>()
@@ -36,9 +37,10 @@ export const createLiveChannelTracker = () => {
      * Add a listener. Returns true when it is the first on the channel.
      */
     acquire(channel: LiveChannel): boolean {
-      const count = (counts.get(liveChannelKey(channel)) ?? 0) + 1
+      const name = liveChannelName(channel)
+      const count = (counts.get(name) ?? 0) + 1
 
-      counts.set(liveChannelKey(channel), count)
+      counts.set(name, count)
 
       return count === 1
     },
@@ -47,15 +49,16 @@ export const createLiveChannelTracker = () => {
      * Drop a listener. Returns true when it was the last on the channel.
      */
     release(channel: LiveChannel): boolean {
-      const remaining = (counts.get(liveChannelKey(channel)) ?? 1) - 1
+      const name = liveChannelName(channel)
+      const remaining = (counts.get(name) ?? 1) - 1
 
       if (remaining > 0) {
-        counts.set(liveChannelKey(channel), remaining)
+        counts.set(name, remaining)
 
         return false
       }
 
-      counts.delete(liveChannelKey(channel))
+      counts.delete(name)
 
       return true
     },

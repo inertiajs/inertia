@@ -115,6 +115,25 @@ describe('pusher', () => {
     warn.mockRestore()
   })
 
+  it('keeps a channel two live channels share on the wire until both have gone', () => {
+    const { transport } = pusher({ client: fake.client })
+
+    const stopPublic = transport.subscribe({ name: 'private-orders.1', type: 'public' }, 'OrderUpdated', () => {})
+    const stopPrivate = transport.subscribe(orders, 'NotesUpdated', () => {})
+
+    const channel = fake.channel('private-orders.1')!
+    const errorBindings = channel.bind.mock.calls.filter(([event]) => event === 'pusher:subscription_error')
+
+    expect(errorBindings).toHaveLength(1)
+
+    stopPublic()
+    expect(fake.log).not.toContain('unsubscribe private-orders.1')
+
+    stopPrivate()
+    expect(fake.log).toContain('unsubscribe private-orders.1')
+    expect(channel.unbind).toHaveBeenCalledWith('pusher:subscription_error', errorBindings[0][1])
+  })
+
   it('counts channels separately, so leaving one leaves the others alone', () => {
     const { transport } = pusher({ client: fake.client })
 

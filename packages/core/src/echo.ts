@@ -54,8 +54,8 @@ const formatEvent = (event: string): string => {
 }
 
 /**
- * Resolves the configured Echo instance on each use, so `configureEcho()` swaps
- * are respected.
+ * Resolves the configured Echo instance for each new listener, so `configureEcho()`
+ * swaps are respected, while a listener is always removed from the one it joined.
  */
 export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
   const channels = createLiveChannelTracker()
@@ -110,14 +110,12 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
       }
 
       return () => {
-        const current = resolve()
-
-        subscriberFor(channel)(current, channel.name).stopListening(name, handler)
+        echoChannel.stopListening(name, handler)
 
         // Unbinding the callback leaves the channel itself subscribed, so the
         // last listener has to leave it as well
         if (channels.release(channel)) {
-          current.leaveChannel(liveChannelName(channel))
+          instance.leaveChannel(liveChannelName(channel))
         }
       }
     },

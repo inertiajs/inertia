@@ -39,23 +39,29 @@ describe('socket id', () => {
     expect(socketId.resolve()).toBe('from-transport')
   })
 
-  it('leaves a resolver the app registered first alone', async () => {
-    const { socketId, configureLive, channelTransport } = await setup()
+  it.each(['channelTransport', 'eventTransport'] as const)(
+    'leaves a resolver the app registered first alone (%s)',
+    async (transport) => {
+      const context = await setup()
 
-    socketId.resolveUsing(() => 'from-app')
-    configureLive({ transport: channelTransport })
+      context.socketId.resolveUsing(() => 'from-app')
+      context.configureLive({ transport: context[transport] })
 
-    expect(socketId.resolve()).toBe('from-app')
-  })
+      expect(context.socketId.resolve()).toBe('from-app')
+    },
+  )
 
-  it('treats clearing the resolver as a choice, so the default does not undo it', async () => {
-    const { socketId, configureLive, channelTransport } = await setup()
+  it.each(['channelTransport', 'eventTransport'] as const)(
+    'treats clearing the resolver as a choice, so the default does not undo it (%s)',
+    async (transport) => {
+      const context = await setup()
 
-    socketId.resolveUsing(null)
-    configureLive({ transport: channelTransport })
+      context.socketId.resolveUsing(null)
+      context.configureLive({ transport: context[transport] })
 
-    expect(socketId.resolve()).toBeNull()
-  })
+      expect(context.socketId.resolve()).toBeNull()
+    },
+  )
 
   it('lets the app take over after the default is installed', async () => {
     const { socketId, configureLive, channelTransport } = await setup()

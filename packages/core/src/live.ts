@@ -122,12 +122,9 @@ class Live {
     this.pauseWhenHidden = options.pauseWhenHidden ?? true
 
     // A broadcaster that issues no socket id of its own still needs one, since
-    // that is what an event it caused is recognised by
-    if (this.transport.socketId) {
-      socketId.resolveUsing(this.transport.socketId)
-    } else {
-      socketId.resolveUsingDefault(clientSocketId)
-    }
+    // that is what an event it caused is recognised by. Either way it is only a
+    // default, so a resolver the app chose itself is left alone.
+    socketId.resolveUsingDefault(this.transport.socketId ?? clientSocketId)
 
     eventHandler.on('pageUpdated', (page: Page) => this.sync(page))
 
