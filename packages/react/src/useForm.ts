@@ -61,6 +61,7 @@ export interface InertiaFormProps<TForm extends Record<string, any>> {
   put: (url: string, options?: UseFormSubmitOptions) => void
   patch: (url: string, options?: UseFormSubmitOptions) => void
   delete: (url: string, options?: UseFormSubmitOptions) => void
+  query: (url: string, options?: UseFormSubmitOptions) => void
   cancel: () => void
   dontRemember: <K extends FormDataKeys<TForm>>(...fields: K[]) => InertiaFormProps<TForm>
   optimistic: <TProps>(callback: OptimisticCallback<TProps>) => InertiaFormProps<TForm>
@@ -245,6 +246,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
       put: (url: string, options: VisitOptions = {}) => submit('put', url, options),
       patch: (url: string, options: VisitOptions = {}) => submit('patch', url, options),
       delete: (url: string, options: VisitOptions = {}) => submit('delete', url, options),
+      query: (url: string, options: VisitOptions = {}) => submit('query', url, options),
     }),
     [submit],
   )

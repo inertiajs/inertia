@@ -20,7 +20,12 @@ class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
   protected inFlightRequests: InFlightPrefetch[] = []
   protected removalTimers: PrefetchRemovalTimer[] = []
-  protected currentUseId: string | null = null
+  protected currentUse: {
+    id: string
+    async: boolean
+    params: InternalActiveVisit
+    response: Response | null
+  } | null = null
 
   public add(
     params: ActiveVisit,
@@ -212,16 +217,16 @@ class PrefetchedRequests {
   public use(prefetched: PrefetchedResponse | InFlightPrefetch, params: ActiveVisit) {
     const id = `${params.url.pathname}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 
-    this.currentUseId = id
-
     const consumedParams: InternalActiveVisit = {
       ...params,
       cached: true,
     }
 
+    this.currentUse = { id, async: params.async, params: consumedParams, response: null }
+
     return prefetched.response.then(
       (response) => {
-        if (this.currentUseId !== id) {
+        if (this.currentUse?.id !== id) {
           // They've since gone on to `use` a different request,
           // so we should ignore this one
           return
@@ -233,18 +238,59 @@ class PrefetchedRequests {
         // (generally a prefetch="click" request with no specified cache value)
         this.removeSingleUseItems(params)
 
-        return response.handle()
+        this.currentUse.response = response
+
+        return response.handle().finally(() => {
+          if (this.currentUse?.id === id) {
+            this.currentUse = null
+          }
+        })
       },
       (error) => {
         if (!(error instanceof HttpCancelledError)) {
           throw error
         }
 
-        consumedParams.onCancel()
-        consumedParams.cancelled = true
-        consumedParams.onFinish(consumedParams)
+        if (this.currentUse?.id === id) {
+          this.currentUse = null
+        }
+
+        this.cancelUse(consumedParams)
       },
     )
+  }
+
+  /**
+   * A cached response isn't part of a request stream, so the router interrupts it here, like an in-flight
+   * request of the stream its visit belongs to. One that's still waiting for its prefetch is cancelled.
+   */
+  public interruptInFlight({ async }: { async: boolean }): void {
+    const use = this.currentUse
+
+    if (use?.async !== async) {
+      return
+    }
+
+    this.currentUse = null
+
+    if (use.response) {
+      use.response.interrupt()
+    } else {
+      this.cancelUse(use.params)
+    }
+  }
+
+  /**
+   * Both the router and a cancelled prefetch can cancel a visit that's waiting for it, but it only finishes once.
+   */
+  protected cancelUse(params: InternalActiveVisit): void {
+    if (params.cancelled) {
+      return
+    }
+
+    params.cancelled = true
+    params.onCancel()
+    params.onFinish(params)
   }
 
   protected removeSingleUseItems(params: ActiveVisit) {

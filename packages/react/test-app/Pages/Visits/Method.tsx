@@ -36,6 +36,11 @@ export default () => {
     router.delete('/dump/delete')
   }
 
+  const queryMethod = (e: React.MouseEvent) => {
+    e.preventDefault()
+    router.query('/dump/query')
+  }
+
   return (
     <div>
       <span className="text">This is the page that demonstrates manual visit methods</span>
@@ -60,6 +65,9 @@ export default () => {
       </a>
       <a href="#" onClick={deleteMethod} className="delete">
         DELETE Link
+      </a>
+      <a href="#" onClick={queryMethod} className="query">
+        QUERY Link
       </a>
     </div>
   )

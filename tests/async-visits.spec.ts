@@ -71,12 +71,104 @@ test.describe('Async visits', () => {
     const inFlight = page.waitForRequest(
       (req) => req.url().includes('/async-visits/reload-origin') && !!req.headers()['x-repro-delay'],
     )
-    await page.getByRole('button', { name: 'Reload' }).click()
+    await page.getByRole('button', { name: 'Reload', exact: true }).click()
     await inFlight
 
     await page.getByRole('link', { name: 'Go to C' }).click()
     await expect(page.getByText('Page: C')).toBeVisible()
 
     await expect.poll(() => cancelled.length).toBe(1)
+  })
+
+  test('it cancels a reload that starts while a visit to another query string is in flight', async ({ page }) => {
+    const cancelled: string[] = []
+
+    page.on('requestfailed', (req) => {
+      if (req.url().includes('/async-visits/reload-origin') && req.headers()['x-repro-delay']) {
+        cancelled.push(req.failure()?.errorText || 'failed')
+      }
+    })
+
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Visit page 2 and reload' }).click()
+
+    await expect(page.getByText('Reload: cancelled')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
+    await expect.poll(() => cancelled.length).toBe(1)
+  })
+
+  test('it does not cancel a reload of the current page when an async visit to another URL starts', async ({
+    page,
+  }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Reload and post async' }).click()
+
+    await expect(page.getByText('Reload: finished')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin')
+  })
+
+  test('it does not cancel a reload of the current page when a visit is redirected back to it', async ({ page }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Visit redirect and reload' }).click()
+
+    await expect(page.getByText('Reload: finished')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin')
+  })
+
+  test('it does not cancel a reload of the current page when a post redirects back to it', async ({ page }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Post and reload' }).click()
+
+    await expect(page.getByText('Reload: finished')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin')
+  })
+
+  test('it cancels a reload of the current page when a post to it redirects to another page', async ({ page }) => {
+    const cancelled: string[] = []
+
+    page.on('requestfailed', (req) => {
+      if (req.url().includes('/async-visits/reload-origin') && req.headers()['x-repro-delay']) {
+        cancelled.push(req.failure()?.errorText || 'failed')
+      }
+    })
+
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Post to this page and reload' }).click()
+
+    await expect(page.getByText('Page: C')).toBeVisible()
+    await expect.poll(() => cancelled.length).toBe(1)
+  })
+
+  test('it keeps the query string of a client visit when a reload that started before it lands', async ({ page }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Reload and replace query' }).click()
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
+
+    await expect(page.getByText('Reload: finished')).toBeVisible()
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
+  })
+
+  test('it lets an async visit to another query string set its URL after a client visit changed it', async ({
+    page,
+  }) => {
+    await page.goto('/async-visits/reload-origin')
+    await expect(page.getByText('Page: Reload Origin')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Visit page 3 async and replace query' }).click()
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=2')
+
+    await expect(page).toHaveURL('/async-visits/reload-origin?page=3')
   })
 })

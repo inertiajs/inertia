@@ -2,6 +2,7 @@ import { isEqual } from 'es-toolkit'
 import { get, set } from 'es-toolkit/compat'
 import { router } from '.'
 import dialog from './dialog'
+import { eventHandler } from './eventHandler'
 import {
   fireBeforeUpdateEvent,
   fireErrorEvent,
@@ -11,6 +12,7 @@ import {
   firePrefetchedEvent,
   fireSuccessEvent,
 } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { interceptors } from './interceptors'
 import { parsePage } from './json'
@@ -20,13 +22,14 @@ import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
 import { ActiveVisit, ErrorBag, Errors, HttpResponse, Page, PageProps } from './types'
-import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
+import { hrefToUrl, isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash, setHashIfSameUrl } from './url'
 
 const queue = new Queue<Promise<boolean | void>>()
 
 export class Response {
   protected wasPrefetched = false
   protected processed = false
+  protected pageApplied = false
 
   constructor(
     protected requestParams: RequestParams,
@@ -49,7 +52,10 @@ export class Response {
   }
 
   public async handlePrefetch() {
-    if (isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
+    const { method, url } = this.requestParams.all()
+
+    // A QUERY prefetch may carry a different body than the current page, so it's only used once visited
+    if (method !== 'query' && isSameUrlWithoutHash(url, window.location)) {
       this.handle()
     }
   }
@@ -59,6 +65,9 @@ export class Response {
   }
 
   public async process() {
+    // A cached response is processed again for every visit that uses it
+    this.pageApplied = false
+
     if (this.requestParams.all().prefetch) {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
@@ -71,6 +80,10 @@ export class Response {
 
     this.requestParams.runCallbacks()
     this.processed = true
+
+    if (this.requestParams.wasCancelledAtAll()) {
+      return
+    }
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -97,6 +110,11 @@ export class Response {
 
     try {
       await this.setPage()
+
+      // A visit that's cancelled before its page is applied reports nothing, but once the page is shown it still does
+      if (this.requestParams.wasCancelledAtAll() && !this.pageApplied) {
+        return
+      }
 
       const { flash } = currentPage.get()
 
@@ -133,6 +151,12 @@ export class Response {
 
   public mergeParams(params: ActiveVisit) {
     this.requestParams.merge(params)
+  }
+
+  public interrupt(): void {
+    if (!this.requestParams.wasCancelledAtAll()) {
+      this.requestParams.markAsCancelled({ cancelled: false, interrupted: true })
+    }
   }
 
   public getPageResponse(): Page {
@@ -260,21 +284,70 @@ export class Response {
 
     await this.setRememberedState(pageResponse)
 
+    // The request may have been cancelled while the response was being prepared,
+    // for example when the user navigated back or a visit to another page committed
+    if (this.requestParams.wasCancelledAtAll()) {
+      return
+    }
+
+    // A redirect decides where the visit lands, so we compare against the page the server returned
+    const currentPageUrl = hrefToUrl(currentPage.get().url)
+    const responseUrl = hrefToUrl(pageResponse.url)
+    const leavesPage = this.requestParams.leavesPage(currentPageUrl, responseUrl)
+
+    const keepsCurrentUrl = this.keepsCurrentUrl(currentPageUrl, responseUrl)
+
     this.requestParams.setPreserveOptions(pageResponse)
 
-    pageResponse.url = history.preserveUrl ? currentPage.get().url : this.pageUrl(pageResponse)
+    const queryMethodData = this.queryMethodData(pageResponse)
+
+    if (queryMethodData) {
+      pageResponse.queryMethodData = queryMethodData
+    }
+
+    pageResponse.url = history.preserveUrl || keepsCurrentUrl ? currentPage.get().url : this.pageUrl(pageResponse)
 
     this.requestParams.all().onBeforeUpdate(pageResponse)
     fireBeforeUpdateEvent(pageResponse)
 
+    const visit = this.requestParams.all()
+
     return currentPage.set(pageResponse, {
-      replace: this.requestParams.all().replace,
-      preserveScroll: this.requestParams.all().preserveScroll as boolean,
-      preserveState: this.requestParams.all().preserveState as boolean,
-      viewTransition: this.requestParams.all().viewTransition,
-      cached: this.requestParams.all().cached,
-      visitId: this.requestParams.all().id,
+      replace: visit.replace,
+      preserveScroll: visit.preserveScroll as boolean,
+      preserveState: visit.preserveState as boolean,
+      viewTransition: visit.viewTransition,
+      cached: visit.cached,
+      visitId: visit.id,
+      isCancelled: () => this.requestParams.wasCancelledAtAll(),
+      onCommit: () => {
+        this.pageApplied = true
+
+        // The page is only left once it's replaced, a dropped visit leaves its requests running
+        if (leavesPage) {
+          eventHandler.fireInternalEvent('leavePage', currentPageUrl)
+        }
+      },
     })
+  }
+
+  protected queryMethodData(pageResponse: Page): Page['queryMethodData'] {
+    const { method, data, url, preserveUrl } = this.requestParams.all()
+
+    // Redirects (e.g. after a failed validation) are followed with GET,
+    // so their pages don't carry the QUERY request data.
+    const wasRenderedByQuery =
+      method === 'query' &&
+      !isFormData(data) &&
+      isSameUrlWithoutHash(hrefToUrl(pageResponse.url), url) &&
+      Object.keys(pageResponse.props.errors ?? {}).length === 0
+
+    if (!wasRenderedByQuery) {
+      return undefined
+    }
+
+    // Like reload data on a GET page, it becomes part of the page unless the URL is preserved (e.g. infinite scroll).
+    return this.requestParams.isQueryMethodReload() && preserveUrl ? currentPage.get().queryMethodData : data
   }
 
   protected getDataFromResponse(response: any): any {
@@ -313,6 +386,26 @@ export class Response {
     // We have the same component, let's double-check the URL
     // If we're no longer on the same path name (e.g. /users/1 -> /users/2), we should not set the page
     return originatingUrl.origin === currentPageUrl.origin && originatingUrl.pathname === currentPageUrl.pathname
+  }
+
+  /**
+   * A client visit, like the URL updates of <InfiniteScroll>, may change the query string while a reload of the
+   * page is in flight. The reload then keeps that URL instead of putting the previous query string back.
+   */
+  protected keepsCurrentUrl(currentPageUrl: URL, responseUrl: URL): boolean {
+    const visit = this.requestParams.all()
+
+    if (!visit.async) {
+      return false
+    }
+
+    const originatingUrl = hrefToUrl(this.originatingPage.url)
+
+    const reloadsOriginatingPage = isSameUrlWithoutHash(visit.url, originatingUrl)
+    const urlChangedSince = !isSameUrlWithoutHash(currentPageUrl, originatingUrl)
+    const landsOnCurrentPath = isSameUrlWithoutQueryOrHash(responseUrl, currentPageUrl)
+
+    return reloadsOriginatingPage && urlChangedSince && landsOnCurrentPath
   }
 
   protected pageUrl(pageResponse: Page) {

@@ -207,7 +207,7 @@ export type FormDataValues<T, K extends FormDataKeys<T>> = K extends `${infer P}
 
 export type FormDataError<T> = Partial<Record<FormDataKeys<T>, ErrorValue>>
 
-export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete'
+export type Method = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'query'
 
 export type RequestPayload = Record<string, FormDataConvertible> | FormData
 
@@ -256,6 +256,8 @@ export interface Page<SharedProps extends PageProps = PageProps> {
 
   /** @internal */
   rememberedState: Record<string, unknown>
+  /** @internal */
+  queryMethodData?: Record<string, FormDataConvertible>
   /** @internal */
   optimisticUpdatedAt?: Record<string, number>
 }
@@ -500,7 +502,7 @@ export type GlobalEventCallback<TEventName extends GlobalEventNames<T>, T extend
   ...params: GlobalEventParameters<TEventName, T>
 ) => GlobalEventResult<TEventName, T>
 
-export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded'
+export type InternalEvent = 'missingHistoryItem' | 'loadDeferredProps' | 'historyQuotaExceeded' | 'leavePage'
 
 export type VisitCallbacks<T extends RequestPayload = RequestPayload> = {
   onCancelToken: CancelTokenCallback
@@ -564,6 +566,7 @@ export type InternalActiveVisit = ActiveVisit & {
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
   poll?: boolean
+  queryMethodReload?: boolean
   cached?: boolean
 }
 

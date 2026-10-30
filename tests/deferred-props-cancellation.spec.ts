@@ -41,6 +41,44 @@ test.describe('Deferred Props Cancellation', () => {
     expect(completedFromB).toHaveLength(3)
   })
 
+  test('it cancels in-flight deferred props when pushing a different URL', async ({ page }) => {
+    const cancelledFromA: string[] = []
+    const completedFromA: string[] = []
+
+    page.on('requestfailed', (req) => {
+      if (req.url().includes('/a') && req.headers()['x-inertia-partial-data']) {
+        cancelledFromA.push(req.headers()['x-inertia-partial-data'])
+      }
+    })
+
+    page.on('response', (res) => {
+      const prop = res.request().headers()['x-inertia-partial-data']
+      if (prop && res.status() === 200 && res.url().includes('/a')) {
+        completedFromA.push(prop)
+      }
+    })
+
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
+    await expect(page.getByText('Loading users...')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Push Page B', exact: true }).click()
+    await expect(page).toHaveURL(/rapid-navigation\/b$/)
+    await expect(page.getByText('users data for b')).toBeVisible()
+
+    expect(cancelledFromA).toHaveLength(3)
+    expect(completedFromA).toHaveLength(0)
+  })
+
+  test('it reports an in-flight partial reload as cancelled when pushing a different URL', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/rapid-navigation/a')
+    await expect(page.getByText('users data for a')).toBeVisible()
+    await expect(page.getByText('Reload: idle')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Reload users and push Page B' }).click()
+    await expect(page).toHaveURL(/rapid-navigation\/b$/)
+    await expect(page.getByText('Reload: cancelled')).toBeVisible()
+  })
+
   test('it does not cancel deferred props for same-URL operations', async ({ page }) => {
     const cancelled: string[] = []
 
@@ -193,5 +231,35 @@ test.describe('Deferred Props Cancellation', () => {
 
     // No requests were cancelled (hash-only change)
     expect(cancelled).toHaveLength(0)
+  })
+
+  test('it loads the deferred props again when a visit away is interrupted by a visit that stays', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
+    await expect(page.getByText('Loading bar...')).toBeVisible()
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/sleep')
+      window.testing.Inertia.visit('/deferred-props/page-1', { only: ['foo'] })
+    })
+
+    await expect(page.getByText('foo value')).toBeVisible()
+    await expect(page.getByText('bar value')).toBeVisible()
+  })
+
+  test('it loads the deferred props again when a visit away is dropped while its page loads', async ({ page }) => {
+    await gotoPageAndWaitForContent(page, '/deferred-props/page-1')
+    await expect(page.getByText('Loading bar...')).toBeVisible()
+
+    await page.evaluate(() => window.testing.Inertia.visit('/visits/interrupted-visit/held'))
+    await page.waitForFunction(() => window.releaseHeldComponent !== undefined)
+
+    await page.evaluate(() => {
+      window.testing.Inertia.visit('/deferred-props/page-1', { only: ['foo'] })
+      window.releaseHeldComponent!()
+    })
+
+    await expect(page.getByText('foo value')).toBeVisible()
+    await expect(page.getByText('bar value')).toBeVisible()
+    await expect(page.getByText('This is the held page.')).not.toBeVisible()
   })
 })

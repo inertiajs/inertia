@@ -1,5 +1,21 @@
-import { expect, test } from '@playwright/test'
+import { expect, Page, test } from '@playwright/test'
 import { clickAndWaitForResponse, requests } from './support'
+
+const recordNavigations = async (page: Page): Promise<string[]> => {
+  const urls: string[] = []
+
+  page.on('console', (message) => {
+    if (message.text().startsWith('navigate:')) {
+      urls.push(message.text().slice('navigate:'.length))
+    }
+  })
+
+  await page.evaluate(() =>
+    window.testing.Inertia.on('navigate', (event) => console.log(`navigate:${event.detail.page.url}`)),
+  )
+
+  return urls
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/history/1')
@@ -303,8 +319,6 @@ test('it does not leak cleared history entries through a known plaintext', async
 
   const recovered = new TextDecoder().decode(recoveredBytes)
 
-  console.log({ recovered })
-
   // With a fresh IV for every entry, the two keystreams differ and this is just noise. With a
   // shared IV, it contains A's private page, including the token that only A has seen.
   expect(recovered).not.toContain(tokenOfUserA)
@@ -396,14 +410,44 @@ test('it keeps the restored page when the back button is pressed while the next 
   await page.goBack()
   await page.waitForURL('/auto/props')
 
-  const visitFinished = page.evaluate(
-    () => new Promise((resolve) => document.addEventListener('inertia:success', () => resolve(null), { once: true })),
-  )
+  const navigations = await recordNavigations(page)
 
   releaseHomeChunk()
-  await visitFinished
+
+  // Responses are applied one at a time, so this reload only finishes after the superseded visit was handled
+  await page.evaluate(() => new Promise((resolve) => window.testing.Inertia.reload({ onFinish: resolve })))
+
+  expect(navigations).toEqual([])
 
   await expect(page.getByTestId('props-title')).toBeVisible()
   await expect(page.getByTestId('vite-title')).not.toBeVisible()
   await expect(page).toHaveURL('/auto/props')
+})
+
+test('it keeps the restored page when the back button is pressed after a deferred response arrived', async ({
+  page,
+}) => {
+  await page.goto('/history/held-deferred/home')
+  await expect(page.getByText('This is the home page.')).toBeVisible()
+
+  await page.getByRole('link', { name: 'Open the post' }).click()
+  await page.waitForURL('/history/held-deferred/post')
+  await page.waitForFunction(() => window.releaseHeldResponse !== undefined)
+
+  await page.goBack()
+  await page.waitForURL('/history/held-deferred/home')
+  await expect(page.getByText('This is the home page.')).toBeVisible()
+
+  const navigations = await recordNavigations(page)
+
+  await page.getByRole('button', { name: 'Release held response' }).click()
+
+  // Responses are applied one at a time, so this reload only finishes after the released response was handled
+  await page.evaluate(() => new Promise((resolve) => window.testing.Inertia.reload({ onFinish: resolve })))
+
+  expect(navigations).toEqual([])
+
+  await expect(page).toHaveURL('/history/held-deferred/home')
+  await expect(page.getByText('This is the home page.')).toBeVisible()
+  await expect(page.getByText('Comments loaded')).not.toBeVisible()
 })

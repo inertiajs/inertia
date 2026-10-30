@@ -26,6 +26,8 @@ declare global {
     _inertia_content_layout_id: string | undefined
     _plugin_global_props: object
     resolverReceivedPage: Page | null
+    releaseHeldResponse?: () => void
+    releaseHeldComponent?: () => void
   }
 
   interface ImportMeta {
