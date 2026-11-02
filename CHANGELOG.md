@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 For changes prior to v1.0.0, see the [legacy releases](https://legacy.inertiajs.com/releases).
 
-## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.10.0...3.x)
+## [Unreleased](https://github.com/inertiajs/inertia/compare/v3.11.0...3.x)
 
 - Nothing yet
+
+## [v3.11.0](https://github.com/inertiajs/inertia/compare/v3.10.0...v3.11.0) - 2026-11-02
+
+### What's Changed
+
+* [3.x] Support for Live props by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3232
+* [3.x] Bump dependencies by [@pascalbaljet](https://github.com/pascalbaljet) in https://github.com/inertiajs/inertia/pull/3368
+
+**Full Changelog**: https://github.com/inertiajs/inertia/compare/v3.10.0...v3.11.0
 
 ## [v3.10.0](https://github.com/inertiajs/inertia/compare/v3.9.1...v3.10.0) - 2026-10-30
 
