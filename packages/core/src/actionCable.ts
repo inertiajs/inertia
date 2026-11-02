@@ -2,7 +2,13 @@ import { clientSocketId } from './clientSocketId'
 import { warnRejectedLiveChannel } from './liveChannel'
 import { LiveChannel, LiveChannelTransport, LiveOptions, SocketIdResolver } from './types'
 
-export type ActionCableIdentifier = { channel: string } & Record<string, unknown>
+/**
+ * Subscription params are serialized into the identifier, and AnyCable only
+ * accepts primitives there, so a consumer typed for either client accepts these.
+ */
+export type ActionCableParams = Record<string, string | number | boolean>
+
+export type ActionCableIdentifier = { channel: string } & ActionCableParams
 
 export interface ActionCableSubscriptionMixin {
   connected?(): void
@@ -34,7 +40,7 @@ const defaultIdentifier =
   (channel: string) =>
   ({ name, type, params }: LiveChannel): ActionCableIdentifier => ({
     channel,
-    ...params,
+    ...(params as ActionCableParams | undefined),
     stream: name,
     type,
   })
