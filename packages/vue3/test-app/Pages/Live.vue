@@ -12,6 +12,7 @@ defineProps<{
   multi: string
   plain: string
   account: { balance: string; currency: string }
+  optional?: string
   socketIdHeader: string | null
 }>()
 
@@ -78,6 +79,9 @@ onUnmounted(() => {
       <dt>account.currency</dt>
       <dd id="account-currency">{{ account.currency }}</dd>
 
+      <dt>optional</dt>
+      <dd id="optional">{{ optional ?? 'not loaded' }}</dd>
+
       <dt>socket id header</dt>
       <dd id="socket-id-header">{{ socketIdHeader ?? 'none' }}</dd>
 
@@ -106,6 +110,7 @@ onUnmounted(() => {
     <button @click="showSubscriptions">Show Subscriptions</button>
     <button @click="cancel = !cancel">Toggle Cancel: {{ cancel }}</button>
     <button @click="router.reload({ only: ['plain'] })">Reload Plain</button>
+    <button @click="router.reload({ only: ['optional'] })">Load Optional</button>
 
     <Link href="/">Leave</Link>
   </div>

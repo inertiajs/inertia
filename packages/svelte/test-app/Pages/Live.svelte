@@ -12,6 +12,7 @@
     multi,
     plain,
     account,
+    optional,
     socketIdHeader,
   }: {
     order: string
@@ -22,6 +23,7 @@
     multi: string
     plain: string
     account: { balance: string; currency: string }
+    optional?: string
     socketIdHeader: string | null
   } = $props()
 
@@ -87,6 +89,9 @@
     <dt>account.currency</dt>
     <dd id="account-currency">{account.currency}</dd>
 
+    <dt>optional</dt>
+    <dd id="optional">{optional ?? 'not loaded'}</dd>
+
     <dt>socket id header</dt>
     <dd id="socket-id-header">{socketIdHeader ?? 'none'}</dd>
 
@@ -115,6 +120,7 @@
   <button onclick={showSubscriptions}>Show Subscriptions</button>
   <button onclick={() => (cancel = !cancel)}>Toggle Cancel: {cancel}</button>
   <button onclick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
+  <button onclick={() => router.reload({ only: ['optional'] })}>Load Optional</button>
 
   <a href="/" use:inertia>Leave</a>
 </div>

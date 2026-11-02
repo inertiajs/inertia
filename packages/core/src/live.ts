@@ -1,4 +1,4 @@
-import { toPath } from 'es-toolkit/compat'
+import { get, toPath } from 'es-toolkit/compat'
 import { router } from '.'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
@@ -148,7 +148,9 @@ class Live {
       if (reconnected) {
         // Events that fired while the connection was down never arrived, so
         // every live prop is potentially stale
-        Object.keys(this.liveProps).forEach((prop) => this.markDirty(prop, { force: true }))
+        Object.keys(this.liveProps)
+          .filter((prop) => this.isRequested(prop))
+          .forEach((prop) => this.markDirty(prop, { force: true }))
         this.scheduleFlush()
       }
     })
@@ -295,7 +297,11 @@ class Live {
       return
     }
 
-    const props = Array.from(subscription.props)
+    const props = Array.from(subscription.props).filter((prop) => this.isRequested(prop))
+
+    if (props.length === 0) {
+      return
+    }
 
     const cancelled = !fireLiveEvent({
       props,
@@ -336,6 +342,15 @@ class Live {
     if (received) {
       this.scheduleWrite()
     }
+  }
+
+  /**
+   * A prop the page has, or a request is still fetching, such as a deferred
+   * prop on its way. An optional prop nobody asked for stays out of the page,
+   * even though the server sends its listeners along.
+   */
+  protected isRequested(prop: string): boolean {
+    return get(currentPage.get().props, prop) !== undefined || propRefreshes.isRefreshing(prop)
   }
 
   /**

@@ -423,6 +423,36 @@ test.describe('Live props', () => {
     expect(liveRequests()).toBe(0)
   })
 
+  test('it leaves a live prop the page never loaded alone until it is loaded', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/live')
+
+    await expect(page.locator('#optional')).toHaveText('not loaded')
+
+    const response = page.waitForResponse('**/live')
+    await emit(page, 'orders.1', ORDER_EVENT)
+
+    expect((await response).request().headers()['x-inertia-partial-data']).toBe('order,stats')
+    await expect(page.locator('#last-props')).toHaveText('order, stats')
+    await expect(page.locator('#optional')).toHaveText('not loaded')
+
+    await page.getByRole('button', { name: 'Load Optional' }).click()
+    await expect(page.locator('#optional')).not.toHaveText('not loaded')
+
+    const optional = await page.locator('#optional').textContent()
+
+    // Order and stats are still in their throttle window, so optional goes first
+    const reload = page.waitForResponse(
+      (response) =>
+        response.url().includes('/live') && response.request().headers()['x-inertia-partial-data'] === 'optional',
+    )
+    await emit(page, 'orders.1', ORDER_EVENT)
+    await reload
+
+    await expect(page.locator('#last-props')).toHaveText('order, stats, optional')
+    await expect(page.locator('#optional')).not.toHaveText(optional!)
+  })
+
   test('it writes the values a broadcast carried instead of reloading the props', async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/live')

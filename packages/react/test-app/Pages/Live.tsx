@@ -11,6 +11,7 @@ export default ({
   multi,
   plain,
   account,
+  optional,
   socketIdHeader,
 }: {
   order: string
@@ -21,6 +22,7 @@ export default ({
   multi: string
   plain: string
   account: { balance: string; currency: string }
+  optional?: string
   socketIdHeader: string | null
 }) => {
   const [events, setEvents] = useState(0)
@@ -80,6 +82,9 @@ export default ({
         <dt>account.currency</dt>
         <dd id="account-currency">{account.currency}</dd>
 
+        <dt>optional</dt>
+        <dd id="optional">{optional ?? 'not loaded'}</dd>
+
         <dt>socket id header</dt>
         <dd id="socket-id-header">{socketIdHeader ?? 'none'}</dd>
 
@@ -108,6 +113,7 @@ export default ({
       <button onClick={showSubscriptions}>Show Subscriptions</button>
       <button onClick={() => setCancel((value) => !value)}>Toggle Cancel: {String(cancel)}</button>
       <button onClick={() => router.reload({ only: ['plain'] })}>Reload Plain</button>
+      <button onClick={() => router.reload({ only: ['optional'] })}>Load Optional</button>
 
       <Link href="/">Leave</Link>
     </div>

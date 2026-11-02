@@ -326,3 +326,68 @@ describe('live prop payloads', () => {
     expect(live.props().order).toEqual({ id: 1, total: '99.00' })
   })
 })
+
+describe('live props the page has not loaded', () => {
+  beforeEach(() => {
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('leaves a prop the page never loaded out of the reload', async () => {
+    const live = await setup({
+      order: listeners(orders, 'OrderUpdated'),
+      report: listeners(orders, 'OrderUpdated'),
+    })
+
+    live.emit(orders, 'OrderUpdated', null)
+
+    await live.settle()
+
+    expect(live.reloaded()).toEqual(['order'])
+  })
+
+  it('does not write a value the broadcast carried for a prop the page never loaded', async () => {
+    const live = await setup({ report: listeners(orders, 'OrderUpdated') })
+
+    live.emit(orders, 'OrderUpdated', {
+      __inertia: { props: { report: { total: 5 } } },
+    })
+
+    await live.settle()
+
+    expect(live.props().report).toBeUndefined()
+    expect(live.writes()).toBe(0)
+    expect(live.requests()).toHaveLength(0)
+  })
+
+  it('still refreshes a prop a request is fetching, since that response may predate the event', async () => {
+    const live = await setup({ report: listeners(orders, 'OrderUpdated') })
+
+    live.startRefreshing(['report'])
+
+    live.emit(orders, 'OrderUpdated', null)
+
+    await live.settle()
+
+    expect(live.requests()).toHaveLength(0)
+
+    live.stopRefreshing(['report'])
+
+    await live.settle()
+
+    expect(live.reloaded()).toEqual(['report'])
+  })
+
+  it('refreshes a nested prop once its parent holds it', async () => {
+    const live = await setup({ 'order.total': listeners(orders, 'OrderUpdated') })
+
+    live.emit(orders, 'OrderUpdated', null)
+
+    await live.settle()
+
+    expect(live.reloaded()).toEqual(['order.total'])
+  })
+})

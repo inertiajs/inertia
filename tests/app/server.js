@@ -3791,6 +3791,16 @@ const liveProps = {
       },
     ],
   },
+  // Left out of every response unless asked for, the way an optional prop is,
+  // while its listeners are still sent along
+  optional: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
 }
 
 app.get('/live', (req, res) => {
@@ -3813,6 +3823,7 @@ app.get('/live', (req, res) => {
         multi: value('multi'),
         plain: value('plain'),
         account: { balance: value('balance'), currency: value('currency') },
+        ...(requested.includes('optional') ? { optional: value('optional') } : {}),
       },
       alwaysProps: {
         socketIdHeader: req.headers['x-socket-id'] ?? null,
