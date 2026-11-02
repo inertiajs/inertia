@@ -1,3 +1,5 @@
+import { uid } from './uid'
+
 let clientId: string | null = null
 
 /**
@@ -6,9 +8,7 @@ let clientId: string | null = null
  * can drop it, which is how `toOthers` is earned without server side exclusion.
  */
 export const clientSocketId = (): string => {
-  if (clientId === null) {
-    clientId = globalThis.crypto?.randomUUID?.() ?? `inertia-${Date.now()}-${Math.random().toString(36).slice(2)}`
-  }
+  clientId ??= uid()
 
   return clientId
 }
