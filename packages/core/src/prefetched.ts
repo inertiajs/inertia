@@ -3,6 +3,7 @@ import { get } from 'es-toolkit/compat'
 import { HttpCancelledError } from './httpErrors'
 import { objectsAreEqual } from './objectUtils'
 import { page as currentPage } from './page'
+import { trackPropRefresh, untrackPropRefresh } from './propRefreshes'
 import { Response } from './response'
 import { timeToMs } from './time'
 import {
@@ -224,40 +225,46 @@ class PrefetchedRequests {
 
     this.currentUse = { id, async: params.async, params: consumedParams, response: null }
 
-    return prefetched.response.then(
-      (response) => {
-        if (this.currentUse?.id !== id) {
-          // They've since gone on to `use` a different request,
-          // so we should ignore this one
-          return
-        }
+    // A visit waiting on a prefetch is waiting on a request all the same, so it
+    // claims the props it refreshes until it is done
+    trackPropRefresh(consumedParams)
 
-        response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
+    return prefetched.response
+      .then(
+        (response) => {
+          if (this.currentUse?.id !== id) {
+            // They've since gone on to `use` a different request,
+            // so we should ignore this one
+            return
+          }
 
-        // If this was a one-time cache, remove it
-        // (generally a prefetch="click" request with no specified cache value)
-        this.removeSingleUseItems(params)
+          response.mergeParams({ ...consumedParams, onPrefetched: () => {} })
 
-        this.currentUse.response = response
+          // If this was a one-time cache, remove it
+          // (generally a prefetch="click" request with no specified cache value)
+          this.removeSingleUseItems(params)
 
-        return response.handle().finally(() => {
+          this.currentUse.response = response
+
+          return response.handle().finally(() => {
+            if (this.currentUse?.id === id) {
+              this.currentUse = null
+            }
+          })
+        },
+        (error) => {
+          if (!(error instanceof HttpCancelledError)) {
+            throw error
+          }
+
           if (this.currentUse?.id === id) {
             this.currentUse = null
           }
-        })
-      },
-      (error) => {
-        if (!(error instanceof HttpCancelledError)) {
-          throw error
-        }
 
-        if (this.currentUse?.id === id) {
-          this.currentUse = null
-        }
-
-        this.cancelUse(consumedParams)
-      },
-    )
+          this.cancelUse(consumedParams)
+        },
+      )
+      .finally(() => untrackPropRefresh(consumedParams))
   }
 
   /**
@@ -289,6 +296,7 @@ class PrefetchedRequests {
     }
 
     params.cancelled = true
+    untrackPropRefresh(params)
     params.onCancel()
     params.onFinish(params)
   }

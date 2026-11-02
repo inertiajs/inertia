@@ -72,6 +72,9 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(axios@1.20.0)
     devDependencies:
+      '@laravel/echo-react':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(react@19.2.7)
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.17
@@ -90,6 +93,9 @@ importers:
       esbuild-node-externals:
         specifier: ^1.23.1
         version: 1.23.1(esbuild@0.28.1)
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       react:
         specifier: ^19.2.4
         version: 19.2.7
@@ -121,6 +127,9 @@ importers:
         specifier: ^19.2.4
         version: 19.2.7(react@19.2.7)
     devDependencies:
+      '@laravel/echo-react':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(react@19.2.7)
       '@types/node':
         specifier: ^24.10.13
         version: 24.13.2
@@ -130,6 +139,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.17)
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -152,18 +164,24 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(axios@1.20.0)
     devDependencies:
+      '@laravel/echo-svelte':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(svelte@5.57.3)
       '@sveltejs/package':
         specifier: ^3.0.1
         version: 3.0.1(svelte@5.57.3)(typescript@6.0.3)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^7.0.0
-        version: 7.1.2(svelte@5.57.3)(vite@8.3.5)
+        version: 7.1.2(svelte@5.57.3)(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
       axios:
         specifier: ^1.20.0
         version: 1.20.0
       es-check:
         specifier: 9.5.3
         version: 9.5.3
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       publint:
         specifier: ^0.3.17
         version: 0.3.21
@@ -172,7 +190,7 @@ importers:
         version: 5.57.3
       svelte-check:
         specifier: ^4.4.8
-        version: 4.6.0(picomatch@4.0.4)(svelte@5.57.3)(typescript@6.0.3)
+        version: 4.6.0(picomatch@4.0.7)(svelte@5.57.3)(typescript@6.0.3)
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -181,7 +199,7 @@ importers:
         version: 6.0.3
       vite:
         specifier: ^8.3.5
-        version: 8.3.5
+        version: 8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)
 
   packages/svelte/test-app:
     dependencies:
@@ -195,6 +213,9 @@ importers:
         specifier: workspace:*
         version: link:../../vite
     devDependencies:
+      '@laravel/echo-svelte':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(svelte@5.57.3)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^7.0.0
         version: 7.1.2(svelte@5.57.3)(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
@@ -207,6 +228,9 @@ importers:
       eslint-plugin-svelte:
         specifier: ^3.17.1
         version: 3.19.0(eslint@10.5.0(jiti@2.7.0))(svelte@5.57.3)
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -272,6 +296,9 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(axios@1.20.0)
     devDependencies:
+      '@laravel/echo-vue':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(vue@3.5.43(typescript@6.0.3))
       axios:
         specifier: ^1.20.0
         version: 1.20.0
@@ -284,6 +311,9 @@ importers:
       esbuild-node-externals:
         specifier: ^1.23.1
         version: 1.23.1(esbuild@0.28.1)
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -303,12 +333,18 @@ importers:
         specifier: workspace:*
         version: link:..
     devDependencies:
+      '@laravel/echo-vue':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(vue@3.5.43(typescript@6.0.3))
       '@types/node':
         specifier: ^24.10.13
         version: 24.13.2
       '@vitejs/plugin-vue':
         specifier: ^6.0.4
         version: 6.0.7(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))(vue@3.5.43(typescript@6.0.3))
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -336,6 +372,9 @@ importers:
       '@inertiajs/vite':
         specifier: workspace:*
         version: link:../../packages/vite
+      '@laravel/echo-react':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(react@19.2.7)
       '@laravel/stream-react':
         specifier: ^0.3.13
         version: 0.3.13(react@19.2.7)
@@ -357,12 +396,18 @@ importers:
       autosize:
         specifier: ^6.0.1
         version: 6.0.1
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       laravel-vite-plugin:
         specifier: ^3.0.0
         version: 3.1.0(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
       marked:
         specifier: ^17.0.3
         version: 17.0.6
+      pusher-js:
+        specifier: ^8.6.0
+        version: 8.6.0
       react:
         specifier: ^19.2.4
         version: 19.2.7
@@ -390,6 +435,9 @@ importers:
       '@inertiajs/vite':
         specifier: workspace:*
         version: link:../../packages/vite
+      '@laravel/echo-svelte':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(svelte@5.57.3)
       '@sveltejs/vite-plugin-svelte':
         specifier: ^7.0.0
         version: 7.1.2(svelte@5.57.3)(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
@@ -399,9 +447,15 @@ importers:
       '@tsconfig/svelte':
         specifier: ^5.0.8
         version: 5.0.8
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       laravel-vite-plugin:
         specifier: ^3.0.0
         version: 3.1.0(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
+      pusher-js:
+        specifier: ^8.6.0
+        version: 8.6.0
       svelte:
         specifier: ^5.57.3
         version: 5.57.3
@@ -429,6 +483,9 @@ importers:
       '@inertiajs/vue3':
         specifier: workspace:*
         version: link:../../packages/vue3
+      '@laravel/echo-vue':
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)(vue@3.5.43(typescript@5.9.3))
       '@laravel/stream-vue':
         specifier: ^0.3.13
         version: 0.3.13(vue@3.5.43(typescript@5.9.3))
@@ -447,12 +504,18 @@ importers:
       autosize:
         specifier: ^6.0.1
         version: 6.0.1
+      laravel-echo:
+        specifier: ^2.4.0
+        version: 2.6.3(pusher-js@8.6.0)
       laravel-vite-plugin:
         specifier: ^3.0.0
         version: 3.1.0(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
       marked:
         specifier: ^17.0.3
         version: 17.0.6
+      pusher-js:
+        specifier: ^8.6.0
+        version: 8.6.0
       tailwindcss:
         specifier: ^4.2.1
         version: 4.3.1
@@ -733,6 +796,45 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@laravel/echo-react@2.6.3':
+    resolution: {integrity: sha512-KUqMonhI7zcX3EK5xZckAuC6C1iABXrAWx6ikX9DjdpA69LhU9e/BgQ3e3qFxBG+lEhZYNUm27TbeWY9kiR6Ww==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      pusher-js: '*'
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      socket.io-client: '*'
+    peerDependenciesMeta:
+      pusher-js:
+        optional: true
+      socket.io-client:
+        optional: true
+
+  '@laravel/echo-svelte@2.6.3':
+    resolution: {integrity: sha512-X9AvpQvceHDruO4YkudN9h7Da5ohzo9GGhCuhfqJVuJtg3BrLf0iYC8abS8HUR00lzVE+9IGxVRPBaZsDJ9yxg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      pusher-js: '*'
+      socket.io-client: '*'
+      svelte: ^5.55.7
+    peerDependenciesMeta:
+      pusher-js:
+        optional: true
+      socket.io-client:
+        optional: true
+
+  '@laravel/echo-vue@2.6.3':
+    resolution: {integrity: sha512-eDZUY4R0qO3qMYPPZqmG4Zgd6SxRqpaGiv70en082iSQ5WfTleKqTKOWgtzX8kcd3xsCI1+aWDSn9KO82+jXXg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      pusher-js: '*'
+      socket.io-client: '*'
+      vue: ^3.0.0
+    peerDependenciesMeta:
+      pusher-js:
+        optional: true
+      socket.io-client:
+        optional: true
 
   '@laravel/stream-react@0.3.13':
     resolution: {integrity: sha512-VNGEMBU1j3HcQtncYTVrBmBqWXiTk5w341VqCdBuC0aB/qmkLNeXcSt2T3iPc6VyRqPN6PSzlPXU2MdPN7+Kvg==}
@@ -1968,6 +2070,18 @@ packages:
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
 
+  laravel-echo@2.6.3:
+    resolution: {integrity: sha512-I5tIbxIIC0lJMCeAYlo/ywJ2Zacu5uL3iCOOZkbUjT42Tv0LrNXGqMPhENIyJBFJT6C6Xk5jYktSwO6GSINVBQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    peerDependencies:
+      pusher-js: '*'
+      socket.io-client: '*'
+    peerDependenciesMeta:
+      pusher-js:
+        optional: true
+      socket.io-client:
+        optional: true
+
   laravel-precognition@2.1.1:
     resolution: {integrity: sha512-Wg05+puJ5qiNsE8rdO5JmSiqQ2xcEf7442AIZiDhZg1JyPOePv5SSCu0fO7z7LqmJcPMxNNuOIcZd6UatEmYug==}
     peerDependencies:
@@ -2429,6 +2543,9 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  pusher-js@8.6.0:
+    resolution: {integrity: sha512-wShJPfCS/kYkCBVzVW67wa9cnQIgHTszEK2XHNrFkOgGruuGw081aERAxfRjfdFU+WcIt8x6dvbwkTW4iZuQ8Q==}
+
   qs@6.17.1:
     resolution: {integrity: sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==}
     engines: {node: '>=0.6'}
@@ -2634,6 +2751,9 @@ packages:
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -2988,6 +3108,30 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@laravel/echo-react@2.6.3(pusher-js@8.6.0)(react@19.2.7)':
+    dependencies:
+      react: 19.2.7
+    optionalDependencies:
+      pusher-js: 8.6.0
+
+  '@laravel/echo-svelte@2.6.3(pusher-js@8.6.0)(svelte@5.57.3)':
+    dependencies:
+      svelte: 5.57.3
+    optionalDependencies:
+      pusher-js: 8.6.0
+
+  '@laravel/echo-vue@2.6.3(pusher-js@8.6.0)(vue@3.5.43(typescript@5.9.3))':
+    dependencies:
+      vue: 3.5.43(typescript@5.9.3)
+    optionalDependencies:
+      pusher-js: 8.6.0
+
+  '@laravel/echo-vue@2.6.3(pusher-js@8.6.0)(vue@3.5.43(typescript@6.0.3))':
+    dependencies:
+      vue: 3.5.43(typescript@6.0.3)
+    optionalDependencies:
+      pusher-js: 8.6.0
+
   '@laravel/stream-react@0.3.13(react@19.2.7)':
     dependencies:
       react: 19.2.7
@@ -3210,15 +3354,6 @@ snapshots:
       svelte: 5.57.3
       vite: 8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)
       vitefu: 1.1.3(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0))
-
-  '@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.57.3)(vite@8.3.5)':
-    dependencies:
-      deepmerge: 4.3.1
-      magic-string: 0.30.21
-      obug: 2.1.3
-      svelte: 5.57.3
-      vite: 8.3.5
-      vitefu: 1.1.3(vite@8.3.5)
 
   '@tailwindcss/node@4.3.1':
     dependencies:
@@ -3484,7 +3619,7 @@ snapshots:
 
   agent-base@6.0.2:
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3629,10 +3764,6 @@ snapshots:
   cssesc@3.0.0: {}
 
   csstype@3.2.3: {}
-
-  debug@4.4.3:
-    dependencies:
-      ms: 2.1.3
 
   debug@4.4.3(supports-color@5.5.0):
     dependencies:
@@ -4025,7 +4156,7 @@ snapshots:
   https-proxy-agent@5.0.1:
     dependencies:
       agent-base: 6.0.2
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4076,6 +4207,10 @@ snapshots:
       json-buffer: 3.0.1
 
   known-css-properties@0.37.0: {}
+
+  laravel-echo@2.6.3(pusher-js@8.6.0):
+    optionalDependencies:
+      pusher-js: 8.6.0
 
   laravel-precognition@2.1.1(axios@1.20.0):
     dependencies:
@@ -4451,6 +4586,10 @@ snapshots:
 
   punycode@2.3.1: {}
 
+  pusher-js@8.6.0:
+    dependencies:
+      tweetnacl: 1.0.3
+
   qs@6.17.1:
     dependencies:
       es-define-property: 1.0.1
@@ -4612,19 +4751,6 @@ snapshots:
     dependencies:
       has-flag: 3.0.0
 
-  svelte-check@4.6.0(picomatch@4.0.4)(svelte@5.57.3)(typescript@6.0.3):
-    dependencies:
-      '@jridgewell/trace-mapping': 0.3.31
-      '@sveltejs/load-config': 0.1.1
-      chokidar: 4.0.3
-      fdir: 6.5.0(picomatch@4.0.4)
-      picocolors: 1.1.1
-      sade: 1.8.1
-      svelte: 5.57.3
-      typescript: 6.0.3
-    transitivePeerDependencies:
-      - picomatch
-
   svelte-check@4.6.0(picomatch@4.0.7)(svelte@5.57.3)(typescript@5.9.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -4719,6 +4845,8 @@ snapshots:
 
   tslib@2.8.1: {}
 
+  tweetnacl@1.0.3: {}
+
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -4763,16 +4891,6 @@ snapshots:
       picocolors: 1.1.1
       picomatch: 2.3.2
 
-  vite@8.3.5:
-    dependencies:
-      lightningcss: 1.33.0
-      picomatch: 4.0.7
-      postcss: 8.5.31
-      rolldown: 1.2.15
-      tinyglobby: 0.2.17
-    optionalDependencies:
-      fsevents: 2.3.3
-
   vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0):
     dependencies:
       lightningcss: 1.33.0
@@ -4789,10 +4907,6 @@ snapshots:
   vitefu@1.1.3(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)):
     optionalDependencies:
       vite: 8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)
-
-  vitefu@1.1.3(vite@8.3.5):
-    optionalDependencies:
-      vite: 8.3.5
 
   vitest@4.1.12(@types/node@24.13.2)(vite@8.3.5(@types/node@24.13.2)(esbuild@0.28.1)(jiti@2.7.0)):
     dependencies:

@@ -9,9 +9,11 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@laravel/echo-react": "^2.4.0",
     "@types/node": "^24.10.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "laravel-echo": "^2.4.0",
     "nodemon": "^3.1.14",
     "typescript": "^6.0.3",
     "vite": "^8.3.5"
