@@ -7,6 +7,8 @@ import { LiveChannel, LiveChannelType, LiveOptions, LiveTransport } from './type
  */
 export type EchoConnectionStatus = 'connected' | 'connecting' | 'reconnecting' | 'disconnected' | 'failed'
 
+export type EchoChannelType = 'public' | 'private' | 'encrypted' | 'presence'
+
 /**
  * Kept structural so every `@laravel/echo-*` package satisfies it without core
  * depending on any of them.
@@ -17,6 +19,8 @@ export interface EchoInstance {
   encryptedPrivate(name: string): EchoChannel
   join(name: string): EchoChannel
   leaveChannel(name: string): void
+  acquire?(name: string, type: EchoChannelType): EchoChannel
+  release?(name: string, type: EchoChannelType, options?: { keepExisting?: boolean }): unknown
   socketId(): string | null | undefined
   connector: {
     onConnectionChange(callback: (status: EchoConnectionStatus) => void): VoidFunction
@@ -45,6 +49,13 @@ const subscribers: Record<LiveChannelType, (echo: EchoInstance, name: string) =>
 // since the manifest is a hand-synced contract with the server
 const subscriberFor = (channel: LiveChannel) => subscribers[channel.type as LiveChannelType] ?? subscribers.public
 
+const echoChannelTypes: Record<LiveChannelType, EchoChannelType> = {
+  public: 'public',
+  private: 'private',
+  presence: 'presence',
+  'encrypted-private': 'encrypted',
+}
+
 /**
  * Laravel already sends the broadcast name. Prefix literal names with `.` so
  * Echo does not apply the app namespace.
@@ -59,6 +70,7 @@ const formatEvent = (event: string): string => {
  */
 export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportConfig): LiveTransport => {
   const channels = createLiveChannelTracker()
+  const watchedForErrors = new WeakMap<EchoChannel, Set<string>>()
 
   let statusCallback: ((connected: boolean) => void) | null = null
   let watch: { instance: EchoInstance; stop: VoidFunction } | null = null
@@ -98,20 +110,31 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
     subscribe(channel, event, handler) {
       const name = formatEvent(event)
       const instance = resolve()
+      const type = echoChannelTypes[channel.type as LiveChannelType] ?? 'public'
 
-      // Echo joins on demand, so there is nothing to do when this is the first
-      // listener. Leaving is another matter.
-      const echoChannel = subscriberFor(channel)(instance, channel.name)
+      // Acquiring shares the channel with everything else on this Echo instance,
+      // such as useEcho(), so neither side leaves it while the other still listens
+      const shared = typeof instance.acquire === 'function' && typeof instance.release === 'function'
+
+      const echoChannel = shared
+        ? instance.acquire!(channel.name, type)
+        : subscriberFor(channel)(instance, channel.name)
 
       echoChannel.listen(name, handler)
 
       subscribedInstance = instance
       watchConnection(instance)
 
-      // Echo offers no way to unbind this, but leaving the channel discards the
-      // channel object along with it, so binding once per join is enough
-      if (channels.acquire(channel)) {
-        echoChannel.error((status: unknown) => warnRejectedLiveChannel(liveChannelName(channel), status))
+      const isFirstListener = channels.acquire(channel)
+
+      // Echo offers no way to unbind this. Leaving discards the channel object,
+      // but a shared one can outlive every live prop, so it binds once per object.
+      const fullName = liveChannelName(channel)
+      const watched = watchedForErrors.get(echoChannel) ?? new Set<string>()
+
+      if (shared ? !watched.has(fullName) : isFirstListener) {
+        watchedForErrors.set(echoChannel, watched.add(fullName))
+        echoChannel.error((status: unknown) => warnRejectedLiveChannel(fullName, status))
       }
 
       return () => {
@@ -119,8 +142,14 @@ export const createEchoTransport = ({ echo, echoIsConfigured }: EchoTransportCon
 
         // Unbinding the callback leaves the channel itself subscribed, so the
         // last listener has to leave it as well
-        if (channels.release(channel)) {
+        if (channels.release(channel) && !shared) {
           instance.leaveChannel(liveChannelName(channel))
+        }
+
+        // Channels the app joined itself before a live prop used them stay theirs.
+        // Once Echo has left one, the object may be handed out again unwatched.
+        if (shared && instance.release!(channel.name, type, { keepExisting: true }) === true) {
+          watched.delete(fullName)
         }
 
         if (!channels.hasAny()) {
