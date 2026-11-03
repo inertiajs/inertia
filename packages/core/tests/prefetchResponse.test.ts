@@ -100,7 +100,10 @@ describe('Response.handlePrefetch with the real handle', () => {
       params: {
         all: () => visit,
         runCallbacks: vi.fn(),
+        wasCancelledAtAll: () => false,
         isDeferredPropsRequest: () => false,
+        isQueryMethodReload: () => false,
+        leavesPage: () => false,
         setPreserveOptions: vi.fn(),
         isPartial: () => false,
       },

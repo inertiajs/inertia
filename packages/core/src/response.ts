@@ -55,7 +55,7 @@ export class Response {
     const { method, url } = this.requestParams.all()
 
     // A QUERY prefetch may carry a different body than the current page, so it's only used once visited
-    if (method == 'query' || isSameUrlWithoutHash(url, window.location)) {
+    if (method === 'query' || !isSameUrlWithoutHash(url, window.location)) {
       return
     }
 
