@@ -30,6 +30,10 @@ const patchMethod = () => {
 const deleteMethod = () => {
   router.delete('/dump/delete')
 }
+
+const queryMethod = () => {
+  router.query('/dump/query')
+}
 </script>
 
 <template>
@@ -43,5 +47,6 @@ const deleteMethod = () => {
     <a href="#" @click.prevent="putMethod" class="put">PUT Link</a>
     <a href="#" @click.prevent="patchMethod" class="patch">PATCH Link</a>
     <a href="#" @click.prevent="deleteMethod" class="delete">DELETE Link</a>
+    <a href="#" @click.prevent="queryMethod" class="query">QUERY Link</a>
   </div>
 </template>

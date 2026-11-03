@@ -1,4 +1,5 @@
 import { toPath } from 'es-toolkit/compat'
+import { isFormData } from './formData'
 
 export const stripTopLevelUndefined = <T extends Record<string, unknown>>(obj: T): T => {
   const result = {} as T
@@ -52,7 +53,29 @@ export const objectsAreEqual = <T extends Record<string, any>>(
   return true
 }
 
+const formDataAreEqual = (formData1: FormData, formData2: FormData): boolean => {
+  const entries1 = Array.from(formData1.entries())
+  const entries2 = Array.from(formData2.entries())
+
+  return (
+    entries1.length === entries2.length &&
+    entries1.every(([key, value], index) => key === entries2[index][0] && value === entries2[index][1])
+  )
+}
+
 const compareValues = (value1: any, value2: any): boolean => {
+  if (isFormData(value1) || isFormData(value2)) {
+    return isFormData(value1) && isFormData(value2) && formDataAreEqual(value1, value2)
+  }
+
+  if (value1 instanceof Date || value2 instanceof Date) {
+    return value1 instanceof Date && value2 instanceof Date && value1.getTime() === value2.getTime()
+  }
+
+  if (value1 === null || value2 === null || Array.isArray(value1) !== Array.isArray(value2)) {
+    return value1 === value2
+  }
+
   switch (typeof value1) {
     case 'object':
       return objectsAreEqual(value1, value2, [])

@@ -1,6 +1,6 @@
 {
   "name": "@inertiajs/svelte",
-  "version": "3.9.1",
+  "version": "3.11.0",
   "license": "MIT",
   "description": "The Svelte adapter for Inertia.js",
   "contributors": [
@@ -33,37 +33,48 @@
     "./server": {
       "types": "./dist/server.d.ts",
       "svelte": "./dist/server.js"
+    },
+    "./echo": {
+      "types": "./dist/echo.d.ts",
+      "svelte": "./dist/echo.js",
+      "import": "./dist/echo.js"
     }
   },
   "scripts": {
     "build": "pnpm package && svelte-check --tsconfig ./tsconfig.json && publint",
-    "build:with-deps": "svelte-kit sync && vite build --config vite-with-deps.config.js",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "build:with-deps": "vite build --config vite-with-deps.config.js",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
     "dev": "pnpm package --watch",
     "es2022-check": "pnpm build:with-deps && es-check es2022 \"dist/**/*.js\" --checkFeatures --module --noCache --verbose",
-    "package": "svelte-kit sync && svelte-package --input src"
+    "package": "svelte-package --input src"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "^7.0.1",
-    "@sveltejs/kit": "^2.70.2",
-    "@sveltejs/package": "^2.5.7",
+    "@laravel/echo-svelte": "^2.4.0",
+    "@sveltejs/package": "^3.0.1",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "axios": "^1.20.0",
     "es-check": "9.5.3",
+    "laravel-echo": "^2.4.0",
     "publint": "^0.3.17",
-    "svelte": "^5.56.4",
+    "svelte": "^5.57.3",
     "svelte-check": "^4.4.8",
     "tslib": "^2.8.1",
     "typescript": "^6.0.3",
-    "vite": "^8.0.16"
+    "vite": "^8.3.5"
   },
   "peerDependencies": {
+    "@laravel/echo-svelte": "^2.0.0",
     "svelte": "^5.0.0"
   },
   "dependencies": {
     "@inertiajs/core": "workspace:*",
     "es-toolkit": "^1.33.0",
-    "laravel-precognition": "^2.1.0"
+    "laravel-precognition": "^2.1.1"
+  },
+  "peerDependenciesMeta": {
+    "@laravel/echo-svelte": {
+      "optional": true
+    }
   }
 }

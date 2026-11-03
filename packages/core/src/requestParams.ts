@@ -8,6 +8,7 @@ import {
   PreserveStateOption,
   VisitCallbacks,
 } from './types'
+import { isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash } from './url'
 
 export class RequestParams {
   protected callbacks: {
@@ -73,6 +74,10 @@ export class RequestParams {
 
   public isPollRequest() {
     return this.params.poll === true
+  }
+
+  public isQueryMethodReload() {
+    return this.params.queryMethodReload === true
   }
 
   public onCancelToken(cb: VoidFunction) {
@@ -199,5 +204,20 @@ export class RequestParams {
     }
 
     return value
+  }
+
+  /**
+   * Async visits run in the background, so only a sync visit to another URL leaves the page.
+   * Partial visits update the page they're on, so for those only another path counts.
+   * A full QUERY visit may carry a different body to the same URL, so it always leaves the page.
+   */
+  public leavesPage(pageUrl: URL, destinationUrl: URL): boolean {
+    if (this.params.async) {
+      return false
+    }
+
+    return this.isPartial()
+      ? !isSameUrlWithoutQueryOrHash(destinationUrl, pageUrl)
+      : this.params.method === 'query' || !isSameUrlWithoutHash(destinationUrl, pageUrl)
   }
 }

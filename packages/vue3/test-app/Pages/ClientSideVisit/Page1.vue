@@ -40,6 +40,19 @@ const defaultErrors = () => {
   })
 }
 
+const preserveUrlErrors = () => {
+  router.post(
+    '/client-side-visit',
+    {},
+    {
+      preserveUrl: true,
+      onError: (err) => {
+        errors.value = Object.keys(err).length
+      },
+    },
+  )
+}
+
 const replace = () => {
   router.replace({
     preserveState: true,
@@ -93,6 +106,7 @@ const pushSameUrl = () => {
   <button @click="pushSameUrl">Push same URL</button>
   <button @click="defaultErrors">Errors (default)</button>
   <button @click="bagErrors">Errors (bag)</button>
+  <button @click="preserveUrlErrors">Errors (preserveUrl)</button>
   <div>Errors: {{ errors }}</div>
   <div>Finished: {{ finished }}</div>
   <div>Success: {{ success }}</div>

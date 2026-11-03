@@ -19,6 +19,10 @@ export default () => {
     form.delete('/dump/delete')
   }
 
+  const queryForm = () => {
+    form.query('/dump/query')
+  }
+
   const submitForm = () => {
     form.submit('post', '/dump/post')
   }
@@ -64,6 +68,9 @@ export default () => {
       </button>
       <button onClick={deleteForm} className="delete">
         DELETE form
+      </button>
+      <button onClick={queryForm} className="query">
+        QUERY form
       </button>
       <button onClick={submitForm} className="submit">
         SUBMIT form

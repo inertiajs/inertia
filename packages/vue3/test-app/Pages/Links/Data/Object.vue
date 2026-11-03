@@ -11,6 +11,7 @@ import { Link } from '@inertiajs/vue3'
     <Link as="button" method="put" href="/dump/put" :data="{ baz: 'put' }" class="put">PUT Link</Link>
     <Link as="button" method="patch" href="/dump/patch" :data="{ foo: 'patch' }" class="patch">PATCH Link</Link>
     <Link as="button" method="delete" href="/dump/delete" :data="{ bar: 'delete' }" class="delete">DELETE Link</Link>
+    <Link as="button" method="query" href="/dump/query" :data="{ baz: 'query' }" class="query">QUERY Link</Link>
 
     <Link href="/dump/get" :data="{ a: ['b', 'c'] }" class="qsaf-default">QSAF Defaults</Link>
     <Link href="/dump/get" :data="{ a: ['b', 'c'] }" queryStringArrayFormat="indices" class="qsaf-indices"

@@ -20,6 +20,9 @@ export default () => {
       <Link as="button" method="delete" href="/dump/delete" className="delete">
         DELETE Link
       </Link>
+      <Link as="button" method="query" href="/dump/query" className="query">
+        QUERY Link
+      </Link>
       <Link as="button" href={{ url: '/dump/post', method: 'post' }}>
         OBJECT Link
       </Link>

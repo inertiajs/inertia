@@ -23,7 +23,7 @@ jobs:
           version: 11.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
@@ -43,12 +43,16 @@ jobs:
 
   vite-plugin:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
-    name: Vite Plugin (Vite ${{ matrix.vite }})
+    name: Vite Plugin (Vite ${{ matrix.vite }}${{ matrix.os == 'windows-latest' && ', Windows' || '' }})
     timeout-minutes: 15
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-24.04]
         vite: ['7', '8']
+        include:
+          - os: windows-latest
+            vite: '8'
 
     steps:
       - name: Checkout
@@ -62,7 +66,7 @@ jobs:
           version: 11.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
@@ -72,6 +76,11 @@ jobs:
 
       - name: Override Vite version
         run: pnpm --filter './packages/vite' add -D vite@^${{ matrix.vite }}.0.0
+
+      - name: Use Bash for package scripts
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "pnpm_config_script_shell=C:/Program Files/Git/bin/bash.exe" >> "$GITHUB_ENV"
 
       - name: Build Inertia
         run: pnpm -r --filter './packages/{core,vite}' build

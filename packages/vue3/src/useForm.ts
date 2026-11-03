@@ -71,6 +71,7 @@ export interface InertiaFormProps<TForm extends object> {
   put(url: string, options?: UseFormSubmitOptions): void
   patch(url: string, options?: UseFormSubmitOptions): void
   delete(url: string, options?: UseFormSubmitOptions): void
+  query(url: string, options?: UseFormSubmitOptions): void
   cancel(): void
   dontRemember<K extends FormDataKeys<TForm>>(...fields: K[]): this
   optimistic<TProps>(callback: OptimisticCallback<TProps>): this
@@ -127,7 +128,7 @@ export default function useForm<TForm extends FormDataType<TForm> & ValidateForm
   data: TForm | (() => TForm),
 ): InertiaPrecognitiveForm<TForm>
 export default function useForm<TForm extends FormDataType<TForm> & ValidateFormData<TForm>>(
-  rememberKey: string,
+  rememberKey: string | null | undefined,
   data: TForm | (() => TForm),
 ): InertiaForm<TForm>
 export default function useForm<TForm extends FormDataType<TForm> & ValidateFormData<TForm>>(
@@ -244,6 +245,7 @@ export default function useForm<TForm extends FormDataType<TForm>>(
     put: createSubmitMethod('put'),
     patch: createSubmitMethod('patch'),
     delete: createSubmitMethod('delete'),
+    query: createSubmitMethod('query'),
 
     cancel() {
       if (cancelToken) {
