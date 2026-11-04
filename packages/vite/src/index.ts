@@ -17,9 +17,10 @@
  */
 
 import { existsSync } from 'node:fs'
-import { dirname, resolve } from 'node:path'
+import { dirname, posix, resolve } from 'node:path'
 import remapping from '@jridgewell/remapping'
 import { glob } from 'tinyglobby'
+import { normalizePath } from 'vite'
 import type { Plugin, ViteDevServer } from 'vite'
 import { defaultFrameworks } from './frameworks/index'
 import { transformPageResolution } from './pagesTransform'
@@ -94,8 +95,13 @@ function toFrameworkRecord(input?: FrameworkConfig | FrameworkConfig[]): Record<
  */
 async function warmupPageFiles(server: ViteDevServer, sourceFile: string, pageGlobs: string[]): Promise<void> {
   const files = await glob(pageGlobs, { cwd: dirname(sourceFile), absolute: true })
+  const root = normalizePath(server.config.root).replace(/\/?$/, '/')
 
-  files.forEach((file) => server.warmupRequest(file))
+  files.forEach((file) => {
+    const path = normalizePath(file)
+
+    server.warmupRequest(path.startsWith(root) ? '/' + path.slice(root.length) : posix.join('/@fs/', path))
+  })
 }
 
 export default function inertia(options: InertiaPluginOptions = {}): Plugin {

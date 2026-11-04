@@ -1,5 +1,5 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, posix, resolve } from 'node:path'
 import { normalizePath } from 'vite'
 import { describe, expect, it, vi } from 'vitest'
 import inertia from '../src'
@@ -203,7 +203,34 @@ describe('page warmup', () => {
       const warmupRequest = vi.fn()
       const plugin = inertia({ ssr: false })
 
-      plugin.configureServer!({ warmupRequest } as any)
+      plugin.configureServer!({ warmupRequest, config: { root: tmpDir } } as any)
+
+      const appFile = join(tmpDir, 'app.ts')
+      const code = `import { createInertiaApp } from '@inertiajs/vue3'
+export default createInertiaApp()`
+
+      plugin.transform!(code, appFile)
+
+      await vi.waitFor(() => {
+        expect(warmupRequest).toHaveBeenCalledTimes(3)
+      })
+
+      const warmedFiles = warmupRequest.mock.calls.map((call: any) => call[0]).sort()
+
+      expect(warmedFiles).toEqual(['/Pages/About.vue', '/Pages/Auth/Login.vue', '/Pages/Home.vue'])
+    } finally {
+      cleanup()
+    }
+  })
+
+  it('calls warmupRequest with /@fs/ urls for page files outside the root', async () => {
+    setup()
+
+    try {
+      const warmupRequest = vi.fn()
+      const plugin = inertia({ ssr: false })
+
+      plugin.configureServer!({ warmupRequest, config: { root: join(tmpDir, 'app') } } as any)
 
       const appFile = join(tmpDir, 'app.ts')
       const code = `import { createInertiaApp } from '@inertiajs/vue3'
@@ -218,9 +245,9 @@ export default createInertiaApp()`
       const warmedFiles = warmupRequest.mock.calls.map((call: any) => call[0]).sort()
 
       expect(warmedFiles).toEqual([
-        normalizePath(join(pagesDir, 'About.vue')),
-        normalizePath(join(pagesDir, 'Auth', 'Login.vue')),
-        normalizePath(join(pagesDir, 'Home.vue')),
+        posix.join('/@fs/', normalizePath(join(pagesDir, 'About.vue'))),
+        posix.join('/@fs/', normalizePath(join(pagesDir, 'Auth', 'Login.vue'))),
+        posix.join('/@fs/', normalizePath(join(pagesDir, 'Home.vue'))),
       ])
     } finally {
       cleanup()
