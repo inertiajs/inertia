@@ -94,6 +94,8 @@ const liveEventName = (payload: unknown): string | undefined => envelope(payload
 class Live {
   protected transport: AnyLiveTransport | null = null
   protected throttle = DEFAULT_THROTTLE
+  protected jitter = 0
+  protected jitterDelay: number | null = null
   protected pauseWhenHidden = true
   protected liveProps: Record<string, LiveProp> = {}
   protected subscriptions = new Map<string, Subscription>()
@@ -118,6 +120,7 @@ class Live {
 
     this.transport = options.transport
     this.throttle = options.throttle ?? DEFAULT_THROTTLE
+    this.jitter = options.jitter ?? 0
     this.pauseWhenHidden = options.pauseWhenHidden ?? true
 
     // A default only, so a resolver the app chose itself is left alone. Bound,
@@ -151,7 +154,7 @@ class Live {
         Object.keys(this.liveProps)
           .filter((prop) => this.isRequested(prop))
           .forEach((prop) => this.markDirty(prop, { force: true }))
-        this.scheduleFlush()
+        this.scheduleFlush({ jitter: true })
       }
     })
 
@@ -337,7 +340,7 @@ class Live {
       this.markDirty(prop)
     })
 
-    this.scheduleFlush()
+    this.scheduleFlush({ jitter: true })
 
     if (received) {
       this.scheduleWrite()
@@ -407,8 +410,12 @@ class Live {
   /**
    * Keeps whichever deadline comes first, so a prop that owes nothing never
    * waits out a slower neighbour's timer.
+   *
+   * Jitter is drawn once per flush and kept until that flush fires. A fresh
+   * draw per event would let the earliest of a burst win, which shrinks the
+   * spread the more events the burst has.
    */
-  protected scheduleFlush(): void {
+  protected scheduleFlush({ jitter = false }: { jitter?: boolean } = {}): void {
     if (this.dirty.size === 0 || this.isPaused() || typeof window === 'undefined') {
       return
     }
@@ -421,9 +428,13 @@ class Live {
       return
     }
 
+    if (jitter && this.jitterDelay === null) {
+      this.jitterDelay = Math.random() * this.jitter
+    }
+
     // Even a flush that owes the throttle nothing waits out the collect window,
     // so props still on their way join the request rather than following it
-    const delay = Math.max(COLLECT_WINDOW, wait)
+    const delay = Math.max(COLLECT_WINDOW, wait) + (this.jitterDelay ?? 0)
     const at = Date.now() + delay
 
     // Strictly earlier, or a burst of events a millisecond apart would keep
@@ -438,6 +449,7 @@ class Live {
       at,
       timeoutId: window.setTimeout(() => {
         this.pending = null
+        this.jitterDelay = null
         this.attemptFlush()
       }, delay),
     }
