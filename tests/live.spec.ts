@@ -245,6 +245,25 @@ test.describe('Live props', () => {
     expect(liveRequests()).toBe(3)
   })
 
+  test('it waits out the jitter set on the app before reloading', async ({ page }) => {
+    await page.addInitScript(() => {
+      Math.random = () => 0.5
+    })
+
+    pageLoads.watch(page)
+    await page.goto('/live?liveJitter=2000')
+    requests.listen(page)
+
+    // Half the 2s jitter on top of the collect window, so about a second
+    const reload = page.waitForResponse('**/live**')
+    await emit(page, 'orders.1', ORDER_EVENT)
+    await page.waitForTimeout(600)
+    expect(liveRequests()).toBe(0)
+
+    await reload
+    expect(liveRequests()).toBe(1)
+  })
+
   test('it lets a listener cancel the reload', async ({ page }) => {
     pageLoads.watch(page)
     await page.goto('/live')
