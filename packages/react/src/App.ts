@@ -160,16 +160,24 @@ export default function App<SharedProps extends PageProps = PageProps>({
       swapComponent(pending)
     }
 
-    const syncServerHead = (event: { detail: { page: Page } }) => {
-      headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+    const syncServerHead = (event: { detail: { page?: Page } }) => {
+      if (event.detail.page) {
+        headManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+      }
     }
 
+    // A visit that ends on the same URL replaces the history entry and doesn't fire 'navigate',
+    // so we also sync after every server response, whether it succeeded or returned errors.
     const removeNavigateListener = router.on('navigate', syncServerHead)
     const removeClientVisitListener = router.on('clientVisit', syncServerHead)
+    const removeSuccessListener = router.on('success', syncServerHead)
+    const removeErrorListener = router.on('error', syncServerHead)
 
     return () => {
       removeNavigateListener()
       removeClientVisitListener()
+      removeSuccessListener()
+      removeErrorListener()
     }
   }, [])
 

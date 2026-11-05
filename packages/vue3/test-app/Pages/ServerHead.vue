@@ -7,6 +7,7 @@ defineProps<{
 }>()
 
 const override = new URLSearchParams(window.location.search).has('override')
+const currentUrl = window.location.href
 
 function replaceHead() {
   router.replaceProp('head', [
@@ -25,6 +26,8 @@ function replaceHead() {
     <p id="foo">{{ foo }}</p>
     <button @click="router.reload({ only: ['foo'] })">Reload foo</button>
     <button @click="replaceHead">Replace head client-side</button>
+    <button @click="router.post(currentUrl)">Submit to the same URL</button>
+    <button @click="router.post(currentUrl, { invalid: true })">Submit invalid data</button>
     <Link :href="next">Next server head page</Link>
   </div>
 </template>

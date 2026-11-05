@@ -4569,6 +4569,20 @@ app.get('/server-head/keyed/next', (req, res) =>
   }),
 )
 
+app.post('/server-head/keyed', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ServerHead',
+    props: {
+      next: '/server-head/keyed/next',
+      head: [
+        `<title data-inertia="title">${req.body.invalid ? 'Keyed Head Invalid' : 'Keyed Head Submitted'}</title>`,
+        '<meta data-inertia="description" name="description" content="Keyed description submitted">',
+      ],
+      errors: req.body.invalid ? { name: 'The name field is required.' } : {},
+    },
+  }),
+)
+
 app.get('/server-head/custom-prop', (req, res) =>
   inertia.render(req, res, {
     component: 'ServerHead',
