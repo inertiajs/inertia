@@ -21,6 +21,8 @@ export default ({ foo, next }: { foo: string; next: string }) => {
       <p id="foo">{foo}</p>
       <button onClick={() => router.reload({ only: ['foo'] })}>Reload foo</button>
       <button onClick={replaceHead}>Replace head client-side</button>
+      <button onClick={() => router.post(window.location.href)}>Submit to the same URL</button>
+      <button onClick={() => router.post(window.location.href, { invalid: true })}>Submit invalid data</button>
       <Link href={next}>Next server head page</Link>
     </div>
   )
