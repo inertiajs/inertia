@@ -1,3 +1,9 @@
+<script module lang="ts">
+  import PreserveEqualPropsLayout from '@/Layouts/PreserveEqualPropsLayout.svelte'
+
+  export const layout = PreserveEqualPropsLayout
+</script>
+
 <script lang="ts">
   import { page, router } from '@inertiajs/svelte'
   import { untrack } from 'svelte'

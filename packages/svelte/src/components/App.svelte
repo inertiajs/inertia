@@ -174,6 +174,49 @@
       : child
   }
 
+  let layoutPropsCache: {
+    component: unknown
+    source: PageProps
+    keys: string
+    extra: Record<string, unknown>
+    props: PageProps
+  }[] = []
+
+  // Same props object while the layout's own props are unchanged; page props are read through getters
+  function layoutProps(
+    index: number,
+    component: unknown,
+    pageProps: PageProps,
+    extra: Record<string, unknown>,
+  ): PageProps {
+    const keys = Object.keys(pageProps).join('\0')
+    const cached = layoutPropsCache[index]
+
+    if (
+      cached &&
+      cached.component === component &&
+      cached.source === pageProps &&
+      cached.keys === keys &&
+      Object.keys(extra).length === Object.keys(cached.extra).length &&
+      Object.entries(extra).every(([name, value]) => name in cached.extra && cached.extra[name] === value)
+    ) {
+      return cached.props
+    }
+
+    const props: PageProps = {}
+
+    for (const name of Object.keys(pageProps)) {
+      if (!(name in extra)) {
+        Object.defineProperty(props, name, { get: () => pageProps[name], enumerable: true, configurable: true })
+      }
+    }
+
+    Object.assign(props, extra)
+    layoutPropsCache[index] = { component, source: pageProps, keys, extra, props }
+
+    return props
+  }
+
   function resolveLayout(
     layout: LayoutType,
     child: RenderProps,
@@ -195,16 +238,15 @@
     if (layouts.length > 0) {
       const dynamicProps = isServer ? { shared: {}, named: {} } : { shared: storeState.shared, named: storeState.named }
 
-      return layouts.reduceRight((child, layout) => {
+      return layouts.reduceRight((child, layout, index) => {
         return {
           ...h(
             layout.component,
-            {
-              ...pageProps,
+            layoutProps(index, layout.component, pageProps, {
               ...layout.props,
               ...dynamicProps.shared,
               ...(layout.name ? dynamicProps.named[layout.name] || {} : {}),
-            },
+            }),
             [child],
             key,
           ),

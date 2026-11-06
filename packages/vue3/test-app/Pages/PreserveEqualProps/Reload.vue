@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { router, usePage } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import PreserveEqualPropsLayout from '@/Layouts/PreserveEqualPropsLayout.vue'
+
+defineOptions({
+  layout: PreserveEqualPropsLayout,
+})
 
 const props = defineProps<{
   file: { url: string; pages: number }

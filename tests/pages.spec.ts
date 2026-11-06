@@ -23,7 +23,7 @@ test('it preserves equal props from the previous page', async ({ page }) => {
 test.describe('preserve equal props on reload', () => {
   const counts = (page: Page) =>
     Promise.all(
-      ['#effect-count', '#store-effect-count'].map(async (selector) =>
+      ['#effect-count', '#store-effect-count', '#layout-effect-count'].map(async (selector) =>
         Number((await page.locator(selector).textContent())?.replace(/\D/g, '')),
       ),
     )
@@ -36,6 +36,7 @@ test.describe('preserve equal props on reload', () => {
   test('it runs each effect on a prop once on mount', async ({ page }) => {
     await expect(page.locator('#effect-count')).toHaveText('Effect count: 1')
     await expect(page.locator('#store-effect-count')).toHaveText('Store effect count: 1')
+    await expect(page.locator('#layout-effect-count')).toHaveText('Layout effect count: 1')
   })
 
   test('it does not re-run effects on a preserved prop after partial reloads (usePoll with only)', async ({ page }) => {

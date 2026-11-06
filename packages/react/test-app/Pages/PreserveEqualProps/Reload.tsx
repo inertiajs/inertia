@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react'
 import { useEffect, useState } from 'react'
+import PreserveEqualPropsLayout from '@/Layouts/PreserveEqualPropsLayout'
 
 const Reload = ({ file, tick }: { file: { url: string; pages: number }; tick: number }) => {
   const page = usePage<{ file: { url: string; pages: number } }>()
@@ -29,5 +30,7 @@ const Reload = ({ file, tick }: { file: { url: string; pages: number }; tick: nu
     </div>
   )
 }
+
+Reload.layout = PreserveEqualPropsLayout
 
 export default Reload
