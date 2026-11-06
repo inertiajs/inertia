@@ -298,6 +298,25 @@ test.describe('layout props', () => {
   })
 })
 
+test.describe('SSR Suspense', () => {
+  test('it keeps the server HTML of a suspended boundary in place after hydration', async ({ page }) => {
+    test.skip(process.env.PACKAGE !== 'react', 'React-only test')
+
+    consoleMessages.listen(page)
+
+    await page.goto('/ssr/suspense-hydration')
+
+    await expect(page.getByTestId('hydration-status')).toHaveText('Hydrated: true')
+    await expect(page.getByTestId('suspended-content')).toHaveText('Server rendered content')
+    await expect(page.getByTestId('suspense-fallback')).toHaveCount(0)
+
+    await page.evaluate(() => window.resolveSuspendedContent?.())
+
+    await expect(page.getByTestId('suspended-content')).toHaveText('Server rendered content')
+    expect(consoleMessages.errors).toHaveLength(0)
+  })
+})
+
 test.describe('SSR InfiniteScroll', () => {
   test('it renders correct slot props during SSR', async ({ page }) => {
     const response = await page.request.get('/ssr/infinite-scroll')

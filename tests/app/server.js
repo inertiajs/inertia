@@ -136,6 +136,13 @@ app.get('/ssr/layout-props-callback', (req, res) =>
   }),
 )
 
+app.get('/ssr/suspense-hydration', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/SuspenseHydration',
+    props: {},
+  }),
+)
+
 app.get('/ssr/head-title', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/HeadTitle',
