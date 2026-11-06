@@ -12,33 +12,17 @@
 
   let { nestedA, nestedB }: Props = $props()
 
-  let effectACount = $state(1)
-  let effectBCount = $state(1)
-
-  // svelte-ignore state_referenced_locally
-  let previousNestedAJson = $state(JSON.stringify(nestedA))
+  let effectACount = $state(0)
+  let effectBCount = $state(0)
 
   $effect(() => {
-    const currentJson = JSON.stringify(nestedA)
-
-    if (currentJson !== previousNestedAJson) {
-      effectACount++
-      previousNestedAJson = currentJson
-    }
+    void nestedA
+    untrack(() => effectACount++)
   })
 
-  // svelte-ignore state_referenced_locally
-  let previousNestedBJson = $state(JSON.stringify(nestedB))
-
   $effect(() => {
-    const currentJson = JSON.stringify(nestedB)
-
-    if (currentJson !== previousNestedBJson) {
-      untrack(() => {
-        effectBCount++
-        previousNestedBJson = currentJson
-      })
-    }
+    void nestedB
+    untrack(() => effectBCount++)
   })
 </script>
 

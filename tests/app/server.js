@@ -2223,6 +2223,15 @@ app.get('/preserve-equal-props', (req, res) => {
   })
 })
 app.post('/preserve-equal-props/back', (req, res) => res.redirect(303, '/preserve-equal-props'))
+app.get('/preserve-equal-props/reload', (req, res) =>
+  inertia.render(req, res, {
+    component: 'PreserveEqualProps/Reload',
+    props: {
+      file: { url: req.query.file === 'other' ? '/files/other.pdf' : '/files/report.pdf', pages: 3 },
+      tick: Number(req.query.tick ?? 0),
+    },
+  }),
+)
 
 app.all('/sleep', (req, res) => setTimeout(() => res.send(''), 2000))
 app.post('/redirect', (req, res) => res.redirect(303, '/dump/get'))

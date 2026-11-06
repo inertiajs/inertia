@@ -14,7 +14,7 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(page.getByText('page.props.foo is default', { exact: true })).toBeVisible()
   await expect(page.getByText('pageProps.foo is default')).toBeVisible()
   await expect(page.getByText('sveltePage.props.foo is default')).toBeVisible()
-  await expect(consoleMessages.messages).toHaveLength(12)
+  await expect(consoleMessages.messages).toHaveLength(9)
   await expect(consoleMessages.messages[0]).toBe('[script] foo prop is default')
   await expect(consoleMessages.messages[1]).toBe('[script] page.props.foo is default')
   await expect(consoleMessages.messages[2]).toBe('[script] sveltePage.props.foo is default')
@@ -24,9 +24,6 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(consoleMessages.messages[6]).toBe('[onMount] foo prop is default')
   await expect(consoleMessages.messages[7]).toBe('[onMount] page.props.foo is default')
   await expect(consoleMessages.messages[8]).toBe('[onMount] sveltePage.props.foo is default')
-  await expect(consoleMessages.messages[9]).toBe('[reactive expression] foo prop is default')
-  await expect(consoleMessages.messages[10]).toBe('[reactive expression] page.props.foo is default')
-  await expect(consoleMessages.messages[11]).toBe('[reactive expression] sveltePage.props.foo is default')
   await expect(await page.locator('#input').inputValue()).toEqual('default')
 
   consoleMessages.messages = []

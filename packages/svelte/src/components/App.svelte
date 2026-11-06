@@ -14,6 +14,7 @@
 <script lang="ts">
   import { isPropsObjectOrCallback, isPropsObject, normalizeLayouts } from '@inertiajs/core'
   import { router } from '@inertiajs/core'
+  import { isEqual } from 'es-toolkit'
   import { onMount } from 'svelte'
   import type { Component } from 'svelte'
   import { setHydrationContext } from '../hydration'
@@ -35,18 +36,41 @@
   // svelte-ignore state_referenced_locally
   let component = $state(initialComponent)
   let key = $state<number | null>(null)
+  // Raw, so core's objects are not wrapped in a new proxy on every swap
   // svelte-ignore state_referenced_locally
-  let page = $state({ ...initialPage, flash: initialPage.flash ?? {} })
-  let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, key))
+  let page = $state.raw({ ...initialPage, flash: initialPage.flash ?? {} })
+  // svelte-ignore state_referenced_locally
+  let pageProps = $state<Page['props']>({ ...initialPage.props })
+  let renderProps = $derived.by<RenderProps>(() => resolveRenderProps(component, page, pageProps, key))
+
+  function writePageProps(props: Page['props'], previous: Page['props'], remount: boolean): void {
+    if (remount) {
+      pageProps = { ...props }
+      return
+    }
+
+    for (const [name, value] of Object.entries(props)) {
+      // A kept reference is written again if the proxy was changed locally since core sent it
+      if (!(name in previous) || previous[name] !== value || !isEqual($state.snapshot(pageProps[name]), value)) {
+        pageProps[name] = value
+      }
+    }
+
+    for (const name of Object.keys(previous)) {
+      if (!(name in props)) {
+        delete pageProps[name]
+      }
+    }
+  }
 
   // Synchronous initialization so the global page store is populated during SSR
   // ($effect.pre does not run during Svelte 5 SSR)
   // svelte-ignore state_referenced_locally
-  setPage(page)
+  setPage({ ...page, props: pageProps })
 
   // Reactively update the global page state when local page state changes
   $effect.pre(() => {
-    setPage(page)
+    setPage({ ...page, props: pageProps })
   })
 
   const isServer = typeof window === 'undefined'
@@ -64,10 +88,12 @@
       initialPage,
       resolveComponent,
       swapComponent: async (args) => {
+        const remount = !args.preserveState || args.component.default !== component.default
+        writePageProps(args.page.props, page.props, remount)
         // Explicitly sync the global page store before swapping components,
         // ensuring the page store is up-to-date when the new component's
         // script block runs (necessary for async: true).
-        setPage(args.page)
+        setPage({ ...args.page, props: pageProps })
         component = args.component
         page = args.page
         key = args.preserveState ? key : Date.now()
@@ -107,8 +133,13 @@
     )
   }
 
-  function resolveRenderProps(component: ResolvedComponent, page: Page, key: number | null = null): RenderProps {
-    const child = h(component.default, page.props, [], key)
+  function resolveRenderProps(
+    component: ResolvedComponent,
+    page: Page,
+    pageProps: PageProps,
+    key: number | null = null,
+  ): RenderProps {
+    const child = h(component.default, pageProps, [], key)
 
     if (component.layout && isRenderFunction(component.layout)) {
       return (component.layout as LayoutResolver)(h, child)
@@ -123,7 +154,7 @@
       (layoutValue as Function).length <= 1 &&
       typeof (layoutValue as Function).prototype === 'undefined'
     ) {
-      const result = (layoutValue as Function)(page.props)
+      const result = (layoutValue as Function)(pageProps)
 
       if (isPropsObjectOrCallback(result, isComponent)) {
         effectiveLayout = defaultLayout?.(page.component, page) as LayoutType | undefined
@@ -139,7 +170,7 @@
     }
 
     return effectiveLayout
-      ? resolveLayout(effectiveLayout, child, page.props, key, !!component.layout && !callbackProps, callbackProps)
+      ? resolveLayout(effectiveLayout, child, pageProps, key, !!component.layout && !callbackProps, callbackProps)
       : child
   }
 
