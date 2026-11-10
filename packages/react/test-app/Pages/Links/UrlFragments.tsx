@@ -32,8 +32,12 @@ export default () => {
         <Link href="/links/url-fragments#non-existent-fragment" className="non-existent-fragment">
           Non-existent fragment link
         </Link>
+        <a href="#café" className="non-ascii-fragment">
+          Non-ASCII fragment anchor
+        </a>
 
         <div id="target">This is the element with id 'target'</div>
+        <div id="café">This is the element with id 'café'</div>
       </div>
     </div>
   )

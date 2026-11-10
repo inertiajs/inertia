@@ -881,6 +881,14 @@ test.describe('URL fragment navigation (& automatic scrolling)', () => {
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 0 & 0')).toBeVisible()
   })
+
+  test('scrolls to the fragment element with a non-ASCII id when clicking a plain anchor', async ({ page }) => {
+    await page.getByRole('link', { exact: true, name: 'Non-ASCII fragment anchor' }).click()
+    await expect(page).toHaveURL(`/links/url-fragments#${encodeURIComponent('café')}`)
+    await waitForFragmentScroll(page)
+    await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
+    await expect(page.getByText('Document scroll position is 0 & 0')).not.toBeVisible()
+  })
 })
 
 test.describe('scroll', () => {
@@ -890,6 +898,15 @@ test.describe('scroll', () => {
 
     const scrollTop = await page.evaluate(() => document.documentElement.scrollTop)
     expect(scrollTop).toBeGreaterThan(500)
+  })
+
+  test('scrolls to the fragment with a non-ASCII id on initial page load', async ({ page }) => {
+    await page.goto('/links/url-fragments#café')
+    await expect(page.getByText('This is the element with id')).toHaveCount(2)
+    await waitForFragmentScroll(page)
+
+    const scrollTop = await page.evaluate(() => document.documentElement.scrollTop)
+    expect(scrollTop).toBeGreaterThan(0)
   })
 
   test('does not scroll when clicking the same fragment link', async ({ page }) => {

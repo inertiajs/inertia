@@ -23,7 +23,9 @@
     <a href="/links/url-fragments#non-existent-fragment" use:inertia class="non-existent-fragment"
       >Non-existent fragment link</a
     >
+    <a href="#café" class="non-ascii-fragment">Non-ASCII fragment anchor</a>
 
     <div id="target">This is the element with id 'target'</div>
+    <div id="café">This is the element with id 'café'</div>
   </div>
 </div>
