@@ -11,13 +11,24 @@ interface UserResponse {
   }
 }
 
+interface SearchResponse {
+  method: string
+  name: string
+  query: Record<string, string>
+}
+
 const updateUser = useHttp<{ name: string; email: string }, UserResponse>({
   name: '',
   email: '',
 })
 
+const searchUsers = useHttp<{ name: string }, SearchResponse>({
+  name: '',
+})
+
 const lastPutResponse = ref<UserResponse | null>(null)
 const lastPatchResponse = ref<UserResponse | null>(null)
+const lastQueryResponse = ref<SearchResponse | null>(null)
 
 const performPut = async () => {
   try {
@@ -34,6 +45,15 @@ const performPatch = async () => {
     lastPatchResponse.value = result
   } catch (e) {
     console.error('PATCH failed:', e)
+  }
+}
+
+const performQuery = async () => {
+  try {
+    const result = await searchUsers.query('/api/users/search')
+    lastQueryResponse.value = result
+  } catch (e) {
+    console.error('QUERY failed:', e)
   }
 }
 </script>
@@ -68,6 +88,20 @@ const performPatch = async () => {
       <div v-if="lastPatchResponse" id="patch-result">
         PATCH Success - ID: {{ lastPatchResponse.id }}, Name: {{ lastPatchResponse.user.name }}, Email:
         {{ lastPatchResponse.user.email }}
+      </div>
+    </section>
+
+    <!-- QUERY Request Test -->
+    <section id="query-test">
+      <h2>QUERY Request</h2>
+      <label>
+        Name
+        <input type="text" id="query-name" v-model="searchUsers.name" />
+      </label>
+      <button @click="performQuery" id="query-button">Search Users (QUERY)</button>
+      <div v-if="lastQueryResponse" id="query-result">
+        {{ lastQueryResponse.method }} Success - Name: {{ lastQueryResponse.name }}, Query String:
+        {{ JSON.stringify(lastQueryResponse.query) }}
       </div>
     </section>
   </div>

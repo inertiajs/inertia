@@ -83,7 +83,7 @@ export const requests = {
   },
 }
 
-export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'patch' | 'put' | 'delete') => {
+export const shouldBeDumpPage = async (page: Page, method: 'get' | 'post' | 'patch' | 'put' | 'delete' | 'query') => {
   await expect(page).toHaveURL(new RegExp(`dump/${method}`))
   // Wait for Vue/React/Svelte to mount and set the dump (Firefox may need this)
   await page.waitForFunction(() => window._inertia_request_dump !== undefined)

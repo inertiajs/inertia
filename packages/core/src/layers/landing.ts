@@ -1,5 +1,7 @@
 import { router } from '..'
+import { eventHandler } from '../eventHandler'
 import { fireBeforeUpdateEvent } from '../events'
+import { isFormData } from '../formData'
 import { history } from '../history'
 import {
   addressLayer,
@@ -18,12 +20,13 @@ import {
   promoteLayer,
   responseTarget,
   tierOf,
+  tierUrlOf,
   withTier,
 } from '../layers'
 import { page as currentPage } from '../page'
 import type { RequestParams } from '../requestParams'
-import { BaseSnapshot, LayerState, Page, Target } from '../types'
-import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl, urlWithoutHash } from '../url'
+import { BaseSnapshot, LayerState, Page, Target, Tier } from '../types'
+import { hrefToUrl, isSameUrlWithoutHash, isSameUrlWithoutQueryOrHash, setHashIfSameUrl, urlWithoutHash } from '../url'
 import { layerClosing } from './closing'
 import { registryClose, registryRekey } from './handles'
 import { mergeOncePropsInto, mergeProps, preserveEqualProps } from './merge'
@@ -354,12 +357,52 @@ const landingVisit = (params: RequestParams): LandingVisit => {
   }
 }
 
+/**
+ * A client visit, like the URL updates of <InfiniteScroll>, may change the query string while a reload of the
+ * tier is in flight. The reload then keeps that URL instead of putting the previous query string back.
+ */
+const keepsCurrentUrl = (params: RequestParams, originatingPage: Page, currentUrl: URL, responseUrl: URL): boolean => {
+  const visit = params.all()
+
+  if (!visit.async) {
+    return false
+  }
+
+  const originatingUrl = hrefToUrl(tierUrlOf(originatingPage, visit.layerId))
+
+  const reloadsOriginatingTier = isSameUrlWithoutHash(visit.url, originatingUrl)
+  const urlChangedSince = !isSameUrlWithoutHash(currentUrl, originatingUrl)
+  const landsOnCurrentPath = isSameUrlWithoutQueryOrHash(responseUrl, currentUrl)
+
+  return reloadsOriginatingTier && urlChangedSince && landsOnCurrentPath
+}
+
+const queryMethodData = (response: Page, params: RequestParams, tier: Tier): Page['queryMethodData'] => {
+  const { method, data, url, preserveUrl } = params.all()
+
+  // Redirects (e.g. after a failed validation) are followed with GET,
+  // so their pages don't carry the QUERY request data.
+  const wasRenderedByQuery =
+    method === 'query' &&
+    !isFormData(data) &&
+    isSameUrlWithoutHash(hrefToUrl(response.url), url) &&
+    Object.keys(response.props.errors ?? {}).length === 0
+
+  if (!wasRenderedByQuery) {
+    return undefined
+  }
+
+  // Like reload data on a GET page, it becomes part of the tier unless the URL is preserved (e.g. infinite scroll).
+  return params.isQueryMethodReload() && preserveUrl ? tier.queryMethodData : data
+}
+
 // Props are merged only once the plan says it lands in that layer; a promoted response keeps its own.
 export const landResponse = async (
   response: Page,
   params: RequestParams,
   captured: BaseSnapshot,
   optimisticId: number | null = null,
+  { originatingPage = captured.page, onCommit = () => {} }: { originatingPage?: Page; onCommit?: VoidFunction } = {},
 ): Promise<string | undefined> => {
   const target = responseTarget(currentPage.get(), response, params.all().layerId)
 
@@ -373,10 +416,30 @@ export const landResponse = async (
 
   await rememberedStateInto(response, params)
 
+  // The request may have been cancelled while the response was being prepared,
+  // for example when the user navigated back or a visit to another page committed
+  if (params.wasCancelledAtAll()) {
+    return undefined
+  }
+
+  const { layerId } = params.all()
+  const tier = tierOf(currentPage.get(), layerId)
+  const tierUrl = hrefToUrl(tierUrlOf(currentPage.get(), layerId))
+
+  // A redirect decides where the visit lands, so we compare against the page the server returned
+  const leavesTier = params.leavesPage(tierUrl, hrefToUrl(response.url))
+  const keepsUrl = keepsCurrentUrl(params, originatingPage, tierUrl, hrefToUrl(response.url))
+
   params.setPreserveOptions(response)
 
+  const queryData = queryMethodData(response, params, tier)
+
+  if (queryData) {
+    response.queryMethodData = queryData
+  }
+
   // `preserveUrl` puts the base's url on the response, so the layer's own is held here.
-  const responseUrl = pageUrl(response, params.all().url)
+  const responseUrl = keepsUrl ? tierUrlOf(currentPage.get(), layerId) : pageUrl(response, params.all().url)
 
   response.url = history.preserveUrl ? currentPage.get().url : responseUrl
 
@@ -412,6 +475,15 @@ export const landResponse = async (
     viewTransition: params.all().viewTransition,
     cached: params.all().cached,
     visitId: params.all().id,
+    isCancelled: () => params.wasCancelledAtAll(),
+    onCommit: () => {
+      onCommit()
+
+      // The tier is only left once it's replaced, a dropped visit leaves its requests running
+      if (leavesTier) {
+        eventHandler.fireInternalEvent('leavePage', { url: tierUrl, layerId })
+      }
+    },
   })
 
   return landing.landedOn

@@ -20,6 +20,9 @@ export default () => {
       <Link as="button" method="delete" href="/dump/delete" data={{ bar: 'delete' }} className="delete">
         DELETE Link
       </Link>
+      <Link as="button" method="query" href="/dump/query" data={{ baz: 'query' }} className="query">
+        QUERY Link
+      </Link>
 
       <Link href="/dump/get" data={{ a: ['b', 'c'] }} className="qsaf-default">
         QSAF Defaults

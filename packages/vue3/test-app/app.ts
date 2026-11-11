@@ -1,8 +1,11 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, router, setLayoutProps } from '@inertiajs/vue3'
+import { echo } from '@inertiajs/vue3/echo'
 import type { DefineComponent } from 'vue'
 import { createApp, createSSRApp, h } from 'vue'
+import { resolveFakeEcho } from './fakeEcho'
+import { fakeLiveTransport } from './fakeLiveTransport'
 import AdminLayout from './Layouts/AdminLayout.vue'
 import AppLayout from './Layouts/AppLayout.vue'
 import DefaultLayout from './Layouts/DefaultLayout.vue'
@@ -54,6 +57,11 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 700))
     }
 
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
+    }
+
     return pages[`./Pages/${name}.vue`]
   },
   layer: Layer,
@@ -78,6 +86,19 @@ createInertiaApp({
     inst.mount(el)
   },
   http: getHttpConfig(),
+  // Only the live props page has a manifest, and the fake transport registers a
+  // socket id resolver that other tests don't expect
+  ...(window.location.pathname === '/live' && {
+    live: {
+      transport: fakeLiveTransport(),
+      // Opt-in so the tests that rely on the defaults keep their timings
+      ...(params.has('liveThrottle') && { throttle: Number(params.get('liveThrottle')) }),
+      ...(params.get('liveKeepAlive') === '1' && { pauseWhenHidden: false }),
+    },
+  }),
+  ...(window.location.pathname === '/echo-transport' && {
+    live: echo({ resolve: resolveFakeEcho }),
+  }),
   ...(params.has('withAppDefaults') && {
     defaults: {
       visitOptions: (href: string, options: VisitOptions) => {

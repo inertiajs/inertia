@@ -34,6 +34,7 @@ export { createLayerApi, type LayerApi } from './router'
 export { layerDialogAttributes, mountLayerDialog } from './layers/dialog'
 export { topPageOf } from './layers'
 export { layerIdOf } from './layers/render'
+export { configureLive } from './live'
 export { shouldIntercept, shouldNavigate } from './navigationEvents'
 export { resolveInitialApp } from './layers/walk'
 export {
@@ -42,8 +43,10 @@ export {
   partialReloadRequestsProp,
   partialReloadRequestsSomeProps,
 } from './partialReload'
+export { propRefreshes } from './propRefreshes'
 export { progress, default as setupProgress } from './progress'
 export { FormComponentResetSymbol, resetFormFields } from './resetFormFields'
+export { socketId } from './socketId'
 export { buildSSRBody } from './ssrUtils'
 export * from './types'
 export {

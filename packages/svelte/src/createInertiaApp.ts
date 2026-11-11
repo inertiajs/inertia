@@ -1,5 +1,6 @@
 import {
   buildSSRBody,
+  configureLive,
   createHeadManager,
   exposeInterceptors,
   getInitialPageFromDOM,
@@ -12,6 +13,7 @@ import {
   type CreateInertiaAppOptionsForCSR,
   type InertiaAppSSRResponse,
   type LoadingOption,
+  type LiveAppOption,
   type Page,
   type PageProps,
   type SharedPageProps,
@@ -41,11 +43,12 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<SharedProps>,
   SvelteRenderResult | void,
   SvelteInertiaAppConfig
-> & {
-  layer?: LayerComponent
-  loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
-  withApp?: never
-}
+> &
+  LiveAppOption & {
+    layer?: LayerComponent
+    loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
+    withApp?: never
+  }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
   CreateInertiaAppOptions<
@@ -55,11 +58,12 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
     SvelteInertiaAppConfig
   >,
   'setup'
-> & {
-  page?: Page<SharedProps>
-  layer?: LayerComponent
-  loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
-} & (
+> &
+  LiveAppOption & {
+    page?: Page<SharedProps>
+    layer?: LayerComponent
+    loading?: LoadingOption<ResolvedComponent['default'] | ResolvedComponent>
+  } & (
     | { setup?: undefined; withApp?: SvelteWithApp<SharedProps> }
     | { setup: (options: SetupOptions<SharedProps>) => SvelteRenderResult | void; withApp?: never }
   )
@@ -93,6 +97,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     layout,
     layer,
     loading,
+    live,
     serverHead,
     withApp,
     dev = !!import.meta.env?.DEV,
@@ -108,6 +113,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (live) {
+    configureLive(live)
   }
 
   if (dev) {

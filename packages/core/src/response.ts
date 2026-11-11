@@ -25,6 +25,7 @@ import { hrefToUrl, isSameUrlWithoutHash, setHashIfSameUrl } from './url'
 export class Response {
   protected wasPrefetched = false
   protected processed = false
+  protected pageApplied = false
 
   constructor(
     protected requestParams: RequestParams,
@@ -49,7 +50,10 @@ export class Response {
   }
 
   public async handlePrefetch() {
-    if (isSameUrlWithoutHash(this.requestParams.all().url, window.location)) {
+    const { method, url } = this.requestParams.all()
+
+    // A QUERY prefetch may carry a different body than the current page, so it's only used once visited
+    if (method !== 'query' && isSameUrlWithoutHash(url, window.location)) {
       this.handle()
     }
   }
@@ -59,6 +63,9 @@ export class Response {
   }
 
   public async process() {
+    // A cached response is processed again for every visit that uses it
+    this.pageApplied = false
+
     if (this.requestParams.all().prefetch) {
       this.wasPrefetched = true
       this.requestParams.all().prefetch = false
@@ -71,6 +78,10 @@ export class Response {
 
     this.requestParams.runCallbacks()
     this.processed = true
+
+    if (this.requestParams.wasCancelledAtAll()) {
+      return
+    }
 
     if (!this.isInertiaResponse()) {
       return this.handleNonInertiaResponse()
@@ -117,45 +128,52 @@ export class Response {
 
     history.preserveUrl = this.requestParams.all().preserveUrl
 
-    const landedOn = await this.setPage()
+    try {
+      const landedOn = await this.setPage()
 
-    const page = currentPage.get()
-    const tier = landedOn === undefined ? page : layerAt(page, landedOn)
-    // A form inside a layer reads back its own tier, as its flash and errors already do.
-    const landedPage = landedOn === undefined || !tier ? page : layerPageOf(page, tier as LayerState)
-
-    if (tier) {
-      const { flash } = tier
-
-      if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
-        fireFlashEvent(flash)
-        this.requestParams.all().onFlash(flash)
+      // A visit that's cancelled before its page is applied reports nothing, but once the page is shown it still does
+      if (this.requestParams.wasCancelledAtAll() && !this.pageApplied) {
+        return
       }
 
-      const errors = (tier.props.errors || {}) as Errors & ErrorBag
+      const page = currentPage.get()
+      const tier = landedOn === undefined ? page : layerAt(page, landedOn)
+      // A form inside a layer reads back its own tier, as its flash and errors already do.
+      const landedPage = landedOn === undefined || !tier ? page : layerPageOf(page, tier as LayerState)
 
-      if (Object.keys(errors).length > 0) {
-        const scopedErrors = this.getScopedErrors(errors)
+      if (tier) {
+        const { flash } = tier
 
-        fireErrorEvent(scopedErrors, { page: landedPage, stack: page, visitId: this.requestParams.all().id })
+        if (Object.keys(flash).length > 0 && !this.requestParams.isDeferredPropsRequest()) {
+          fireFlashEvent(flash)
+          this.requestParams.all().onFlash(flash)
+        }
 
-        return this.requestParams.all().onError(scopedErrors)
+        const errors = (tier.props.errors || {}) as Errors & ErrorBag
+
+        if (Object.keys(errors).length > 0) {
+          const scopedErrors = this.getScopedErrors(errors)
+
+          fireErrorEvent(scopedErrors, { page: landedPage, stack: page, visitId: this.requestParams.all().id })
+
+          return this.requestParams.all().onError(scopedErrors)
+        }
       }
+
+      router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
+
+      if (!this.wasPrefetched) {
+        // We end up here other than from the prefetch cache, so we assume this response is
+        // newer than the cached one and therefore flush the cache.
+        router.flush(tier?.url ?? page.url)
+      }
+
+      fireSuccessEvent(landedPage, { stack: page, visitId: this.requestParams.all().id })
+
+      await this.requestParams.all().onSuccess(landedPage)
+    } finally {
+      history.preserveUrl = false
     }
-
-    router.flushByCacheTags(this.requestParams.all().invalidateCacheTags || [])
-
-    if (!this.wasPrefetched) {
-      // We end up here other than from the prefetch cache, so we assume this response is
-      // newer than the cached one and therefore flush the cache.
-      router.flush(tier?.url ?? page.url)
-    }
-
-    fireSuccessEvent(landedPage, { stack: page, visitId: this.requestParams.all().id })
-
-    await this.requestParams.all().onSuccess(landedPage)
-
-    history.preserveUrl = false
   }
 
   public mergeParams(params: ActiveVisit) {
@@ -164,6 +182,12 @@ export class Response {
 
   public setCapturedBase(capturedBase: BaseSnapshot): void {
     this.capturedBase = capturedBase
+  }
+
+  public interrupt(): void {
+    if (!this.requestParams.wasCancelledAtAll()) {
+      this.requestParams.markAsCancelled({ cancelled: false, interrupted: true })
+    }
   }
 
   public getPageResponse(): Page {
@@ -290,7 +314,10 @@ export class Response {
 
     this.response = await interceptors.processResponse(this.requestParams.all(), this.response)
 
-    return landResponse(pageResponse, this.requestParams, this.capturedBase, this.optimisticId)
+    return landResponse(pageResponse, this.requestParams, this.capturedBase, this.optimisticId, {
+      originatingPage: this.originatingPage,
+      onCommit: () => (this.pageApplied = true),
+    })
   }
 
   // Landing it would reopen what the user dismissed; an open carries no tier yet, so it is exempt.

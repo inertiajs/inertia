@@ -10,14 +10,25 @@ interface UserResponse {
   }
 }
 
+interface SearchResponse {
+  method: string
+  name: string
+  query: Record<string, string>
+}
+
 export default () => {
   const updateUser = useHttp<{ name: string; email: string }, UserResponse>({
     name: '',
     email: '',
   })
 
+  const searchUsers = useHttp<{ name: string }, SearchResponse>({
+    name: '',
+  })
+
   const [lastPutResponse, setLastPutResponse] = useState<UserResponse | null>(null)
   const [lastPatchResponse, setLastPatchResponse] = useState<UserResponse | null>(null)
+  const [lastQueryResponse, setLastQueryResponse] = useState<SearchResponse | null>(null)
 
   const performPut = async () => {
     try {
@@ -34,6 +45,15 @@ export default () => {
       setLastPatchResponse(result)
     } catch (e) {
       console.error('PATCH failed:', e)
+    }
+  }
+
+  const performQuery = async () => {
+    try {
+      const result = await searchUsers.query('/api/users/search')
+      setLastQueryResponse(result)
+    } catch (e) {
+      console.error('QUERY failed:', e)
     }
   }
 
@@ -84,6 +104,29 @@ export default () => {
           <div id="patch-result">
             PATCH Success - ID: {lastPatchResponse.id}, Name: {lastPatchResponse.user.name}, Email:{' '}
             {lastPatchResponse.user.email}
+          </div>
+        )}
+      </section>
+
+      {/* QUERY Request Test */}
+      <section id="query-test">
+        <h2>QUERY Request</h2>
+        <label>
+          Name
+          <input
+            type="text"
+            id="query-name"
+            value={searchUsers.data.name}
+            onChange={(e) => searchUsers.setData('name', e.target.value)}
+          />
+        </label>
+        <button onClick={performQuery} id="query-button">
+          Search Users (QUERY)
+        </button>
+        {lastQueryResponse && (
+          <div id="query-result">
+            {lastQueryResponse.method} Success - Name: {lastQueryResponse.name}, Query String:{' '}
+            {JSON.stringify(lastQueryResponse.query)}
           </div>
         )}
       </section>

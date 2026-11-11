@@ -343,6 +343,7 @@ const pageKeys = [
   'rememberedState',
   'encryptHistory',
   'scrollProps',
+  'liveProps',
   'flash',
   'layers',
 ] as const

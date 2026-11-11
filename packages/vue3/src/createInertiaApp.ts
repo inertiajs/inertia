@@ -7,8 +7,10 @@ import {
   exposeInterceptors,
   getInitialPageFromDOM,
   http as httpModule,
+  configureLive,
   InertiaAppSSRResponse,
   LoadingOption,
+  LiveAppOption,
   Page,
   PageProps,
   resolveInitialApp,
@@ -57,11 +59,12 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   SetupOptions<HTMLElement, SharedProps>,
   void,
   VueInertiaAppConfig
-> & {
-  layer?: LayerComponent
-  loading?: LoadingOption<Component>
-  withApp?: never
-}
+> &
+  LiveAppOption & {
+    layer?: LayerComponent
+    loading?: LoadingOption<Component>
+    withApp?: never
+  }
 
 type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOptionsForSSR<
   SharedProps,
@@ -74,6 +77,9 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   layer?: LayerComponent
   loading?: LoadingOption<Component>
   withApp?: never
+  // Live props only run in the browser, so a server entry has nothing to
+  // configure. `never` rather than omission keeps the union destructurable.
+  live?: never
 }
 
 type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
@@ -84,12 +90,13 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
     VueInertiaAppConfig
   >,
   'setup'
-> & {
-  page?: Page<SharedProps>
-  render?: undefined
-  layer?: LayerComponent
-  loading?: LoadingOption<Component>
-} & (
+> &
+  LiveAppOption & {
+    page?: Page<SharedProps>
+    render?: undefined
+    layer?: LayerComponent
+    loading?: LoadingOption<Component>
+  } & (
     | { setup?: undefined; withApp?: VueWithApp<SharedProps> }
     | { setup: (options: SetupOptions<HTMLElement | null, SharedProps>) => VueApp | void; withApp?: never }
   )
@@ -122,6 +129,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     defaults = {},
     nonce,
     http,
+    live,
     layout,
     layer,
     loading,
@@ -141,6 +149,10 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (http) {
     httpModule.setClient(http)
+  }
+
+  if (live) {
+    configureLive(live)
   }
 
   if (dev) {

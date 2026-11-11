@@ -16,15 +16,18 @@ class EventHandler {
     listener: (...args: any[]) => void
   }[] = []
 
+  protected onWindowScroll = debounce(() => Scroll.onWindowScroll(), 100)
+  protected onScroll = debounce((event: Event) => Scroll.onScroll(event), 100)
+
   public init() {
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.handlePopstateEvent.bind(this))
       window.addEventListener('pageshow', this.handlePageshowEvent.bind(this))
-      window.addEventListener('scroll', debounce(Scroll.onWindowScroll.bind(Scroll), 100), true)
+      window.addEventListener('scroll', this.onWindowScroll, true)
     }
 
     if (typeof document !== 'undefined') {
-      document.addEventListener('scroll', debounce(Scroll.onScroll.bind(Scroll), 100), true)
+      document.addEventListener('scroll', this.onScroll, true)
     }
   }
 
@@ -81,6 +84,9 @@ class EventHandler {
   }
 
   protected handlePopstateEvent(event: PopStateEvent): void {
+    this.onWindowScroll.cancel()
+    this.onScroll.cancel()
+
     this.restoreFromPopstate(event.state || null)
       .catch(() => this.onMissingHistoryItem())
       .finally(() => layerClosing.unwound())
@@ -99,17 +105,26 @@ class EventHandler {
       return this.onMissingHistoryItem()
     }
 
-    return this.restoreEntry(await history.decrypt(state.page))
+    // A closing layer steps back onto the stack it leaves standing, and only the decrypted entry tells whether it did.
+    const cancelsOnceRestored = layerClosing.isUnwinding()
+
+    if (!cancelsOnceRestored) {
+      // Cancel ongoing requests except prefetch requests before decrypting,
+      // so a response that arrives in the meantime can't replace the restored page
+      router.cancelAll({ prefetch: false })
+    }
+
+    return this.restoreEntry(await history.decrypt(state.page), cancelsOnceRestored)
   }
 
-  protected restoreEntry(data: Page): Promise<void> | void {
+  protected restoreEntry(data: Page, cancelsOnceRestored: boolean): Promise<void> | void {
     if (currentPage.get().version !== data.version) {
       return this.onMissingHistoryItem()
     }
 
     const restore = layerClosing.restoring(data)
 
-    if (!restore.sameStack) {
+    if (cancelsOnceRestored && !restore.sameStack) {
       // Cancel ongoing requests except prefetch requests
       router.cancelAll({ prefetch: false })
     }

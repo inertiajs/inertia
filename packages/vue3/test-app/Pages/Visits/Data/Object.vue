@@ -37,6 +37,12 @@ const deleteMethod = () => {
   })
 }
 
+const queryMethod = () => {
+  router.query('/dump/query', {
+    foo: 'query',
+  })
+}
+
 const qsafDefault = () => {
   router.visit('/dump/get', {
     data: { a: ['b', 'c'] },
@@ -75,6 +81,7 @@ const deleteQueryParam = (e: Event) => {
     <a href="#" @click.prevent="putMethod" class="put">PUT Link</a>
     <a href="#" @click.prevent="patchMethod" class="patch">PATCH Link</a>
     <a href="#" @click.prevent="deleteMethod" class="delete">DELETE Link</a>
+    <a href="#" @click.prevent="queryMethod" class="query">QUERY Link</a>
 
     <a href="#" @click.prevent="qsafDefault" class="qsaf-default">QSAF Defaults</a>
     <a href="#" @click.prevent="qsafIndices" class="qsaf-indices">QSAF Indices</a>

@@ -4,6 +4,7 @@ import { progress, router } from '.'
 import { config } from './config'
 import { eventHandler } from './eventHandler'
 import { fireBeforeEvent, fireClientVisitEvent, fireFlashEvent } from './events'
+import { isFormData } from './formData'
 import { history } from './history'
 import { InitialVisit } from './initialVisit'
 import {
@@ -15,6 +16,7 @@ import {
   nextRenderKey,
   reloadUrlOf,
   targetAt,
+  tierUrlOf,
   withTier,
 } from './layers'
 import { layerClosing } from './layers/closing'
@@ -24,6 +26,7 @@ import { setPathPreservingIdentity, stripTopLevelUndefined } from './objectUtils
 import { page as currentPage } from './page'
 import { polls } from './polls'
 import { prefetchedRequests } from './prefetched'
+import { clearPendingDeferredProps } from './propRefreshes'
 import Queue from './queue'
 import { Request } from './request'
 import { RequestParams } from './requestParams'
@@ -45,7 +48,6 @@ import {
   LayerHandle,
   LayerState,
   LocalLayer,
-  Method,
   OptimisticCallback,
   Page,
   PageFlashData,
@@ -66,13 +68,7 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import {
-  hrefToUrl,
-  isSameUrlWithoutHash,
-  isSameUrlWithoutQueryOrHash,
-  isUrlMethodPair,
-  transformUrlAndData,
-} from './url'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
 
 const noop = () => {}
 
@@ -90,7 +86,7 @@ const clientVisits = new Queue<Promise<void>>()
 
 type ClientVisitPageParams<TProps> = Omit<
   ClientSideVisitOptions<TProps>,
-  'viewTransition' | 'onError' | 'onFinish' | 'onFlash' | 'onSuccess' | 'layerId'
+  'viewTransition' | 'preserveFlash' | 'onError' | 'onFinish' | 'onFlash' | 'onSuccess' | 'layerId'
 >
 
 const isLocalLayer = (target: string | URL | UrlMethodPair | LocalLayer): target is LocalLayer =>
@@ -132,6 +128,10 @@ export class Router {
 
     eventHandler.on('loadDeferredProps', (payload: { deferredProps: Page['deferredProps']; layerId?: string }) => {
       this.loadDeferredProps(payload.deferredProps, payload.layerId)
+    })
+
+    eventHandler.on('leavePage', ({ url, layerId }: { url: URL; layerId?: string }) => {
+      this.cancelAsyncRequestsFor(url, layerId)
     })
 
     eventHandler.on('historyQuotaExceeded', (url) => {
@@ -184,6 +184,14 @@ export class Router {
     return this.visit(url, { preserveState: true, ...options, method: 'delete' })
   }
 
+  public query<T extends RequestPayload = RequestPayload>(
+    url: URL | string | UrlMethodPair,
+    data: T = {} as T,
+    options: VisitHelperOptions<T> = {},
+  ): void {
+    return this.visit(url, { preserveState: true, ...options, method: 'query', data })
+  }
+
   public reload<T extends RequestPayload = RequestPayload>(options: ReloadOptions<T> = {}): void {
     return this.doReload(options)
   }
@@ -204,8 +212,16 @@ export class Router {
 
     const url = reloadUrlOf(page, layerId, window.location.href)
 
-    const visitOptions: VisitOptions<T> & { reload: true } = {
+    // A page rendered by a QUERY visit is reloaded with the same request body, unless another method is given.
+    const queryMethodData =
+      options.method || isFormData(options.data) ? undefined : (layer?.url ? layer : page).queryMethodData
+    const queryMethodOptions = queryMethodData
+      ? { method: 'query' as const, data: { ...queryMethodData, ...options.data } as T, queryMethodReload: true }
+      : {}
+
+    const visitOptions: VisitOptions<T> & { reload: true; queryMethodReload?: boolean } = {
       ...reloadOptions,
+      ...queryMethodOptions,
       ...(layer?.url ? { layerId } : {}),
       reload: true,
       preserveScroll: true,
@@ -327,11 +343,27 @@ export class Router {
   public cancelAll({ async = true, prefetch = true, sync = true } = {}): void {
     if (async) {
       this.asyncRequestStream.cancelInFlight({ prefetch })
+      prefetchedRequests.interruptInFlight({ async: true })
     }
 
     if (sync) {
       this.syncRequestStream.cancelInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
+  }
+
+  /**
+   * Cancels the in-flight requests for a page or layer we're leaving, like deferred props, partial reloads and polls.
+   * Prefetches, optimistic requests, and background async visits to other pages are left untouched.
+   */
+  protected cancelAsyncRequestsFor(url: URL, layerId?: string): void {
+    this.asyncRequestStream.cancelInFlight(
+      (request) =>
+        !request.isPrefetch() &&
+        !request.isOptimistic() &&
+        (request.layerId ?? null) === (layerId ?? null) &&
+        isSameUrlWithoutQueryOrHash(request.getUrl(), url),
+    )
   }
 
   public poll(interval: number, requestOptions: ReloadOptions | (() => ReloadOptions) = {}, options: PollOptions = {}) {
@@ -397,12 +429,11 @@ export class Router {
 
     const capturedBase = this.captureBase()
 
-    this.cancelStaleRequests(visit)
-
     // Interrupt in-flight requests before taking the optimistic snapshot
     // so that any previous optimistic state is restored first
     if (!visit.async) {
       this.syncRequestStream.interruptInFlight()
+      prefetchedRequests.interruptInFlight({ async: false })
     }
 
     let optimisticId: number | null = null
@@ -432,34 +463,6 @@ export class Router {
     }
 
     return true
-  }
-
-  // Cancel in-flight requests aimed at the page we're navigating away from (deferred props, partial
-  // reloads, plain reloads), but leave prefetches, optimistic requests, and background async visits
-  // to other pages untouched.
-  protected cancelStaleRequests(visit: PendingVisit): void {
-    const isPartialReload = visit.only.length > 0 || visit.except.length > 0 || visit.reset.length > 0
-
-    const targetedLayer = layerAt(currentPage.get(), visit.layerId)
-    const tierUrl = targetedLayer?.url ? hrefToUrl(targetedLayer.url) : hrefToUrl(currentPage.get().url)
-
-    // For partial reloads, only compare the base URL (origin + pathname) to allow
-    // concurrent requests with different query params to the same page
-    const isSamePage = isPartialReload
-      ? isSameUrlWithoutQueryOrHash(visit.url, tierUrl)
-      : isSameUrlWithoutHash(visit.url, tierUrl)
-
-    if (isSamePage) {
-      return
-    }
-
-    this.asyncRequestStream.cancelInFlight(
-      (request) =>
-        !request.isPrefetch() &&
-        !request.isOptimistic() &&
-        (request.layerId ?? null) === (visit.layerId ?? null) &&
-        isSameUrlWithoutQueryOrHash(request.getUrl(), tierUrl),
-    )
   }
 
   protected sendVisitRequest(
@@ -539,12 +542,6 @@ export class Router {
     options: VisitOptions = {},
     prefetchOptions: Partial<PrefetchOptions> = {},
   ) {
-    const method: Method = options.method ?? (isUrlMethodPair(href) ? href.method : 'get')
-
-    if (method !== 'get') {
-      throw new Error('Prefetch requests must use the GET method')
-    }
-
     const visit: PendingVisit = this.getPendingVisit(href, {
       ...options,
       layerId: options.layerId ?? this.layerId,
@@ -554,11 +551,16 @@ export class Router {
       viewTransition: false,
     })
 
+    if (visit.method !== 'get' && visit.method !== 'query') {
+      throw new Error('Prefetch requests must use the GET or QUERY method')
+    }
+
     const visitUrl = visit.url.origin + visit.url.pathname + visit.url.search
     const currentUrl = window.location.origin + window.location.pathname + window.location.search
 
-    if (visitUrl === currentUrl) {
-      // Don't prefetch the current page, you're already on it
+    if (visit.method === 'get' && visitUrl === currentUrl) {
+      // Don't prefetch the current page, you're already on it. A QUERY request carries
+      // its data in the body, so the same URL may still return a different page.
       return
     }
 
@@ -766,12 +768,20 @@ export class Router {
 
     const { props, flash } = this.clientVisitState(params, tier.state)
     const { viewTransition, onFinish } = params
-    const pageParams = omit(params, ['viewTransition', 'onError', 'onFinish', 'onFlash', 'onSuccess', 'layerId'])
+    const pageParams = omit(params, [
+      'viewTransition',
+      'preserveFlash',
+      'onError',
+      'onFinish',
+      'onFlash',
+      'onSuccess',
+      'layerId',
+    ])
 
     const { page, preservesBase } = this.clientVisitPage(current, tier, {
       pageParams,
       props: props as Page['props'],
-      flash: flash ?? {},
+      flash: params.preserveFlash ? tier.state.flash : (flash ?? {}),
       preserveState: params.preserveState ?? false,
       replace,
     })
@@ -782,6 +792,12 @@ export class Router {
     const preserveState = RequestParams.resolvePreserveOption(params.preserveState ?? false, tierPage)
 
     const visitId = this.createVisitId()
+
+    const leftUrl = hrefToUrl(tierUrlOf(current, tier.layer?.id))
+
+    if (!isSameUrlWithoutQueryOrHash(hrefToUrl(tierUrlOf(page, tier.layer?.id)), leftUrl)) {
+      this.cancelAsyncRequestsFor(leftUrl, tier.layer?.id)
+    }
 
     return currentPage
       .set(page, {
@@ -830,6 +846,12 @@ export class Router {
       replace: boolean
     },
   ): { page: Page; preservesBase: boolean } {
+    // The request body of a QUERY visit describes the page it rendered, so it does not follow the tier elsewhere.
+    const staysOnTier =
+      (pageParams.component === undefined || pageParams.component === tier.state.component) &&
+      (pageParams.url === undefined ||
+        isSameUrlWithoutQueryOrHash(hrefToUrl(pageParams.url), hrefToUrl(tierUrlOf(current, tier.layer?.id))))
+
     if (tier.layer) {
       const keepsState = RequestParams.resolvePreserveOption(preserveState, tier.page)
 
@@ -837,6 +859,7 @@ export class Router {
         page: withTier(current, tier.layer.id, {
           ...(pageParams.component !== undefined && { component: pageParams.component }),
           ...(pageParams.url !== undefined && { url: pageParams.url }),
+          ...(staysOnTier ? {} : { queryMethodData: undefined }),
           ...(pageParams.encryptHistory !== undefined && { encryptHistory: pageParams.encryptHistory }),
           ...(keepsState ? {} : { renderKey: nextRenderKey() }),
           flash,
@@ -848,8 +871,16 @@ export class Router {
 
     const preservesBase = replace && pageParams.component === undefined
 
+    const base = preservesBase ? current : omit(current, ['layers'])
+
     return {
-      page: { ...(preservesBase ? current : omit(current, ['layers'])), ...pageParams, flash, props },
+      page: {
+        ...(staysOnTier ? base : omit(base, ['queryMethodData'])),
+        clearHistory: false,
+        ...pageParams,
+        flash,
+        props,
+      },
       preservesBase,
     }
   }
@@ -864,7 +895,9 @@ export class Router {
     const tier = targetAt(current, params.layerId).state
     const currentFlash = tier.flash
 
-    if (Object.keys(currentFlash).length > 0) {
+    // Flash that was carried over was already announced when it arrived,
+    // so announcing it again would replay whatever the app did with it.
+    if (!params.preserveFlash && Object.keys(currentFlash).length > 0) {
       fireFlashEvent(currentFlash)
       params.onFlash?.(currentFlash)
     }
@@ -994,14 +1027,16 @@ export class Router {
     const onceProps: NonNullable<Page['onceProps']> = {}
 
     Object.entries(current.onceProps ?? {}).forEach(([key, onceProp]) => {
-      if (get(props, onceProp.prop) !== undefined) {
-        // The visit provided its own value, so we can't claim to remember the once prop
-        return
-      }
-
       const currentValue = get(current.props, onceProp.prop)
 
       if (currentValue === undefined) {
+        return
+      }
+
+      const providedValue = get(props, onceProp.prop)
+
+      if (providedValue !== undefined && !isEqual(providedValue, currentValue)) {
+        // The visit provided a different value, so we can't claim to remember the once prop
         return
       }
 
@@ -1200,6 +1235,10 @@ export class Router {
         })
       })
     }
+
+    // Each reload that started now claims its own props, and one a `before`
+    // listener cancelled never will, so the tier's claim ends here either way
+    clearPendingDeferredProps(layerId)
   }
 }
 
@@ -1213,6 +1252,7 @@ export interface LayerApi extends Pick<
   | 'put'
   | 'patch'
   | 'delete'
+  | 'query'
   | 'reload'
   | 'poll'
   | 'prefetch'

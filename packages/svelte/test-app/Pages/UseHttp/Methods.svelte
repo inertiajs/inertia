@@ -10,13 +10,24 @@
     }
   }
 
+  interface SearchResponse {
+    method: string
+    name: string
+    query: Record<string, string>
+  }
+
   const updateUser = useHttp<{ name: string; email: string }, UserResponse>({
     name: '',
     email: '',
   })
 
+  const searchUsers = useHttp<{ name: string }, SearchResponse>({
+    name: '',
+  })
+
   let lastPutResponse: UserResponse | null = $state(null)
   let lastPatchResponse: UserResponse | null = $state(null)
+  let lastQueryResponse: SearchResponse | null = $state(null)
 
   const performPut = async () => {
     try {
@@ -33,6 +44,15 @@
       lastPatchResponse = result
     } catch (e) {
       console.error('PATCH failed:', e)
+    }
+  }
+
+  const performQuery = async () => {
+    try {
+      const result = await searchUsers.query('/api/users/search')
+      lastQueryResponse = result
+    } catch (e) {
+      console.error('QUERY failed:', e)
     }
   }
 </script>
@@ -70,6 +90,23 @@
       <div id="patch-result">
         PATCH Success - ID: {lastPatchResponse.id}, Name: {lastPatchResponse.user.name}, Email: {lastPatchResponse.user
           .email}
+      </div>
+    {/if}
+  </section>
+
+  <!-- QUERY Request Test -->
+  <section id="query-test">
+    <h2>QUERY Request</h2>
+    <label>
+      Name
+      <input type="text" id="query-name" bind:value={searchUsers.name} />
+    </label>
+    <button onclick={performQuery} id="query-button">Search Users (QUERY)</button>
+    {#if lastQueryResponse}
+      <div id="query-result">
+        {lastQueryResponse.method} Success - Name: {lastQueryResponse.name}, Query String: {JSON.stringify(
+          lastQueryResponse.query,
+        )}
       </div>
     {/if}
   </section>

@@ -1,5 +1,6 @@
 import type { LayerHandle, Method, Page, PageProps, Router } from '@inertiajs/core'
 import { setLayoutProps as adapterSetLayoutProps } from '@inertiajs/vue3'
+import type { FakeLiveTransportControls } from './fakeLiveTransport'
 
 declare global {
   interface Window {
@@ -31,6 +32,16 @@ declare global {
     _plugin_global_props: object
     resolverReceivedPage: Page | null
     loadingResolved: string | undefined
+    __inertiaLive: FakeLiveTransportControls
+    __inertiaEcho: {
+      emit(channel: string, event: string, payload?: unknown): void
+      reject(channel: string, status?: unknown): void
+      status(status: string): void
+      log(): string[]
+      swap(): void
+    }
+    releaseHeldResponse?: () => void
+    releaseHeldComponent?: () => void
   }
 
   interface ImportMeta {

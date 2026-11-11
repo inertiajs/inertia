@@ -75,6 +75,7 @@ test.describe('methods', () => {
     { method: 'put', label: 'PUT', el: 'button' },
     { method: 'patch', label: 'PATCH', el: 'button' },
     { method: 'delete', label: 'DELETE', el: 'button' },
+    { method: 'query', label: 'QUERY', el: 'button' },
     { method: 'post', label: 'OBJECT', el: 'button' },
     { method: 'post', label: 'OBJECT METHOD OVERRIDE', el: 'button' },
   ] as const
@@ -144,6 +145,7 @@ test.describe('data', () => {
       { method: 'put', label: 'PUT', form: { baz: 'put' } },
       { method: 'patch', label: 'PATCH', form: { foo: 'patch' } },
       { method: 'delete', label: 'DELETE', form: { bar: 'delete' } },
+      { method: 'query', label: 'QUERY', form: { baz: 'query' } },
     ] as const
 
     data.forEach(({ method, label, form }) => {
@@ -506,6 +508,35 @@ test.describe('preserve scroll', () => {
     await page.getByRole('button', { exact: true, name: 'Update scroll positions' }).click()
     await expect(page.getByText('Document scroll position is 5 & 7')).toBeVisible()
     await expect(page.getByText('Slot scroll position is 0 & 0')).toBeVisible()
+  })
+
+  test('restores the document scroll position when pressing the back button right after scrolling', async ({
+    page,
+  }) => {
+    await page.getByRole('link', { exact: true, name: 'Reset Scroll' }).click()
+
+    await expect(page).toHaveURL('/links/preserve-scroll-false-page-two?foo=bar')
+    await expect(page.getByText('Foo is now bar')).toBeVisible()
+
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          window.addEventListener('scroll', () => resolve(), { once: true })
+          window.scrollTo(0, 20)
+        }),
+    )
+    await page.evaluate(() => {
+      // Delay the scroll restore past the scroll debounce, like on a slow device
+      window.requestAnimationFrame = (callback) => window.setTimeout(() => callback(performance.now()), 200)
+    })
+    await page.goBack()
+
+    await expect(page).toHaveURL('/links/preserve-scroll-false')
+    await expect(page.getByText('Foo is now default')).toBeVisible()
+
+    await page.waitForFunction(
+      () => document.documentElement.scrollTop === 7 && document.documentElement.scrollLeft === 5,
+    )
   })
 
   test('does not restore untracked scroll regions when returning true from a preserveScroll callback', async ({
@@ -1034,6 +1065,7 @@ test.describe('"as" attribute', () => {
     { method: 'put', label: 'PUT' },
     { method: 'patch', label: 'PATCH' },
     { method: 'delete', label: 'DELETE' },
+    { method: 'query', label: 'QUERY' },
   ] as const
 
   data.forEach(({ method, label }) => {
@@ -1331,6 +1363,13 @@ test.describe('path traversal', () => {
 
     await page.getByRole('link', { name: 'Up three levels' }).click()
     await expect(page).toHaveURL('/')
+  })
+
+  test('it goes one level down with a relative path', async ({ page }) => {
+    await page.goto('/links/sub/')
+
+    await page.getByRole('link', { name: 'Down one level' }).click()
+    await expect(page).toHaveURL('/links/sub/sub')
   })
 })
 

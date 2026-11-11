@@ -1,7 +1,10 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
 import { createInertiaApp, type ResolvedComponent, router, setLayoutProps } from '@inertiajs/svelte'
+import { echo } from '@inertiajs/svelte/echo'
 import { hydrate, mount } from 'svelte'
+import { resolveFakeEcho } from './fakeEcho'
+import { fakeLiveTransport } from './fakeLiveTransport'
 import AdminLayout from './Layouts/AdminLayout.svelte'
 import AppLayout from './Layouts/AppLayout.svelte'
 import DefaultLayout from './Layouts/DefaultLayout.svelte'
@@ -29,6 +32,19 @@ function getHttpConfig(): HttpClient | HttpClientOptions | undefined {
 }
 
 createInertiaApp({
+  // Only the live props page has a manifest, and the fake transport registers a
+  // socket id resolver that other tests don't expect
+  ...(window.location.pathname === '/live' && {
+    live: {
+      transport: fakeLiveTransport(),
+      // Opt-in so the tests that rely on the defaults keep their timings
+      ...(params.has('liveThrottle') && { throttle: Number(params.get('liveThrottle')) }),
+      ...(params.get('liveKeepAlive') === '1' && { pauseWhenHidden: false }),
+    },
+  }),
+  ...(window.location.pathname === '/echo-transport' && {
+    live: echo({ resolve: resolveFakeEcho }),
+  }),
   page: window.initialPage,
   resolve: async (name, page) => {
     const pages = import.meta.glob<ResolvedComponent>(['./Pages/**/*.svelte', '!./Pages/SSR/Async.svelte'], {
@@ -56,6 +72,11 @@ createInertiaApp({
     if (name === 'Layers/SlowImport') {
       // Long enough for a dismissal to supersede a walk landing while its component resolves
       await new Promise((resolve) => setTimeout(resolve, 700))
+    }
+
+    if (name === 'Visits/InterruptedVisitHeld') {
+      // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
+      await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
     }
 
     const path = `./Pages/${name}.svelte`

@@ -37,6 +37,9 @@ export const layerAt = (page: Page, id: string | undefined): LayerState | undefi
 
 export const tierOf = (page: Page, id: string | undefined): Tier => layerAt(page, id) ?? page
 
+// A layer with no url of its own is addressed by the page beneath the stack.
+export const tierUrlOf = (page: Page, id: string | undefined): string => layerAt(page, id)?.url ?? page.url
+
 export const mapLayers = (page: Page, fn: (layer: LayerState) => LayerState): Page =>
   page.layers ? { ...page, layers: page.layers.map(fn) } : page
 
@@ -127,6 +130,8 @@ const layerFromResponse = (response: Page, url: string | null) => ({
   flash: response.flash ?? {},
   onceProps: response.onceProps ?? {},
   scrollProps: response.scrollProps ?? {},
+  ...(response.liveProps ? { liveProps: response.liveProps } : {}),
+  ...(response.queryMethodData ? { queryMethodData: response.queryMethodData } : {}),
 })
 
 export const composeLayer = (base: Page, response: Page, id: string, options: ComposeOptions = {}): Page => {

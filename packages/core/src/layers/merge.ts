@@ -243,6 +243,11 @@ export const mergeProps = (response: Page, tier: Tier, params: RequestParams): v
     response.scrollProps = { ...tier.scrollProps, ...response.scrollProps }
   }
 
+  // A partial response only carries the entries for the live props it refreshed.
+  if (tier.liveProps) {
+    response.liveProps = { ...tier.liveProps, ...response.liveProps }
+  }
+
   if (Object.keys(tier.onceProps ?? {}).length > 0) {
     response.onceProps = { ...tier.onceProps, ...response.onceProps }
   }

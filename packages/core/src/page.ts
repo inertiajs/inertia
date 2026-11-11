@@ -21,6 +21,7 @@ import { registryClose } from './layers/handles'
 import { resolveLayers } from './layers/render'
 import { continueWalk } from './layers/walk'
 import { prefetchedRequests } from './prefetched'
+import { clearPendingDeferredProps, setPendingDeferredProps } from './propRefreshes'
 import { Scroll } from './scroll'
 import {
   Component,
@@ -43,16 +44,55 @@ const tiersOf = (page: Page): [string | undefined, Tier][] => [
   [undefined, page],
 ]
 
-const pendingDeferred = new Map<string | undefined, Pick<Tier, 'deferredProps' | 'component' | 'url'>>()
+type OwedDeferredProps = Pick<Tier, 'deferredProps' | 'component' | 'url'>
 
-const recordDeferredProps = (page: Page, onScreen?: Page): void => {
-  const carried = new Map(onScreen ? tiersOf(onScreen).map(([key, tier]) => [key, tier.deferredProps]) : [])
+const pendingDeferred = new Map<string | undefined, OwedDeferredProps>()
+
+// Hands back the way to forget what it recorded, for a page that never lands.
+const recordDeferredProps = (page: Page, onScreen?: Page): VoidFunction => {
+  const carried = new Map(onScreen ? tiersOf(onScreen) : [])
+  const recorded: [string | undefined, OwedDeferredProps, OwedDeferredProps | undefined][] = []
+
+  // A tier carried over as it stands already requested its deferred props, unless it moved to another url
+  const isCarried = (key: string | undefined, tier: Tier): boolean => {
+    const was = carried.get(key)
+
+    return (
+      was !== undefined &&
+      tier.deferredProps === was.deferredProps &&
+      tier.component === was.component &&
+      tier.url === was.url
+    )
+  }
 
   for (const [key, tier] of tiersOf(page)) {
-    if (Object.keys(tier.deferredProps ?? {}).length && tier.deferredProps !== carried.get(key)) {
-      pendingDeferred.set(key, { deferredProps: tier.deferredProps, component: tier.component, url: tier.url })
+    if (Object.keys(tier.deferredProps ?? {}).length && !isCarried(key, tier)) {
+      const owed = { deferredProps: tier.deferredProps, component: tier.component, url: tier.url }
+
+      recorded.push([key, owed, pendingDeferred.get(key)])
+      pendingDeferred.set(key, owed)
     }
   }
+
+  return () => {
+    for (const [key, owed, previous] of recorded) {
+      if (pendingDeferred.get(key) !== owed) {
+        continue
+      }
+
+      if (previous) {
+        pendingDeferred.set(key, previous)
+      } else {
+        pendingDeferred.delete(key)
+      }
+    }
+  }
+}
+
+const owedDeferredProps = (key: string | undefined, tier: Tier): Page['deferredProps'] => {
+  const owed = pendingDeferred.get(key)
+
+  return owed && owed.component === tier.component && owed.url === tier.url ? owed.deferredProps : undefined
 }
 
 const announceDeferredProps = (page: Page): void => {
@@ -108,6 +148,8 @@ interface SetOptions {
   initialRender?: boolean
   preservesBase?: boolean
   visitId?: string
+  isCancelled?: () => boolean
+  onCommit?: () => void
 }
 
 interface InstallOptions extends SetOptions {
@@ -149,6 +191,8 @@ class CurrentPage {
     onFlash,
   }: RouterInitParams<ComponentType>) {
     this.page = { ...initialPage, flash: initialPage.flash ?? {}, rescuedProps: initialPage.rescuedProps ?? [] }
+    // The initial visit loads the first page's deferred props once it renders
+    this.announcePage((_key, tier) => tier.deferredProps)
     this.swapComponent = swapComponent
     this.resolveComponent = resolveComponent
     this.resolveLoading = resolveLoading
@@ -173,23 +217,29 @@ class CurrentPage {
     const departed = previous.filter((layer) => !after.has(layer.id))
 
     this.dropLayerOptimisticState(departed.map((layer) => layer.id))
+    departed.forEach((layer) => clearPendingDeferredProps(layer.id))
     departed.forEach((layer) => interceptors.fireLayerEvent({ type: 'closed', layer }))
     next
       .filter((layer) => !before.has(layer.id))
       .forEach((layer) => interceptors.fireLayerEvent({ type: 'opened', layer }))
 
+    if (departed.length > 0) {
+      // A layer can leave the stack without the page being replaced as a whole
+      eventHandler.fireInternalEvent('pageUpdated', page)
+    }
+
     this.fireEventsFor('commit')
   }
 
   public set(page: Page, options: SetOptions = {}): Promise<void> {
-    const { initialRender = false, preservesBase = false } = options
+    const { initialRender = false, preservesBase = false, isCancelled = () => false, onCommit = () => {} } = options
 
     if (Object.keys(page.deferredProps || {}).length && page.initialDeferredProps === undefined) {
       // Preserve original deferred props for back button handling
       page.initialDeferredProps = page.deferredProps
     }
 
-    recordDeferredProps(page, initialRender ? undefined : this.page)
+    const forgetDeferredProps = recordDeferredProps(page, initialRender ? undefined : this.page)
 
     if (!preservesBase) {
       this.baseGeneration++
@@ -208,10 +258,17 @@ class CurrentPage {
     }
 
     return Promise.all([this.resolve(page.component, page), this.resolveLayers(page)]).then(([component, layers]) => {
-      if (componentId !== this.componentId) {
-        // Component has changed since we started resolving this component, bail
+      if (componentId !== this.componentId || isCancelled()) {
+        // A newer page may still load our deferred props, but those of a cancelled visit shouldn't outlive it
+        if (isCancelled()) {
+          forgetDeferredProps()
+        }
+
+        // Component has changed or the visit was cancelled since we started resolving this component, bail
         return
       }
+
+      onCommit()
 
       return this.write(page, component, layers, options)
     })
@@ -289,6 +346,7 @@ class CurrentPage {
     }
 
     this.commit(page, { announceAll: initialRender })
+    this.announcePage(owedDeferredProps)
     this.cleared = false
 
     if (this.hasOnceProps()) {
@@ -360,6 +418,7 @@ class CurrentPage {
 
       this.commit(page)
       this.cleared = false
+      this.announcePage()
       history.setCurrent(page)
       return this.swap({ component, layers, page, preserveState, viewTransition: false })
     })
@@ -395,6 +454,20 @@ class CurrentPage {
 
   public hasOnceProps(): boolean {
     return tiersOf(this.page).some(([, tier]) => Object.keys(tier.onceProps ?? {}).length > 0)
+  }
+
+  /**
+   * Announce a page that was replaced as a whole. The partial mutations below
+   * deliberately do not.
+   */
+  protected announcePage(
+    pendingDeferredProps: (key: string | undefined, tier: Tier) => Page['deferredProps'] = () => undefined,
+  ): void {
+    for (const [key, tier] of tiersOf(this.page)) {
+      setPendingDeferredProps(tier.props, pendingDeferredProps(key, tier), key)
+    }
+
+    eventHandler.fireInternalEvent('pageUpdated', this.page)
   }
 
   public merge(data: Partial<Page>): void {

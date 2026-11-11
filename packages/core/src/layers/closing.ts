@@ -269,6 +269,10 @@ class LayerClosing {
     }
   }
 
+  public isUnwinding(): boolean {
+    return this.unwinding !== null
+  }
+
   public unwound(): void {
     this.unwinding?.answered()
     this.unwinding = null

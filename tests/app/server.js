@@ -92,6 +92,20 @@ app.get('/ssr/when-mounted', (req, res) =>
   }),
 )
 
+app.get('/ssr/use-prop', (req, res) => {
+  const partial = !!req.headers['x-inertia-partial-component']
+
+  setTimeout(
+    () =>
+      inertia.renderSSR(req, res, {
+        component: 'SSR/UseProp',
+        props: partial ? { orders: 'orders-loaded' } : {},
+        deferredProps: partial ? {} : { default: ['orders'] },
+      }),
+    partial ? 500 : 0,
+  )
+})
+
 app.get('/ssr/page-with-script-element', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/PageWithScriptElement',
@@ -561,6 +575,13 @@ app.get('/client-side-visit', (req, res) =>
   }),
 )
 
+app.post('/client-side-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'ClientSideVisit/Page1',
+    props: { foo: 'foo from server', bar: 'bar from server', errors: { foo: 'The foo field is required.' } },
+  }),
+)
+
 app.get('/client-side-visit/props', (req, res) =>
   inertia.render(req, res, {
     component: 'ClientSideVisit/Props',
@@ -723,6 +744,53 @@ app.get('/visits/headers/version', (req, res) =>
   inertia.render(req, res, { component: 'Visits/Headers', version: 'example-version-header' }),
 )
 app.get('/visits/after-error/:page', (req, res) => inertia.render(req, res, { component: 'Visits/AfterError' }))
+app.get('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'No comments yet' },
+  }),
+)
+app.post('/visits/interrupted-visit', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Comment posted' },
+  }),
+)
+app.get('/visits/interrupted-visit/held', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
+app.get('/visits/interrupted-visit/prefetched', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld' }),
+)
+app.get('/visits/interrupted-visit/encrypted', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisit',
+    props: { user: 'John', status: 'Encrypted page' },
+    encryptHistory: true,
+  }),
+)
+app.get('/visits/interrupted-visit/clear-history', (req, res) =>
+  inertia.render(req, res, { component: 'Visits/InterruptedVisitHeld', clearHistory: true }),
+)
+app.get('/visits/interrupted-visit/home', (req, res) => inertia.render(req, res, { component: 'Home' }))
+app.get('/visits/interrupted-visit/deferred', (req, res) =>
+  inertia.render(req, res, {
+    component: 'Visits/InterruptedVisitHeld',
+    ...(req.headers['x-inertia-partial-data']
+      ? { props: { comments: 'Comments loaded' } }
+      : { deferredProps: { default: ['comments'] } }),
+  }),
+)
+app.get('/visits/interrupted-visit/slow', (req, res) =>
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Visits/InterruptedVisit',
+        props: { user: 'John', status: 'Opened the slow page' },
+      }),
+    1000,
+  ),
+)
 
 app.post('/remember/form-helper/default', (req, res) =>
   inertia.render(req, res, {
@@ -797,7 +865,7 @@ app.post('/form-helper/events/errors', (req, res) => {
 //
 const isValidEmail = (email) => /\S+@\S+\.\S+/.test(email)
 
-app.post('/precognition/default', upload.any(), (req, res) => {
+const precognitionDefault = (req, res) => {
   if (!req.headers['precognition']) {
     return renderDump(req, res)
   }
@@ -844,7 +912,10 @@ app.post('/precognition/default', upload.any(), (req, res) => {
     },
     !!req.query['slow'] ? 2000 : 250,
   )
-})
+}
+
+app.post('/precognition/default', upload.any(), precognitionDefault)
+app.query('/precognition/default', upload.any(), precognitionDefault)
 
 app.post('/precognition/transform-keys', upload.any(), (req, res) => {
   if (!req.headers['precognition']) {
@@ -1082,7 +1153,7 @@ app.post('/precognition/error-sync', upload.any(), (req, res) => {
   }, 100)
 })
 
-const methods = ['get', 'post', 'put', 'patch', 'delete']
+const methods = ['get', 'post', 'put', 'patch', 'delete', 'query']
 const renderDump = (req, res) =>
   inertia.render(req, res, {
     component: 'Dump',
@@ -1216,6 +1287,12 @@ app.get('/prefetch/cancelled', (req, res) => inertia.render(req, res, { componen
 app.get('/prefetch/test-page', (req, res) => inertia.render(req, res, { component: 'Prefetch/TestPage' }))
 app.get('/prefetch/wayfinder', (req, res) => inertia.render(req, res, { component: 'Prefetch/Wayfinder' }))
 app.get('/prefetch/navigate-event', (req, res) => inertia.render(req, res, { component: 'Prefetch/NavigateEvent' }))
+app.get('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: null } }),
+)
+app.query('/prefetch/query', (req, res) =>
+  inertia.render(req, res, { component: 'Prefetch/Query', props: { term: req.body.term } }),
+)
 app.get('/prefetch/navigate-event/cached', (req, res) =>
   inertia.render(req, res, { component: 'Prefetch/NavigateEventTarget', props: { label: 'cached' } }),
 )
@@ -1302,6 +1379,21 @@ app.get('/encrypted-history/logout', (req, res) => {
     component: 'EncryptedHistory/Page',
     props: { title: 'Logged out' },
     clearHistory: true,
+  })
+})
+
+app.get('/history/held-deferred/:page', (req, res) => {
+  if (req.params.page !== 'post' || !req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'History/HeldDeferred',
+      props: { page: req.params.page },
+      ...(req.params.page === 'post' && { deferredProps: { default: ['comments'] } }),
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'History/HeldDeferred',
+    props: { page: req.params.page, comments: 'Comments loaded' },
   })
 })
 
@@ -2443,6 +2535,14 @@ app.get('/async-visits/reload-origin', (req, res) => {
   setTimeout(() => inertia.render(req, res, { component: 'AsyncVisits/ReloadOrigin' }), delay)
 })
 
+app.post('/async-visits/reload-origin', (req, res) => res.redirect(303, '/async-visits/page-c'))
+
+app.post('/async-visits/reload-origin/like', (req, res) => res.redirect(303, '/async-visits/reload-origin'))
+
+app.get('/async-visits/reload-origin/redirect', (req, res) =>
+  res.status(409).header('X-Inertia-Redirect', '/async-visits/reload-origin').send(''),
+)
+
 app.get('/deferred-props/partial-reloads', (req, res) => {
   if (!req.headers['x-inertia-partial-data']) {
     return inertia.render(req, res, {
@@ -2906,6 +3006,55 @@ function renderInfiniteScroll(req, res, component, total = 40, orderByDesc = fal
   )
 }
 
+const renderQueryVisitsSearch = (req, res) => {
+  const term = req.body?.term ?? null
+
+  if (!req.headers['x-inertia-partial-data']) {
+    return inertia.render(req, res, {
+      component: 'QueryVisits/Search',
+      props: { term, reloadedAt: null },
+      deferredProps: { default: ['results'] },
+    })
+  }
+
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'QueryVisits/Search',
+        props: {
+          results: req.headers['x-inertia-partial-data'].includes('results')
+            ? `Results for: ${term ?? 'nothing'}`
+            : undefined,
+          reloadedAt: req.headers['x-inertia-partial-data'].includes('reloadedAt') ? Date.now() : undefined,
+        },
+      }),
+    req.headers['x-slow'] ? 1000 : 0,
+  )
+}
+
+app.get('/query-visits/search', renderQueryVisitsSearch)
+app.get('/query-visits/search-elsewhere', renderQueryVisitsSearch)
+app.query('/query-visits/search', renderQueryVisitsSearch)
+
+const renderQueryVisitsInfiniteScroll = (req, res) => {
+  const term = req.body?.term ?? null
+  const page = parseInt(req.body?.page ?? req.query.page ?? 1)
+  const { paginated, scrollProp } = paginateUsers(page, 15, 40)
+
+  inertia.render(req, res, {
+    component: 'QueryVisits/InfiniteScroll',
+    props: {
+      term,
+      users: { ...paginated, data: paginated.data.map((user) => ({ ...user, name: `${term ?? 'Any'} ${user.name}` })) },
+    },
+    mergeProps: ['users.data'],
+    scrollProps: { users: scrollProp },
+  })
+}
+
+app.get('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+app.query('/query-visits/infinite-scroll', renderQueryVisitsInfiniteScroll)
+
 app.get('/infinite-scroll', (req, res) => inertia.render(req, res, { component: 'InfiniteScroll/Links' }))
 app.get('/infinite-scroll-with-link', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/InfiniteScrollWithLink'),
@@ -2930,6 +3079,9 @@ app.get('/infinite-scroll/trigger-start-buffer', (req, res) =>
 app.get('/infinite-scroll/reverse', (req, res) => renderInfiniteScroll(req, res, 'InfiniteScroll/Reverse', 40, true))
 app.get('/infinite-scroll/reverse-short-content', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ReverseShortContent', 40, true, 5),
+)
+app.get('/infinite-scroll/reverse-pinned-to-bottom', (req, res) =>
+  renderInfiniteScroll(req, res, 'InfiniteScroll/ReversePinnedToBottom', 40, true, 5),
 )
 app.get('/infinite-scroll/manual-reverse', (req, res) =>
   renderInfiniteScroll(req, res, 'InfiniteScroll/ManualReverse', 40, true),
@@ -3653,6 +3805,7 @@ app.get('/once-props/instant/:page', (req, res) => {
       },
       deferredProps: deferFoo ? { default: ['foo'] } : {},
       onceProps: { foo: { prop: 'foo', expiresAt: null } },
+      sharedProps: req.query.shared === '1' ? ['foo'] : [],
     })
   }, delay)
 })
@@ -3832,10 +3985,24 @@ app.patch('/api/users/:id', upload.none(), (req, res) => {
   })
 })
 
+app.query('/api/users/search', (req, res) => {
+  res.json({
+    method: req.method,
+    name: req.body.name,
+    query: req.query,
+  })
+})
+
 app.get('/api/slow', (req, res) => {
   setTimeout(() => {
     res.json({ result: 'slow response' })
   }, 2000)
+})
+
+app.get('/api/delayed', (req, res) => {
+  setTimeout(() => {
+    res.json({ result: req.query.name })
+  }, Number(req.query.delay))
 })
 
 app.post('/api/error', upload.none(), (req, res) => {
@@ -4007,6 +4174,259 @@ app.get('/preserve-fragment/target', (req, res) =>
 
 app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
+})
+
+// The partial reload rule the useProp and live routes filter their props and
+// manifests by: a prop is sent when it, an ancestor or a descendant is
+// requested, and it isn't excepted
+const partialReloadFilter = (req) => {
+  const only = (req.headers['x-inertia-partial-data'] || '').split(',').filter(Boolean)
+  const except = (req.headers['x-inertia-partial-except'] || '').split(',').filter(Boolean)
+
+  const related = (prop, candidate) =>
+    prop === candidate || prop.startsWith(`${candidate}.`) || candidate.startsWith(`${prop}.`)
+
+  const wants = (prop) =>
+    (only.length === 0 || only.some((candidate) => related(prop, candidate))) &&
+    !except.some((candidate) => related(prop, candidate))
+
+  return { only, related, wants }
+}
+
+// useProp loading state. Reloads are deliberately slow so the loading flag is
+// observable, and `delay` lets a test overlap two requests for the same prop.
+// Props are filtered by the partial headers, so an untouched prop keeps its value.
+app.get('/use-prop', (req, res) => {
+  const isPartial = !!req.headers['x-inertia-partial-component']
+  const { only, related, wants } = partialReloadFilter(req)
+  const delay = parseInt(req.query.delay || '0', 10) || (isPartial ? 500 : 0)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  const props = {}
+
+  if (wants('users')) {
+    props.users = value('users')
+  }
+
+  if (wants('stats')) {
+    props.stats = value('stats')
+  }
+
+  if (wants('user')) {
+    props.user = { name: value('name'), email: value('email') }
+  }
+
+  // Deferred on the initial load, so it only ships when it is asked for by name
+  if (only.some((candidate) => related('orders', candidate))) {
+    props.orders = value('orders')
+  }
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'UseProp',
+      props,
+      deferredProps: isPartial ? {} : { default: ['orders'] },
+    })
+  }, delay)
+})
+
+app.get('/socket-id', (req, res) =>
+  inertia.render(req, res, {
+    component: 'SocketId',
+    props: { socketIdHeader: req.headers['x-socket-id'] ?? null },
+  }),
+)
+
+// Live props, filtered by the same partial rule as the props themselves,
+// mirroring what the Laravel adapter sends.
+const liveProps = {
+  order: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
+  stats: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
+  // Two events on one channel, which is what an explicit `channel:` argument
+  // produces on the server
+  feed: {
+    listeners: [
+      {
+        channel: { name: 'feed', type: 'public' },
+        events: ['App\\Events\\FeedUpdated', 'App\\Events\\FeedCleared'],
+      },
+    ],
+  },
+  throttled: {
+    listeners: [
+      {
+        channel: { name: 'throttled', type: 'public' },
+        events: ['App\\Events\\ThrottledUpdated'],
+      },
+    ],
+    throttle: 5000,
+  },
+  // Shares a channel with order and stats, but listens for a different event,
+  // the way a server action that broadcasts twice reaches the client
+  notes: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\NotesUpdated'],
+      },
+    ],
+  },
+  'account.balance': {
+    listeners: [
+      {
+        channel: { name: 'accounts.1', type: 'private' },
+        events: ['App\\Events\\BalanceUpdated'],
+      },
+    ],
+  },
+  // Two events on two different channels, which the flat channels/events shape
+  // could only express as a cross product
+  multi: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderArchived'],
+      },
+      {
+        channel: { name: 'users.7', type: 'private' },
+        events: ['App\\Events\\UserUpdated'],
+      },
+    ],
+  },
+  // Left out of every response unless asked for, the way an optional prop is,
+  // while its listeners are still sent along
+  optional: {
+    listeners: [
+      {
+        channel: { name: 'orders.1', type: 'private' },
+        events: ['App\\Events\\OrderUpdated'],
+      },
+    ],
+  },
+}
+
+app.get('/live', (req, res) => {
+  const { only: requested, wants } = partialReloadFilter(req)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  // Only reloads are slowed, so `delay` holds a partial in flight long enough
+  // for a broadcast to arrive for a prop that request already claims
+  const delay = requested.length > 0 ? parseInt(req.query.delay || '0', 10) : 0
+
+  setTimeout(() => {
+    inertia.render(req, res, {
+      component: 'Live',
+      props: {
+        order: value('order'),
+        stats: value('stats'),
+        feed: value('feed'),
+        throttled: value('throttled'),
+        notes: value('notes'),
+        multi: value('multi'),
+        plain: value('plain'),
+        account: { balance: value('balance'), currency: value('currency') },
+        ...(requested.includes('optional') ? { optional: value('optional') } : {}),
+      },
+      alwaysProps: {
+        socketIdHeader: req.headers['x-socket-id'] ?? null,
+      },
+      liveProps: Object.fromEntries(Object.entries(liveProps).filter(([prop]) => wants(prop))),
+    })
+  }, delay)
+})
+
+// Live props over the Echo transport. Every channel type is represented, and two
+// props share a channel through different events so the transport has to refcount.
+const echoLiveProps = (drop, swap) => {
+  const props = {
+    order: {
+      listeners: [
+        {
+          channel: { name: 'orders.1', type: 'private' },
+          events: ['App\\Events\\OrderUpdated'],
+        },
+      ],
+    },
+    stats: {
+      listeners: [
+        {
+          channel: { name: 'orders.1', type: 'private' },
+          events: ['App\\Events\\StatsUpdated'],
+        },
+      ],
+    },
+    room: {
+      listeners: [
+        {
+          channel: { name: 'rooms.1', type: 'presence' },
+          events: ['App\\Events\\RoomUpdated'],
+        },
+      ],
+    },
+    secret: {
+      listeners: [
+        {
+          channel: { name: 'secrets.1', type: 'encrypted-private' },
+          events: ['App\\Events\\SecretUpdated'],
+        },
+      ],
+    },
+    news: {
+      listeners: [
+        {
+          channel: { name: 'news', type: 'public' },
+          events: ['news.published'],
+        },
+      ],
+    },
+  }
+
+  // Keep the channel but replace the events on it, so the transport is asked to
+  // subscribe to new keys on a channel it already holds
+  if (swap) {
+    props.order.listeners[0].events = ['App\\Events\\OrderArchived']
+    props.stats.listeners[0].events = ['App\\Events\\StatsArchived']
+  }
+
+  delete props[drop]
+
+  return props
+}
+
+app.get('/echo-transport', (req, res) => {
+  const { wants } = partialReloadFilter(req)
+  const value = (prop) => `${prop}-${randomUUID().slice(0, 8)}`
+
+  inertia.render(req, res, {
+    component: 'EchoTransport',
+    props: {
+      order: value('order'),
+      stats: value('stats'),
+      room: value('room'),
+      secret: value('secret'),
+      news: value('news'),
+    },
+    alwaysProps: {
+      socketIdHeader: req.headers['x-socket-id'] ?? null,
+    },
+    liveProps: Object.fromEntries(
+      Object.entries(echoLiveProps(req.query.drop, req.query.swap)).filter(([prop]) => wants(prop)),
+    ),
+  })
 })
 
 // Optimistic updates (state scoped per session cookie to avoid cross-worker interference)

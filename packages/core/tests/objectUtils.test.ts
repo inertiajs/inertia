@@ -1,6 +1,6 @@
 import { set } from 'es-toolkit/compat'
 import { describe, expect, it } from 'vitest'
-import { setPathPreservingIdentity, toStructuredCloneable } from '../src/objectUtils'
+import { objectsAreEqual, setPathPreservingIdentity, toStructuredCloneable } from '../src/objectUtils'
 
 describe('setPathPreservingIdentity', () => {
   it('matches es-toolkit set() semantics for values', () => {
@@ -198,5 +198,36 @@ describe('toStructuredCloneable', () => {
 
     expect(() => structuredClone(result)).not.toThrow()
     expect(copiedKey.map).toBe(result.map)
+  })
+})
+
+describe('objectsAreEqual', () => {
+  const formData = (entries: Record<string, string>) => {
+    const form = new FormData()
+
+    Object.entries(entries).forEach(([key, value]) => form.append(key, value))
+
+    return form
+  }
+
+  it('compares form data by its entries', () => {
+    expect(objectsAreEqual({ data: formData({ term: 'apple' }) }, { data: formData({ term: 'apple' }) }, [])).toBe(true)
+    expect(objectsAreEqual({ data: formData({ term: 'apple' }) }, { data: formData({ term: 'banana' }) }, [])).toBe(
+      false,
+    )
+    expect(objectsAreEqual({ data: formData({ term: 'apple' }) }, { data: formData({}) }, [])).toBe(false)
+    expect(objectsAreEqual({ data: formData({ term: 'apple' }) }, { data: { term: 'apple' } }, [])).toBe(false)
+  })
+
+  it('does not consider null, objects and arrays equal', () => {
+    expect(objectsAreEqual({ filter: null }, { filter: {} }, [])).toBe(false)
+    expect(objectsAreEqual({ filter: {} }, { filter: null }, [])).toBe(false)
+    expect(objectsAreEqual({ filter: [] }, { filter: {} }, [])).toBe(false)
+    expect(objectsAreEqual({ filter: null }, { filter: null }, [])).toBe(true)
+  })
+
+  it('compares dates by their time', () => {
+    expect(objectsAreEqual({ date: new Date(1000) }, { date: new Date(1000) }, [])).toBe(true)
+    expect(objectsAreEqual({ date: new Date(1000) }, { date: new Date(2000) }, [])).toBe(false)
   })
 })
