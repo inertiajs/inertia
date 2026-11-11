@@ -141,6 +141,14 @@ export type AnyLiveTransport = LiveTransport | LiveChannelTransport
 export type LiveOptions = {
   transport: AnyLiveTransport
   throttle?: number
+
+  /**
+   * The most a reload may wait, in milliseconds, on top of its usual delay.
+   * Every viewer on a shared channel gets an event at the same moment, so a
+   * random wait keeps their reloads from reaching the server together.
+   */
+  jitter?: number
+
   pauseWhenHidden?: boolean
 }
 

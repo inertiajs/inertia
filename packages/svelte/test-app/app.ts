@@ -35,6 +35,7 @@ createInertiaApp({
       transport: fakeLiveTransport(),
       // Opt-in so the tests that rely on the defaults keep their timings
       ...(params.has('liveThrottle') && { throttle: Number(params.get('liveThrottle')) }),
+      ...(params.has('liveJitter') && { jitter: Number(params.get('liveJitter')) }),
       ...(params.get('liveKeepAlive') === '1' && { pauseWhenHidden: false }),
     },
   }),
