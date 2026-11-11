@@ -623,4 +623,72 @@ test.describe('Live props', () => {
     await expect(page.locator('#order')).toHaveText(order!)
     await expect(page.locator('#feed')).toHaveText(feed!)
   })
+
+  test.describe('inside a layer', () => {
+    const LAYER_NOTES_EVENT = 'App\\Events\\LayerNotesUpdated'
+
+    const subscriptions = (page: Page) => page.evaluate(() => window.__inertiaLive.subscriptions())
+
+    const openLayer = async (page: Page) => {
+      await page.goto('/live?liveThrottle=0')
+      await page.getByRole('link', { name: 'Open live layer' }).click()
+      await expect(page.locator('#layer-order')).toBeVisible()
+    }
+
+    test('it reloads the live prop of a layer from the layer, and the one of the page beneath from the page', async ({
+      page,
+    }) => {
+      await openLayer(page)
+
+      const pageOrder = await page.locator('#order').textContent()
+      const layerOrder = await page.locator('#layer-order').textContent()
+      const layerPlain = await page.locator('#layer-plain').textContent()
+
+      const layerReload = page.waitForRequest((request) => new URL(request.url()).pathname === '/live/layer')
+      const pageReload = page.waitForRequest((request) => new URL(request.url()).pathname === '/live')
+
+      await emit(page, 'orders.1', ORDER_EVENT, { id: 1 })
+
+      expect((await layerReload).headers()['x-inertia-partial-component']).toBe('Layers/Live')
+      expect((await layerReload).headers()['x-inertia-partial-data']).toBe('order')
+      expect((await pageReload).headers()['x-inertia-partial-component']).toBe('Live')
+
+      await expect(page.locator('#layer-order-loading')).toHaveText('true')
+      await expect(page.locator('#layer-order')).not.toHaveText(layerOrder!)
+      await expect(page.locator('#layer-order-loading')).toHaveText('false')
+      await expect(page.locator('#layer-plain')).toHaveText(layerPlain!)
+      await expect(page.locator('#order')).not.toHaveText(pageOrder!)
+      await expect(page.locator('[data-layer-index]')).toHaveCount(1)
+    })
+
+    test('it writes a value the broadcast carried into the layer and into the page beneath it', async ({ page }) => {
+      await openLayer(page)
+
+      requests.listen(page)
+
+      await emit(page, 'orders.1', ORDER_EVENT, { __inertia: { props: { order: 'order-from-the-broadcast' } } })
+
+      await expect(page.locator('#layer-order')).toHaveText('order-from-the-broadcast')
+      await expect(page.locator('#order')).toHaveText('order-from-the-broadcast')
+      await expect(page.locator('[data-layer-index]')).toHaveCount(1)
+      expect(requests.requests.filter((request) => request.url().includes('/live/layer'))).toHaveLength(0)
+    })
+
+    test('it listens for the live props of a layer only while the layer is open', async ({ page }) => {
+      await page.goto('/live')
+
+      expect(await subscriptions(page)).not.toContain(`public:layer-notes::${LAYER_NOTES_EVENT}`)
+
+      await page.getByRole('link', { name: 'Open live layer' }).click()
+      await expect(page.locator('#layer-order')).toBeVisible()
+
+      expect(await subscriptions(page)).toContain(`public:layer-notes::${LAYER_NOTES_EVENT}`)
+
+      await page.keyboard.press('Escape')
+      await expect(page.locator('[data-layer-index]')).toHaveCount(0)
+
+      await expect.poll(() => subscriptions(page)).not.toContain(`public:layer-notes::${LAYER_NOTES_EVENT}`)
+      expect(await subscriptions(page)).toContain(`private:orders.1::${ORDER_EVENT}`)
+    })
+  })
 })

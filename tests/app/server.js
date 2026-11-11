@@ -4349,6 +4349,32 @@ app.get('/live', (req, res) => {
   }, delay)
 })
 
+// A layer over the live props page. Its order listens to the event the page's own order
+// listens to, and its notes listen on a channel nothing else is subscribed to.
+app.get('/live/layer', (req, res) => {
+  const { only: requested, wants } = partialReloadFilter(req)
+  const value = (prop) => `layer-${prop}-${randomUUID().slice(0, 8)}`
+
+  const layerLiveProps = {
+    order: liveProps.order,
+    notes: {
+      listeners: [{ channel: { name: 'layer-notes', type: 'public' }, events: ['App\\Events\\LayerNotesUpdated'] }],
+    },
+  }
+
+  // Only reloads are slowed, so the layer's own loading state can be seen
+  setTimeout(
+    () =>
+      inertia.render(req, res, {
+        component: 'Layers/Live',
+        props: { order: value('order'), notes: value('notes'), plain: value('plain') },
+        layer: { base: '/live' },
+        liveProps: Object.fromEntries(Object.entries(layerLiveProps).filter(([prop]) => wants(prop))),
+      }),
+    requested.length > 0 ? 300 : 0,
+  )
+})
+
 // Live props over the Echo transport. Every channel type is represented, and two
 // props share a channel through different events so the transport has to refcount.
 const echoLiveProps = (drop, swap) => {

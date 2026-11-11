@@ -1963,6 +1963,84 @@ describe('a reload or partial issued from inside a layer', () => {
     expect(currentPage.get().layers![0].props).toEqual({ user: { id: 5 } })
   })
 
+  it("a visit made from a layer cancels the layer's pending load once it lands, never while it is in flight", async () => {
+    const layer = await openWarm()
+    let land!: (response: HttpResponse) => void
+
+    // `router.init()` listens for this on a booted app, and these tests hold the page without booting one.
+    const stopListening = eventHandler.on('leavePage', ({ url, layerId }: { url: URL; layerId?: string }) =>
+      (router as unknown as { cancelAsyncRequestsFor(url: URL, layerId?: string): void }).cancelAsyncRequestsFor(
+        url,
+        layerId,
+      ),
+    )
+
+    http.setClient({
+      request: ({ url }) =>
+        new URL(url).pathname === '/users/7/edit'
+          ? new Promise<HttpResponse>((resolve) => (land = resolve))
+          : new Promise<HttpResponse>(() => {}),
+    })
+
+    let layerPartialCancelled = false
+    let basePartialCancelled = false
+    router.reload({ layerId: layer.id, only: ['user'], onCancel: () => (layerPartialCancelled = true) })
+    router.reload({ only: ['users'], onCancel: () => (basePartialCancelled = true) })
+
+    const landed = new Promise<void>((resolve) => {
+      router.visit('http://localhost/users/7/edit', { layerId: layer.id, onSuccess: () => resolve() })
+    })
+    await vi.waitFor(() => expect(land).toBeDefined())
+
+    expect(layerPartialCancelled).toBe(false)
+
+    land(inertiaResponse(editLayer({ url: '/users/7/edit', props: { user: { id: 7 } } })))
+    await landed
+
+    expect(layerPartialCancelled).toBe(true)
+    expect(basePartialCancelled).toBe(false)
+    expect(currentPage.get().layers).toEqual([expect.objectContaining({ id: layer.id, url: '/users/7/edit' })])
+
+    stopListening()
+  })
+
+  it('a layer rendered by a QUERY visit reloads with the same request body, and the page beneath it does not', async () => {
+    await hold(pageWith())
+    const sent: { method: string; path: string; data: unknown }[] = []
+
+    http.setClient({
+      request: async ({ method, url, data }) => {
+        const path = new URL(url).pathname
+        sent.push({ method, path, data })
+
+        return inertiaResponse(path === '/users/5/edit' ? editLayer() : pageWith())
+      },
+    })
+
+    await new Promise<void>((resolve) => {
+      router.query('http://localhost/users/5/edit', { term: 'apple' }, { onSuccess: () => resolve() })
+    })
+    await queueSettled()
+
+    const layer = currentPage.get().layers![0]
+
+    expect(layer.queryMethodData).toEqual({ term: 'apple' })
+    expect(currentPage.get().queryMethodData).toBeUndefined()
+
+    await new Promise<void>((resolve) => {
+      router.reload({ layerId: layer.id, onFinish: () => resolve() } as VisitOptions)
+    })
+    await new Promise<void>((resolve) => {
+      router.reload({ onFinish: () => resolve() })
+    })
+
+    expect(sent.slice(1)).toEqual([
+      { method: 'query', path: '/users/5/edit', data: { term: 'apple' } },
+      expect.objectContaining({ method: 'get', path: '/users' }),
+    ])
+    expect(currentPage.get().layers![0].queryMethodData).toEqual({ term: 'apple' })
+  })
+
   it('a visit to the page does not cancel an in-flight request aimed at a layer', async () => {
     await hold(pageWith())
     const id = nextLayerId(currentPage.get())

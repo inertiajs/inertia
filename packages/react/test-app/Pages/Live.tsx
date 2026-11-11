@@ -116,6 +116,7 @@ export default ({
       <button onClick={() => router.reload({ only: ['optional'] })}>Load Optional</button>
 
       <Link href="/">Leave</Link>
+      <Link href="/live/layer">Open live layer</Link>
     </div>
   )
 }
