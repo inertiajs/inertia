@@ -155,6 +155,8 @@ export type LiveAppOption = {
 }
 
 export type LiveEventDetails = {
+  /** The layer whose props the event feeds. Absent for the page beneath the stack. */
+  layerId?: string
   props: string[]
   channel: LiveChannel
   event: string
@@ -333,6 +335,95 @@ export type ScrollProp = {
   reset: boolean
 }
 
+/** What every tier carries: the page beneath and each layer on the stack. */
+export type Tier = Pick<
+  Page,
+  | 'component'
+  | 'encryptHistory'
+  | 'deferredProps'
+  | 'initialDeferredProps'
+  | 'rescuedProps'
+  | 'flash'
+  | 'onceProps'
+  | 'scrollProps'
+  | 'liveProps'
+  | 'queryMethodData'
+> & {
+  props: PageProps
+  /** Null for a layer with no url of its own; the address falls through to the layer beneath. */
+  url: string | null
+}
+
+export interface LayerState extends Tier {
+  id: string
+  key: string
+  base: string | null
+  encryptHistory: boolean
+  deferredProps: Record<string, NonNullable<VisitOptions['only']>>
+  local?: boolean
+  /** @internal */
+  renderKey: number
+  /** @internal */
+  standalone: boolean
+  /** @internal */
+  entries: number
+  /** @internal */
+  owner: string | null
+  /** @internal */
+  preservesUrl?: boolean
+  /** @internal Marked by a close: the shell is running its exit, and history no longer holds the layer. */
+  closing?: true
+  /** @internal Keyed by the layer's own `useRemember` keys, so they cannot collide with the base's. */
+  rememberedState?: Page['rememberedState']
+}
+
+/** A layer as seen from inside another tier's page: its place on the stack, never its props. */
+export type Layer = Pick<LayerState, 'id' | 'key' | 'component' | 'url'>
+
+/** The tier a visit targets: the layer if it names one, that tier's own state, and the page the app sees for it. */
+export interface Target {
+  layer: LayerState | undefined
+  state: Tier
+  page: Page
+}
+
+export interface LayerShellProps {
+  open: boolean
+  index: number
+  isTop: boolean
+  type: 'routed' | 'local'
+  close: () => void
+  done: () => void
+}
+
+export interface LayerHandle {
+  id: string
+  /** Hears what this layer's immediate children emit, and returns its own unsubscribe. */
+  on(name: string, callback: (payload?: unknown, childId?: string) => void): () => void
+  once(name: string, callback: (payload?: unknown, childId?: string) => void): () => void
+  onClose(callback: () => void): () => void
+  close(): Promise<void>
+  /** Sends an event to whatever opened this layer; dropped when that has no handle of its own. */
+  emit(name: string, payload?: unknown): void
+}
+
+export interface MountedLayerDialog {
+  update(shell: LayerShellProps): void
+  unmount(): void
+}
+
+export interface ResolvedLayer<ComponentType = Component> {
+  id: string
+  /** Changes when the layer's component must remount; use it as the component's key. */
+  renderKey: number
+  component: ComponentType
+  page: Page
+  layoutPage: Page
+  attributes: { 'data-layer-id': string }
+  transitionName: string
+  shell: LayerShellProps
+}
+
 export interface Page<SharedProps extends PageProps = PageProps> {
   component: string
   props: PageProps &
@@ -364,6 +455,14 @@ export interface Page<SharedProps extends PageProps = PageProps> {
       expiresAt?: number | null
     }
   >
+  interstitial?: boolean
+  /** Open layers, bottom first. The `@internal` fields are core's bookkeeping; a layer's own page carries these as `Layer`. */
+  layers?: LayerState[]
+  layer?: {
+    key?: string
+    base?: string
+  }
+  close?: boolean
 
   /** @internal */
   rememberedState: Record<string, unknown>
@@ -371,6 +470,18 @@ export interface Page<SharedProps extends PageProps = PageProps> {
   queryMethodData?: Record<string, FormDataConvertible>
   /** @internal */
   optimisticUpdatedAt?: Record<string, number>
+}
+
+/** A layer opened from the client rather than fetched; still a history step, with no url of its own. */
+export interface LocalLayer {
+  component: string
+  props?: PageProps
+}
+
+/** @internal The page a visit was dispatched from, pinned so the response lands on it and not on whatever is current. */
+export interface BaseSnapshot {
+  page: Page
+  generation: number
 }
 
 export type ScrollRegion = {
@@ -390,6 +501,7 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
   preserveFlash?: boolean
   errorBag?: string | null
   viewTransition?: VisitOptions['viewTransition']
+  layerId?: string
   onError?: (errors: Errors) => void
   onFinish?: (visit: ClientSideVisitOptions<TProps>) => void
   onFlash?: (flash: FlashData) => void
@@ -398,14 +510,30 @@ export interface ClientSideVisitOptions<TProps = Page['props']> {
 
 export type PageResolver = (name: string, page?: Page<SharedPageProps>) => Component
 
+/** Resolves the placeholder rendered while a cold-opened layer's base is still being fetched. */
+export type LoadingResolver = (url: string, page: Page) => Component | Promise<Component>
+
+export type LoadingOption<ComponentType = Component> =
+  | ComponentType
+  | ((
+      url: string,
+      page: Page,
+    ) =>
+      | ComponentType
+      | { default: ComponentType }
+      | Promise<ComponentType | { default: ComponentType } | undefined>
+      | undefined)
+
 export type PageHandler<ComponentType = Component> = ({
   component,
   page,
+  layers,
   preserveState,
   initialRender,
 }: {
   component: ComponentType
   page: Page
+  layers?: ResolvedLayer<ComponentType>[]
   preserveState: boolean
   initialRender: boolean
 }) => Promise<unknown>
@@ -456,6 +584,8 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
     | ((currentProps: PageProps, sharedProps: Partial<PageProps>) => Record<string, unknown>)
     | null
   cached: boolean
+  layerId?: string
+  layerOwner?: string
 }
 
 export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
@@ -503,6 +633,7 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     parameters: [Page<SharedPageProps>, { type: 'initial' | 'visit' | 'history'; cached?: boolean; visitId?: string }]
     details: {
       page: Page<SharedPageProps>
+      url: string
       type: 'initial' | 'visit' | 'history'
       cached?: boolean
       visitId?: string
@@ -519,19 +650,22 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
     result: void
   }
   success: {
-    parameters: [Page<SharedPageProps>, { visitId?: string }?]
+    parameters: [Page<SharedPageProps>, { visitId?: string; stack?: Page<SharedPageProps> }?]
     details: {
       page: Page<SharedPageProps>
+      url: string
       visitId?: string
+      stack: Page<SharedPageProps>
     }
     result: void
   }
   error: {
-    parameters: [Errors, { page?: Page<SharedPageProps>; visitId?: string }?]
+    parameters: [Errors, { page?: Page<SharedPageProps>; visitId?: string; stack?: Page<SharedPageProps> }?]
     details: {
       errors: Errors
       page?: Page<SharedPageProps>
       visitId?: string
+      stack?: Page<SharedPageProps>
     }
     result: void
   }
@@ -587,7 +721,7 @@ export type GlobalEventsMap<T extends RequestPayload = RequestPayload> = {
   }
 }
 
-export type PageEvent = 'newComponent' | 'firstLoad'
+export type PageEvent = 'newComponent' | 'firstLoad' | 'commit'
 
 export type GlobalEventNames<T extends RequestPayload = RequestPayload> = keyof GlobalEventsMap<T>
 
@@ -665,6 +799,7 @@ export type VisitHelperOptions<T extends RequestPayload = RequestPayload> = Omit
 export type RouterInitParams<ComponentType = Component> = {
   initialPage: Page
   resolveComponent: PageResolver
+  resolveLoading?: LoadingResolver
   swapComponent: PageHandler<ComponentType>
   onFlash?: (flash: Page['flash']) => void
 }
@@ -681,15 +816,22 @@ export type PendingVisitOptions = {
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
 export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> &
-  Required<Omit<VisitOptions<T>, 'optimistic'>>
+  Required<Omit<VisitOptions<T>, 'optimistic' | 'layerId' | 'layerOwner'>> & {
+    layerId?: string
+    layerOwner?: string
+  }
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void
   onPrefetchError?: (error: Error) => void
   deferredProps?: boolean
   poll?: boolean
+  reload?: boolean
   queryMethodReload?: boolean
   cached?: boolean
+  walk?: boolean
+  /** The instant swap left a placeholder layer under layerId for the response to claim. */
+  claims?: boolean
 }
 
 export type VisitId = string
@@ -785,7 +927,7 @@ export type HeadManagerOnUpdateCallback = (elements: string[]) => void
 export type HeadManager = {
   forceUpdate: () => void
   updateServerHead: (elements?: string[]) => void
-  createProvider: () => {
+  createProvider: (layerId?: string) => {
     reconnect: () => void
     update: HeadManagerOnUpdateCallback
     disconnect: () => void
@@ -1004,6 +1146,7 @@ export type FormComponentSlotProps<TForm extends object = Record<string, any>> =
 export type FormComponentRef<TForm extends object = Record<string, any>> = FormComponentSlotProps<TForm>
 
 export interface UseInfiniteScrollOptions {
+  layerId?: string
   // Core data
   getPropName: () => string
   inReverseMode: () => boolean

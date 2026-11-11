@@ -19,6 +19,7 @@ import React, {
   useState,
 } from 'react'
 import { flushSync } from 'react-dom'
+import { useLayerId } from './useLayer'
 import usePage from './usePage'
 
 const resolveHTMLElement = (
@@ -113,6 +114,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
     const itemsElementRef = useCallback((node: HTMLElement | null) => setItemsElementFromRef(node), [])
 
     const scrollProp = usePage().scrollProps?.[data]
+    const layerId = useLayerId()
 
     const [loadingPrevious, setLoadingPrevious] = useState(false)
     const [loadingNext, setLoadingNext] = useState(false)
@@ -192,6 +194,7 @@ const InfiniteScroll = forwardRef<InfiniteScrollRef, ComponentProps>(
       }
 
       const infiniteScrollInstance = useInfiniteScroll({
+        layerId,
         // Data
         getPropName: () => data,
         inReverseMode: () => callbackPropsRef.current.reverse,

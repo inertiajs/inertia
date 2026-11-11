@@ -9,19 +9,25 @@ import {
   getInitialPageFromDOM,
   http as httpModule,
   InertiaAppSSRResponse,
+  LoadingOption,
   LiveAppOption,
   Page,
   PageProps,
+  resolveInitialApp,
   router,
   setupProgress,
   SharedPageProps,
 } from '@inertiajs/core'
-import { createElement, ReactElement, StrictMode } from 'react'
+import { createElement, isValidElement, ReactElement, StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import { renderToString } from 'react-dom/server'
 import App, { InertiaAppProps, type InertiaApp } from './App'
 import { config } from './index'
-import { ReactComponent, ReactInertiaAppConfig } from './types'
+import { LayerComponent, ReactComponent, ReactInertiaAppConfig } from './types'
+
+// Renders nothing beneath a cold-opened layer; declares no layouts.
+const Blank: ReactComponent = () => null
+Blank.layout = []
 
 export type SetupOptions<ElementType, SharedProps extends PageProps> = {
   el: ElementType
@@ -47,6 +53,8 @@ type InertiaAppOptionsForCSR<SharedProps extends PageProps> = CreateInertiaAppOp
   ReactInertiaAppConfig
 > &
   LiveAppOption & {
+    layer?: LayerComponent
+    loading?: LoadingOption<ReactComponent>
     strictMode?: undefined
     withApp?: never
   }
@@ -59,6 +67,8 @@ type InertiaAppOptionsForSSR<SharedProps extends PageProps> = CreateInertiaAppOp
   ReactInertiaAppConfig
 > & {
   render: typeof renderToString
+  layer?: LayerComponent
+  loading?: LoadingOption<ReactComponent>
   strictMode?: undefined
   withApp?: never
   // Live props only run in the browser, so a server entry has nothing to
@@ -78,6 +88,8 @@ type InertiaAppOptionsAuto<SharedProps extends PageProps> = Omit<
   LiveAppOption & {
     page?: Page<SharedProps>
     render?: undefined
+    layer?: LayerComponent
+    loading?: LoadingOption<ReactComponent>
     strictMode?: boolean
   } & (
     | { setup?: undefined; withApp?: ReactWithApp<SharedProps> }
@@ -113,6 +125,8 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     nonce,
     http,
     layout,
+    layer,
+    loading,
     live,
     serverHead,
     strictMode = false,
@@ -158,15 +172,23 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     return async (page: Page<SharedProps>, renderToString: RenderToString) => {
       let head: string[] = []
 
-      const initialComponent = await resolveComponent(page.component, page)
+      const {
+        page: initialPage,
+        component: initialComponent,
+        layers: initialLayers,
+        resolveLoading,
+      } = await resolveInitialApp({ response: page, resolveComponent, loading, blank: Blank, rendered: isValidElement })
 
       const props: InertiaAppProps<SharedProps> = {
-        initialPage: page,
+        initialPage,
         initialComponent,
+        initialLayers,
         resolveComponent,
         titleCallback: title,
         onHeadUpdate: (elements: string[]) => (head = elements),
         defaultLayout: layout,
+        layer,
+        resolveLoading,
         serverHead,
       }
 
@@ -193,21 +215,24 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
     }
   }
 
-  const initialPage = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
+  const initialResponse = page || getInitialPageFromDOM<Page<SharedProps>>(id)!
 
   let head: string[] = []
 
   const reactApp = await Promise.all([
-    resolveComponent(initialPage.component, initialPage),
+    resolveInitialApp({ response: initialResponse, resolveComponent, loading, blank: Blank, rendered: isValidElement }),
     router.decryptHistory().catch(() => {}),
-  ]).then(([initialComponent]) => {
+  ]).then(([{ page: initialPage, component: initialComponent, layers: initialLayers, resolveLoading }]) => {
     const props: InertiaAppProps<SharedProps> = {
       initialPage,
       initialComponent,
+      initialLayers,
       resolveComponent,
       titleCallback: title,
       onHeadUpdate: isServer ? (elements: string[]) => (head = elements) : undefined,
       defaultLayout: layout,
+      layer,
+      resolveLoading,
       serverHead,
     }
 
@@ -248,7 +273,7 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
 
   if (isServer && render && reactApp) {
     const html = render(reactApp)
-    const body = buildSSRBody(id, initialPage, html)
+    const body = buildSSRBody(id, initialResponse, html)
 
     return { head, body }
   }

@@ -1,12 +1,14 @@
-import { router } from '@inertiajs/core'
 import { cloneDeep } from 'es-toolkit'
 import { ComponentOptions } from 'vue'
+import useLayer from './useLayer'
 
 const remember: ComponentOptions = {
   created() {
     if (!this.$options.remember) {
       return
     }
+
+    const layer = useLayer()
 
     if (Array.isArray(this.$options.remember)) {
       this.$options.remember = { data: this.$options.remember }
@@ -25,7 +27,7 @@ const remember: ComponentOptions = {
         ? this.$options.remember.key.call(this)
         : this.$options.remember.key
 
-    const restored = router.restore(rememberKey) as Record<string, unknown> | undefined
+    const restored = layer.restore(rememberKey) as Record<string, unknown> | undefined
 
     const rememberable = this.$options.remember.data.filter((key: string) => {
       return !(this[key] !== null && typeof this[key] === 'object' && this[key].__rememberable === false)
@@ -48,7 +50,7 @@ const remember: ComponentOptions = {
       this.$watch(
         key,
         () => {
-          router.remember(
+          layer.remember(
             rememberable.reduce(
               (data, key) => ({
                 ...data,

@@ -3,10 +3,12 @@ import debounce from './debounce'
 import { fireNavigateEvent } from './events'
 import { history } from './history'
 import { router } from './index'
+import { isBlankBase, layersOf, recordHistoryEntry, withAddressHash } from './layers'
+import { layerClosing } from './layers/closing'
+import { recoverBlankBase } from './layers/walk'
 import { page as currentPage } from './page'
 import { Scroll } from './scroll'
-import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent } from './types'
-import { hrefToUrl } from './url'
+import { GlobalEvent, GlobalEventNames, GlobalEventResult, InternalEvent, LayerState, Page } from './types'
 
 class EventHandler {
   protected internalListeners: {
@@ -85,13 +87,15 @@ class EventHandler {
     this.onWindowScroll.cancel()
     this.onScroll.cancel()
 
-    const state = event.state || null
+    this.restoreFromPopstate(event.state || null)
+      .catch(() => this.onMissingHistoryItem())
+      .finally(() => layerClosing.unwound())
+  }
 
+  protected async restoreFromPopstate(state: { page: Page } | null): Promise<void> {
     if (state === null) {
-      const url = hrefToUrl(currentPage.get().url)
-      url.hash = window.location.hash
-
-      history.replaceState({ ...currentPage.getWithoutFlashData(), url: url.href })
+      // An entry the browser wrote itself (an in-page anchor), so a closing layer has one more step to take back.
+      history.replaceState(withAddressHash(recordHistoryEntry(currentPage.getWithoutFlashData()), window.location.hash))
       Scroll.reset()
 
       return
@@ -101,41 +105,65 @@ class EventHandler {
       return this.onMissingHistoryItem()
     }
 
-    // Cancel ongoing requests except prefetch requests before decrypting,
-    // so a response that arrives in the meantime can't replace the restored page
-    router.cancelAll({ prefetch: false })
+    // A closing layer steps back onto the stack it leaves standing, and only the decrypted entry tells whether it did.
+    const cancelsOnceRestored = layerClosing.isUnwinding()
 
-    history
-      .decrypt(state.page)
-      .then((data) => {
-        if (currentPage.get().version !== data.version) {
-          this.onMissingHistoryItem()
-          return
+    if (!cancelsOnceRestored) {
+      // Cancel ongoing requests except prefetch requests before decrypting,
+      // so a response that arrives in the meantime can't replace the restored page
+      router.cancelAll({ prefetch: false })
+    }
+
+    return this.restoreEntry(await history.decrypt(state.page), cancelsOnceRestored)
+  }
+
+  protected restoreEntry(data: Page, cancelsOnceRestored: boolean): Promise<void> | void {
+    if (currentPage.get().version !== data.version) {
+      return this.onMissingHistoryItem()
+    }
+
+    const restore = layerClosing.restoring(data)
+
+    if (cancelsOnceRestored && !restore.sameStack) {
+      // Cancel ongoing requests except prefetch requests
+      router.cancelAll({ prefetch: false })
+    }
+
+    if (restore.landsItself) {
+      return
+    }
+
+    if (isBlankBase(data)) {
+      return recoverBlankBase(data.url)
+    }
+
+    return restore.install().then(() => {
+      Scroll.restore(history.getScrollRegions())
+      fireNavigateEvent(currentPage.get(), { type: 'history' })
+
+      this.loadDeferredPropsFor(data)
+    })
+  }
+
+  protected loadDeferredPropsFor(data: Page): void {
+    for (const tier of [data, ...layersOf(data)]) {
+      const pendingDeferred: Record<string, string[]> = {}
+
+      for (const [group, props] of Object.entries(tier.initialDeferredProps ?? tier.deferredProps ?? {})) {
+        const missing = props.filter((prop) => get(tier.props, prop) === undefined)
+
+        if (missing.length > 0) {
+          pendingDeferred[group] = missing
         }
+      }
 
-        currentPage.setQuietly(data, { preserveState: false }).then(() => {
-          Scroll.restore(history.getScrollRegions())
-          fireNavigateEvent(currentPage.get(), { type: 'history' })
-
-          const pendingDeferred: Record<string, string[]> = {}
-          const pageProps = currentPage.get().props
-
-          for (const [group, props] of Object.entries(data.initialDeferredProps ?? data.deferredProps ?? {})) {
-            const missing = props.filter((prop) => get(pageProps, prop) === undefined)
-
-            if (missing.length > 0) {
-              pendingDeferred[group] = missing
-            }
-          }
-
-          if (Object.keys(pendingDeferred).length > 0) {
-            this.fireInternalEvent('loadDeferredProps', pendingDeferred)
-          }
+      if (Object.keys(pendingDeferred).length > 0) {
+        this.fireInternalEvent('loadDeferredProps', {
+          deferredProps: pendingDeferred,
+          layerId: (tier as LayerState).id,
         })
-      })
-      .catch(() => {
-        this.onMissingHistoryItem()
-      })
+      }
+    }
   }
 }
 

@@ -3,6 +3,7 @@ import { get } from 'es-toolkit/compat'
 import { computed, onMounted, onScopeDispose, ref, type ComputedRef, type Ref } from 'vue'
 import { usePage } from './app'
 import { injectHydrationContext } from './hydration'
+import { useLayerId } from './useLayer'
 
 export interface InertiaProp<T> {
   value: ComputedRef<T | undefined>
@@ -12,6 +13,7 @@ export interface InertiaProp<T> {
 
 export default function useProp<T = unknown>(name: string): InertiaProp<T> {
   const page = usePage()
+  const layerId = useLayerId()
 
   const value = computed(() => get(page.props, name) as T | undefined)
   const loaded = computed(() => value.value !== undefined)
@@ -19,10 +21,10 @@ export default function useProp<T = unknown>(name: string): InertiaProp<T> {
   // The server renders nothing as loading, so hydration has to match it before
   // the client catches up on mount
   const isHydrating = injectHydrationContext()?.value === false
-  const loading = ref(isHydrating ? false : propRefreshes.isRefreshing(name))
+  const loading = ref(isHydrating ? false : propRefreshes.isRefreshing(name, layerId))
 
   const sync = () => {
-    loading.value = propRefreshes.isRefreshing(name)
+    loading.value = propRefreshes.isRefreshing(name, layerId)
   }
 
   // Nothing subscribes on the server: `onScopeDispose` never runs there, so an

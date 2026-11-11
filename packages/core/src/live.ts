@@ -2,6 +2,7 @@ import { get, toPath } from 'es-toolkit/compat'
 import { router } from '.'
 import { eventHandler } from './eventHandler'
 import { fireLiveEvent } from './events'
+import { layerAt, layersOf } from './layers'
 import { liveChannelKey } from './liveChannel'
 import { setPathPreservingIdentity } from './objectUtils'
 import { page as currentPage } from './page'
@@ -17,6 +18,7 @@ import {
   LiveProp,
   LiveTransport,
   Page,
+  Tier,
 } from './types'
 import { visibility } from './visibility'
 
@@ -38,8 +40,20 @@ export const throttleWait = (throttle: number, flushedAt: number | undefined, no
 }
 
 /**
+ * A live prop of one tier: a layer, or the page beneath the stack when it names
+ * none. Two tiers may declare a prop of the same name, and each keeps its own.
+ */
+type LivePropRef = {
+  layerId: string | undefined
+  prop: string
+  entry: LiveProp
+}
+
+const propKey = (layerId: string | undefined, prop: string): string => `${layerId ?? ''}::${prop}`
+
+/**
  * Keyed by `subscriptionKey`, which is what the transport is asked to subscribe
- * to.
+ * to. The props are held by their `propKey`.
  */
 type Subscription = {
   channel: LiveChannel
@@ -53,7 +67,20 @@ const subscriptionKey = (channel: LiveChannel, event: string): string => `${live
  * Compared the way `pendingDeferredProps` compares its own, since a partial
  * reload replaces the page object without changing which page it is.
  */
-const pageKey = (page: Page): string => `${page.component}::${page.url}`
+const tierKey = (tier: Tier): string => `${tier.component}::${tier.url}`
+
+const tiersOf = (page: Page): [string | undefined, Tier][] => [
+  [undefined, page],
+  ...layersOf(page).map((layer): [string, Tier] => [layer.id, layer]),
+]
+
+const groupByTier = <T extends { layerId: string | undefined }>(refs: T[]): Map<string | undefined, T[]> => {
+  const tiers = new Map<string | undefined, T[]>()
+
+  refs.forEach((ref) => tiers.set(ref.layerId, [...(tiers.get(ref.layerId) ?? []), ref]))
+
+  return tiers
+}
 
 const isTransport = (live: LiveOption): live is AnyLiveTransport => {
   return (
@@ -87,22 +114,22 @@ const propValues = (payload: unknown): Record<string, unknown> => {
 const liveEventName = (payload: unknown): string | undefined => envelope(payload)?.event
 
 /**
- * Every page swap diffs the server's live props against the active
- * subscriptions, and an incoming event marks the props it feeds for reload in
- * one throttled partial request.
+ * Every page swap diffs the live props of the page and its layers against the
+ * active subscriptions, and an incoming event marks the props it feeds for
+ * reload in one throttled partial request per tier.
  */
 class Live {
   protected transport: AnyLiveTransport | null = null
   protected throttle = DEFAULT_THROTTLE
   protected pauseWhenHidden = true
-  protected liveProps: Record<string, LiveProp> = {}
+  protected liveProps = new Map<string, LivePropRef>()
   protected subscriptions = new Map<string, Subscription>()
   protected unsubscribers = new Map<string, VoidFunction>()
   protected dirty = new Set<string>()
   protected flushedAt = new Map<string, number>()
   protected pending: { at: number; timeoutId: number } | null = null
   protected incoming = new Map<string, unknown>()
-  protected incomingPage: string | null = null
+  protected incomingTiers = new Map<string | undefined, string>()
   protected pendingWrite: number | null = null
 
   /**
@@ -148,9 +175,11 @@ class Live {
       if (reconnected) {
         // Events that fired while the connection was down never arrived, so
         // every live prop is potentially stale
-        Object.keys(this.liveProps)
-          .filter((prop) => this.isRequested(prop))
-          .forEach((prop) => this.markDirty(prop, { force: true }))
+        this.liveProps.forEach((ref, key) => {
+          if (this.isRequested(ref)) {
+            this.markDirty(key, { force: true })
+          }
+        })
         this.scheduleFlush()
       }
     })
@@ -175,11 +204,19 @@ class Live {
       return
     }
 
-    this.liveProps = page.liveProps ?? {}
+    const tiers = tiersOf(page)
+
+    this.liveProps = new Map()
+
+    tiers.forEach(([layerId, tier]) => {
+      Object.entries(tier.liveProps ?? {}).forEach(([prop, entry]) => {
+        this.liveProps.set(propKey(layerId, prop), { layerId, prop, entry })
+      })
+    })
 
     const desired = new Map<string, Subscription>()
 
-    Object.entries(this.liveProps).forEach(([prop, entry]) => {
+    this.liveProps.forEach(({ entry }, prop) => {
       entry.listeners.forEach(({ channel, events }) => {
         events.forEach((event) => {
           const key = subscriptionKey(channel, event)
@@ -218,26 +255,35 @@ class Live {
     })
 
     this.dirty.forEach((prop) => {
-      if (!(prop in this.liveProps)) {
+      if (!this.liveProps.has(prop)) {
         this.dirty.delete(prop)
       }
     })
 
-    // Values are collected for the page they arrived on. A page swap leaves
-    // them meaningless, even where the new page happens to declare the same
-    // prop, so they go rather than land on data they never described. Throttle
-    // windows go with them, since the new page owes nothing for the old one.
-    if (this.incomingPage !== pageKey(page)) {
-      this.incoming.clear()
-      this.flushedAt.clear()
-      this.incomingPage = pageKey(page)
-    }
+    // Values are collected for the tier they arrived on. A swap of that tier
+    // leaves them meaningless, even where the new one happens to declare the
+    // same prop, so they go rather than land on data they never described.
+    // Throttle windows go with them, since the new tier owes nothing for the old one.
+    const swapped = new Set(
+      tiers.filter(([layerId, tier]) => this.incomingTiers.get(layerId) !== tierKey(tier)).map(([layerId]) => layerId),
+    )
 
-    this.incoming.forEach((_value, prop) => {
-      if (!(prop in this.liveProps)) {
+    this.incomingTiers = new Map(tiers.map(([layerId, tier]) => [layerId, tierKey(tier)]))
+
+    this.liveProps.forEach(({ layerId }, prop) => {
+      if (swapped.has(layerId)) {
         this.incoming.delete(prop)
+        this.flushedAt.delete(prop)
       }
     })
+
+    for (const stale of [this.incoming, this.flushedAt]) {
+      stale.forEach((_value, prop) => {
+        if (!this.liveProps.has(prop)) {
+          stale.delete(prop)
+        }
+      })
+    }
   }
 
   /**
@@ -297,17 +343,29 @@ class Live {
       return
     }
 
-    const props = Array.from(subscription.props).filter((prop) => this.isRequested(prop))
+    const fed = Array.from(subscription.props)
+      .map((prop) => this.liveProps.get(prop))
+      .filter((ref): ref is LivePropRef => ref !== undefined && this.isRequested(ref))
 
-    if (props.length === 0) {
-      return
-    }
+    groupByTier(fed).forEach((refs, layerId) => this.receive(subscription, refs, layerId, payload))
+  }
 
+  /**
+   * An event that feeds several tiers is announced once for each, so cancelling
+   * it for a layer leaves the page beneath it to its own decision.
+   */
+  protected receive(
+    subscription: Subscription,
+    refs: LivePropRef[],
+    layerId: string | undefined,
+    payload: unknown,
+  ): void {
     const cancelled = !fireLiveEvent({
-      props,
+      props: refs.map((ref) => ref.prop),
       channel: subscription.channel,
       event: subscription.event,
       payload,
+      ...(layerId !== undefined && { layerId }),
     })
 
     if (cancelled) {
@@ -319,22 +377,24 @@ class Live {
     const values = propValues(payload)
     let received = false
 
-    props.forEach((prop) => {
+    refs.forEach(({ prop }) => {
+      const key = propKey(layerId, prop)
+
       // A request already claims this prop and read the database after the
       // broadcast did, so let the reload win and drop the value.
-      const usable = prop in values && !propRefreshes.isRefreshing(prop)
+      const usable = prop in values && !propRefreshes.isRefreshing(prop, layerId)
 
       if (usable) {
         // A value supersedes a reload this prop was still queued for
-        this.dirty.delete(prop)
-        this.incoming.set(prop, values[prop])
+        this.dirty.delete(key)
+        this.incoming.set(key, values[prop])
         received = true
 
         return
       }
 
-      this.incoming.delete(prop)
-      this.markDirty(prop)
+      this.incoming.delete(key)
+      this.markDirty(key)
     })
 
     this.scheduleFlush()
@@ -345,12 +405,15 @@ class Live {
   }
 
   /**
-   * A prop the page has, or a request is still fetching, such as a deferred
-   * prop on its way. An optional prop nobody asked for stays out of the page,
+   * A prop its tier has, or a request is still fetching, such as a deferred
+   * prop on its way. An optional prop nobody asked for stays out of the tier,
    * even though the server sends its listeners along.
    */
-  protected isRequested(prop: string): boolean {
-    return get(currentPage.get().props, prop) !== undefined || propRefreshes.isRefreshing(prop)
+  protected isRequested({ layerId, prop }: LivePropRef): boolean {
+    const page = currentPage.get()
+    const tier = layerId === undefined ? page : layerAt(page, layerId)
+
+    return tier !== undefined && (get(tier.props, prop) !== undefined || propRefreshes.isRefreshing(prop, layerId))
   }
 
   /**
@@ -369,26 +432,30 @@ class Live {
   }
 
   protected write(): void {
-    const values = Array.from(this.incoming.entries())
+    // `sync()` prunes values whose prop left the manifest, so a burst can be
+    // emptied out before it ever gets written
+    const values = Array.from(this.incoming.entries()).flatMap(([key, value]) => {
+      const ref = this.liveProps.get(key)
+
+      return ref ? [{ ...ref, value }] : []
+    })
 
     this.incoming.clear()
 
-    // `sync()` prunes values whose prop left the manifest, so a burst can be
-    // emptied out before it ever gets written
-    if (values.length === 0) {
-      return
-    }
+    groupByTier(values).forEach((written, layerId) => {
+      // Ancestors first. `setPathPreservingIdentity` rebuilds every container
+      // along the path, so writing `order` after `order.total` would rebuild
+      // `order` from the payload and lose the narrower write.
+      written.sort((a, b) => toPath(a.prop).length - toPath(b.prop).length)
 
-    // Ancestors first. `setPathPreservingIdentity` rebuilds every container
-    // along the path, so writing `order` after `order.total` would rebuild
-    // `order` from the payload and lose the narrower write.
-    values.sort(([a], [b]) => toPath(a).length - toPath(b).length)
-
-    router.replace({
-      preserveScroll: true,
-      preserveState: true,
-      preserveFlash: true,
-      props: (props) => values.reduce((carry, [path, value]) => setPathPreservingIdentity(carry, path, value), props),
+      router.replace({
+        preserveScroll: true,
+        preserveState: true,
+        preserveFlash: true,
+        ...(layerId !== undefined && { layerId }),
+        props: (props) =>
+          written.reduce((carry, { prop, value }) => setPathPreservingIdentity(carry, prop, value), props),
+      })
     })
   }
 
@@ -447,12 +514,14 @@ class Live {
    * Null for a prop a request in flight already claims, since reloading it risks
    * overwriting fresher data with an older response.
    */
-  protected waitFor(prop: string, now: number): number | null {
-    if (propRefreshes.isRefreshing(prop)) {
+  protected waitFor(key: string, now: number): number | null {
+    const ref = this.liveProps.get(key)
+
+    if (!ref || propRefreshes.isRefreshing(ref.prop, ref.layerId)) {
       return null
     }
 
-    return throttleWait(this.throttleFor(prop), this.flushedAt.get(prop), now)
+    return throttleWait(ref.entry.throttle ?? this.throttle, this.flushedAt.get(key), now)
   }
 
   protected shortestWait(): number | null {
@@ -481,14 +550,18 @@ class Live {
     this.scheduleFlush()
   }
 
-  protected flush(only: string[]): void {
-    only.forEach((prop) => this.dirty.delete(prop))
+  protected flush(ready: string[]): void {
+    ready.forEach((prop) => this.dirty.delete(prop))
 
-    router.reload({ only, preserveErrors: true })
-  }
+    const refs = ready.map((key) => this.liveProps.get(key)).filter((ref): ref is LivePropRef => ref !== undefined)
 
-  protected throttleFor(prop: string): number {
-    return this.liveProps[prop]?.throttle ?? this.throttle
+    groupByTier(refs).forEach((reloaded, layerId) => {
+      router.reload({
+        only: reloaded.map((ref) => ref.prop),
+        preserveErrors: true,
+        ...(layerId !== undefined && { layerId }),
+      })
+    })
   }
 
   protected clearTimeout(): void {

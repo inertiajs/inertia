@@ -123,4 +123,5 @@
   <button onclick={() => router.reload({ only: ['optional'] })}>Load Optional</button>
 
   <a href="/" use:inertia>Leave</a>
+  <a href="/live/layer" use:inertia>Open live layer</a>
 </div>

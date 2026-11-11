@@ -1,5 +1,6 @@
 import { createInertiaApp, type ResolvedComponent } from '@inertiajs/react'
 import { createElement } from 'react'
+import Layer from './Layouts/Layer'
 import { WithAppContext } from './Pages/SSR/WithApp'
 
 // This file uses createInertiaApp as a standalone expression (not exported)
@@ -9,6 +10,7 @@ import { WithAppContext } from './Pages/SSR/WithApp'
 // 3. Export a default render function
 
 createInertiaApp<{ locale?: string }>({
+  layer: Layer,
   resolve: (name) => {
     const pages = import.meta.glob<ResolvedComponent>('./Pages/SSR/**/*.tsx', { eager: true })
     return pages[`./Pages/${name}.tsx`]

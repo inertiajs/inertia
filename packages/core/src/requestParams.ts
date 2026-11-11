@@ -1,3 +1,4 @@
+import { tierOf } from './layers'
 import { page as currentPage } from './page'
 import { Response } from './response'
 import {
@@ -76,6 +77,18 @@ export class RequestParams {
     return this.params.poll === true
   }
 
+  public isReload() {
+    return this.params.reload === true
+  }
+
+  public isWalkRequest() {
+    return this.params.walk === true
+  }
+
+  public claims() {
+    return this.params.claims === true
+  }
+
   public isQueryMethodReload() {
     return this.params.queryMethodReload === true
   }
@@ -138,7 +151,7 @@ export class RequestParams {
     }
 
     if (this.isPartial()) {
-      headers['X-Inertia-Partial-Component'] = currentPage.get().component
+      headers['X-Inertia-Partial-Component'] = tierOf(currentPage.get(), this.params.layerId).component
     }
 
     const only = this.params.only.concat(this.params.reset)

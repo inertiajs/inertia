@@ -1,10 +1,14 @@
-import type { Method, Page, PageProps, Router } from '@inertiajs/core'
+import type { LayerHandle, Method, Page, PageProps, Router } from '@inertiajs/core'
+import { setLayoutProps as adapterSetLayoutProps } from '@inertiajs/svelte'
 import type { FakeLiveTransportControls } from './fakeLiveTransport'
 
 declare global {
   interface Window {
     testing: {
       Inertia: Router
+      setLayoutProps?: typeof adapterSetLayoutProps
+      childHandle?: LayerHandle
+      layerChildHandle?: LayerHandle
     }
     initialPage: Page
     _inertia_request_dump: {
@@ -28,6 +32,7 @@ declare global {
     _inertia_content_layout_id: string | undefined
     _plugin_global_props: object
     resolverReceivedPage: Page | null
+    loadingResolved: string | undefined
     __inertiaLive: FakeLiveTransportControls
     __inertiaEcho: {
       emit(channel: string, event: string, payload?: unknown): void

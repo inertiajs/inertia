@@ -1,5 +1,6 @@
 import { createInertiaApp } from '@inertiajs/vue3'
 import type { DefineComponent } from 'vue'
+import Layer from './Layouts/Layer.vue'
 
 // This file uses createInertiaApp as a standalone expression (not exported)
 // The Vite plugin SSR transform will automatically:
@@ -8,6 +9,7 @@ import type { DefineComponent } from 'vue'
 // 3. Export a default render function
 
 createInertiaApp<{ locale?: string }>({
+  layer: Layer,
   resolve: (name) => {
     const pages = import.meta.glob<DefineComponent>('./Pages/SSR/**/*.vue', { eager: true })
     return pages[`./Pages/${name}.vue`]

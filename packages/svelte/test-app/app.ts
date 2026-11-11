@@ -1,14 +1,18 @@
 import type { HttpClient, HttpClientOptions, Page } from '@inertiajs/core'
 import { axiosAdapter, type VisitOptions } from '@inertiajs/core'
-import { createInertiaApp, type ResolvedComponent, router } from '@inertiajs/svelte'
+import { createInertiaApp, type ResolvedComponent, router, setLayoutProps } from '@inertiajs/svelte'
 import { echo } from '@inertiajs/svelte/echo'
 import { hydrate, mount } from 'svelte'
 import { resolveFakeEcho } from './fakeEcho'
 import { fakeLiveTransport } from './fakeLiveTransport'
+import AdminLayout from './Layouts/AdminLayout.svelte'
 import AppLayout from './Layouts/AppLayout.svelte'
 import DefaultLayout from './Layouts/DefaultLayout.svelte'
+import Layer from './Layouts/Layer.svelte'
+import LoadingBase from './Pages/Layers/LoadingBase.svelte'
+import LayerLoading from './Pages/SSR/LayerLoading.svelte'
 
-window.testing = { Inertia: router }
+window.testing = { Inertia: router, setLayoutProps }
 window.resolverReceivedPage = null as Page | null
 
 const params = new URLSearchParams(window.location.search)
@@ -60,6 +64,16 @@ createInertiaApp({
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
 
+    if (name === 'Layers/Slow') {
+      // Long enough for a test to supersede the layer visit while it is still resolving
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
+
+    if (name === 'Layers/SlowImport') {
+      // Long enough for a dismissal to supersede a walk landing while its component resolves
+      await new Promise((resolve) => setTimeout(resolve, 700))
+    }
+
     if (name === 'Visits/InterruptedVisitHeld') {
       // Held like a slow lazy chunk, so a newer visit can start while this component is still resolving
       await new Promise((resolve) => (window.releaseHeldComponent = () => resolve(null)))
@@ -68,6 +82,16 @@ createInertiaApp({
     const path = `./Pages/${name}.svelte`
 
     return (pages[path] ?? (await asyncPages[path]?.())) as ResolvedComponent
+  },
+  layer: Layer,
+  loading: (url: string, page: Page) => {
+    window.loadingResolved = [url, ...(page.layers ?? []).map((layer) => layer.key)].join('|')
+
+    if (url.startsWith('/ssr/layer-loading-base')) {
+      return LayerLoading
+    }
+
+    return url.startsWith('/layers/loading') ? LoadingBase : undefined
   },
   setup({ el, App, props }) {
     const isServerRendered = el?.hasAttribute('data-server-rendered')
@@ -88,6 +112,9 @@ createInertiaApp({
   }),
   ...(params.has('withDefaultLayout') && {
     layout: () => DefaultLayout,
+  }),
+  ...(params.has('withUrlBasedLayout') && {
+    layout: (name: string, page) => (page.url?.startsWith('/layers/base') ? AdminLayout : DefaultLayout),
   }),
   ...(params.has('withDefaultAppLayout') && {
     layout: () => AppLayout,
