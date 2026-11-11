@@ -42,20 +42,23 @@
 
   // svelte-ignore state_referenced_locally
   const { component, props = {}, children = [], key = null }: RenderProps = $props()
+
+  // Without it, every rebuild of the parent's render props re-runs every prop reader
+  const stableProps = $derived(props)
 </script>
 
 {#if component}
   {#key children?.length === 0 ? key : null}
     {#if children.length > 0}
       {@const SvelteComponent = component}
-      <SvelteComponent {...props}>
+      <SvelteComponent {...stableProps}>
         {#each children as child}
           <Render {...child} />
         {/each}
       </SvelteComponent>
     {:else}
       {@const SvelteComponent_1 = component}
-      <SvelteComponent_1 {...props} />
+      <SvelteComponent_1 {...stableProps} />
     {/if}
   {/key}
 {/if}
