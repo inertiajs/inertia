@@ -37,6 +37,7 @@ declare global {
     }
     releaseHeldResponse?: () => void
     releaseHeldComponent?: () => void
+    resolveSuspendedContent?: () => void
   }
 
   interface ImportMeta {

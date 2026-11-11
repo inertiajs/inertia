@@ -114,7 +114,11 @@ export default function App<SharedProps extends PageProps = PageProps>({
     )
   }, [])
 
-  const dynamicLayoutProps = useSyncExternalStore(store.subscribe, store.get, () => emptySnapshot)
+  const dynamicLayoutProps = useSyncExternalStore(
+    store.subscribe,
+    store.get,
+    typeof window === 'undefined' ? () => emptySnapshot : store.get,
+  )
 
   if (!routerIsInitialized) {
     router.init<ReactComponent>({
