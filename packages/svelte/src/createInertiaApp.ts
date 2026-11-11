@@ -226,12 +226,18 @@ export default async function createInertiaApp<SharedProps extends PageProps = P
   }
 
   if (serverHeadManager) {
-    const syncServerHead = (event: { detail: { page: Page } }) => {
-      serverHeadManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+    const syncServerHead = (event: { detail: { page?: Page } }) => {
+      if (event.detail.page) {
+        serverHeadManager.updateServerHead(resolveServerHead(event.detail.page, serverHead))
+      }
     }
 
+    // A visit that ends on the same URL replaces the history entry and doesn't fire 'navigate',
+    // so we also sync after every server response, whether it succeeded or returned errors.
     router.on('navigate', syncServerHead)
     router.on('clientVisit', syncServerHead)
+    router.on('success', syncServerHead)
+    router.on('error', syncServerHead)
   }
 
   if (progress) {
