@@ -488,10 +488,10 @@ test.describe('Form Component', () => {
       const dump = await shouldBeDumpPage(page, 'post')
 
       expect(dump.headers).toMatchObject({
-        'x-inertia-partial-data': 'orders',
-        'x-inertia-partial-component': 'FormComponent/Options',
         'x-inertia-reset': 'orders',
       })
+      expect(dump.headers['x-inertia-partial-data']).toBeUndefined()
+      expect(dump.headers['x-inertia-partial-component']).toBeUndefined()
     })
 
     test('submits the form and encodes arrays using brackets format', async ({ page }) => {

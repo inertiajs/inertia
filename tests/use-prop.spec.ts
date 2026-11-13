@@ -48,10 +48,8 @@ test.describe('useProp', () => {
 
     await page.getByRole('button', { name: 'Reset Users' }).click()
 
-    await expect(page.locator('#users-loading')).toHaveText('true')
-    await expect(page.locator('#stats-loading')).toHaveText('false')
-
-    await expect(page.locator('#users-loading')).toHaveText('false')
+    await expect(page.locator('#users-value')).not.toHaveText(initialUsers!)
+    await expect(page.locator('#stats-value')).not.toHaveText(initialStats!)
   })
 
   test('it tracks dot-path keys down to the requested path', async ({ page }) => {
