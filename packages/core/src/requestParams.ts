@@ -61,7 +61,7 @@ export class RequestParams {
   }
 
   public isPartial() {
-    return this.params.only.length > 0 || this.params.except.length > 0 || this.params.reset.length > 0
+    return this.params.only.length > 0 || this.params.except.length > 0
   }
 
   public isPrefetch(): boolean {
@@ -141,7 +141,7 @@ export class RequestParams {
       headers['X-Inertia-Partial-Component'] = currentPage.get().component
     }
 
-    const only = this.params.only.concat(this.params.reset)
+    const only = this.params.only.length > 0 ? [...new Set(this.params.only.concat(this.params.reset))] : []
 
     if (only.length > 0) {
       headers['X-Inertia-Partial-Data'] = only.join(',')

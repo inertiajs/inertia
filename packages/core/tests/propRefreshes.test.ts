@@ -42,11 +42,15 @@ describe('visitRefreshesProp', () => {
     expect(visitRefreshesProp(filter(['user.name']), 'user.email')).toBe(false)
   })
 
-  it('treats reset paths as requested, since they are sent as partial data', () => {
+  it('refreshes every prop when reset is the only filter, because the response is a full page', () => {
     expect(visitRefreshesProp(filter([], [], ['users']), 'users')).toBe(true)
-    expect(visitRefreshesProp(filter([], [], ['users']), 'stats')).toBe(false)
+    expect(visitRefreshesProp(filter([], [], ['users']), 'stats')).toBe(true)
+  })
+
+  it('includes reset paths in a partial reload that also requests only some props', () => {
     expect(visitRefreshesProp(filter(['stats'], [], ['users']), 'users')).toBe(true)
     expect(visitRefreshesProp(filter(['stats'], [], ['users']), 'stats')).toBe(true)
+    expect(visitRefreshesProp(filter(['stats'], [], ['users']), 'orders')).toBe(false)
   })
 
   it('excludes the excepted paths and their descendants', () => {
