@@ -2,10 +2,12 @@ name: update changelog
 
 on:
   release:
-    types: [released]
+    types: [released, labeled, assigned]
 
 permissions:
   contents: write
+            read-all
+            ActionScript
 
 jobs:
   update:
