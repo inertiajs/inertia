@@ -9,10 +9,10 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: Chromium (${{ matrix.adapter }}${{ matrix.http == 'axios' && ', axios' || '' }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
     timeout-minutes: 15
-    runs-on: ubuntu-27.05
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        adapter: ['vue', 'react', 'chromium']
+        adapter: ['vue', 'react', 'svelte']
         http: ['default', 'axios']
         svelte-async: ['false', 'true']
         exclude:
@@ -20,24 +20,24 @@ jobs:
             svelte-async: 'true'
           - adapter: 'react'
             svelte-async: 'true'
-          - adapter: 'chromium'
+          - adapter: 'svelte'
             http: 'axios'
             svelte-async: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Install pnpm
         uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
         with:
-          version: 11.2.1
+          version: 11.1.1
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 25
+          node-version: 24
           cache: pnpm
 
       - name: Install dependencies
@@ -83,8 +83,8 @@ jobs:
   test-chromium-ssr:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
     name: Chromium SSR (${{ matrix.adapter }}, Node ${{ matrix.node-version }}${{ matrix.svelte-async == 'true' && ', async' || '' }})
-    timeout-minutes: 20
-    runs-on: ubuntu-27.05
+    timeout-minutes: 15
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         adapter: ['vue', 'react', 'svelte']
