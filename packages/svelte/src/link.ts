@@ -66,6 +66,20 @@ function link(
   let baseParams: VisitOptions
   let visitParams: VisitOptions
 
+  // Svelte only calls "update" when the action's parameters change, and it calls it before it
+  // writes the element's new attributes. So a link whose href attribute changes while it stays
+  // mounted (such as a <Link> in a persistent layout) is resolved again once the attribute changes.
+  let currentParams = initialParams
+  let resolvedHref: string | null = null
+  const hrefObserver =
+    typeof MutationObserver === 'undefined'
+      ? null
+      : new MutationObserver(() => {
+          if (node.getAttribute('href') !== resolvedHref) {
+            follow(currentParams)
+          }
+        })
+
   const handleClick = (event: MouseEvent) => {
     if (shouldIntercept(event)) {
       event.preventDefault()
@@ -230,7 +244,7 @@ function link(
   function hrefAndData(method: Method, params: ActionParameters) {
     return mergeDataIntoQueryString(
       method,
-      isUrlMethodPair(params.href) ? params.href.url : node.href || params.href || '',
+      isUrlMethodPair(params.href) ? params.href.url : params.href || node.href || '',
       params.data || {},
       params.queryStringArrayFormat || 'brackets',
     )
@@ -287,19 +301,28 @@ function link(
     })
   }
 
+  function follow(params: ActionParameters = {}) {
+    currentParams = params
+    update(params)
+    // The href this action wrote to the element, so its own write doesn't resolve the link again
+    resolvedHref = node.getAttribute('href')
+  }
+
   function destroy() {
     clearTimeout(hoverTimeout)
     removeEventListeners()
+    hrefObserver?.disconnect()
   }
 
-  update(initialParams)
+  follow(initialParams)
+  hrefObserver?.observe(node, { attributes: true, attributeFilter: ['href'] })
 
   // TODO: Confirm is this needs to rerun when "prefetchModes" changes
   if (prefetchModes.includes('mount')) {
     prefetch()
   }
 
-  return { update, destroy }
+  return { update: follow, destroy }
 }
 
 export default link
