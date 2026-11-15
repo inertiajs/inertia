@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { consoleMessages } from './support'
+import { consoleMessages, shouldBeDumpPage } from './support'
 
 test.beforeEach(async ({ page }) => {
   test.skip(process.env.PACKAGE !== 'svelte', 'Svelte-only test')
@@ -89,4 +89,30 @@ test('props and page store are in sync', async ({ page }) => {
   await expect(consoleMessages.messages[6]).toBe('[onMount] foo prop is baz')
   await expect(consoleMessages.messages[7]).toBe('[onMount] page.props.foo is baz')
   await expect(consoleMessages.messages[8]).toBe('[onMount] sveltePage.props.foo is baz')
+})
+
+test.describe('link action', () => {
+  test('visits the href attribute after it changes', async ({ page }) => {
+    await page.goto('/links/href-change')
+
+    await page.getByRole('button', { name: 'Change URL' }).click()
+    const link = page.getByRole('link', { name: 'The Action Link', exact: true })
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?step=two$/)
+    await link.click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.query).toEqual({ step: 'two' })
+  })
+
+  test('visits the href parameter after it changes', async ({ page }) => {
+    await page.goto('/links/href-change')
+
+    await page.getByRole('button', { name: 'Change URL' }).click()
+    const link = page.getByRole('link', { name: 'The Action Parameter Link' })
+    await expect(link).toHaveAttribute('href', /\/dump\/get\?step=two$/)
+    await link.click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.query).toEqual({ step: 'two' })
+  })
 })

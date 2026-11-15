@@ -1289,6 +1289,16 @@ test.describe('reactivity', () => {
     await expect(link).toHaveAttribute('href', /\/something-else$/)
   })
 
+  test('will visit the updated href', async ({ page }) => {
+    await page.goto('/links/href-change')
+
+    await page.getByRole('button', { name: 'Change URL' }).click()
+    await page.getByRole('link', { name: 'The Link', exact: true }).click()
+
+    const dump = await shouldBeDumpPage(page, 'get')
+    await expect(dump.query).toEqual({ step: 'two' })
+  })
+
   test('will update the method, href, data, and headers when props are updated', async ({ page }) => {
     await page.goto('/links/reactivity')
 
