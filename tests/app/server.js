@@ -143,6 +143,12 @@ app.get('/ssr/head-title', (req, res) =>
   }),
 )
 
+app.get('/ssr/head-with-fragment', (req, res) =>
+  inertia.renderSSR(req, res, {
+    component: 'SSR/HeadWithFragment',
+  }),
+)
+
 app.get('/ssr/head-with-xss-title', (req, res) =>
   inertia.renderSSR(req, res, {
     component: 'SSR/HeadWithXssTitle',
