@@ -105,8 +105,16 @@ const Head: InertiaHead = function ({ children, title }) {
     return renderTag(ensureNodeHasInertiaProp(node))
   }
 
+  function flattenFragments(nodes: ReactNode): ReactNode[] {
+    return React.Children.toArray(nodes).flatMap((node) =>
+      React.isValidElement<{ children?: ReactNode }>(node) && node.type === React.Fragment
+        ? flattenFragments(node.props.children)
+        : [node],
+    )
+  }
+
   function renderNodes(nodes: ReactNode) {
-    const elements = React.Children.toArray(nodes)
+    const elements = flattenFragments(nodes)
       .filter((node) => node)
       .map((node) => renderNode(node as ReactElement<any>))
 

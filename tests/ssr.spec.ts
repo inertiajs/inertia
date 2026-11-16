@@ -212,6 +212,26 @@ test.describe('Head title escaping', () => {
   })
 })
 
+test.describe('Head children in the SSR output', () => {
+  // Without hydration, the head is exactly what the browser parsed from the SSR HTML.
+  // After hydration, the head manager re-appends Inertia-managed tags that were pushed
+  // out of <head>, which would hide a broken SSR head.
+  test.use({ javaScriptEnabled: false })
+
+  test.beforeEach(() => {
+    test.skip(process.env.PACKAGE === 'svelte', 'Svelte adapter has no Head component')
+  })
+
+  test('it keeps the tags in a fragment and the tags after it in the head', async ({ page }) => {
+    await page.goto('/ssr/head-with-fragment')
+
+    await expect(page.locator('head meta[name="before-fragment"]')).toHaveCount(1)
+    await expect(page.locator('head meta[name="in-fragment-a"]')).toHaveCount(1)
+    await expect(page.locator('head meta[name="in-fragment-b"]')).toHaveCount(1)
+    await expect(page.locator('head meta[name="after-fragment"]')).toHaveCount(1)
+  })
+})
+
 test.describe('server head', () => {
   test('it renders server-provided head elements in the SSR output', async ({ page }) => {
     const response = await page.request.get('/ssr/server-head')
