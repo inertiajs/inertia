@@ -4230,6 +4230,47 @@ app.get('/nested-props/deferred', (req, res) => {
   )
 })
 
+// The server only resolves the element on the requested path. Laravel sends that element alone, as a
+// list when it is the first one and keyed by its index otherwise. Rails keeps every position and
+// sends placeholders for the other elements.
+app.get('/nested-props/array-elements/:response', (req, res) => {
+  const responses = {
+    first: { deferred: 'rows.0.stats', rows: [{ stats: 'Stats 1' }] },
+    keyed: { deferred: 'rows.1.stats', rows: { 1: { stats: 'Stats 2' } } },
+    placeholders: { deferred: 'rows.1.stats', rows: [{}, { stats: 'Stats 2' }, {}] },
+  }
+
+  const { deferred, rows } = responses[req.params.response]
+  const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
+
+  if (partialData.includes('rows')) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/ArrayElements',
+      props: { rows: [{ name: 'Fourth', stats: 'Stats 4' }] },
+    })
+  }
+
+  if (partialData.includes(deferred)) {
+    return inertia.render(req, res, { component: 'NestedProps/ArrayElements', props: { rows } })
+  }
+
+  if (partialData.includes('tags.1')) {
+    return inertia.render(req, res, {
+      component: 'NestedProps/ArrayElements',
+      props: { tags: [null, 'two reloaded', null] },
+    })
+  }
+
+  inertia.render(req, res, {
+    component: 'NestedProps/ArrayElements',
+    deferredProps: { default: [deferred] },
+    props: {
+      rows: [{ name: 'First' }, { name: 'Second' }, { name: 'Third' }],
+      tags: ['one', 'two', 'three'],
+    },
+  })
+})
+
 app.get('/nested-props/rescued-deferred', (req, res) => {
   const partialData = req.headers['x-inertia-partial-data']?.split(',') ?? []
 

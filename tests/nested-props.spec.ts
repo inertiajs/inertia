@@ -168,3 +168,41 @@ test('it can use WhenVisible with nested dot-notation data prop', async ({ page 
   await expect(page.locator('#loading')).not.toBeVisible()
   await expect(page.locator('#visitors')).toContainText('Visitors: 1250')
 })
+
+test('it preserves the other array elements when a deferred prop inside an element loads', async ({ page }) => {
+  await page.goto('/nested-props/array-elements/first')
+
+  await expect(page.locator('#rows')).toHaveText(
+    '[{"name":"First","stats":"Stats 1"},{"name":"Second"},{"name":"Third"}]',
+  )
+})
+
+test('it preserves the other array elements when the response keys the element by its index', async ({ page }) => {
+  await page.goto('/nested-props/array-elements/keyed')
+
+  await expect(page.locator('#rows')).toHaveText(
+    '[{"name":"First"},{"name":"Second","stats":"Stats 2"},{"name":"Third"}]',
+  )
+})
+
+test('it preserves the other array elements when the response has placeholders for them', async ({ page }) => {
+  await page.goto('/nested-props/array-elements/placeholders')
+
+  await expect(page.locator('#rows')).toHaveText(
+    '[{"name":"First"},{"name":"Second","stats":"Stats 2"},{"name":"Third"}]',
+  )
+
+  await clickAndWaitForResponse(page, 'Reload second tag', null, 'button')
+
+  await expect(page.locator('#tags')).toHaveText('["one","two reloaded","three"]')
+})
+
+test('it replaces an array that is reloaded as a whole next to a path inside it', async ({ page }) => {
+  await page.goto('/nested-props/array-elements/first')
+
+  await expect(page.locator('#rows')).toContainText('Stats 1')
+
+  await clickAndWaitForResponse(page, 'Reload rows', null, 'button')
+
+  await expect(page.locator('#rows')).toHaveText('[{"name":"Fourth","stats":"Stats 4"}]')
+})
