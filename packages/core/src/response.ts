@@ -17,7 +17,7 @@ import { history } from './history'
 import { interceptors } from './interceptors'
 import { parsePage } from './json'
 import { page as currentPage } from './page'
-import { partialReloadRequestsProp } from './partialReload'
+import { isPathOrSubPath, partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
@@ -525,10 +525,8 @@ export class Response {
         .map((prop) => prop.split('.')[0]),
     )
     for (const key of nestedTopKeys) {
-      const currentValue = currentPage.get().props[key]
-
-      if (this.isObject(currentValue) && this.isObject(pageResponse.props[key])) {
-        pageResponse.props[key] = this.deepMergeObjects(currentValue as PageProps, pageResponse.props[key] as PageProps)
+      if (key in pageResponse.props) {
+        pageResponse.props[key] = this.mergeNestedValue(currentPage.get().props[key], pageResponse.props[key], key)
       }
     }
 
@@ -620,17 +618,57 @@ export class Response {
     return item && typeof item === 'object' && !Array.isArray(item)
   }
 
-  protected deepMergeObjects(target: PageProps, source: PageProps): PageProps {
+  /**
+   * Merges the response for a nested partial reload into the current value of a prop.
+   */
+  protected mergeNestedValue(target: unknown, source: unknown, path: string): unknown {
+    if (this.isObject(target) && this.isObject(source)) {
+      return this.deepMergeObjects(target as PageProps, source as PageProps, path)
+    }
+
+    if (Array.isArray(target) && typeof source === 'object' && source !== null && this.partialReloadReachesInto(path)) {
+      return this.mergeArrayElements(target, source as PageProps, path)
+    }
+
+    return source
+  }
+
+  protected deepMergeObjects(target: PageProps, source: PageProps, path: string): PageProps {
     const result = { ...target }
 
     for (const key of Object.keys(source)) {
-      const targetValue = target[key]
-      const sourceValue = source[key]
+      result[key] = this.mergeNestedValue(target[key], source[key], `${path}.${key}`)
+    }
 
-      if (this.isObject(targetValue) && this.isObject(sourceValue)) {
-        result[key] = this.deepMergeObjects(targetValue as PageProps, sourceValue as PageProps)
-      } else {
-        result[key] = sourceValue
+    return result
+  }
+
+  /**
+   * An array is replaced as a whole, unless the partial reload only asks for paths inside it.
+   */
+  protected partialReloadReachesInto(path: string): boolean {
+    const { only } = this.requestParams.all()
+
+    if (only.some((prop) => isPathOrSubPath(path, prop))) {
+      return false
+    }
+
+    return only.some((prop) => isPathOrSubPath(prop, path))
+  }
+
+  /**
+   * The server only resolves the elements on a requested path. It sends the others as
+   * placeholders or leaves them out, so they keep their current value.
+   */
+  protected mergeArrayElements(target: unknown[], source: PageProps, path: string): unknown[] {
+    const { only } = this.requestParams.all()
+    const result = [...target]
+
+    for (const index of Object.keys(source)) {
+      const elementPath = `${path}.${index}`
+
+      if (only.some((prop) => isPathOrSubPath(prop, elementPath))) {
+        result[Number(index)] = this.mergeNestedValue(target[Number(index)], source[index], elementPath)
       }
     }
 
