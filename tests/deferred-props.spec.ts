@@ -180,6 +180,72 @@ shouldNotShowReloading.forEach((type) => {
   })
 })
 
+const samePageSaveCases = [
+  { title: 'keeps deferred content after a same-page save when enabled', enabled: true, query: '', retains: true },
+  { title: 'still shows deferred fallback after a same-page save by default', query: '', retains: false },
+  {
+    title: 'shows deferred fallback when the save changes the query string',
+    enabled: true,
+    query: '?tab=new',
+    retains: false,
+  },
+]
+
+samePageSaveCases.forEach(({ title, enabled, query, retains }) => {
+  test(title, async ({ page }) => {
+    const dashboard = '/deferred-props/with-partial-reload/only'
+    const landing = `${dashboard}${query}`
+    const save = '/deferred-props/save'
+    await gotoPageAndWaitForContent(page, dashboard)
+    await expect(page.getByText('John Doe')).toBeVisible()
+
+    await page.route(`**${save}`, (route) => route.fulfill({ status: 303, headers: { location: landing } }))
+
+    let releaseDeferred!: () => void
+    const held = new Promise<void>((resolve) => {
+      releaseDeferred = resolve
+    })
+
+    await page.route(`**${dashboard}*`, async (route) => {
+      if (!route.request().headers()['x-inertia-partial-data']) {
+        await route.continue()
+        return
+      }
+
+      await held
+      const response = await route.fetch()
+      const body = await response.json()
+      body.props.users = [{ id: 1, name: 'Jane Doe' }]
+      await route.fulfill({ response, json: body })
+    })
+
+    try {
+      const deferred = page.waitForRequest(
+        (request) => request.url().endsWith(landing) && request.headers()['x-inertia-partial-data'] === 'users',
+      )
+      await page.evaluate(
+        ({ url, enabled }) => window.testing.Inertia.post(url, {}, enabled ? { preserveDeferredProps: true } : {}),
+        { url: save, enabled },
+      )
+      await deferred
+
+      if (retains) {
+        await expect(page.getByText('John Doe')).toBeVisible()
+        await expect(page.getByText('Loading...', { exact: true })).toBeHidden()
+        await expect(page.locator('#reloading-indicator')).toBeVisible()
+      } else {
+        await expect(page.getByText('John Doe')).toBeHidden()
+        await expect(page.getByText('Loading...', { exact: true })).toBeVisible()
+      }
+    } finally {
+      releaseDeferred()
+    }
+
+    await expect(page.getByText('Jane Doe')).toBeVisible()
+    await expect(page.locator('#reloading-indicator')).toBeHidden()
+  })
+})
+
 test('it shows fallback during full reload without only/except (none)', async ({ page }) => {
   await gotoPageAndWaitForContent(page, `/deferred-props/with-partial-reload/none`)
 
