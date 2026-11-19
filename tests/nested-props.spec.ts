@@ -14,6 +14,51 @@ test('it can load nested deferred props without clobbering siblings', async ({ p
   await expect(page.locator('#user')).toContainText('User: John Doe')
 })
 
+test('it keeps an opted-in deferred child beside a fresh sibling after a same-page save', async ({ page }) => {
+  const dashboard = '/nested-props/deferred'
+  await page.goto(dashboard)
+  await expect(page.locator('#user')).toContainText('User: John Doe')
+  await expect(page.locator('#notifications')).toContainText('Notification 1')
+
+  let releaseDeferred!: () => void
+  const held = new Promise<void>((resolve) => {
+    releaseDeferred = resolve
+  })
+
+  await page.route(`**${dashboard}`, async (route) => {
+    if (route.request().method() === 'POST') {
+      const response = await page.request.get(route.request().url(), { headers: { 'x-inertia': 'true' } })
+      const body = await response.json()
+      body.props.auth.user = 'Jane Doe'
+      await route.fulfill({ response, json: body })
+      return
+    }
+
+    await held
+    const response = await route.fetch()
+    const body = await response.json()
+    body.props.auth.notifications = ['Updated notification']
+    await route.fulfill({ response, json: body })
+  })
+
+  try {
+    const deferred = page.waitForRequest(
+      (request) =>
+        request.url().endsWith(dashboard) && request.headers()['x-inertia-partial-data'] === 'auth.notifications',
+    )
+    await page.evaluate((url) => window.testing.Inertia.post(url, {}, { preserveDeferredProps: true }), dashboard)
+    await deferred
+
+    await expect(page.locator('#user')).toContainText('User: Jane Doe')
+    await expect(page.locator('#notifications')).toContainText('Notification 1')
+  } finally {
+    releaseDeferred()
+  }
+
+  await expect(page.locator('#notifications')).toContainText('Updated notification')
+  await expect(page.locator('#user')).toContainText('User: Jane Doe')
+})
+
 test('it clears rescued child props when a parent path is reloaded', async ({ page }) => {
   await page.goto('/nested-props/rescued-deferred')
 

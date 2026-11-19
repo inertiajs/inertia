@@ -434,6 +434,8 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   replace: boolean
   preserveScroll: PreserveStateOption
   preserveState: PreserveStateOption
+  /** Keep loaded deferred props visible while a successful write refreshes the same page. */
+  preserveDeferredProps?: boolean
   only: Array<string>
   except: Array<string>
   headers: Record<string, string>
@@ -681,7 +683,7 @@ export type PendingVisitOptions = {
 export type PendingVisit<T extends RequestPayload = RequestPayload> = Visit<T> & PendingVisitOptions
 
 export type ActiveVisit<T extends RequestPayload = RequestPayload> = PendingVisit<T> &
-  Required<Omit<VisitOptions<T>, 'optimistic'>>
+  Required<Omit<VisitOptions<T>, 'optimistic' | 'preserveDeferredProps'>>
 
 export type InternalActiveVisit = ActiveVisit & {
   onPrefetchResponse?: (response: Response) => void

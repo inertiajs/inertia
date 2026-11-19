@@ -17,7 +17,7 @@ import { history } from './history'
 import { interceptors } from './interceptors'
 import { parsePage } from './json'
 import { page as currentPage } from './page'
-import { partialReloadRequestsProp } from './partialReload'
+import { isPathOrSubPath, partialReloadRequestsProp } from './partialReload'
 import Queue from './queue'
 import { RequestParams } from './requestParams'
 import { SessionStorage } from './sessionStorage'
@@ -298,6 +298,7 @@ export class Response {
     const keepsCurrentUrl = this.keepsCurrentUrl(currentPageUrl, responseUrl)
 
     this.requestParams.setPreserveOptions(pageResponse)
+    this.preserveDeferredProps(pageResponse, currentPageUrl, responseUrl)
 
     const queryMethodData = this.queryMethodData(pageResponse)
 
@@ -437,6 +438,50 @@ export class Response {
     // An optimistic request that started later has already been confirmed, so these
     // props were read before that write and would roll it back on screen
     return this.optimisticId !== null && currentPage.hasConfirmedOptimisticAfter(this.optimisticId)
+  }
+
+  protected preserveDeferredProps(pageResponse: Page, currentUrl: URL, responseUrl: URL): void {
+    const visit = this.requestParams.all()
+    const previous = currentPage.get()
+
+    if (
+      visit.preserveDeferredProps !== true ||
+      visit.preserveState !== true ||
+      visit.method === 'get' ||
+      visit.method === 'query' ||
+      this.requestParams.isPartial() ||
+      this.response.status < 200 ||
+      this.response.status >= 300 ||
+      Object.keys(pageResponse.props.errors ?? {}).length > 0 ||
+      pageResponse.clearHistory ||
+      pageResponse.version !== previous.version ||
+      previous.queryMethodData ||
+      previous.component !== pageResponse.component ||
+      this.originatingPage.component !== previous.component ||
+      !isSameUrlWithoutHash(currentUrl, responseUrl) ||
+      !isSameUrlWithoutHash(hrefToUrl(this.originatingPage.url), currentUrl)
+    ) {
+      return
+    }
+
+    const retained: PageProps = {}
+    const rescued = [...(previous.rescuedProps ?? []), ...(pageResponse.rescuedProps ?? [])]
+
+    for (const prop of Object.values(pageResponse.deferredProps ?? {}).flat()) {
+      const value = get(previous.props, prop)
+
+      if (
+        value !== undefined &&
+        get(pageResponse.props, prop) === undefined &&
+        !rescued.some((key) => isPathOrSubPath(prop, key) || isPathOrSubPath(key, prop))
+      ) {
+        set(retained, prop, value)
+      }
+    }
+
+    if (Object.keys(retained).length > 0) {
+      pageResponse.props = this.deepMergeObjects(retained, pageResponse.props) as Page['props']
+    }
   }
 
   protected preserveEqualProps(pageResponse: Page): void {
