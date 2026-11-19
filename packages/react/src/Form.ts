@@ -17,6 +17,7 @@ import {
 import { isEqual } from 'es-toolkit'
 import { NamedInputEvent, ValidationConfig } from 'laravel-precognition'
 import React, {
+  ChangeEvent,
   createContext,
   createElement,
   FormEvent,
@@ -153,15 +154,15 @@ const Form = forwardRef<FormComponentRef, FormProps>(
       )
     }
 
-    const updateDirtyState = (event: Event) => {
-      if (event.type === 'reset' && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
+    const updateDirtyState = (event?: Event) => {
+      const isReset = event?.type === 'reset'
+
+      if (isReset && (event as CustomEvent).detail?.[FormComponentResetSymbol]) {
         // When the form is reset programmatically, prevent native reset behavior
         event.preventDefault()
       }
 
-      deferStateUpdate(() =>
-        setIsDirty(event.type === 'reset' ? false : !isEqual(getData(), formDataToObject(defaultData.current))),
-      )
+      deferStateUpdate(() => setIsDirty(isReset ? false : !isEqual(getData(), formDataToObject(defaultData.current))))
     }
 
     const clearErrors = (...names: string[]) => {
@@ -171,16 +172,37 @@ const Form = forwardRef<FormComponentRef, FormProps>(
     }
 
     useEffect(() => {
+      const element = formElement.current!
       defaultData.current = getFormData()
 
       form.setDefaults(getData())
 
       const formEvents: Array<keyof HTMLElementEventMap> = ['input', 'change', 'reset']
 
-      formEvents.forEach((e) => formElement.current!.addEventListener(e, updateDirtyState))
+      formEvents.forEach((e) => element.addEventListener(e, updateDirtyState))
+
+      // Hidden inputs do not dispatch input or change events when changed or replaced.
+      const hiddenInput = 'input[type="hidden"][name]'
+      const observer = new MutationObserver((mutations) => {
+        const hasHiddenInputChanges = mutations.some(({ type, target, addedNodes, removedNodes }) => {
+          if (type === 'attributes') {
+            return target instanceof HTMLInputElement && target.form === element && target.matches(hiddenInput)
+          }
+
+          return [...addedNodes, ...removedNodes].some(
+            (node) => node instanceof Element && (node.matches(hiddenInput) || node.querySelector(hiddenInput)),
+          )
+        })
+
+        if (hasHiddenInputChanges) {
+          updateDirtyState()
+        }
+      })
+      observer.observe(element, { attributes: true, attributeFilter: ['value'], childList: true, subtree: true })
 
       return () => {
-        formEvents.forEach((e) => formElement.current?.removeEventListener(e, updateDirtyState))
+        observer.disconnect()
+        formEvents.forEach((e) => element.removeEventListener(e, updateDirtyState))
 
         if (cancelOnUnmountRef.current) {
           form.cancel()
@@ -323,6 +345,21 @@ const Form = forwardRef<FormComponentRef, FormProps>(
         ref: formElement,
         action: isUrlMethodPair(action) ? action.url : action,
         method: resolvedMethod,
+        onChange: (event: ChangeEvent<HTMLFormElement>) => {
+          props.onChange?.(event)
+
+          // React can detect a checkbox change from a plain click event that does not trigger native input or change.
+          const { nativeEvent } = event
+          const { target } = nativeEvent
+          if (
+            nativeEvent.type === 'click' &&
+            !(nativeEvent instanceof MouseEvent) &&
+            target instanceof HTMLInputElement &&
+            target.form === event.currentTarget
+          ) {
+            updateDirtyState()
+          }
+        },
         onSubmit: (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault()
           submit((event.nativeEvent as SubmitEvent).submitter)

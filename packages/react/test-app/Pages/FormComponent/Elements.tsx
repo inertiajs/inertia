@@ -1,5 +1,6 @@
 import { QueryStringArrayFormatOption } from '@inertiajs/core'
 import { config, Form } from '@inertiajs/react'
+import { useRef, useState } from 'react'
 
 export default ({
   queryStringArrayFormat,
@@ -8,13 +9,30 @@ export default ({
 }) => {
   const format: QueryStringArrayFormatOption =
     queryStringArrayFormat === 'force-brackets' ? 'brackets' : queryStringArrayFormat
+  const [token, setToken] = useState('abc123')
+  const [showOption, setShowOption] = useState(false)
+  const [changes, setChanges] = useState(0)
+  const switchInput = useRef<HTMLInputElement>(null)
+
+  const toggleSwitch = () => {
+    const input = switchInput.current!
+    const setChecked = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked')!.set!
+
+    setChecked.call(input, !input.checked)
+    input.dispatchEvent(new Event('click', { bubbles: true }))
+  }
 
   if (queryStringArrayFormat === 'force-brackets') {
     config.set('form.forceIndicesArrayFormatInFormData', false)
   }
 
   return (
-    <Form action="/dump/post" method="post" queryStringArrayFormat={format}>
+    <Form
+      action="/dump/post"
+      method="post"
+      queryStringArrayFormat={format}
+      onChange={() => setChanges((count) => count + 1)}
+    >
       {({ isDirty }) => (
         <>
           <h1>Form Elements</h1>
@@ -111,8 +129,25 @@ export default ({
 
           {/* Hidden input */}
           <div>
-            <input type="hidden" name="token" id="token" value="abc123" />
+            <input type="hidden" name="token" id="token" value={token} />
+            <button type="button" onClick={() => setToken(token === 'abc123' ? 'def456' : 'abc123')}>
+              Toggle hidden value
+            </button>
+            <button type="button" onClick={() => setShowOption((visible) => !visible)}>
+              Toggle hidden option
+            </button>
+            {showOption && (
+              <span>
+                <input type="hidden" name="options[]" value="extra" />
+              </span>
+            )}
           </div>
+
+          <button type="button" onClick={toggleSwitch}>
+            Toggle switch
+          </button>
+          <input ref={switchInput} type="checkbox" name="switch" id="switch-input" aria-hidden="true" hidden />
+          <div id="change-count">{changes}</div>
 
           {/* Number input */}
           <div>

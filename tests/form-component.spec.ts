@@ -1628,6 +1628,56 @@ test.describe('Form Component', () => {
   test.describe('React', () => {
     test.skip(process.env.PACKAGE !== 'react', 'Skipping React-specific tests')
 
+    test('tracks controlled hidden input values in the dirty state', async ({ page }) => {
+      await page.goto('/form-component/elements')
+
+      const toggle = page.getByRole('button', { name: 'Toggle hidden value' })
+      const token = page.locator('#token')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await toggle.click()
+      await expect(token).toHaveValue('def456')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await toggle.click()
+      await expect(token).toHaveValue('abc123')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
+
+    test('tracks inserted and removed hidden options in the dirty state', async ({ page }) => {
+      await page.goto('/form-component/elements')
+
+      const toggle = page.getByRole('button', { name: 'Toggle hidden option' })
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await toggle.click()
+      await expect(page.locator('input[name="options[]"]')).toHaveCount(1)
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await toggle.click()
+      await expect(page.locator('input[name="options[]"]')).toHaveCount(0)
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
+
+    test('tracks switch click events and calls the consumer change handler', async ({ page }) => {
+      await page.goto('/form-component/elements')
+
+      const toggle = page.getByRole('button', { name: 'Toggle switch' })
+      const input = page.locator('#switch-input')
+      const changes = page.locator('#change-count')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+
+      await toggle.click()
+      await expect(input).toBeChecked()
+      await expect(changes).toHaveText('1')
+      await expect(page.getByText('Form is dirty')).toBeVisible()
+
+      await toggle.click()
+      await expect(input).not.toBeChecked()
+      await expect(changes).toHaveText('2')
+      await expect(page.getByText('Form is clean')).toBeVisible()
+    })
+
     test('it preserves the internal state of child components', async ({ page }) => {
       await page.goto('/form-component/child-component')
 
