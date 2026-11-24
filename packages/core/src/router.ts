@@ -774,6 +774,7 @@ export class Router {
       fresh: false,
       reset: [],
       preserveUrl: false,
+      preserveFragment: false,
       preserveErrors: false,
       prefetch: false,
       invalidateCacheTags: [],

@@ -3656,6 +3656,16 @@ app.get('/preserve-fragment/target', (req, res) =>
   }),
 )
 
+app.get('/preserve-fragment/redirect-no-server-flag', (req, res) =>
+  res.redirect(303, '/preserve-fragment/no-server-flag'),
+)
+
+app.get('/preserve-fragment/no-server-flag', (req, res) =>
+  inertia.render(req, res, {
+    component: 'PreserveFragment/Target',
+  }),
+)
+
 app.get('/http-handlers/error', (req, res) => {
   res.status(500).send('Internal Server Error')
 })

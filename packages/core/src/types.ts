@@ -446,6 +446,7 @@ export type Visit<T extends RequestPayload = RequestPayload> = {
   fresh: boolean
   reset: string[]
   preserveUrl: boolean
+  preserveFragment: boolean
   preserveErrors: boolean
   invalidateCacheTags: string | string[]
   viewTransition: boolean | ((viewTransition: ViewTransition) => void)
@@ -826,6 +827,7 @@ export interface LinkComponentBaseProps extends Partial<
     | 'preserveScroll'
     | 'preserveState'
     | 'preserveUrl'
+    | 'preserveFragment'
     | 'only'
     | 'except'
     | 'headers'
@@ -923,6 +925,7 @@ export type FormComponentOptions = Pick<
   | 'preserveScroll'
   | 'preserveState'
   | 'preserveUrl'
+  | 'preserveFragment'
   | 'replace'
   | 'only'
   | 'except'

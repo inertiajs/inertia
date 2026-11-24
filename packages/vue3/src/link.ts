@@ -58,6 +58,10 @@ const Link: InertiaLink = defineComponent({
       type: Boolean as PropType<InertiaLinkProps['preserveUrl']>,
       default: false,
     },
+    preserveFragment: {
+      type: Boolean as PropType<InertiaLinkProps['preserveFragment']>,
+      default: false,
+    },
     only: {
       type: Array as PropType<InertiaLinkProps['only']>,
       default: () => [],
@@ -258,6 +262,7 @@ const Link: InertiaLink = defineComponent({
       preserveScroll: props.preserveScroll,
       preserveState: props.preserveState ?? method.value !== 'get',
       preserveUrl: props.preserveUrl,
+      preserveFragment: props.preserveFragment,
       only: props.only,
       except: props.except,
       headers: props.headers,

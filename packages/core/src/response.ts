@@ -184,7 +184,13 @@ export class Response {
     if (this.isLocationVisit()) {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
-      setHashIfSameUrl(this.requestParams.all().url, locationUrl)
+      if (this.requestParams.all().preserveFragment) {
+        if (!locationUrl.hash) {
+          locationUrl.hash = this.preservedFragment()
+        }
+      } else {
+        setHashIfSameUrl(this.requestParams.all().url, locationUrl)
+      }
 
       return this.locationVisit(locationUrl)
     }
@@ -408,10 +414,30 @@ export class Response {
     return reloadsOriginatingPage && urlChangedSince && landsOnCurrentPath
   }
 
+  protected preservedFragment(): string {
+    const requestHash = this.requestParams.all().url.hash
+
+    if (requestHash) {
+      return requestHash
+    }
+
+    const currentUrl = currentPage.get()?.url
+
+    if (currentUrl) {
+      return hrefToUrl(currentUrl).hash
+    }
+
+    return typeof window !== 'undefined' ? window.location.hash : ''
+  }
+
   protected pageUrl(pageResponse: Page) {
     const responseUrl = hrefToUrl(pageResponse.url)
 
-    if (pageResponse.preserveFragment) {
+    if (this.requestParams.all().preserveFragment) {
+      if (!responseUrl.hash) {
+        responseUrl.hash = this.preservedFragment()
+      }
+    } else if (pageResponse.preserveFragment) {
       responseUrl.hash = this.requestParams.all().url.hash
     } else {
       setHashIfSameUrl(this.requestParams.all().url, responseUrl)
