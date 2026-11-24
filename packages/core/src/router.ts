@@ -44,7 +44,7 @@ import {
   VisitOptions,
 } from './types'
 import { uid } from './uid'
-import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData } from './url'
+import { hrefToUrl, isSameUrlWithoutQueryOrHash, isUrlMethodPair, transformUrlAndData, urlWithoutHash } from './url'
 
 const noop = () => {}
 
@@ -172,7 +172,7 @@ export class Router {
       ? { method: 'query' as const, data: { ...queryMethodData, ...options.data } as T, queryMethodReload: true }
       : {}
 
-    return this.visit(window.location.href, {
+    return this.visit(options.preserveFragment ? urlWithoutHash(window.location) : window.location.href, {
       ...options,
       ...queryMethodOptions,
       preserveScroll: true,
@@ -671,9 +671,15 @@ export class Router {
 
     const onceProps = this.preserveOncePropsOnInstantVisit(current, intermediateProps)
 
+    const hash =
+      visit.url.hash ||
+      (visit.preserveFragment
+        ? (typeof window !== 'undefined' ? window.location.hash : '') || hrefToUrl(current.url).hash
+        : '')
+
     const intermediatePage: Page = {
       component: visit.component!,
-      url: visit.url.pathname + visit.url.search + visit.url.hash,
+      url: visit.url.pathname + visit.url.search + hash,
       version: current.version,
       props: {
         ...intermediateProps,

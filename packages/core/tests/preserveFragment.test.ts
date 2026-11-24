@@ -17,7 +17,9 @@ vi.hoisted(() => {
   }
 })
 
+import { router } from '../src'
 import { page as currentPage } from '../src/page'
+import { prefetchedRequests } from '../src/prefetched'
 import { RequestParams } from '../src/requestParams'
 import { Response } from '../src/response'
 import type { ActiveVisit, HttpResponse, Page } from '../src/types'
@@ -82,6 +84,12 @@ const locationHttpResponse = (location: string): HttpResponse => ({
   data: '',
 })
 
+const redirectHttpResponse = (location: string): HttpResponse => ({
+  status: 409,
+  headers: { 'x-inertia-redirect': location },
+  data: '',
+})
+
 const bootPage = (page: Page): Page => {
   currentPage.init({
     initialPage: page,
@@ -95,9 +103,13 @@ const bootPage = (page: Page): Page => {
 describe('preserveFragment visit option', () => {
   beforeEach(() => {
     stubBrowser()
+    ;(document as unknown as { getElementById: () => null }).getElementById = () => null
   })
 
-  afterEach(() => {
+  afterEach(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    prefetchedRequests.removeAll()
+    vi.restoreAllMocks()
     vi.unstubAllGlobals()
   })
 
@@ -225,5 +237,198 @@ describe('preserveFragment visit option', () => {
     await response.process()
 
     expect(window.location.href).toBe('http://localhost/orders?status=open#42')
+  })
+
+  it('does not leak the fragment to cross-origin X-Inertia-Location redirects', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#secret-drawer' }))
+
+    const visit = makeVisit({
+      url: new URL('http://localhost/checkout'),
+      preserveFragment: true,
+    })
+    const response = Response.create(
+      RequestParams.create(visit),
+      locationHttpResponse('https://external.example/checkout'),
+      initial,
+    )
+
+    await response.process()
+
+    expect(window.location.href).toBe('https://external.example/checkout')
+  })
+
+  it('preserves a fragment updated directly on window.location.hash even when currentPage.url has no hash or a stale hash', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#stale' }))
+    window.location.href = 'http://localhost/orders#native-anchor'
+
+    const visit = makeVisit({
+      url: new URL('http://localhost/orders?status=open'),
+      preserveFragment: true,
+    })
+    const responsePage = ordersPage({ url: '/orders?status=open' })
+    const response = Response.create(RequestParams.create(visit), inertiaHttpResponse(responsePage), initial)
+
+    await response.process()
+
+    expect(currentPage.get().url).toBe('/orders?status=open#native-anchor')
+  })
+
+  it('does not poison a reused cached prefetch response with an earlier preserved fragment', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#42' }))
+    const responsePage = ordersPage({ url: '/orders?status=open' })
+    const cachedResponse = Response.create(
+      RequestParams.create(
+        makeVisit({
+          url: new URL('http://localhost/orders?status=open'),
+          prefetch: true,
+          preserveFragment: false,
+        }),
+      ),
+      inertiaHttpResponse(responsePage),
+      initial,
+    )
+
+    // First consumption while #42 is active
+    cachedResponse.mergeParams(
+      makeVisit({
+        url: new URL('http://localhost/orders?status=open'),
+        cached: true,
+        preserveFragment: true,
+      }),
+    )
+    await cachedResponse.handle()
+    expect(currentPage.get().url).toBe('/orders?status=open#42')
+
+    // Second consumption after the user switched to #99
+    await currentPage.setQuietly(ordersPage({ url: '/orders#99' }))
+    cachedResponse.mergeParams(
+      makeVisit({
+        url: new URL('http://localhost/orders?status=open'),
+        cached: true,
+        preserveFragment: true,
+      }),
+    )
+    await cachedResponse.handle()
+    expect(currentPage.get().url).toBe('/orders?status=open#99')
+
+    // Third consumption with preserveFragment: false should not carry over #99
+    cachedResponse.mergeParams(
+      makeVisit({
+        url: new URL('http://localhost/orders?status=open'),
+        cached: true,
+        preserveFragment: false,
+      }),
+    )
+    await cachedResponse.handle()
+    expect(currentPage.get().url).toBe('/orders?status=open')
+  })
+
+  it('preserves the fragment across same-origin 409 X-Inertia-Redirect responses and does not leak cross-origin', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders' }))
+    const visitSpy = vi.spyOn(router, 'visit').mockImplementation(() => {})
+
+    const sameOriginResponse = Response.create(
+      RequestParams.create(
+        makeVisit({
+          url: new URL('http://localhost/old#target'),
+          preserveFragment: true,
+        }),
+      ),
+      redirectHttpResponse('http://localhost/new'),
+      initial,
+    )
+
+    await sameOriginResponse.process()
+
+    expect(visitSpy).toHaveBeenCalledTimes(1)
+    expect((visitSpy.mock.calls[0][0] as URL).href).toBe('http://localhost/new#target')
+
+    visitSpy.mockClear()
+
+    const crossOriginResponse = Response.create(
+      RequestParams.create(
+        makeVisit({
+          url: new URL('http://localhost/old#target'),
+          preserveFragment: true,
+        }),
+      ),
+      redirectHttpResponse('https://external.example/new'),
+      initial,
+    )
+
+    await crossOriginResponse.process()
+
+    expect(visitSpy).toHaveBeenCalledTimes(1)
+    expect((visitSpy.mock.calls[0][0] as URL).href).toBe('https://external.example/new')
+  })
+
+  it('preserves the fragment during instant visit intermediate swaps', async () => {
+    bootPage(ordersPage({ url: '/orders#42' }))
+
+    const visit = makeVisit({
+      url: new URL('http://localhost/orders?status=open'),
+      component: 'Orders/Index',
+      preserveFragment: true,
+    })
+
+    await (
+      router as unknown as {
+        performInstantSwap: (pendingVisit: ActiveVisit) => Promise<void>
+      }
+    ).performInstantSwap(visit)
+
+    expect(currentPage.get().url).toBe('/orders?status=open#42')
+  })
+
+  it('does not snapshot the starting hash into router.reload when preserveFragment is true', () => {
+    bootPage(ordersPage({ url: '/orders#42' }))
+    window.location.href = 'http://localhost/orders#42'
+    const visitSpy = vi.spyOn(router, 'visit').mockImplementation(() => {})
+
+    router.reload({ preserveFragment: true })
+
+    expect(visitSpy).toHaveBeenCalledTimes(1)
+    expect((visitSpy.mock.calls[0][0] as URL).href).toBe('http://localhost/orders')
+    expect(visitSpy.mock.calls[0][1]).toMatchObject({ preserveFragment: true })
+
+    visitSpy.mockClear()
+
+    router.reload()
+
+    expect(visitSpy).toHaveBeenCalledTimes(1)
+    expect(visitSpy.mock.calls[0][0]).toBe('http://localhost/orders#42')
+  })
+
+  it('reuses a prefetched response regardless of preserveFragment differences', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#42' }))
+    const prefetchVisit = makeVisit({
+      id: 'prefetch-1',
+      url: new URL('http://localhost/orders?status=open'),
+      prefetch: true,
+      preserveFragment: false,
+    })
+
+    await prefetchedRequests.add(
+      prefetchVisit,
+      (params) => {
+        const response = Response.create(
+          RequestParams.create(params),
+          inertiaHttpResponse(ordersPage({ url: '/orders?status=open' })),
+          initial,
+        )
+        params.onPrefetchResponse?.(response)
+      },
+      { cacheFor: 30_000, cacheTags: [] },
+    )
+
+    const cached = prefetchedRequests.findCached(
+      makeVisit({
+        id: 'visit-2',
+        url: new URL('http://localhost/orders?status=open'),
+        preserveFragment: true,
+      }),
+    )
+
+    expect(cached).not.toBeNull()
   })
 })

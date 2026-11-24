@@ -57,4 +57,17 @@ test.describe('preserve fragment', () => {
     await expect(page).toHaveURL('/preserve-fragment?status=open')
     await expect(page.locator('#current-url')).toHaveText('/preserve-fragment?status=open')
   })
+
+  test('it preserves a URL fragment updated directly via window.location.hash', async ({ page }) => {
+    pageLoads.watch(page)
+    await page.goto('/preserve-fragment')
+
+    await page.evaluate(() => {
+      window.location.hash = '#native-drawer'
+    })
+
+    await page.locator('#visit-preserve-fragment').click()
+    await expect(page).toHaveURL('/preserve-fragment?status=open#native-drawer')
+    await expect(page.locator('#current-url')).toHaveText('/preserve-fragment?status=open#native-drawer')
+  })
 })

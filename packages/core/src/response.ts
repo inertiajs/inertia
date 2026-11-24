@@ -30,6 +30,7 @@ export class Response {
   protected wasPrefetched = false
   protected processed = false
   protected pageApplied = false
+  protected originalPageUrl: string | null = null
 
   constructor(
     protected requestParams: RequestParams,
@@ -172,7 +173,13 @@ export class Response {
 
   protected async handleNonInertiaResponse() {
     if (this.isInertiaRedirect()) {
-      router.visit(this.getHeader('x-inertia-redirect'), {
+      const redirectUrl = hrefToUrl(this.getHeader('x-inertia-redirect'))
+
+      if (this.requestParams.all().preserveFragment && !redirectUrl.hash && this.isSameOriginUrl(redirectUrl)) {
+        redirectUrl.hash = this.preservedFragment()
+      }
+
+      router.visit(redirectUrl, {
         ...this.requestParams.all(),
         method: 'get',
         data: {},
@@ -185,7 +192,7 @@ export class Response {
       const locationUrl = hrefToUrl(this.getHeader('x-inertia-location'))
 
       if (this.requestParams.all().preserveFragment) {
-        if (!locationUrl.hash) {
+        if (!locationUrl.hash && this.isSameOriginUrl(locationUrl)) {
           locationUrl.hash = this.preservedFragment()
         }
       } else {
@@ -414,6 +421,12 @@ export class Response {
     return reloadsOriginatingPage && urlChangedSince && landsOnCurrentPath
   }
 
+  protected isSameOriginUrl(url: URL): boolean {
+    const origin = typeof window !== 'undefined' ? window.location.origin : this.requestParams.all().url.origin
+
+    return url.origin === origin
+  }
+
   protected preservedFragment(): string {
     const requestHash = this.requestParams.all().url.hash
 
@@ -421,17 +434,23 @@ export class Response {
       return requestHash
     }
 
-    const currentUrl = currentPage.get()?.url
+    const windowHash = typeof window !== 'undefined' ? window.location.hash : ''
 
-    if (currentUrl) {
-      return hrefToUrl(currentUrl).hash
+    if (windowHash) {
+      return windowHash
     }
 
-    return typeof window !== 'undefined' ? window.location.hash : ''
+    const currentUrl = currentPage.get()?.url
+
+    return currentUrl ? hrefToUrl(currentUrl).hash : ''
   }
 
   protected pageUrl(pageResponse: Page) {
-    const responseUrl = hrefToUrl(pageResponse.url)
+    if (this.originalPageUrl === null) {
+      this.originalPageUrl = pageResponse.url
+    }
+
+    const responseUrl = hrefToUrl(this.originalPageUrl)
 
     if (this.requestParams.all().preserveFragment) {
       if (!responseUrl.hash) {
