@@ -91,6 +91,7 @@ const redirectHttpResponse = (location: string): HttpResponse => ({
 })
 
 const bootPage = (page: Page): Page => {
+  window.location.href = new URL(page.url, 'http://localhost').href
   currentPage.init({
     initialPage: page,
     resolveComponent: () => ({}),
@@ -103,6 +104,13 @@ const bootPage = (page: Page): Page => {
 describe('preserveFragment visit option', () => {
   beforeEach(() => {
     stubBrowser()
+    const syncHistoryUrl = (_state: unknown, _unused: string, url?: string | URL | null) => {
+      if (url != null) {
+        window.location.href = new URL(url.toString(), window.location.href).href
+      }
+    }
+    window.history.replaceState = syncHistoryUrl
+    window.history.pushState = syncHistoryUrl
     ;(document as unknown as { getElementById: () => null }).getElementById = () => null
   })
 
@@ -184,7 +192,7 @@ describe('preserveFragment visit option', () => {
     const response = Response.create(RequestParams.create(visit), inertiaHttpResponse(responsePage), initial)
 
     // User closes the drawer before the filter response lands.
-    await currentPage.setQuietly(ordersPage({ url: '/orders' }))
+    await currentPage.set(ordersPage({ url: '/orders' }), { replace: true })
 
     await response.process()
 
@@ -273,6 +281,22 @@ describe('preserveFragment visit option', () => {
     expect(currentPage.get().url).toBe('/orders?status=open#native-anchor')
   })
 
+  it('does not resurrect a stale currentPage.url hash when window.location.hash is cleared directly', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#stale' }))
+    window.location.href = 'http://localhost/orders'
+
+    const visit = makeVisit({
+      url: new URL('http://localhost/orders?status=open'),
+      preserveFragment: true,
+    })
+    const responsePage = ordersPage({ url: '/orders?status=open' })
+    const response = Response.create(RequestParams.create(visit), inertiaHttpResponse(responsePage), initial)
+
+    await response.process()
+
+    expect(currentPage.get().url).toBe('/orders?status=open')
+  })
+
   it('does not poison a reused cached prefetch response with an earlier preserved fragment', async () => {
     const initial = bootPage(ordersPage({ url: '/orders#42' }))
     const responsePage = ordersPage({ url: '/orders?status=open' })
@@ -300,7 +324,7 @@ describe('preserveFragment visit option', () => {
     expect(currentPage.get().url).toBe('/orders?status=open#42')
 
     // Second consumption after the user switched to #99
-    await currentPage.setQuietly(ordersPage({ url: '/orders#99' }))
+    await currentPage.set(ordersPage({ url: '/orders#99' }), { replace: true })
     cachedResponse.mergeParams(
       makeVisit({
         url: new URL('http://localhost/orders?status=open'),
@@ -323,11 +347,11 @@ describe('preserveFragment visit option', () => {
     expect(currentPage.get().url).toBe('/orders?status=open')
   })
 
-  it('preserves the fragment across same-origin 409 X-Inertia-Redirect responses and does not leak cross-origin', async () => {
-    const initial = bootPage(ordersPage({ url: '/orders' }))
+  it('preserves fragments across same-origin 409 X-Inertia-Redirect responses without snapshotting live hashes or leaking cross-origin', async () => {
+    const initial = bootPage(ordersPage({ url: '/orders#42' }))
     const visitSpy = vi.spyOn(router, 'visit').mockImplementation(() => {})
 
-    const sameOriginResponse = Response.create(
+    const explicitHashResponse = Response.create(
       RequestParams.create(
         makeVisit({
           url: new URL('http://localhost/old#target'),
@@ -338,10 +362,31 @@ describe('preserveFragment visit option', () => {
       initial,
     )
 
-    await sameOriginResponse.process()
+    await explicitHashResponse.process()
 
     expect(visitSpy).toHaveBeenCalledTimes(1)
     expect((visitSpy.mock.calls[0][0] as URL).href).toBe('http://localhost/new#target')
+    expect(visitSpy.mock.calls[0][1]).toMatchObject({ preserveFragment: true })
+
+    visitSpy.mockClear()
+
+    // Live fragment (#42) should not be baked into redirectUrl early so clearing it mid-flight still works
+    const liveHashResponse = Response.create(
+      RequestParams.create(
+        makeVisit({
+          url: new URL('http://localhost/old'),
+          preserveFragment: true,
+        }),
+      ),
+      redirectHttpResponse('http://localhost/new'),
+      initial,
+    )
+
+    await liveHashResponse.process()
+
+    expect(visitSpy).toHaveBeenCalledTimes(1)
+    expect((visitSpy.mock.calls[0][0] as URL).href).toBe('http://localhost/new')
+    expect(visitSpy.mock.calls[0][1]).toMatchObject({ preserveFragment: true })
 
     visitSpy.mockClear()
 
@@ -360,6 +405,7 @@ describe('preserveFragment visit option', () => {
 
     expect(visitSpy).toHaveBeenCalledTimes(1)
     expect((visitSpy.mock.calls[0][0] as URL).href).toBe('https://external.example/new')
+    expect(visitSpy.mock.calls[0][1]).toMatchObject({ preserveFragment: false })
   })
 
   it('preserves the fragment during instant visit intermediate swaps', async () => {

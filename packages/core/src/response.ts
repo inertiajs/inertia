@@ -174,13 +174,15 @@ export class Response {
   protected async handleNonInertiaResponse() {
     if (this.isInertiaRedirect()) {
       const redirectUrl = hrefToUrl(this.getHeader('x-inertia-redirect'))
+      const sameOrigin = this.isSameOriginUrl(redirectUrl)
 
-      if (this.requestParams.all().preserveFragment && !redirectUrl.hash && this.isSameOriginUrl(redirectUrl)) {
-        redirectUrl.hash = this.preservedFragment()
+      if (this.requestParams.all().preserveFragment && !redirectUrl.hash && sameOrigin) {
+        redirectUrl.hash = this.requestParams.all().url.hash
       }
 
       router.visit(redirectUrl, {
         ...this.requestParams.all(),
+        preserveFragment: this.requestParams.all().preserveFragment && sameOrigin,
         method: 'get',
         data: {},
       })
@@ -434,10 +436,8 @@ export class Response {
       return requestHash
     }
 
-    const windowHash = typeof window !== 'undefined' ? window.location.hash : ''
-
-    if (windowHash) {
-      return windowHash
+    if (typeof window !== 'undefined') {
+      return window.location.hash
     }
 
     const currentUrl = currentPage.get()?.url

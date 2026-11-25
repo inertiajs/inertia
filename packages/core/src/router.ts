@@ -674,7 +674,9 @@ export class Router {
     const hash =
       visit.url.hash ||
       (visit.preserveFragment
-        ? (typeof window !== 'undefined' ? window.location.hash : '') || hrefToUrl(current.url).hash
+        ? typeof window !== 'undefined'
+          ? window.location.hash
+          : hrefToUrl(current.url).hash
         : '')
 
     const intermediatePage: Page = {
