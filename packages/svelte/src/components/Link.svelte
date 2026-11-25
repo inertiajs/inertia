@@ -12,6 +12,7 @@
     preserveScroll?: LinkComponentBaseProps['preserveScroll']
     preserveState?: LinkComponentBaseProps['preserveState'] | null
     preserveUrl?: LinkComponentBaseProps['preserveUrl']
+    preserveFragment?: LinkComponentBaseProps['preserveFragment']
     only?: LinkComponentBaseProps['only']
     except?: LinkComponentBaseProps['except']
     headers?: LinkComponentBaseProps['headers']
@@ -63,6 +64,7 @@
     preserveScroll = false,
     preserveState = null,
     preserveUrl = false,
+    preserveFragment = false,
     only = [],
     except = [],
     headers = {},
@@ -105,6 +107,7 @@
     preserveScroll,
     preserveState: preserveState ?? _method !== 'get',
     preserveUrl,
+    preserveFragment,
     only,
     except,
     headers,

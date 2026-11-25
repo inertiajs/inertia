@@ -346,6 +346,7 @@ class PrefetchedRequests {
         'prefetch',
         'preserveScroll',
         'preserveState',
+        'preserveFragment',
         'onBefore',
         'onBeforeUpdate',
         'onStart',

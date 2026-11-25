@@ -186,6 +186,7 @@ function link(
       preserveScroll: params.preserveScroll || false,
       preserveState: params.preserveState ?? method !== 'get',
       preserveUrl: params.preserveUrl || false,
+      preserveFragment: params.preserveFragment || false,
       only: params.only || [],
       except: params.except || [],
       headers: params.headers || {},
