@@ -17,6 +17,8 @@ import {
   PrefetchRemovalTimer,
 } from './types'
 
+const MAX_TIMEOUT_DELAY = 2_147_483_647
+
 class PrefetchedRequests {
   protected cached: PrefetchedResponse[] = []
   protected inFlightRequests: InFlightPrefetch[] = []
@@ -202,7 +204,16 @@ class PrefetchedRequests {
     this.clearTimer(params)
 
     if (expiresIn > 0) {
-      const timer = window.setTimeout(() => this.remove(params), expiresIn)
+      // Browsers fire a timer at once when its delay is above the max
+      // 32-bit value (~24.8 days), so long delays are split into steps
+      const delay = Math.min(expiresIn, MAX_TIMEOUT_DELAY)
+      const timer = window.setTimeout(() => {
+        if (expiresIn > delay) {
+          this.scheduleForRemoval(params, expiresIn - delay)
+        } else {
+          this.remove(params)
+        }
+      }, delay)
 
       this.removalTimers.push({
         params,
